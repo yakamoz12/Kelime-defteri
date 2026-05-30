@@ -219,6 +219,68 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
 .banner button.x{color:var(--soft);font-size:1.1rem;padding:4px 8px;align-self:flex-start}
 
 .section-h{font-family:"Fraunces",serif;font-size:1.05rem;font-weight:600;margin:18px 2px 12px;color:var(--soft)}
+
+/* 5 tabs fit */
+.tab span{font-size:.63rem;white-space:nowrap}
+.tab svg{width:21px;height:21px}
+
+/* OKU: list */
+.okuchips{margin:12px 0 14px}
+.okutoggle{margin-bottom:14px}
+.okutoggle button{flex:1}
+.spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.alist{display:flex;flex-direction:column;gap:11px}
+.art{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px;box-shadow:var(--shadow);transition:.15s;animation:rise .45s both;color:var(--ink)}
+.art:active{transform:scale(.99)}
+.art-title{font-family:"Fraunces",serif;font-size:1.06rem;font-weight:600;line-height:1.3;letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.art-meta{font-size:.76rem;color:var(--accent);font-weight:600;margin-top:7px}
+.art-auth{font-size:.78rem;color:var(--soft);margin-top:4px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+
+/* OKU: reader */
+.backbtn{display:inline-flex;align-items:center;gap:7px;background:var(--bg2);border:1px solid var(--line);color:var(--ink);border-radius:30px;padding:8px 15px 8px 11px;font-weight:600;font-size:.85rem;margin-bottom:16px}
+.backbtn:active{transform:scale(.96)}
+.backbtn svg{width:17px;height:17px}
+.reader{padding-bottom:20px}
+.r-title{font-family:"Fraunces",serif;font-size:1.55rem;font-weight:600;line-height:1.25;letter-spacing:-.01em;margin:0 0 12px}
+.r-meta{font-size:.84rem;color:var(--accent);font-weight:600}
+.r-auth{font-size:.82rem;color:var(--soft);margin-top:5px;line-height:1.4}
+.r-hint{display:flex;gap:9px;align-items:flex-start;background:var(--bg2);border:1px solid var(--line);border-radius:13px;padding:11px 13px;margin:16px 0 18px;font-size:.82rem;color:var(--soft);line-height:1.45}
+.r-hint svg{width:18px;height:18px;color:var(--accent);flex-shrink:0;margin-top:1px}
+.r-hint b{color:var(--ink);font-weight:600}
+.r-body{font-size:1.06rem;line-height:1.78;color:var(--ink)}
+.tok{cursor:pointer;border-radius:5px;padding:0 1px;transition:background .12s,color .12s}
+.tok:active{background:var(--accent);color:#fff}
+.r-doi{display:inline-block;margin-top:20px;color:var(--accent);font-weight:600;font-size:.92rem;text-decoration:none}
+
+/* translation popup */
+.tpop{position:fixed;z-index:55;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg);padding:14px 15px;display:none}
+.tpop.show{animation:pop .16s ease}
+@keyframes pop{from{opacity:0;transform:scale(.94) translateY(4px)}to{opacity:1;transform:none}}
+.tp-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.tp-word{font-family:"Fraunces",serif;font-size:1.2rem;font-weight:600;letter-spacing:-.01em}
+.tp-spk{width:34px;height:34px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);color:var(--accent);display:grid;place-items:center;flex-shrink:0}
+.tp-spk svg{width:16px;height:16px}
+.tp-tr{color:var(--accent);font-weight:600;font-size:1.06rem;margin-top:5px;min-height:22px}
+.tp-actions{display:flex;gap:8px;margin-top:13px}
+.tp-add{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--accent);color:#fff;border-radius:11px;padding:10px;font-weight:600;font-size:.9rem}
+.tp-add svg{width:16px;height:16px}
+.tp-add:active{transform:scale(.97)}
+.tp-close{padding:10px 14px;border-radius:11px;background:var(--bg2);border:1px solid var(--line);color:var(--soft);font-weight:600;font-size:.9rem}
+
+/* selection -> translate */
+.selbtn{position:fixed;z-index:56;display:none;align-items:center;gap:6px;background:var(--ink);color:var(--bg);border-radius:30px;padding:9px 16px;font-weight:700;font-size:.85rem;box-shadow:var(--shadow-lg)}
+.selbtn.show{display:inline-flex;animation:pop .16s ease}
+.selbtn svg{width:16px;height:16px}
+.tr-src{background:var(--bg2);border:1px solid var(--line);border-radius:13px;padding:13px;font-size:.95rem;line-height:1.55;margin-bottom:14px;max-height:30vh;overflow-y:auto}
+.tr-out{color:var(--accent);font-weight:600;font-size:1.08rem;line-height:1.55;min-height:26px;margin-bottom:16px}
+
+/* loading dots */
+.dots3{display:inline-flex;gap:5px;align-items:center}
+.dots3 i{width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:.4;animation:bd 1s infinite}
+.dots3 i:nth-child(2){animation-delay:.15s}
+.dots3 i:nth-child(3){animation-delay:.3s}
+@keyframes bd{0%,100%{opacity:.4;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
 </style>
 </head>
 <body>
@@ -267,6 +329,9 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
 
     <!-- İSTATİSTİK -->
     <section class="screen" id="s-stat"></section>
+
+    <!-- OKU -->
+    <section class="screen" id="s-oku"></section>
   </main>
 
   <button class="fab" id="fab" aria-label="Kelime ekle">
@@ -277,6 +342,10 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
     <button class="tab on" data-screen="defter">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       <span>Defter</span>
+    </button>
+    <button class="tab" data-screen="oku">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h7a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-7a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>
+      <span>Oku</span>
     </button>
     <button class="tab" data-screen="calis">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="16" rx="2"/><path d="M8 5V3.5A1.5 1.5 0 0 1 9.5 2h9A1.5 1.5 0 0 1 20 3.5V17"/></svg>
@@ -297,6 +366,8 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
 <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+<div class="tpop" id="tpop"></div>
+<button class="selbtn" id="selbtn"></button>
 
 <script>
 "use strict";
@@ -690,6 +761,207 @@ $("#importFile").addEventListener("change",e=>{
   r.readAsText(file);
 });
 
+/* ---------- OKU: tıp makaleleri + çeviri ---------- */
+const svgSearch='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
+const svgBack='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>';
+const svgInfo='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';
+const svgNews='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h7a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 4h-7a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/></svg>';
+const svgLang='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h7M8.5 5v3M11 14c-3 0-5-2-5-5M4 14c4 0 7-2 8-5M17 20l4-9 4 9M18.5 17h5"/></svg>';
+
+const TCACHE={};
+async function translate(text,from,to){
+  text=(text||"").trim(); if(!text)return "";
+  const key=from+">"+to+":"+text;
+  if(TCACHE[key])return TCACHE[key];
+  try{
+    const u="https://translate.googleapis.com/translate_a/single?client=gtx&sl="+from+"&tl="+to+"&dt=t&q="+encodeURIComponent(text);
+    const r=await fetch(u);
+    if(r.ok){const d=await r.json();const out=((d&&d[0])||[]).map(s=>(s&&s[0])||"").join("");if(out){TCACHE[key]=out;return out}}
+  }catch(e){}
+  try{
+    const u="https://api.mymemory.translated.net/get?q="+encodeURIComponent(text.slice(0,480))+"&langpair="+from+"|"+to;
+    const r=await fetch(u);
+    if(r.ok){const d=await r.json();const out=d&&d.responseData&&d.responseData.translatedText;if(out){TCACHE[key]=out;return out}}
+  }catch(e){}
+  return null;
+}
+
+let okuState={mode:"news",view:"list",article:null,
+  newsCat:"Dünya",newsItems:[],newsLoading:false,newsLoaded:false,newsErr:false,
+  pmcQuery:"",pmcItems:[],pmcLoading:false,pmcErr:false};
+
+const NEWS_FEEDS={
+  "Dünya":"https://feeds.bbci.co.uk/news/world/rss.xml",
+  "Sağlık":"https://feeds.bbci.co.uk/news/health/rss.xml",
+  "Bilim":"https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+  "Teknoloji":"https://feeds.bbci.co.uk/news/technology/rss.xml",
+  "Ekonomi":"https://feeds.bbci.co.uk/news/business/rss.xml"
+};
+
+function stripHtml(s){const d=document.createElement("div");d.innerHTML=s||"";return (d.textContent||"").replace(/\s+/g," ").trim()}
+function fmtDate(s){if(!s)return "";const d=new Date(s);if(isNaN(d))return "";return d.toLocaleDateString("tr-TR",{day:"numeric",month:"short"})}
+
+async function fetchFeed(url){
+  try{
+    const r=await fetch("https://api.rss2json.com/v1/api.json?count=25&rss_url="+encodeURIComponent(url));
+    if(r.ok){const d=await r.json();if(d&&d.status==="ok"&&d.items&&d.items.length)return d.items.map(it=>({title:it.title,desc:stripHtml(it.description||it.content||""),link:it.link,date:it.pubDate,source:(d.feed&&d.feed.title)||""}))}
+  }catch(e){}
+  try{
+    const r=await fetch("https://api.allorigins.win/get?url="+encodeURIComponent(url));
+    if(r.ok){const d=await r.json();const xml=d&&d.contents;if(xml)return parseRss(xml)}
+  }catch(e){}
+  return null;
+}
+function parseRss(xml){
+  try{
+    const doc=new DOMParser().parseFromString(xml,"text/xml");
+    let items=[].slice.call(doc.querySelectorAll("item"));
+    if(!items.length)items=[].slice.call(doc.querySelectorAll("entry"));
+    const src=doc.querySelector("channel > title")||doc.querySelector("feed > title");
+    const srcName=src?src.textContent:"";
+    return items.slice(0,25).map(it=>{
+      const g=t=>{const el=it.querySelector(t);return el?el.textContent:""};
+      let link=g("link");const la=it.querySelector("link");if(la&&la.getAttribute&&la.getAttribute("href"))link=la.getAttribute("href")||link;
+      return {title:g("title"),desc:stripHtml(g("description")||g("summary")||g("content")),link:link,date:g("pubDate")||g("published")||g("updated"),source:srcName};
+    });
+  }catch(e){return null}
+}
+
+async function fetchNews(cat){
+  okuState.newsCat=cat;okuState.newsLoading=true;okuState.newsErr=false;okuState.newsItems=[];renderOku();
+  const items=await fetchFeed(NEWS_FEEDS[cat]);
+  if(items&&items.length)okuState.newsItems=items;else okuState.newsErr=true;
+  okuState.newsLoading=false;okuState.newsLoaded=true;renderOku();
+}
+async function fetchPmc(q){
+  q=(q||"").trim(); if(!q)return;
+  okuState.pmcQuery=q;okuState.pmcLoading=true;okuState.pmcErr=false;renderOku();
+  try{
+    const query=encodeURIComponent(q+" AND HAS_ABSTRACT:Y");
+    const u="https://www.ebi.ac.uk/europepmc/webservices/rest/search?query="+query+"&resultType=core&format=json&pageSize=25";
+    const r=await fetch(u);const d=await r.json();
+    okuState.pmcItems=(d&&d.resultList&&d.resultList.result)||[];
+  }catch(e){okuState.pmcItems=[];okuState.pmcErr=true}
+  okuState.pmcLoading=false;renderOku();
+}
+
+function jrn(a){return (a.journalInfo&&a.journalInfo.journal&&a.journalInfo.journal.title)||a.journalTitle||""}
+
+function renderOku(){
+  const root=$("#s-oku");
+  if(okuState.view==="article"&&okuState.article){renderArticle();return}
+  const toggle='<div class="dir-toggle okutoggle"><button class="'+(okuState.mode==="news"?"on":"")+'" data-m="news">Haberler</button><button class="'+(okuState.mode==="makale"?"on":"")+'" data-m="makale">Makaleler</button></div>';
+  let head="",body="";
+  if(okuState.mode==="news"){
+    const cats=Object.keys(NEWS_FEEDS);
+    head='<div class="chips okuchips" id="newsCats">'+cats.map(c=>'<button class="chip '+(okuState.newsCat===c?"on":"")+'" data-c="'+esc(c)+'">'+esc(c)+'</button>').join("")+'</div>';
+    if(okuState.newsLoading||(!okuState.newsLoaded&&!okuState.newsErr))body='<div class="empty"><div class="spinner"></div><p>Haberler yükleniyor…</p></div>';
+    else if(okuState.newsErr)body='<div class="empty"><div class="ico">'+svgNews+'</div><h3>Haberler alınamadı</h3><p>İnternet bağlantını kontrol edip tekrar dene.</p><button class="btn btn-ghost" id="newsRetry">Tekrar dene</button></div>';
+    else if(!okuState.newsItems.length)body='<div class="empty"><p>Haber bulunamadı.</p></div>';
+    else body='<div class="alist">'+okuState.newsItems.map((it,i)=>'<button class="art" data-ni="'+i+'" style="animation-delay:'+Math.min(i*30,300)+'ms"><div class="art-title">'+esc(it.title||"")+'</div><div class="art-meta">'+esc([it.source,fmtDate(it.date)].filter(Boolean).join(" · "))+'</div>'+(it.desc?'<div class="art-auth">'+esc(it.desc)+'</div>':'')+'</button>').join("")+'</div>';
+  }else{
+    const topics=["Diabetes","Cardiology","Oncology","Neurology","Nutrition","Immunology","COVID-19","Surgery"];
+    head='<div class="searchbar">'+svgSearch+'<input id="okuSearch" placeholder="Tıp konusu ara…" autocomplete="off" enterkeyhint="search" value="'+esc(okuState.pmcQuery)+'"></div><div class="chips okuchips" id="okuTopics">'+topics.map(t=>'<button class="chip" data-t="'+esc(t)+'">'+esc(t)+'</button>').join("")+'</div>';
+    if(okuState.pmcLoading)body='<div class="empty"><div class="spinner"></div><p>Makaleler aranıyor…</p></div>';
+    else if(okuState.pmcErr)body='<div class="empty"><div class="ico">'+svgNews+'</div><h3>Bağlantı sorunu</h3><p>Makaleler alınamadı. Tekrar dene.</p><button class="btn btn-ghost" id="pmcRetry">Tekrar dene</button></div>';
+    else if(!okuState.pmcItems.length&&okuState.pmcQuery)body='<div class="empty"><p>"'+esc(okuState.pmcQuery)+'" için sonuç bulunamadı.</p></div>';
+    else if(!okuState.pmcItems.length)body='<div class="empty"><div class="ico">'+svgNews+'</div><h3>Tıp makaleleri</h3><p>Bir konu ara ya da aşağıdan birine dokun.</p></div>';
+    else body='<div class="alist">'+okuState.pmcItems.map((a,i)=>'<button class="art" data-ai="'+i+'" style="animation-delay:'+Math.min(i*30,300)+'ms"><div class="art-title">'+esc(a.title||"Başlıksız")+'</div><div class="art-meta">'+esc(jrn(a))+(a.pubYear?" · "+esc(a.pubYear):"")+'</div>'+(a.authorString?'<div class="art-auth">'+esc(a.authorString)+'</div>':'')+'</button>').join("")+'</div>';
+  }
+  root.innerHTML=toggle+head+body;
+  root.querySelector(".okutoggle").addEventListener("click",e=>{const b=e.target.closest("[data-m]");if(b&&okuState.mode!==b.dataset.m){okuState.mode=b.dataset.m;renderOku()}});
+  if(okuState.mode==="news"){
+    const nc=$("#newsCats");if(nc)nc.addEventListener("click",e=>{const c=e.target.closest("[data-c]");if(c)fetchNews(c.dataset.c)});
+    const rt=$("#newsRetry");if(rt)rt.onclick=()=>fetchNews(okuState.newsCat);
+    const al=root.querySelector(".alist");if(al)al.addEventListener("click",e=>{const x=e.target.closest("[data-ni]");if(x)openNews(+x.dataset.ni)});
+    if(!okuState.newsLoaded&&!okuState.newsLoading&&!okuState.newsErr)fetchNews(okuState.newsCat);
+  }else{
+    const si=$("#okuSearch");if(si)si.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();si.blur();fetchPmc(si.value)}});
+    const ot=$("#okuTopics");if(ot)ot.addEventListener("click",e=>{const t=e.target.closest("[data-t]");if(t)fetchPmc(t.dataset.t)});
+    const rt=$("#pmcRetry");if(rt)rt.onclick=()=>fetchPmc(okuState.pmcQuery||"medicine");
+    const al=root.querySelector(".alist");if(al)al.addEventListener("click",e=>{const x=e.target.closest("[data-ai]");if(x)openPmc(+x.dataset.ai)});
+  }
+}
+
+function openNews(i){const it=okuState.newsItems[i];okuState.article={title:it.title||"",meta:[it.source,fmtDate(it.date)].filter(Boolean).join(" · "),sub:"",body:it.desc||"Bu haberin kısa özeti yok. Tamamını aşağıdaki bağlantıdan okuyabilirsin.",link:it.link,linkLabel:"Haberin tamamını oku ↗"};okuState.view="article";hideTpop();hideSel();renderArticle();window.scrollTo(0,0)}
+function openPmc(i){const a=okuState.pmcItems[i];okuState.article={title:a.title||"Başlıksız",meta:[jrn(a),a.pubYear].filter(Boolean).join(" · "),sub:a.authorString||"",body:a.abstractText||"Bu makalenin özeti bulunmuyor.",link:a.doi?("https://doi.org/"+a.doi):"",linkLabel:"Makalenin tamamını aç ↗"};okuState.view="article";hideTpop();hideSel();renderArticle();window.scrollTo(0,0)}
+
+function splitSentences(t){return t.match(/[^.!?]+[.!?]*\s*/g)||[t]}
+function tokenizeWords(t){let o="";const re=/([A-Za-z][A-Za-z'’\-]*)|([^A-Za-z]+)/g;let m;while((m=re.exec(t))){o+=m[1]?'<span class="tok">'+esc(m[1])+'</span>':esc(m[2])}return o}
+function tokenizeBody(t){return splitSentences(t).map(s=>'<span class="sent" data-s="'+esc(s.trim())+'">'+tokenizeWords(s)+'</span>').join("")}
+function sentenceOf(tok){const s=tok.closest(".sent");return s?s.getAttribute("data-s"):""}
+
+function renderArticle(){
+  const root=$("#s-oku"); const a=okuState.article;
+  root.innerHTML='<button class="backbtn" id="okuBack">'+svgBack+' Geri</button><article class="reader"><h2 class="r-title">'+tokenizeWords(a.title||"")+'</h2>'+(a.meta?'<div class="r-meta">'+esc(a.meta)+'</div>':'')+(a.sub?'<div class="r-auth">'+esc(a.sub)+'</div>':'')+'<div class="r-hint">'+svgInfo+'<span>Kelimeye dokun → çevir. Cümleyi parmağınla seçince <b>Çevir</b> çıkar.</span></div><div class="r-body" id="rBody">'+tokenizeBody(a.body||"")+'</div>'+(a.link?'<a class="r-doi" href="'+esc(a.link)+'" target="_blank" rel="noopener">'+esc(a.linkLabel||"Tamamını oku ↗")+'</a>':'')+'</article>';
+  $("#okuBack").onclick=()=>{okuState.view="list";okuState.article=null;hideTpop();hideSel();renderOku();window.scrollTo(0,0)};
+  $("#rBody").addEventListener("click",onTokenTap);
+  root.querySelector(".r-title").addEventListener("click",onTokenTap);
+}
+
+async function onTokenTap(e){
+  const tok=e.target.closest(".tok"); if(!tok)return;
+  const sel=window.getSelection(); if(sel&&sel.toString().trim().length>1)return;
+  const word=tok.textContent;
+  showTpop(tok,word,null,true);
+  const tr=await translate(word.toLowerCase(),"en","tr");
+  showTpop(tok,word,tr,false,sentenceOf(tok));
+}
+
+function showTpop(anchor,word,tr,loading,sentence){
+  const p=$("#tpop");
+  p.innerHTML='<div class="tp-row"><div class="tp-word">'+esc(word)+'</div><button class="tp-spk" data-spk="'+esc(word)+'">'+SVG.spk+'</button></div><div class="tp-tr">'+(loading?'<span class="dots3"><i></i><i></i><i></i></span>':esc(tr||"(çeviri alınamadı)"))+'</div>'+(loading?"":'<div class="tp-actions"><button class="tp-add" id="tpAdd">'+SVG.check+' Deftere ekle</button><button class="tp-close" id="tpClose">Kapat</button></div>');
+  p.style.display="block"; p.classList.add("show");
+  const pw=Math.min(300,window.innerWidth-24); p.style.width=pw+"px";
+  const r=anchor.getBoundingClientRect();
+  const left=Math.max(12,Math.min(r.left+r.width/2-pw/2,window.innerWidth-pw-12));
+  const ph=p.offsetHeight; let top=r.bottom+8;
+  if(top+ph>window.innerHeight-70)top=Math.max(8,r.top-ph-8);
+  p.style.left=left+"px"; p.style.top=top+"px";
+  if(!loading){
+    const add=$("#tpAdd"),cl=$("#tpClose");
+    if(add)add.onclick=()=>{addWordFromReader(word,tr,sentence);hideTpop()};
+    if(cl)cl.onclick=hideTpop;
+  }
+}
+function hideTpop(){const p=$("#tpop");if(!p)return;p.classList.remove("show");p.style.display="none"}
+
+function addWordFromReader(en,tr,sentence){
+  en=(en||"").trim().toLowerCase(); if(!en)return;
+  if(state.words.some(w=>lower(w.en)===lower(en))){toast("Bu kelime zaten defterde");return}
+  state.words.push({id:uid(),en:en,tr:tr||"",example:sentence||"",category:"Okuma",box:0,due:Date.now(),createdAt:Date.now(),correct:0,wrong:0});
+  save(); toast("Deftere eklendi ✓");
+  if(document.querySelector(".screen.active").id==="s-defter")renderDefter();
+}
+
+/* cümle seçimi → Çevir */
+let selText="";
+function showSel(){
+  const sel=window.getSelection(); const btn=$("#selbtn");
+  try{const r=sel.getRangeAt(0).getBoundingClientRect();
+    btn.style.left=Math.max(12,Math.min(r.left+r.width/2-52,window.innerWidth-120))+"px";
+    btn.style.top=Math.max(58,r.top-46)+"px";
+  }catch(e){}
+  btn.classList.add("show");
+}
+function hideSel(){const b=$("#selbtn");if(b)b.classList.remove("show")}
+document.addEventListener("selectionchange",()=>{
+  if(okuState.view!=="article"){hideSel();return}
+  const t=((window.getSelection&&window.getSelection())||"").toString().trim();
+  if(t.length>1){selText=t;showSel()}else hideSel();
+});
+$("#selbtn").innerHTML=svgLang+" Çevir";
+$("#selbtn").onclick=async()=>{
+  const text=selText; hideSel();
+  try{window.getSelection().removeAllRanges()}catch(e){}
+  showSheet('<h2>Çeviri</h2><div class="tr-src">'+esc(text)+'</div><div class="tr-out" id="trOut"><span class="dots3"><i></i><i></i><i></i></span></div><div class="sheet-actions"><button class="btn btn-pri btn-block" id="trClose">Kapat</button></div>');
+  const cl=$("#trClose"); if(cl)cl.onclick=closeSheet;
+  const tr=await translate(text,"en","tr");
+  const o=$("#trOut"); if(o)o.textContent=tr||"(çeviri alınamadı)";
+};
+document.addEventListener("click",e=>{if(!e.target.closest("#tpop")&&!e.target.closest(".tok"))hideTpop()});
+window.addEventListener("scroll",()=>hideTpop(),true);
+
 /* ---------- navigation ---------- */
 function switchScreen(name){
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.screen===name));
@@ -700,6 +972,8 @@ function switchScreen(name){
   if(name==="calis")renderStudy();
   if(name==="test")renderQuiz();
   if(name==="stat")renderStats();
+  if(name==="oku")renderOku();
+  hideTpop();hideSel();
   window.scrollTo(0,0);
 }
 function refreshActive(){
@@ -724,7 +998,7 @@ $("#wlist").addEventListener("click",e=>{
   const ed=e.target.closest("[data-edit]");if(ed){openEdit(ed.dataset.edit);return}
   const dl=e.target.closest("[data-del]");if(dl){confirmDelete(dl.dataset.del);return}
 });
-document.body.addEventListener("click",e=>{const sp=e.target.closest(".spkbig[data-spk],.spkq[data-spk]");if(sp)speak(sp.dataset.spk,"en-US")});
+document.body.addEventListener("click",e=>{const sp=e.target.closest(".spkbig[data-spk],.spkq[data-spk],.tp-spk[data-spk]");if(sp)speak(sp.dataset.spk,"en-US")});
 
 /* manifest (best-effort, mainly for Android/desktop) */
 try{
