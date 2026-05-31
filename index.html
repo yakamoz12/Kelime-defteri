@@ -927,11 +927,9 @@ function renderOku(){
 
 async function fetchFullText(pmcid){
   if(!pmcid)return null;
-  try{
-    const u="https://www.ebi.ac.uk/europepmc/webservices/rest/PMC/"+encodeURIComponent(pmcid)+"/fullTextXML";
-    const r=await fetch(u);
-    if(r.ok){const xml=await r.text();return jatsToBlocks(xml)}
-  }catch(e){}
+  const u="https://www.ebi.ac.uk/europepmc/webservices/rest/PMC/"+encodeURIComponent(pmcid)+"/fullTextXML";
+  try{const r=await fetch(u);if(r.ok){const xml=await r.text();const b=jatsToBlocks(xml);if(b)return b}}catch(e){}
+  try{const xml=await fetchPage(u);if(xml){const b=jatsToBlocks(xml);if(b)return b}}catch(e){}
   return null;
 }
 function jatsToBlocks(xml){
@@ -983,7 +981,7 @@ async function loadFull(){
 }
 
 function openNews(i){const it=okuState.newsItems[i];okuState.article={kind:"news",title:it.title||"",meta:[it.source,fmtDate(it.date)].filter(Boolean).join(" · "),sub:"",body:it.desc||"Bu haberin kısa özeti yok. Tamamını aşağıdaki bağlantıdan okuyabilirsin.",link:it.link,linkLabel:"Haberin tamamını oku ↗",fullUrl:it.link};okuState.view="article";hideTpop();hideSel();renderArticle();window.scrollTo(0,0)}
-function openPmc(i){const a=okuState.pmcItems[i];const oa=!!(a.pmcid&&(a.inEPMC==="Y"||a.isOpenAccess==="Y"));okuState.article={kind:"pmc",title:a.title||"Başlıksız",meta:[jrn(a),a.pubYear].filter(Boolean).join(" · "),sub:a.authorString||"",body:a.abstractText||"Bu makalenin özeti bulunmuyor.",link:a.doi?("https://doi.org/"+a.doi):"",linkLabel:"Makalenin tamamını aç ↗",pmcid:a.pmcid||"",hasFull:oa};okuState.view="article";hideTpop();hideSel();renderArticle();window.scrollTo(0,0)}
+function openPmc(i){const a=okuState.pmcItems[i];const oa=!!(a.pmcid&&a.inEPMC==="Y");okuState.article={kind:"pmc",title:a.title||"Başlıksız",meta:[jrn(a),a.pubYear].filter(Boolean).join(" · "),sub:a.authorString||"",body:a.abstractText||"Bu makalenin özeti bulunmuyor.",link:a.doi?("https://doi.org/"+a.doi):"",linkLabel:"Makalenin tamamını aç ↗",pmcid:a.pmcid||"",hasFull:oa};okuState.view="article";hideTpop();hideSel();renderArticle();window.scrollTo(0,0)}
 
 function splitSentences(t){return t.match(/[^.!?]+[.!?]*\s*/g)||[t]}
 function tokenizeWords(t){let o="";const re=/([A-Za-z][A-Za-z'’\-]*)|([^A-Za-z]+)/g;let m;while((m=re.exec(t))){o+=m[1]?'<span class="tok">'+esc(m[1])+'</span>':esc(m[2])}return o}
@@ -1011,13 +1009,33 @@ function renderArticle(){
   const fb=$("#fullBtn"); if(fb)fb.onclick=loadFull;
 }
 
+function lemma(w){
+  w=(w||"").toLowerCase();
+  if(w.length<3)return w;
+  const vowel=c=>"aeiou".indexOf(c)>=0;
+  const restoreE=s=>{if(s.length>=2){const a=s[s.length-1],b=s[s.length-2];if(!vowel(a)&&vowel(b)&&"sctvzgplrkmnd".indexOf(a)>=0&&a!==b)return s+"e"}return s};
+  if(w.endsWith("ing")&&w.length>5){let s=w.slice(0,-3);if(s.length>=2&&s[s.length-1]===s[s.length-2]&&!vowel(s[s.length-1]))s=s.slice(0,-1);else s=restoreE(s);return s}
+  if(w.endsWith("ied")&&w.length>4)return w.slice(0,-3)+"y";
+  if(w.endsWith("ies")&&w.length>4)return w.slice(0,-3)+"y";
+  if(w.endsWith("ed")&&w.length>4){let s=w.slice(0,-2);if(s.length>=2&&s[s.length-1]===s[s.length-2]&&!vowel(s[s.length-1]))s=s.slice(0,-1);else s=restoreE(s);return s}
+  if((w.endsWith("sses")||w.endsWith("xes")||w.endsWith("ches")||w.endsWith("shes"))&&w.length>4)return w.slice(0,-2);
+  if(w.endsWith("s")&&!w.endsWith("ss")&&!w.endsWith("us")&&!w.endsWith("is")&&w.length>3)return w.slice(0,-1);
+  return w;
+}
+async function lookupWord(raw){
+  const w=(raw||"").toLowerCase().replace(/[^a-z'’\-]/g,"");
+  if(!w)return {base:raw,tr:null};
+  const base=lemma(w)||w;
+  const tr=await translate(base,"en","tr");
+  return {base:base,tr:tr};
+}
 async function onTokenTap(e){
   const tok=e.target.closest(".tok"); if(!tok)return;
   const sel=window.getSelection(); if(sel&&sel.toString().trim().length>1)return;
-  const word=tok.textContent;
-  showTpop(tok,word,null,true);
-  const tr=await translate(word.toLowerCase(),"en","tr");
-  showTpop(tok,word,tr,false,sentenceOf(tok));
+  const raw=tok.textContent;
+  showTpop(tok,raw,null,true);
+  const res=await lookupWord(raw);
+  showTpop(tok,res.base||raw,res.tr,false,sentenceOf(tok));
 }
 
 function showTpop(anchor,word,tr,loading,sentence){
