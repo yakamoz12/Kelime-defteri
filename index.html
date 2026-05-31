@@ -226,6 +226,12 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
 
 /* OKU: list */
 .okuchips{margin:12px 0 14px}
+.okutoggle button{flex:1;padding:8px 6px;font-size:.78rem}
+.genrow{display:flex;gap:9px;margin-bottom:16px}
+.genrow input{flex:1;min-width:0;padding:12px 14px;border-radius:13px;border:1.5px solid var(--line);background:var(--card);outline:none}
+.genrow input:focus{border-color:var(--accent)}
+.genrow .btn{white-space:nowrap;padding:12px 15px}
+.lvlbadge{display:inline-block;font-size:.7rem;font-weight:700;color:#fff;background:var(--accent);padding:2px 8px;border-radius:20px;margin-bottom:6px}
 .okutoggle{margin-bottom:14px}
 .okutoggle button{flex:1}
 .spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:spin .8s linear infinite;margin:0 auto 16px}
@@ -405,6 +411,7 @@ function load(){
     save();
   }
   state.settings=state.settings||{theme:"light",dir:"en2tr"};
+  state.stories=Array.isArray(state.stories)?state.stories:[];
 }
 function save(){lsSet(KEY,JSON.stringify(state))}
 
@@ -830,7 +837,8 @@ async function translate(text,from,to){
 
 let okuState={mode:"news",view:"list",article:null,
   newsCat:"Dünya",newsItems:[],newsLoading:false,newsLoaded:false,newsErr:false,
-  pmcQuery:"",pmcItems:[],pmcLoading:false,pmcErr:false};
+  pmcQuery:"",pmcItems:[],pmcLoading:false,pmcErr:false,
+  storyLevel:"A1",storyTopic:"",storyBusy:false};
 
 const NEWS_FEEDS={
   "Dünya":"https://feeds.bbci.co.uk/news/world/rss.xml",
@@ -892,7 +900,7 @@ function jrn(a){return (a.journalInfo&&a.journalInfo.journal&&a.journalInfo.jour
 function renderOku(){
   const root=$("#s-oku");
   if(okuState.view==="article"&&okuState.article){renderArticle();return}
-  const toggle='<div class="dir-toggle okutoggle"><button class="'+(okuState.mode==="news"?"on":"")+'" data-m="news">Haberler</button><button class="'+(okuState.mode==="makale"?"on":"")+'" data-m="makale">Makaleler</button></div>';
+  const toggle='<div class="dir-toggle okutoggle"><button class="'+(okuState.mode==="news"?"on":"")+'" data-m="news">Haberler</button><button class="'+(okuState.mode==="makale"?"on":"")+'" data-m="makale">Makaleler</button><button class="'+(okuState.mode==="story"?"on":"")+'" data-m="story">Hikayeler</button></div>';
   let head="",body="";
   if(okuState.mode==="news"){
     const cats=Object.keys(NEWS_FEEDS);
@@ -901,6 +909,16 @@ function renderOku(){
     else if(okuState.newsErr)body='<div class="empty"><div class="ico">'+svgNews+'</div><h3>Haberler alınamadı</h3><p>İnternet bağlantını kontrol edip tekrar dene.</p><button class="btn btn-ghost" id="newsRetry">Tekrar dene</button></div>';
     else if(!okuState.newsItems.length)body='<div class="empty"><p>Haber bulunamadı.</p></div>';
     else body='<div class="alist">'+okuState.newsItems.map((it,i)=>'<button class="art" data-ni="'+i+'" style="animation-delay:'+Math.min(i*30,300)+'ms"><div class="art-title">'+esc(it.title||"")+'</div><div class="art-meta">'+esc([it.source,fmtDate(it.date)].filter(Boolean).join(" · "))+'</div>'+(it.desc?'<div class="art-auth">'+esc(it.desc)+'</div>':'')+'</button>').join("")+'</div>';
+  }else if(okuState.mode==="story"){
+    const levels=["A1","A2","B1","B2","C1","C2"];
+    head='<div class="chips okuchips" id="storyLevels">'+levels.map(l=>'<button class="chip '+(okuState.storyLevel===l?"on":"")+'" data-l="'+l+'">'+l+'</button>').join("")+'</div><div class="genrow"><input id="storyTopic" placeholder="Konu (ör. uzay, bir doktorun günü)…" autocomplete="off" value="'+esc(okuState.storyTopic||"")+'"><button class="btn btn-pri" id="genBtn">'+(okuState.storyBusy?'<span class="dots3"><i></i><i></i><i></i></span>':(okuState.storyLevel+" üret"))+'</button></div>';
+    const mine=(state.stories||[]).filter(s=>s.level===okuState.storyLevel);
+    const built=BUILTIN_STORIES.map((s,idx)=>({s:s,idx:idx})).filter(o=>o.s.level===okuState.storyLevel);
+    const snip=t=>esc(t.slice(0,90))+(t.length>90?"…":"");
+    let lh="";
+    if(mine.length)lh+='<div class="section-h">Senin ürettiklerin ('+okuState.storyLevel+')</div><div class="alist">'+mine.map(s=>'<button class="art" data-smid="'+s.id+'"><span class="lvlbadge">'+s.level+'</span><div class="art-title">'+esc(s.title)+'</div>'+(s.topic?'<div class="art-meta">'+esc(s.topic)+'</div>':'')+'<div class="art-auth">'+snip(s.body)+'</div></button>').join("")+'</div>';
+    lh+='<div class="section-h">Hazır hikayeler ('+okuState.storyLevel+')</div>'+(built.length?'<div class="alist">'+built.map(o=>'<button class="art" data-sbi="'+o.idx+'"><span class="lvlbadge">'+o.s.level+'</span><div class="art-title">'+esc(o.s.title)+'</div><div class="art-auth">'+snip(o.s.body)+'</div></button>').join("")+'</div>':'<div class="empty"><p>Bu seviyede hazır hikaye yok; yukarıdan kendin üret.</p></div>');
+    body='<div id="storyList">'+lh+'</div>';
   }else{
     const topics=["Diabetes","Cardiology","Oncology","Neurology","Nutrition","Immunology","COVID-19","Surgery"];
     head='<div class="searchbar">'+svgSearch+'<input id="okuSearch" placeholder="Tıp konusu ara…" autocomplete="off" enterkeyhint="search" value="'+esc(okuState.pmcQuery)+'"></div><div class="chips okuchips" id="okuTopics">'+topics.map(t=>'<button class="chip" data-t="'+esc(t)+'">'+esc(t)+'</button>').join("")+'</div>';
@@ -917,6 +935,14 @@ function renderOku(){
     const rt=$("#newsRetry");if(rt)rt.onclick=()=>fetchNews(okuState.newsCat);
     const al=root.querySelector(".alist");if(al)al.addEventListener("click",e=>{const x=e.target.closest("[data-ni]");if(x)openNews(+x.dataset.ni)});
     if(!okuState.newsLoaded&&!okuState.newsLoading&&!okuState.newsErr)fetchNews(okuState.newsCat);
+  }else if(okuState.mode==="story"){
+    const sl=$("#storyLevels");if(sl)sl.addEventListener("click",e=>{const l=e.target.closest("[data-l]");if(l){okuState.storyLevel=l.dataset.l;renderOku()}});
+    const gb=$("#genBtn");if(gb)gb.onclick=genStory;
+    const ti=$("#storyTopic");if(ti)ti.addEventListener("input",()=>{okuState.storyTopic=ti.value});
+    const slist=$("#storyList");if(slist)slist.addEventListener("click",e=>{
+      const b=e.target.closest("[data-sbi]");if(b){openStoryItem(BUILTIN_STORIES[+b.dataset.sbi]);return}
+      const m=e.target.closest("[data-smid]");if(m){const s=(state.stories||[]).find(x=>x.id===m.dataset.smid);if(s)openStoryItem(s)}
+    });
   }else{
     const si=$("#okuSearch");if(si)si.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();si.blur();fetchPmc(si.value)}});
     const ot=$("#okuTopics");if(ot)ot.addEventListener("click",e=>{const t=e.target.closest("[data-t]");if(t)fetchPmc(t.dataset.t)});
@@ -979,6 +1005,47 @@ async function loadFull(){
   if(blocks&&blocks.length){a.fullBlocks=blocks;toast("Tam metin yüklendi")}else toast("Tam metin alınamadı");
   renderArticle();window.scrollTo(0,0);
 }
+
+const BUILTIN_STORIES=[
+  {level:"A1",title:"A Cat and a Box",body:"Tom has a cat. The cat is small and black. The cat likes a big box. Every day, the cat sleeps in the box. Tom looks at the cat and smiles. He is very happy."},
+  {level:"A1",title:"My Morning",body:"I wake up at seven. I drink water and eat bread. My mother makes tea. I go to school with my friend. We walk and we talk. School is fun and I like my teacher."},
+  {level:"A2",title:"A Day at the Market",body:"Last Saturday, Lina went to the market with her father. They bought apples, bread, and fresh fish. The market was very busy and loud. A man sold colourful flowers near the door. Lina chose some yellow ones for her mother. On the way home it started to rain, so they walked fast and laughed."},
+  {level:"A2",title:"The Lost Key",body:"Sam could not find his key. He looked under the bed and behind the door. He asked his sister, but she did not know. Finally, he found the key inside his shoe. He was surprised and a little embarrassed. Then he left for work, ten minutes late."},
+  {level:"B1",title:"The New Neighbour",body:"When Maya moved into the apartment, she did not know anyone. One evening, she heard music coming from the flat next door. She knocked, and an old man opened the door with a warm smile. He invited her in for tea and told stories about the city as it used to be. By the time she left, she felt that the strange new place was slowly becoming a home. The next morning, she baked a cake and brought it to him."},
+  {level:"B1",title:"A Small Decision",body:"Daniel had to choose between two jobs. One paid more money but was far from his family. The other was close to home but offered less. For a week he could not decide, and the question followed him everywhere. In the end, he realised that being near the people he loved mattered more than a bigger salary. He accepted the local job and never regretted it."},
+  {level:"B2",title:"The Quiet Library",body:"The old library on Mill Street had survived three generations, though fewer people visited it each year. Its librarian, Mr. Owen, knew every shelf by heart and treated each book as if it were a guest. When the council announced plans to close it, the neighbourhood reacted with unexpected passion. Petitions appeared in shop windows, and children wrote letters explaining why the library mattered to them. In the face of such determination, the council hesitated, and eventually the doors stayed open. Mr. Owen said little, but everyone noticed the relief in his eyes."},
+  {level:"B2",title:"An Unexpected Delay",body:"The flight had been delayed for six hours, and the passengers were growing restless. Among them was Elena, who had been dreading a difficult conversation waiting at her destination. At first she resented the wasted time, but then she began talking to the stranger beside her. He turned out to be a retired teacher with a remarkable gift for listening. By the time the plane finally boarded, Elena felt calmer and strangely grateful. Sometimes, she thought, a delay is simply life giving you time to prepare."},
+  {level:"C1",title:"The Weight of Habit",body:"For most of his adult life, Victor had followed the same routine with almost religious devotion. He believed that consistency was the foundation of any meaningful achievement, and for years the evidence seemed to support him. Yet as the world around him changed, his rigid habits began to feel less like a strength and more like a cage. The very discipline that had once propelled him forward now quietly held him in place. Recognising this was uncomfortable, for it meant admitting that a virtue, carried too far, can become a flaw. Change, he discovered, demanded a different kind of courage than persistence ever had."},
+  {level:"C1",title:"A Question of Trust",body:"When the small company faced its first serious crisis, its founder had to decide how much to tell her employees. Her instinct was to protect them from the worst of the uncertainty, to present a confident face and carry the burden alone. But she suspected that silence, however well intentioned, might breed the very anxiety she hoped to prevent. After a sleepless night, she chose honesty, laying out the difficulties plainly and inviting the team to help find a way through. To her surprise, the openness did not weaken morale; it strengthened it. People, she learned, can endure hard truths far better than they can endure being kept in the dark."},
+  {level:"C2",title:"The Architecture of Memory",body:"We tend to imagine memory as a faithful archive, a vast repository in which the past is stored intact and retrieved on demand. The reality is considerably more unsettling. Each act of remembering is, in truth, an act of reconstruction, and every reconstruction subtly revises the original. What we recall is therefore not the event itself but the most recent version of our recollection of it, layered with the emotions and assumptions of the present moment. In this sense, our personal history is less a fixed monument than a living structure, perpetually under renovation. To remember, paradoxically, is also to forget, for in choosing what to emphasise we inevitably let other details dissolve into silence."},
+  {level:"C2",title:"On the Edge of Certainty",body:"There is a peculiar comfort in certainty, a sense of solid ground beneath one's convictions, and yet the history of human understanding is largely a chronicle of certainties overturned. The thinkers we most admire were rarely those who clung to settled answers; they were the ones willing to dwell, however uneasily, in the territory of doubt. To question what everyone takes for granted requires not arrogance but a certain humility, an acknowledgement that one's own assumptions may be no more reliable than those one seeks to challenge. Genuine progress, it seems, depends on this delicate balance, on the capacity to act decisively while remaining quietly prepared to be wrong. Those who master it tend to leave the world a little wiser than they found it."}
+];
+
+async function geminiGenerate(level,topic,key){
+  const lens={A1:"about 50 words, 5 to 6 very short simple sentences, present tense, basic vocabulary",A2:"about 80 words, simple short sentences",B1:"about 130 words, one clear paragraph",B2:"about 180 words, two short paragraphs",C1:"about 230 words with richer vocabulary and some complex sentences",C2:"about 290 words, sophisticated, nuanced and idiomatic"};
+  const prompt="Write an original short story in English for an English learner at CEFR level "+level+". Topic: "+(topic||"any interesting everyday topic")+". Use vocabulary and grammar strictly suitable for level "+level+". Length: "+(lens[level]||"about 130 words")+". Make it engaging, clear and self-contained. Respond in EXACTLY this format and nothing else:\nTITLE: <a short title>\n<the story text>";
+  try{
+    const u="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="+encodeURIComponent(key);
+    const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.9}})});
+    if(r.ok){const d=await r.json();const c=d&&d.candidates&&d.candidates[0];let out=c&&c.content&&c.content.parts&&c.content.parts[0]&&c.content.parts[0].text;
+      if(out){out=out.trim();const m=out.match(/^\s*TITLE:\s*(.+?)\s*\n([\s\S]+)$/i);if(m)return {title:m[1].trim(),body:m[2].trim()};return {title:(topic||"Story"),body:out}}}
+  }catch(e){}
+  return null;
+}
+async function genStory(){
+  const cfg=(state.settings.trCfg||"").trim();
+  if(!cfg||/^https?:\/\//i.test(cfg)){toast("Önce ⋯ → Çeviri ayarlarına Gemini anahtarı gir");return}
+  const ti=$("#storyTopic"); const topic=ti?ti.value.trim():"";
+  okuState.storyTopic=topic; okuState.storyBusy=true; renderOku();
+  const s=await geminiGenerate(okuState.storyLevel,topic,cfg);
+  okuState.storyBusy=false;
+  if(s&&s.body){
+    const item={id:uid(),level:okuState.storyLevel,topic:topic,title:s.title||topic||"Hikaye",body:s.body,createdAt:Date.now()};
+    state.stories.unshift(item); save(); okuState.storyTopic="";
+    openStoryItem(item);
+  }else{toast("Hikaye üretilemedi, tekrar dene");renderOku()}
+}
+function openStoryItem(s){okuState.article={kind:"story",title:s.title||"Hikaye",meta:s.level+(s.topic?" · "+s.topic:""),sub:"",body:s.body||"",link:"",linkLabel:""};okuState.view="article";hideTpop();hideSel();renderArticle();window.scrollTo(0,0)}
 
 function openNews(i){const it=okuState.newsItems[i];okuState.article={kind:"news",title:it.title||"",meta:[it.source,fmtDate(it.date)].filter(Boolean).join(" · "),sub:"",body:it.desc||"Bu haberin kısa özeti yok. Tamamını aşağıdaki bağlantıdan okuyabilirsin.",link:it.link,linkLabel:"Haberin tamamını oku ↗",fullUrl:it.link};okuState.view="article";hideTpop();hideSel();renderArticle();window.scrollTo(0,0)}
 function openPmc(i){const a=okuState.pmcItems[i];const oa=!!(a.pmcid&&a.inEPMC==="Y");okuState.article={kind:"pmc",title:a.title||"Başlıksız",meta:[jrn(a),a.pubYear].filter(Boolean).join(" · "),sub:a.authorString||"",body:a.abstractText||"Bu makalenin özeti bulunmuyor.",link:a.doi?("https://doi.org/"+a.doi):"",linkLabel:"Makalenin tamamını aç ↗",pmcid:a.pmcid||"",hasFull:oa};okuState.view="article";hideTpop();hideSel();renderArticle();window.scrollTo(0,0)}
