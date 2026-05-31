@@ -290,6 +290,33 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
 .dots3 i:nth-child(2){animation-delay:.15s}
 .dots3 i:nth-child(3){animation-delay:.3s}
 @keyframes bd{0%,100%{opacity:.4;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+.sheet-note{color:var(--soft);font-size:.85rem;line-height:1.55;margin:-6px 0 15px}
+.pdf-opt{margin-bottom:13px}
+.pdf-opt>label{display:block;font-size:.8rem;font-weight:600;color:var(--soft);margin-bottom:6px}
+
+/* ---- PDF / print export ---- */
+#printRoot{display:none}
+@media print{
+  @page{size:A4 landscape;margin:11mm}
+  html,body{background:#fff !important;margin:0}
+  #app,#overlay,#sheet,#toast,#tpop,#selbtn,nav,header{display:none !important}
+  #printRoot{display:block !important}
+  #printRoot *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+}
+#printRoot{font-family:"Hanken Grotesk",sans-serif;color:#2A2118}
+#printRoot .pt-title{font-family:"Fraunces",serif;font-size:23pt;font-weight:600;margin:0 0 2pt}
+#printRoot .pt-sub{font-size:9.5pt;color:#7A6E5C;margin:0 0 12pt}
+#printRoot table{width:100%;border-collapse:collapse;font-size:10.5pt;border:.5pt solid #E7DECB}
+#printRoot thead th{background:#1f6f7b;color:#fff;text-align:left;font-size:9pt;font-weight:700;letter-spacing:.04em;padding:8pt 10pt;text-transform:uppercase}
+#printRoot td{padding:7pt 10pt;border-bottom:.5pt solid #E7DECB;vertical-align:top;line-height:1.4}
+#printRoot tr.cat td{background:#E7F1F2;color:#1f6f7b;font-weight:700;font-size:9pt;letter-spacing:.05em;text-transform:uppercase;padding:5pt 10pt}
+#printRoot tr.alt td{background:#F4EFE4}
+#printRoot td.w{font-weight:700;color:#2A2118}
+#printRoot td.t{color:#1f6f7b}
+#printRoot td.e{font-family:"Fraunces",serif;font-style:italic;color:#7A6E5C}
+#printRoot td.e b{color:#1f6f7b;font-weight:600}
+#printRoot tbody tr{break-inside:avoid;page-break-inside:avoid}
+#printRoot thead{display:table-header-group}
 </style>
 </head>
 <body>
@@ -377,6 +404,7 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
 <input type="file" id="importFile" accept="application/json,.json" style="display:none">
 <div class="tpop" id="tpop"></div>
 <button class="selbtn" id="selbtn"></button>
+<div id="printRoot"></div>
 
 <script>
 "use strict";
@@ -461,7 +489,8 @@ const SVG={
   dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>',
   up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></svg>',
   sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
-  moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'
+  moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+  pdf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>'
 };
 
 /* ---------- theme ---------- */
@@ -737,11 +766,57 @@ function openMenu(){
     <button class="menu-item" id="m-tr">${svgLang}<div>Çeviri ayarları<div class="sub">Akademik kalite için API anahtarı</div></div></button>
     <button class="menu-item" id="m-export">${SVG.dl}<div>Dışa aktar (yedekle)<div class="sub">Tüm kelimelerini JSON dosyası olarak indir</div></div></button>
     <button class="menu-item" id="m-import">${SVG.up}<div>İçe aktar<div class="sub">Yedek dosyandan kelimeleri geri yükle</div></div></button>
+    <button class="menu-item" id="m-pdf">${SVG.pdf}<div>PDF indir<div class="sub">Kelimeleri yatay tablo halinde yazdır / PDF kaydet</div></div></button>
     <button class="menu-item" id="m-theme">${state.settings.theme==='dark'?SVG.sun:SVG.moon}<div>${state.settings.theme==='dark'?'Açık tema':'Koyu tema'}<div class="sub">Görünümü değiştir</div></div></button>`);
   $("#m-tr").onclick=()=>{closeSheet();openTrSettings()};
   $("#m-export").onclick=()=>{exportData();closeSheet()};
   $("#m-import").onclick=()=>{closeSheet();$("#importFile").click()};
+  $("#m-pdf").onclick=openPdfSheet;
   $("#m-theme").onclick=()=>{state.settings.theme=state.settings.theme==="dark"?"light":"dark";save();applyTheme();closeSheet()};
+}
+
+let pdfOpts={sort:"cat",ex:true};
+function trUpper(s){return String(s).replace(/i/g,"İ").replace(/ı/g,"I").toUpperCase()}
+function exHtml(w){
+  let e=esc(w.example||"");if(!e)return "";
+  const word=(w.en||"").trim();
+  if(word){try{const re=new RegExp("("+word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","i");e=e.replace(re,"<b>$1</b>")}catch(_){}}
+  return "\u201C"+e+"\u201D";
+}
+function openPdfSheet(){
+  showSheet('<h2>PDF indir</h2>'+
+    '<p class="sheet-note">Kelimelerin yatay bir tabloya (Kelime · Türkçe · Örnek cümle) dizilir. Açılan yazdırma ekranında <b>Paylaş → "PDF olarak kaydet"</b> seç. Ana ekran kısayolunda çıkmazsa Safari\'de açıp dene.</p>'+
+    '<div class="pdf-opt"><label>Sıralama</label><div class="dir-toggle" id="po-sort"><button class="'+(pdfOpts.sort==="cat"?"on":"")+'" data-v="cat">Kategoriye göre</button><button class="'+(pdfOpts.sort==="az"?"on":"")+'" data-v="az">A → Z</button></div></div>'+
+    '<div class="pdf-opt"><label>Örnek cümleler</label><div class="dir-toggle" id="po-ex"><button class="'+(pdfOpts.ex?"on":"")+'" data-v="1">Dahil</button><button class="'+(!pdfOpts.ex?"on":"")+'" data-v="0">Hariç</button></div></div>'+
+    '<button class="btn btn-pri btn-block" id="po-go" style="margin-top:6px">PDF oluştur</button>');
+  $("#po-sort").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(b){pdfOpts.sort=b.dataset.v;openPdfSheet()}});
+  $("#po-ex").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(b){pdfOpts.ex=b.dataset.v==="1";openPdfSheet()}});
+  $("#po-go").onclick=()=>pdfExport(pdfOpts);
+}
+function pdfExport(opts){
+  const words=state.words.slice();
+  if(!words.length){toast("Önce kelime ekle");return}
+  const byEn=(a,b)=>(a.en||"").localeCompare(b.en||"","en",{sensitivity:"base"});
+  const cols=opts.ex?3:2;
+  const cg=opts.ex?'<col style="width:17%"><col style="width:25%"><col style="width:58%">':'<col style="width:34%"><col style="width:66%">';
+  const head='<tr><th>Kelime</th><th>Türkçe</th>'+(opts.ex?'<th>Örnek cümle</th>':'')+'</tr>';
+  const row=(w,alt)=>{let r='<tr'+(alt?' class="alt"':'')+'><td class="w">'+esc(w.en)+'</td><td class="t">'+esc(w.tr||"")+'</td>'+(opts.ex?'<td class="e">'+exHtml(w)+'</td>':'')+'</tr>';return r};
+  let rows="";
+  if(opts.sort==="az"){
+    words.sort(byEn);words.forEach((w,i)=>rows+=row(w,i%2===1));
+  }else{
+    const cats=[...new Set(words.map(w=>w.category||"Diğer"))].sort((a,b)=>a.localeCompare(b,"tr"));
+    cats.forEach(cat=>{
+      const grp=words.filter(w=>(w.category||"Diğer")===cat).sort(byEn);
+      rows+='<tr class="cat"><td colspan="'+cols+'">'+esc(trUpper(cat))+'</td></tr>';
+      grp.forEach((w,i)=>rows+=row(w,i%2===1));
+    });
+  }
+  const dnow=new Date().toLocaleDateString("tr-TR",{day:"numeric",month:"long",year:"numeric"});
+  $("#printRoot").innerHTML='<div class="pt-title">Kelime Defteri</div><div class="pt-sub">İngilizce – Türkçe sözcük listesi · '+words.length+' kelime · '+dnow+'</div>'+
+    '<table><colgroup>'+cg+'</colgroup><thead>'+head+'</thead><tbody>'+rows+'</tbody></table>';
+  closeSheet();
+  setTimeout(()=>{try{window.print()}catch(e){toast("Yazdırma açılamadı; Safari'de dene")}},300);
 }
 function openTrSettings(){
   const cur=state.settings.trCfg||"";
