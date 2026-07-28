@@ -220,9 +220,10 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
 
 .section-h{font-family:"Fraunces",serif;font-size:1.05rem;font-weight:600;margin:18px 2px 12px;color:var(--soft)}
 
-/* 5 tabs fit */
-.tab span{font-size:.63rem;white-space:nowrap}
-.tab svg{width:21px;height:21px}
+/* 6 tabs fit */
+.tab span{font-size:.58rem;white-space:nowrap;letter-spacing:-.01em}
+.tab svg{width:20px;height:20px}
+@media (min-width:400px){.tab span{font-size:.63rem}.tab svg{width:21px;height:21px}}
 
 /* OKU: list */
 .okuchips{margin:12px 0 14px}
@@ -294,6 +295,71 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
 .pdf-opt{margin-bottom:13px}
 .pdf-opt>label{display:block;font-size:.8rem;font-weight:600;color:var(--soft);margin-bottom:6px}
 
+/* ---- okunuş + akademik blok ---- */
+.pron{font-size:.86rem;color:var(--soft);font-weight:500;letter-spacing:.02em;margin-top:2px}
+.pron b{color:var(--accent);font-weight:700}
+.acbtn{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);padding:3px 9px;border-radius:20px;letter-spacing:.03em}
+.acbtn svg{width:12px;height:12px;transition:transform .2s}
+.acbtn.open svg{transform:rotate(180deg)}
+.acbox{margin-top:11px;padding:12px 13px;background:var(--bg2);border:1px solid var(--line);border-radius:13px;animation:fade .3s ease}
+.acrow{margin-bottom:9px}
+.acrow:last-child{margin-bottom:0}
+.acrow .k{font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--soft);margin-bottom:3px}
+.acrow .v{font-size:.92rem;line-height:1.55}
+.acrow .v.syn{color:var(--accent);font-weight:600}
+.acrow .v.sent{font-family:"Fraunces",serif;font-style:italic;line-height:1.6}
+.acrow .v.sent b{font-style:normal;font-weight:600;color:var(--accent)}
+.acrow .v.trs{color:var(--soft);font-size:.86rem;margin-top:4px}
+.mini.magic{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.mini.busy{opacity:.5;pointer-events:none}
+.enrich-bar{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 15px;box-shadow:var(--shadow);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.enrich-bar .spinner{width:22px;height:22px;border-width:2.5px;margin:0;flex-shrink:0}
+.enrich-bar .et{flex:1;font-size:.86rem;line-height:1.4}
+.enrich-bar .et b{font-weight:600}
+.enrich-bar button{font-size:.82rem;font-weight:700;color:var(--again);padding:6px 10px}
+
+/* ---- SORU (öğretmen) ---- */
+.ask{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:14px}
+.ask textarea{width:100%;border:none;background:none;outline:none;resize:vertical;min-height:96px;font-size:1rem;line-height:1.55}
+.ask textarea::placeholder{color:var(--soft)}
+.askfoot{display:flex;gap:9px;align-items:center;margin-top:10px;padding-top:11px;border-top:1px solid var(--line2)}
+.askfoot .btn{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:12px;background:var(--bg2);border:1px solid var(--line);font-size:.85rem;font-weight:600;color:var(--soft)}
+.pill svg{width:17px;height:17px}
+.pill:active{transform:scale(.95)}
+.shot{position:relative;margin-top:11px;border-radius:13px;overflow:hidden;border:1px solid var(--line)}
+.shot img{display:block;width:100%;max-height:220px;object-fit:contain;background:var(--bg2)}
+.shot button{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:9px;background:rgba(20,14,6,.72);color:#fff;display:grid;place-items:center}
+.shot button svg{width:15px;height:15px}
+.ansbox{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;animation:rise .45s both}
+.ans-hero{padding:18px 17px;background:color-mix(in srgb,var(--accent) 9%,var(--card));border-bottom:1px solid var(--line)}
+.ans-hero .k{font-size:.68rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--soft)}
+.ans-hero .v{font-family:"Fraunces",serif;font-size:1.5rem;font-weight:600;line-height:1.25;letter-spacing:-.01em;color:var(--accent);margin-top:5px}
+.ans-sec{padding:15px 17px;border-bottom:1px solid var(--line2)}
+.ans-sec:last-child{border-bottom:none}
+.ans-sec .k{font-size:.68rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--soft);margin-bottom:6px}
+.ans-sec .v{font-size:1rem;line-height:1.7}
+.ans-sec .v li{margin-bottom:5px}
+.ans-sec .v ul{margin:0;padding-left:19px}
+.qwords{display:flex;flex-wrap:wrap;gap:8px}
+.qw{display:inline-flex;align-items:center;gap:7px;padding:7px 9px 7px 12px;border-radius:11px;background:var(--bg2);border:1px solid var(--line);font-size:.88rem}
+.qw b{font-weight:600}
+.qw span{color:var(--accent);font-weight:600}
+.qw i{font-style:normal;color:var(--soft);opacity:.6}
+.qw button{width:24px;height:24px;border-radius:7px;background:var(--accent);color:#fff;display:grid;place-items:center;flex-shrink:0}
+.qw button svg{width:13px;height:13px}
+.qw.added button{background:var(--good)}
+.followrow{display:flex;gap:9px;margin-top:14px}
+.followrow .btn{flex:1;font-size:.88rem;padding:11px 12px}
+.qhist{display:flex;flex-direction:column;gap:9px}
+.qh{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);color:var(--ink)}
+.qh:active{transform:scale(.99)}
+.qh .q{font-size:.92rem;font-weight:500;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.qh .a{font-size:.8rem;color:var(--accent);font-weight:600;margin-top:5px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.thinking{text-align:center;padding:38px 24px;color:var(--soft)}
+.thinking .spinner{margin-bottom:14px}
+.thinking p{font-size:.95rem}
+
 /* ---- PDF / print export ---- */
 #printRoot{display:none}
 @media print{
@@ -315,6 +381,9 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
 #printRoot td.t{color:#1f6f7b}
 #printRoot td.e{font-family:"Fraunces",serif;font-style:italic;color:#7A6E5C}
 #printRoot td.e b{color:#1f6f7b;font-weight:600}
+#printRoot .pr{font-family:"Hanken Grotesk",sans-serif;font-weight:500;font-size:8.5pt;color:#7A6E5C;font-style:normal;margin-top:2pt;letter-spacing:.02em}
+#printRoot .sy{font-family:"Hanken Grotesk",sans-serif;font-weight:500;font-size:8.5pt;color:#7A6E5C;margin-top:2pt}
+#printRoot .ac{margin-top:4pt;padding-top:4pt;border-top:.4pt dotted #E7DECB}
 #printRoot tbody tr{break-inside:avoid;page-break-inside:avoid}
 #printRoot thead{display:table-header-group}
 </style>
@@ -338,6 +407,7 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
     <!-- DEFTER -->
     <section class="screen active" id="s-defter">
       <div id="installBanner"></div>
+      <div id="bulkBar"></div>
       <div class="tiles">
         <div class="tile"><div class="n" id="t-total">0</div><div class="l">Toplam kelime</div></div>
         <div class="tile"><div class="n" id="t-due">0</div><div class="l">Bugün tekrar</div></div>
@@ -368,6 +438,9 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
 
     <!-- OKU -->
     <section class="screen" id="s-oku"></section>
+
+    <!-- SORU -->
+    <section class="screen" id="s-soru"></section>
   </main>
 
   <button class="fab" id="fab" aria-label="Kelime ekle">
@@ -391,6 +464,10 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       <span>Test</span>
     </button>
+    <button class="tab" data-screen="soru">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 4.5 16.8L21 21l-1.2-4.5A9 9 0 0 0 12 3z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.4"/><path d="M12 17h.01"/></svg>
+      <span>Soru</span>
+    </button>
     <button class="tab" data-screen="stat">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
       <span>İstatistik</span>
@@ -402,6 +479,7 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in sr
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
 <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+<input type="file" id="shotFile" accept="image/*" style="display:none">
 <div class="tpop" id="tpop"></div>
 <button class="selbtn" id="selbtn"></button>
 <div id="printRoot"></div>
@@ -440,6 +518,7 @@ function load(){
   }
   state.settings=state.settings||{theme:"light",dir:"en2tr"};
   state.stories=Array.isArray(state.stories)?state.stories:[];
+  state.solves=Array.isArray(state.solves)?state.solves:[];
 }
 function save(){lsSet(KEY,JSON.stringify(state))}
 
@@ -490,8 +569,89 @@ const SVG={
   up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></svg>',
   sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
-  pdf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>'
+  pdf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>',
+  magic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 13.6 8 19 9.5 13.6 11 12 16.5 10.4 11 5 9.5 10.4 8z"/><path d="M18.5 15.5 19.2 18l2.3.8-2.3.8-.7 2.4-.7-2.4-2.3-.8 2.3-.8z"/><path d="M5 16h.01"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2.2l1.3-2h7l1.3 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.4"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5"/><path d="M21 3 14.5 21l-4-7.5L3 9.5z"/></svg>',
+  teach:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 4.5 16.8L21 21l-1.2-4.5A9 9 0 0 0 12 3z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.4"/><path d="M12 17h.01"/></svg>'
 };
+
+/* ---------- kelime zenginleştirme (okunuş + akademik) ---------- */
+function hasKey(){const c=(state.settings.trCfg||"").trim();return c&&!/^https?:\/\//i.test(c)?c:""}
+function needsEnrich(w){return !(w.pron&&w.syn&&w.acEx)}
+
+async function geminiJson(prompt,key,temp){
+  try{
+    const u="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="+encodeURIComponent(key);
+    const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:temp==null?0.3:temp}})});
+    if(!r.ok)return null;
+    const d=await r.json();const c=d&&d.candidates&&d.candidates[0];
+    const out=c&&c.content&&c.content.parts&&c.content.parts[0]&&c.content.parts[0].text;
+    return out?out.trim():null;
+  }catch(e){return null}
+}
+function pick(txt,label){
+  const re=new RegExp("(?:^|\\n)[ \\t]*"+label+"[ \\t]*:[ \\t]*([\\s\\S]*?)(?=\\n[ \\t]*[A-ZÇĞİÖŞÜ_]{3,}[ \\t]*:|$)","i");
+  const m=String(txt||"").match(re);
+  if(!m)return "";
+  return m[1].replace(/[ \t]+/g," ").replace(/\n{2,}/g,"\n").replace(/\*\*/g,"").trim();
+}
+async function enrichWord(w,key){
+  const prompt=
+  "Sen akademik İngilizce öğreten bir dilbilimcisin. Aşağıdaki İngilizce kelimeyi işle.\n"+
+  "KELİME: "+w.en+"\n"+
+  (w.tr?"Öğrencinin yazdığı Türkçe karşılık: "+w.tr+"\n":"")+
+  "\nŞunları üret:\n"+
+  "1) OKUNUS: Kelimenin Türk alfabesiyle okunuşu. IPA KULLANMA. Heceleri kısa çizgiyle ayır, vurgulu heceyi BÜYÜK harf yaz. Örnekler: abundant -> ı-BAN-dınt | reliable -> ri-LAY-ı-bıl | achieve -> ı-ÇİİV | thorough -> TA-rou | measure -> ME-jır\n"+
+  "2) ANLAM: Kısa, net Türkçe karşılık (en fazla 5 kelime). Öğrencinin yazdığı karşılık doğruysa aynen koru.\n"+
+  "3) ES: Akademik/resmi yazıda bu kelimenin yerine kullanılabilecek 3-5 İngilizce eş anlamlı, virgülle ayrılmış. Günlük konuşma kelimeleri verme.\n"+
+  "4) CUMLE: Kelimeyi içeren, akademik bir makaleden alınmış gibi duran tek bir İngilizce cümle. Bilimsel/akademik register kullan.\n"+
+  "5) CEVIRI: O cümlenin akıcı Türkçe çevirisi.\n"+
+  "\nSADECE şu formatta yanıt ver, başka hiçbir şey yazma:\n"+
+  "OKUNUS: ...\nANLAM: ...\nES: ...\nCUMLE: ...\nCEVIRI: ...";
+  const out=await geminiJson(prompt,key,0.25);
+  if(!out)return false;
+  const pron=pick(out,"OKUNUS"),syn=pick(out,"ES"),ex=pick(out,"CUMLE"),tr=pick(out,"CEVIRI"),anlam=pick(out,"ANLAM");
+  if(!pron&&!syn&&!ex)return false;
+  if(pron)w.pron=pron;
+  if(syn)w.syn=syn;
+  if(ex)w.acEx=ex;
+  if(tr)w.acTr=tr;
+  if(anlam&&!w.tr)w.tr=anlam;
+  return true;
+}
+
+const busyIds=new Set();
+async function enrichOne(id,quiet){
+  const key=hasKey();
+  if(!key){if(!quiet)toast("Önce ⋯ → Çeviri ayarlarına Gemini anahtarı gir");return}
+  const w=state.words.find(x=>x.id===id); if(!w||busyIds.has(id))return;
+  busyIds.add(id); if(!quiet)renderList();
+  const ok=await enrichWord(w,key);
+  busyIds.delete(id); save();
+  if(!quiet){renderList();toast(ok?"Zenginleştirildi ✓":"Bilgi alınamadı, tekrar dene")}
+  else if(document.querySelector(".screen.active").id==="s-defter")renderList();
+}
+
+let bulk=null;
+async function enrichAll(){
+  const key=hasKey();
+  if(!key){toast("Önce ⋯ → Çeviri ayarlarına Gemini anahtarı gir");return}
+  const todo=state.words.filter(needsEnrich);
+  if(!todo.length){toast("Tüm kelimeler zaten hazır ✓");return}
+  bulk={done:0,total:todo.length,stop:false};
+  switchScreen("defter");
+  for(const w of todo){
+    if(bulk.stop)break;
+    await enrichWord(w,key);
+    bulk.done++; save(); renderDefter();
+    await new Promise(r=>setTimeout(r,350));
+  }
+  const n=bulk.done; bulk=null; renderDefter();
+  toast(n+" kelime zenginleştirildi ✓");
+}
 
 /* ---------- theme ---------- */
 function applyTheme(){
@@ -530,15 +690,20 @@ function renderList(){
   list.innerHTML=arr.map((w,i)=>{
     const dots=[0,1,2,3,4].map(n=>`<span class="dot ${ (w.box||0)>n ?'f':''}"></span>`).join("");
     const learned=(w.box||0)>=4;
+    const busy=busyIds.has(w.id);
+    const has=w.syn||w.acEx;
+    const open=openAc.has(w.id);
     return `<div class="word" style="animation-delay:${Math.min(i*40,320)}ms">
       <div class="top">
         <div style="min-width:0">
           <div class="en">${esc(w.en)}</div>
+          ${w.pron?`<div class="pron">${esc(w.pron)}</div>`:""}
           <div class="tr">${esc(w.tr)}</div>
           ${w.example?`<div class="ex">${esc(w.example)}</div>`:""}
         </div>
         <div class="wact">
           <button class="mini spk" data-spk="${esc(w.en)}" aria-label="Seslendir">${SVG.spk}</button>
+          <button class="mini magic ${busy?'busy':''}" data-magic="${w.id}" aria-label="Akademik bilgi getir">${busy?'<span class="dots3"><i></i><i></i><i></i></span>':SVG.magic}</button>
           <button class="mini" data-edit="${w.id}" aria-label="Düzenle">${SVG.edit}</button>
           <button class="mini" data-del="${w.id}" aria-label="Sil">${SVG.trash}</button>
         </div>
@@ -546,12 +711,34 @@ function renderList(){
       <div class="meta">
         ${w.category?`<span class="tag">${esc(w.category)}</span>`:""}
         <span class="lvl" style="color:${learned?'var(--good)':'var(--soft)'};background:${learned?'var(--good-bg)':'var(--bg2)'};border:1px solid var(--line)">${learned?'Öğrenildi':'Seviye '+(w.box||0)}</span>
+        ${has?`<button class="acbtn ${open?'open':''}" data-ac="${w.id}">Akademik ${SVG.chev}</button>`:""}
         <span class="dots">${dots}</span>
       </div>
+      ${has&&open?acHtml(w):""}
     </div>`;
   }).join("");
 }
-function renderDefter(){renderTiles();renderChips();renderList()}
+const openAc=new Set();
+function boldWord(sentence,word){
+  let e=esc(sentence||""); const base=(word||"").trim();
+  if(!base)return e;
+  const stem=base.length>4?base.slice(0,Math.max(4,base.length-2)):base;
+  try{const re=new RegExp("("+stem.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"[a-z]*)","i");e=e.replace(re,"<b>$1</b>")}catch(_){}
+  return e;
+}
+function acHtml(w){
+  return `<div class="acbox">
+    ${w.syn?`<div class="acrow"><div class="k">Akademik eş anlamlılar</div><div class="v syn">${esc(w.syn)}</div></div>`:""}
+    ${w.acEx?`<div class="acrow"><div class="k">Akademik örnek cümle</div><div class="v sent">${boldWord(w.acEx,w.en)}</div>${w.acTr?`<div class="v trs">${esc(w.acTr)}</div>`:""}</div>`:""}
+  </div>`;
+}
+function renderBulk(){
+  const b=$("#bulkBar"); if(!b)return;
+  if(!bulk){b.innerHTML="";return}
+  b.innerHTML=`<div class="enrich-bar"><div class="spinner"></div><div class="et"><b>Kelimeler zenginleştiriliyor</b><br>${bulk.done} / ${bulk.total} tamamlandı</div><button id="bulkStop">Durdur</button></div>`;
+  $("#bulkStop").onclick=()=>{bulk.stop=true;toast("Durduruluyor…")};
+}
+function renderDefter(){renderTiles();renderChips();renderList();renderBulk()}
 
 /* install banner */
 function renderBanner(){
@@ -615,7 +802,9 @@ function renderStudy(){
         <div class="label">${frontEn?'Türkçe':'İngilizce'}</div>
         <button class="spkbig" data-spk="${esc(w.en)}" data-lang="en">${SVG.spk}</button>
         <div class="term">${esc(back)}</div>
-        ${w.example?`<div class="ex">${esc(w.example)}</div>`:""}
+        ${w.pron?`<div class="pron" style="margin-top:8px">${esc(w.pron)}</div>`:""}
+        ${w.syn?`<div class="sub" style="font-size:.92rem;margin-top:10px">${esc(w.syn)}</div>`:""}
+        ${(w.acEx||w.example)?`<div class="ex">${esc(w.acEx||w.example)}</div>`:""}
       </div>
     </div></div>
     <div class="grade">
@@ -729,27 +918,51 @@ function closeSheet(){$("#overlay").classList.remove("show");$("#sheet").classLi
 function openEdit(id){
   const w=id?state.words.find(x=>x.id===id):null;
   const cats=categories();
+  acTrTmp=(w&&w.acTr)||"";
   showSheet(`<h2>${w?'Kelimeyi düzenle':'Yeni kelime'}</h2>
     <div class="field"><label>İngilizce *</label><input id="f-en" value="${esc(w?w.en:'')}" placeholder="ör. abundant" autocapitalize="none"></div>
     <div class="field"><label>Türkçe *</label><input id="f-tr" value="${esc(w?w.tr:'')}" placeholder="ör. bol, bereketli"></div>
+    <div class="field"><label>Türkçe okunuşu</label><input id="f-pron" value="${esc(w&&w.pron?w.pron:'')}" placeholder="ör. ı-BAN-dınt"></div>
     <div class="field"><label>Örnek cümle</label><textarea id="f-ex" placeholder="İsteğe bağlı">${esc(w?w.example:'')}</textarea></div>
+    <div class="field"><label>Akademik eş anlamlılar</label><input id="f-syn" value="${esc(w&&w.syn?w.syn:'')}" placeholder="ör. plentiful, ample, copious"></div>
+    <div class="field"><label>Akademik örnek cümle</label><textarea id="f-acex" placeholder="Akademik bir cümle">${esc(w&&w.acEx?w.acEx:'')}</textarea></div>
     <div class="field"><label>Kategori</label><input id="f-cat" list="catList" value="${esc(w?w.category:'')}" placeholder="ör. Fiiller">
       <datalist id="catList">${cats.map(c=>`<option value="${esc(c)}">`).join("")}</datalist></div>
+    <button class="btn btn-ghost btn-block" id="fillBtn" style="margin-bottom:12px">${SVG.magic} Okunuş, eş anlamlı ve cümleyi getir</button>
     <div class="sheet-actions">
       <button class="btn btn-ghost" id="cancelBtn">İptal</button>
       <button class="btn btn-pri" id="saveBtn">${w?'Kaydet':'Ekle'}</button>
     </div>`);
   $("#cancelBtn").onclick=closeSheet;
+  $("#fillBtn").onclick=async()=>{
+    const key=hasKey();
+    if(!key){toast("Önce ⋯ → Çeviri ayarlarına Gemini anahtarı gir");return}
+    const en=$("#f-en").value.trim();
+    if(!en){toast("Önce İngilizce kelimeyi yaz");return}
+    const b=$("#fillBtn"); b.innerHTML='<span class="dots3"><i></i><i></i><i></i></span>'; b.style.pointerEvents="none";
+    const tmp={en:en,tr:$("#f-tr").value.trim()};
+    const ok=await enrichWord(tmp,key);
+    b.innerHTML=SVG.magic+" Okunuş, eş anlamlı ve cümleyi getir"; b.style.pointerEvents="";
+    if(!ok){toast("Bilgi alınamadı, tekrar dene");return}
+    if(tmp.pron)$("#f-pron").value=tmp.pron;
+    if(tmp.syn)$("#f-syn").value=tmp.syn;
+    if(tmp.acEx)$("#f-acex").value=tmp.acEx;
+    if(tmp.tr&&!$("#f-tr").value.trim())$("#f-tr").value=tmp.tr;
+    acTrTmp=tmp.acTr||"";
+    toast("Dolduruldu ✓");
+  };
   $("#saveBtn").onclick=()=>{
     const en=$("#f-en").value.trim(),tr=$("#f-tr").value.trim();
     if(!en||!tr){toast("İngilizce ve Türkçe alanları gerekli");return}
     const ex=$("#f-ex").value.trim(),cat=$("#f-cat").value.trim();
-    if(w){w.en=en;w.tr=tr;w.example=ex;w.category=cat;toast("Güncellendi")}
-    else{state.words.push({id:uid(),en,tr,example:ex,category:cat,box:0,due:Date.now(),createdAt:Date.now(),correct:0,wrong:0});toast("Kelime eklendi")}
-    save();closeSheet();refreshActive();
+    const pron=$("#f-pron").value.trim(),syn=$("#f-syn").value.trim(),acEx=$("#f-acex").value.trim();
+    if(w){w.en=en;w.tr=tr;w.example=ex;w.category=cat;w.pron=pron;w.syn=syn;w.acEx=acEx;if(acTrTmp)w.acTr=acTrTmp;toast("Güncellendi")}
+    else{state.words.push({id:uid(),en,tr,example:ex,category:cat,pron:pron,syn:syn,acEx:acEx,acTr:acTrTmp,box:0,due:Date.now(),createdAt:Date.now(),correct:0,wrong:0});toast("Kelime eklendi")}
+    acTrTmp="";save();closeSheet();refreshActive();
   };
-  setTimeout(()=>$("#f-en").focus(),250);
+  setTimeout(()=>{const f=$("#f-en");if(f)f.focus()},250);
 }
+let acTrTmp="";
 function confirmDelete(id){
   const w=state.words.find(x=>x.id===id);if(!w)return;
   showSheet(`<h2>Silinsin mi?</h2>
@@ -764,18 +977,20 @@ function confirmDelete(id){
 function openMenu(){
   showSheet(`<h2>Seçenekler</h2>
     <button class="menu-item" id="m-tr">${svgLang}<div>Çeviri ayarları<div class="sub">Akademik kalite için API anahtarı</div></div></button>
+    <button class="menu-item" id="m-enrich">${SVG.magic}<div>Kelimeleri zenginleştir<div class="sub">Eksik olanlara okunuş, eş anlamlı ve akademik cümle ekle</div></div></button>
     <button class="menu-item" id="m-export">${SVG.dl}<div>Dışa aktar (yedekle)<div class="sub">Tüm kelimelerini JSON dosyası olarak indir</div></div></button>
     <button class="menu-item" id="m-import">${SVG.up}<div>İçe aktar<div class="sub">Yedek dosyandan kelimeleri geri yükle</div></div></button>
     <button class="menu-item" id="m-pdf">${SVG.pdf}<div>PDF indir<div class="sub">Kelimeleri yatay tablo halinde yazdır / PDF kaydet</div></div></button>
     <button class="menu-item" id="m-theme">${state.settings.theme==='dark'?SVG.sun:SVG.moon}<div>${state.settings.theme==='dark'?'Açık tema':'Koyu tema'}<div class="sub">Görünümü değiştir</div></div></button>`);
   $("#m-tr").onclick=()=>{closeSheet();openTrSettings()};
+  $("#m-enrich").onclick=()=>{closeSheet();enrichAll()};
   $("#m-export").onclick=()=>{exportData();closeSheet()};
   $("#m-import").onclick=()=>{closeSheet();$("#importFile").click()};
   $("#m-pdf").onclick=openPdfSheet;
   $("#m-theme").onclick=()=>{state.settings.theme=state.settings.theme==="dark"?"light":"dark";save();applyTheme();closeSheet()};
 }
 
-let pdfOpts={sort:"cat",ex:true};
+let pdfOpts={sort:"cat",ex:true,ac:true};
 function trUpper(s){return String(s).replace(/i/g,"İ").replace(/ı/g,"I").toUpperCase()}
 function exHtml(w){
   let e=esc(w.example||"");if(!e)return "";
@@ -788,9 +1003,11 @@ function openPdfSheet(){
     '<p class="sheet-note">Kelimelerin yatay bir tabloya (Kelime · Türkçe · Örnek cümle) dizilir. Açılan yazdırma ekranında <b>Paylaş → "PDF olarak kaydet"</b> seç. Ana ekran kısayolunda çıkmazsa Safari\'de açıp dene.</p>'+
     '<div class="pdf-opt"><label>Sıralama</label><div class="dir-toggle" id="po-sort"><button class="'+(pdfOpts.sort==="cat"?"on":"")+'" data-v="cat">Kategoriye göre</button><button class="'+(pdfOpts.sort==="az"?"on":"")+'" data-v="az">A → Z</button></div></div>'+
     '<div class="pdf-opt"><label>Örnek cümleler</label><div class="dir-toggle" id="po-ex"><button class="'+(pdfOpts.ex?"on":"")+'" data-v="1">Dahil</button><button class="'+(!pdfOpts.ex?"on":"")+'" data-v="0">Hariç</button></div></div>'+
+    '<div class="pdf-opt"><label>Okunuş ve eş anlamlılar</label><div class="dir-toggle" id="po-ac"><button class="'+(pdfOpts.ac?"on":"")+'" data-v="1">Dahil</button><button class="'+(!pdfOpts.ac?"on":"")+'" data-v="0">Hariç</button></div></div>'+
     '<button class="btn btn-pri btn-block" id="po-go" style="margin-top:6px">PDF oluştur</button>');
   $("#po-sort").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(b){pdfOpts.sort=b.dataset.v;openPdfSheet()}});
   $("#po-ex").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(b){pdfOpts.ex=b.dataset.v==="1";openPdfSheet()}});
+  $("#po-ac").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(b){pdfOpts.ac=b.dataset.v==="1";openPdfSheet()}});
   $("#po-go").onclick=()=>pdfExport(pdfOpts);
 }
 function pdfExport(opts){
@@ -800,7 +1017,16 @@ function pdfExport(opts){
   const cols=opts.ex?3:2;
   const cg=opts.ex?'<col style="width:17%"><col style="width:25%"><col style="width:58%">':'<col style="width:34%"><col style="width:66%">';
   const head='<tr><th>Kelime</th><th>Türkçe</th>'+(opts.ex?'<th>Örnek cümle</th>':'')+'</tr>';
-  const row=(w,alt)=>{let r='<tr'+(alt?' class="alt"':'')+'><td class="w">'+esc(w.en)+'</td><td class="t">'+esc(w.tr||"")+'</td>'+(opts.ex?'<td class="e">'+exHtml(w)+'</td>':'')+'</tr>';return r};
+  const row=(w,alt)=>{
+    const wc=esc(w.en)+((opts.ac&&w.pron)?'<div class="pr">'+esc(w.pron)+'</div>':'');
+    const tc=esc(w.tr||"")+((opts.ac&&w.syn)?'<div class="sy">'+esc(w.syn)+'</div>':'');
+    let ec="";
+    if(opts.ex){
+      ec=exHtml(w);
+      if(opts.ac&&w.acEx){const a='\u201C'+boldWord(w.acEx,w.en)+'\u201D';ec=ec?ec+'<div class="ac">'+a+'</div>':'<div class="ac">'+a+'</div>'}
+    }
+    return '<tr'+(alt?' class="alt"':'')+'><td class="w">'+wc+'</td><td class="t">'+tc+'</td>'+(opts.ex?'<td class="e">'+ec+'</td>':'')+'</tr>';
+  };
   let rows="";
   if(opts.sort==="az"){
     words.sort(byEn);words.forEach((w,i)=>rows+=row(w,i%2===1));
@@ -855,7 +1081,7 @@ $("#importFile").addEventListener("change",e=>{
         if(!w||!w.en||!w.tr)return;
         const k=lower(w.en)+"|"+lower(w.tr);
         if(existing.has(k))return;existing.add(k);
-        state.words.push({id:uid(),en:String(w.en),tr:String(w.tr),example:String(w.example||""),category:String(w.category||""),box:w.box||0,due:w.due||Date.now(),createdAt:w.createdAt||Date.now(),correct:w.correct||0,wrong:w.wrong||0});
+        state.words.push({id:uid(),en:String(w.en),tr:String(w.tr),example:String(w.example||""),category:String(w.category||""),pron:String(w.pron||""),syn:String(w.syn||""),acEx:String(w.acEx||""),acTr:String(w.acTr||""),box:w.box||0,due:w.due||Date.now(),createdAt:w.createdAt||Date.now(),correct:w.correct||0,wrong:w.wrong||0});
         added++;
       });
       save();refreshActive();toast(added?`${added} kelime eklendi`:"Yeni kelime yok");
@@ -1201,9 +1427,11 @@ function hideTpop(){const p=$("#tpop");if(!p)return;p.classList.remove("show");p
 function addWordFromReader(en,tr,sentence){
   en=(en||"").trim().toLowerCase(); if(!en)return;
   if(state.words.some(w=>lower(w.en)===lower(en))){toast("Bu kelime zaten defterde");return}
-  state.words.push({id:uid(),en:en,tr:tr||"",example:sentence||"",category:"Okuma",box:0,due:Date.now(),createdAt:Date.now(),correct:0,wrong:0});
+  const nw={id:uid(),en:en,tr:tr||"",example:sentence||"",category:"Okuma",box:0,due:Date.now(),createdAt:Date.now(),correct:0,wrong:0};
+  state.words.push(nw);
   save(); toast("Deftere eklendi ✓");
   if(document.querySelector(".screen.active").id==="s-defter")renderDefter();
+  if(hasKey())enrichOne(nw.id,true);
 }
 
 /* cümle seçimi → Çevir */
@@ -1234,6 +1462,146 @@ $("#selbtn").onclick=async()=>{
 document.addEventListener("click",e=>{if(!e.target.closest("#tpop")&&!e.target.closest(".tok"))hideTpop()});
 window.addEventListener("scroll",()=>hideTpop(),true);
 
+/* ---------- SORU: öğretmen gibi çöz ---------- */
+let soru={text:"",img:null,imgMime:"",busy:false,view:"ask",res:null,added:{}};
+
+function fileToB64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>{const s=String(r.result);const i=s.indexOf(",");res(i>=0?s.slice(i+1):s)};
+    r.onerror=()=>rej(new Error("okunamadı"));
+    r.readAsDataURL(file);
+  });
+}
+$("#shotFile").addEventListener("change",async e=>{
+  const f=e.target.files[0]; e.target.value="";
+  if(!f)return;
+  if(f.size>7*1024*1024){toast("Fotoğraf çok büyük (en fazla 7 MB)");return}
+  try{soru.img=await fileToB64(f);soru.imgMime=f.type||"image/jpeg";renderSoru()}
+  catch(err){toast("Fotoğraf okunamadı")}
+});
+
+const SOLVE_FORMAT=
+ "SADECE aşağıdaki formatta yanıt ver. Başlıkları aynen koru, başka hiçbir şey ekleme:\n"+
+ "SORU: <sorunun kısa metni; görseldeki soruyu buraya yaz>\n"+
+ "CEVAP: <doğru cevap. Şıklıysa harfi ve tam metnini yaz>\n"+
+ "NEDEN: <doğru cevabın neden doğru olduğu. 2-4 cümle, sade ve anlaşılır Türkçe>\n"+
+ "KURAL: <arkasındaki dilbilgisi kuralı ya da mantık. Öğretici ve kısa. Kalıbı örnekle göster>\n"+
+ "CELDIRICI: <yanlış şıkların neden yanlış olduğu. Her şık için '- B) çünkü ...' biçiminde ayrı satır. Şık yoksa: ->\n"+
+ "KELIMELER: <sorudaki zor İngilizce kelimeler. Her biri 'kelime = türkçe' biçiminde, virgülle ayrılmış. Yoksa: ->";
+
+function solvePrompt(extra){
+  return "Sen 20 yıllık deneyimli bir İngilizce öğretmenisin. Öğrencin sana bir soru getirdi. "+
+    "Soruyu çöz ve bir öğretmen gibi anlat: sadece cevabı verme, öğrencinin bir dahaki sefere kendi başına çözebilmesi için mantığını da öğret. "+
+    "Tüm açıklamaları Türkçe yap; İngilizce örnekleri İngilizce bırak. "+
+    "Soru İngilizce dersiyle ilgili değilse (matematik, tarih, biyoloji vb.) yine de aynı öğretmen yaklaşımıyla çöz.\n"+
+    (extra?extra+"\n":"")+"\n"+SOLVE_FORMAT;
+}
+async function geminiSolve(text,img,mime,extra){
+  const key=hasKey(); if(!key)return null;
+  const parts=[];
+  parts.push({text:solvePrompt(extra)+"\n\nÖĞRENCİNİN SORUSU:\n"+(text||"(soru görselde)")});
+  if(img)parts.push({inline_data:{mime_type:mime||"image/jpeg",data:img}});
+  try{
+    const u="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="+encodeURIComponent(key);
+    const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:parts}],generationConfig:{temperature:0.2}})});
+    if(!r.ok)return null;
+    const d=await r.json();const c=d&&d.candidates&&d.candidates[0];
+    const out=c&&c.content&&c.content.parts&&c.content.parts[0]&&c.content.parts[0].text;
+    return out?out.trim():null;
+  }catch(e){return null}
+}
+function parseSolve(raw){
+  const clean=v=>(v&&v!=="-"&&v!=="—")?v:"";
+  const words=[];
+  const wl=clean(pick(raw,"KELIMELER"));
+  if(wl)wl.split(/[,;]/).forEach(p=>{
+    const m=p.split(/=|:|—|–/);
+    if(m.length>=2){const en=m[0].trim(),tr=m.slice(1).join(" ").trim();if(en&&tr&&/[a-zA-Z]/.test(en))words.push({en:en,tr:tr})}
+  });
+  return {q:clean(pick(raw,"SORU")),ans:clean(pick(raw,"CEVAP")),why:clean(pick(raw,"NEDEN")),rule:clean(pick(raw,"KURAL")),wrong:clean(pick(raw,"CELDIRICI")),words:words,raw:raw};
+}
+async function askTeacher(extra){
+  const key=hasKey();
+  if(!key){toast("Önce ⋯ → Çeviri ayarlarına Gemini anahtarı gir");return}
+  const t=(soru.text||"").trim();
+  if(!t&&!soru.img){toast("Soruyu yaz ya da fotoğrafını ekle");return}
+  soru.busy=true;soru.view="answer";renderSoru();
+  const raw=await geminiSolve(t,soru.img,soru.imgMime,extra);
+  soru.busy=false;
+  if(!raw){soru.view=soru.res?"answer":"ask";renderSoru();toast("Çözüm alınamadı, tekrar dene");return}
+  soru.res=parseSolve(raw);soru.added={};
+  const item={id:uid(),q:soru.res.q||t.slice(0,160),ans:soru.res.ans,raw:raw,createdAt:Date.now()};
+  state.solves.unshift(item); if(state.solves.length>40)state.solves.length=40; save();
+  renderSoru(); window.scrollTo(0,0);
+}
+function bullets(t){
+  const s=String(t||"").trim(); if(!s)return "";
+  const clean=a=>a.map(x=>x.replace(/^[-•*]\s*/,"").trim()).filter(Boolean);
+  let lines=clean(s.split(/\n+/));
+  if(lines.length<2)lines=clean(s.split(/\s+[-•]\s+/));
+  if(lines.length<2)return '<div>'+esc(s)+'</div>';
+  return '<ul>'+lines.map(l=>'<li>'+esc(l)+'</li>').join("")+'</ul>';
+}
+function renderSoru(){
+  const root=$("#s-soru");
+  if(soru.view==="answer"){
+    if(soru.busy){
+      root.innerHTML='<button class="backbtn" id="soruBack">'+svgBack+' Geri</button><div class="thinking"><div class="spinner"></div><p>Öğretmen soruyu inceliyor…</p></div>';
+      $("#soruBack").onclick=()=>{soru.view="ask";renderSoru()};
+      return;
+    }
+    const r=soru.res||{};
+    let secs="";
+    if(r.why)secs+='<div class="ans-sec"><div class="k">Neden</div><div class="v">'+esc(r.why)+'</div></div>';
+    if(r.rule)secs+='<div class="ans-sec"><div class="k">Kural</div><div class="v">'+esc(r.rule)+'</div></div>';
+    if(r.wrong)secs+='<div class="ans-sec"><div class="k">Diğer şıklar neden olmaz</div><div class="v">'+bullets(r.wrong)+'</div></div>';
+    if(r.words&&r.words.length)secs+='<div class="ans-sec"><div class="k">Sorudaki kelimeler</div><div class="qwords">'+r.words.map((w,i)=>{
+      const on=soru.added[i]||state.words.some(x=>lower(x.en)===lower(w.en));
+      return '<span class="qw '+(on?'added':'')+'"><b>'+esc(w.en)+'</b> <i>·</i> <span>'+esc(w.tr)+'</span><button data-qw="'+i+'">'+(on?SVG.check:SVG.plus)+'</button></span>';
+    }).join("")+'</div></div>';
+    root.innerHTML='<button class="backbtn" id="soruBack">'+svgBack+' Yeni soru</button>'+
+      '<div class="ansbox">'+
+        (r.q?'<div class="ans-sec"><div class="k">Soru</div><div class="v" style="font-size:.95rem;color:var(--soft)">'+esc(r.q)+'</div></div>':'')+
+        '<div class="ans-hero"><div class="k">Cevap</div><div class="v">'+esc(r.ans||"—")+'</div></div>'+
+        secs+
+      '</div>'+
+      '<div class="followrow"><button class="btn btn-ghost" id="simpler">Daha basit anlat</button><button class="btn btn-ghost" id="similar">Benzer soru üret</button></div>';
+    $("#soruBack").onclick=()=>{soru.view="ask";soru.res=null;renderSoru();window.scrollTo(0,0)};
+    $("#simpler").onclick=()=>askTeacher("ÖNEMLİ: Öğrenci ilk açıklamayı anlamadı. Bu sefer çok daha basit, günlük dille, kısa cümlelerle anlat. Teknik dilbilgisi terimleri kullanma, bunun yerine somut örnek ver.");
+    $("#similar").onclick=()=>askTeacher("ÖNEMLİ: Aynı soruyu tekrar çözme. Bunun yerine AYNI konuyu ve kuralı ölçen YENİ ve benzer bir soru yaz, sonra o yeni soruyu çöz. SORU alanına ürettiğin yeni soruyu yaz.");
+    const qw=root.querySelector(".qwords");
+    if(qw)qw.addEventListener("click",e=>{
+      const b=e.target.closest("[data-qw]"); if(!b)return;
+      const w=(soru.res.words||[])[+b.dataset.qw]; if(!w)return;
+      if(state.words.some(x=>lower(x.en)===lower(w.en))){toast("Bu kelime zaten defterde");soru.added[+b.dataset.qw]=true;renderSoru();return}
+      const nw={id:uid(),en:w.en.toLowerCase(),tr:w.tr,example:"",category:"Sorulardan",box:0,due:Date.now(),createdAt:Date.now(),correct:0,wrong:0};
+      state.words.push(nw);save();soru.added[+b.dataset.qw]=true;renderSoru();toast("Deftere eklendi ✓");
+      if(hasKey())enrichOne(nw.id,true);
+    });
+    return;
+  }
+  const hist=(state.solves||[]).slice(0,8);
+  root.innerHTML=
+    '<div class="ask">'+
+      '<textarea id="qText" placeholder="Soruyu buraya yapıştır ya da yaz…&#10;&#10;Örnek:&#10;She ____ to the office every morning.&#10;A) go  B) goes  C) going  D) gone">'+esc(soru.text||"")+'</textarea>'+
+      (soru.img?'<div class="shot"><img src="data:'+esc(soru.imgMime)+';base64,'+soru.img+'" alt="Soru fotoğrafı"><button id="shotX">'+SVG.x+'</button></div>':'')+
+      '<div class="askfoot"><button class="pill" id="shotBtn">'+SVG.cam+' Fotoğraf</button><button class="btn btn-pri" id="solveBtn">'+SVG.send+' Çöz</button></div>'+
+    '</div>'+
+    '<div class="r-hint">'+svgInfo+'<span>Soruyu yazabilir ya da <b>fotoğrafını</b> çekebilirsin. Öğretmen cevabı, kuralı ve şıkların neden yanlış olduğunu anlatır.</span></div>'+
+    (hist.length?'<div class="section-h">Son çözdüklerin</div><div class="qhist">'+hist.map(h=>'<button class="qh" data-h="'+h.id+'"><div class="q">'+esc(h.q||"Soru")+'</div><div class="a">'+esc(h.ans||"")+'</div></button>').join("")+'</div>':'');
+  const ta=$("#qText"); if(ta)ta.addEventListener("input",()=>{soru.text=ta.value});
+  $("#shotBtn").onclick=()=>$("#shotFile").click();
+  $("#solveBtn").onclick=()=>askTeacher("");
+  const sx=$("#shotX"); if(sx)sx.onclick=()=>{soru.img=null;soru.imgMime="";renderSoru()};
+  const hl=root.querySelector(".qhist");
+  if(hl)hl.addEventListener("click",e=>{
+    const b=e.target.closest("[data-h]"); if(!b)return;
+    const h=(state.solves||[]).find(x=>x.id===b.dataset.h); if(!h)return;
+    soru.res=parseSolve(h.raw);soru.added={};soru.view="answer";renderSoru();window.scrollTo(0,0);
+  });
+}
+
 /* ---------- navigation ---------- */
 function switchScreen(name){
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.screen===name));
@@ -1245,6 +1613,7 @@ function switchScreen(name){
   if(name==="test")renderQuiz();
   if(name==="stat")renderStats();
   if(name==="oku")renderOku();
+  if(name==="soru")renderSoru();
   hideTpop();hideSel();
   window.scrollTo(0,0);
 }
@@ -1269,6 +1638,8 @@ $("#wlist").addEventListener("click",e=>{
   const sp=e.target.closest("[data-spk]");if(sp){speak(sp.dataset.spk,"en-US");return}
   const ed=e.target.closest("[data-edit]");if(ed){openEdit(ed.dataset.edit);return}
   const dl=e.target.closest("[data-del]");if(dl){confirmDelete(dl.dataset.del);return}
+  const mg=e.target.closest("[data-magic]");if(mg){enrichOne(mg.dataset.magic);return}
+  const ac=e.target.closest("[data-ac]");if(ac){const id=ac.dataset.ac;openAc.has(id)?openAc.delete(id):openAc.add(id);renderList();return}
 });
 document.body.addEventListener("click",e=>{const sp=e.target.closest(".spkbig[data-spk],.spkq[data-spk],.tp-spk[data-spk]");if(sp)speak(sp.dataset.spk,"en-US")});
 
