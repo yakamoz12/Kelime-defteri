@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EDEBE4">
+<title>Kesit — İngilizce makale okuyucu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14181A;
+  --ink2:#5A6468;
+  --ink3:#8B9296;
+  --paper:#EDEBE4;
+  --card:#FFFFFF;
+  --line:#D9D5CB;
+  --line2:#EAE7DF;
+  --green:#1E5B52;
+  --green2:#2F7E71;
+  --green-soft:#E4EEEA;
+  --marker:#FFE066;
+  --warn:#A8412B;
+  --r:14px;
+  --fs:17px;
+  --sheet-h:0px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:"Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%;
+  overscroll-behavior-y:none;
+}
+button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+
+/* ---------- app bar ---------- */
+.bar{
+  position:fixed;top:0;left:0;right:0;z-index:40;
+  background:rgba(237,235,228,.92);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--line);
+  padding-top:env(safe-area-inset-top);
+}
+.bar-in{display:flex;align-items:center;gap:10px;height:52px;padding:0 14px}
+.brand{font-weight:600;letter-spacing:.16em;font-size:13px;text-transform:uppercase}
+.brand small{display:block;letter-spacing:.02em;text-transform:none;font-size:11px;color:var(--ink2);font-weight:400;margin-top:-1px}
+.bar-sp{flex:1}
+.iconbtn{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;border:1px solid transparent}
+.iconbtn:active{background:#00000010}
+.iconbtn.on{background:var(--green);color:#fff}
+.iconbtn svg{width:20px;height:20px;stroke-width:1.7;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- screens ---------- */
+main{padding:calc(52px + env(safe-area-inset-top) + 18px) 16px calc(120px + env(safe-area-inset-bottom))}
+.screen{display:none}
+.screen.on{display:block}
+.max{max-width:720px;margin:0 auto}
+
+/* ---------- home ---------- */
+.lede{font-family:"Source Serif 4",Georgia,serif;font-size:26px;line-height:1.25;letter-spacing:-.01em;margin:6px 0 6px}
+.lede em{font-style:italic;color:var(--green)}
+.sub{color:var(--ink2);font-size:14.5px;line-height:1.5;margin:0 0 22px}
+.label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:500;margin:26px 0 10px}
+.src{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;
+}
+.src:active{border-color:var(--green2)}
+.src .ic{width:38px;height:38px;flex:none;border-radius:10px;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
+.src .ic svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.src h3{margin:1px 0 3px;font-size:15.5px;font-weight:600}
+.src p{margin:0;font-size:13px;color:var(--ink2);line-height:1.45}
+.field{display:flex;gap:8px;margin-top:8px}
+.inp{
+  flex:1;background:var(--card);border:1px solid var(--line);border-radius:11px;
+  padding:12px 13px;font-size:16px;outline:none;width:100%;
+}
+.inp:focus{border-color:var(--green2);box-shadow:0 0 0 3px var(--green-soft)}
+textarea.inp{min-height:150px;resize:vertical;line-height:1.5}
+.btn{
+  background:var(--green);color:#fff;border-radius:11px;padding:12px 18px;
+  font-size:15px;font-weight:500;white-space:nowrap;
+}
+.btn:disabled{opacity:.45}
+.btn.ghost{background:transparent;color:var(--green);border:1px solid var(--line)}
+.btn.wide{width:100%;text-align:center}
+.hid{display:none !important}
+
+/* ---------- reader ---------- */
+#doctitle{font-family:"Source Serif 4",serif;font-size:15px;color:var(--ink2);margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+#content{
+  font-family:"Source Serif 4",Georgia,serif;
+  font-size:var(--fs);line-height:1.62;
+  -webkit-user-select:text;user-select:text;
+}
+#content h2{font-size:calc(var(--fs) + 3px);font-weight:600;line-height:1.35;margin:26px 0 8px;letter-spacing:-.01em}
+#content p{margin:0 0 15px}
+#content .tr{
+  font-family:"Instrument Sans",sans-serif;
+  font-size:calc(var(--fs) - 2px);line-height:1.55;
+  color:var(--ink);background:var(--green-soft);
+  border-left:2px solid var(--green2);
+  padding:10px 12px;border-radius:0 8px 8px 0;margin:-6px 0 18px;
+}
+#content .tr i,.out i{color:var(--green);font-style:italic}
+#content .tr.wait{color:var(--ink3);background:#0000000a;border-left-color:var(--line)}
+mark.hl{
+  background:linear-gradient(180deg,transparent 8%,var(--marker) 8%,var(--marker) 92%,transparent 92%);
+  mix-blend-mode:multiply;color:inherit;padding:0 1px;border-radius:2px;
+}
+.ocrbox{
+  border:1px dashed var(--line);border-radius:12px;padding:16px;text-align:center;
+  margin:0 0 16px;background:#00000006;
+  font-family:"Instrument Sans",sans-serif;
+}
+.ocrbox p{font-size:13px !important;color:var(--ink2);margin:0 0 10px !important}
+::selection{background:var(--marker);color:var(--ink)}
+
+/* ---------- floating controls ---------- */
+.dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:35;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  display:flex;gap:8px;justify-content:center;align-items:center;
+  background:linear-gradient(to top,var(--paper) 62%,transparent);
+  pointer-events:none;
+}
+.dock>*{pointer-events:auto}
+.pill{
+  background:var(--ink);color:#fff;border-radius:999px;padding:13px 22px;font-size:15px;font-weight:500;
+  box-shadow:0 6px 22px #00000030;display:flex;align-items:center;gap:8px;
+}
+.pill.green{background:var(--green)}
+.pill svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.mini{
+  background:var(--card);border:1px solid var(--line);border-radius:999px;
+  width:46px;height:46px;display:grid;place-items:center;box-shadow:0 4px 14px #0000001a;
+}
+.mini.on{background:var(--green);color:#fff;border-color:var(--green)}
+.mini svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- bottom sheet ---------- */
+.scrim{position:fixed;inset:0;background:#14181A55;z-index:45;opacity:0;pointer-events:none;transition:opacity .22s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:var(--card);border-radius:20px 20px 0 0;
+  box-shadow:0 -8px 40px #00000026;
+  transform:translateY(101%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+  max-height:80vh;display:flex;flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.sheet.on{transform:translateY(0)}
+.grip{width:36px;height:4px;border-radius:99px;background:var(--line);margin:9px auto 4px;flex:none}
+.tabs{display:flex;gap:4px;padding:6px 14px 0;border-bottom:1px solid var(--line2);flex:none}
+.tab{
+  padding:9px 2px;margin-right:18px;font-size:14px;font-weight:500;color:var(--ink3);
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.tab.on{color:var(--ink);border-bottom-color:var(--green)}
+.sheet-body{padding:14px 16px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.chosen{
+  font-family:"Source Serif 4",serif;font-size:15px;line-height:1.5;color:var(--ink2);
+  background:#0000000a;border-radius:10px;padding:9px 11px;margin-bottom:14px;
+  max-height:74px;overflow:auto;
+}
+.out{font-size:16px;line-height:1.62}
+.out .en{color:var(--green);font-style:italic}
+.out h4{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);margin:16px 0 6px;font-weight:500}
+.out h4:first-child{margin-top:0}
+.out ul{margin:6px 0 10px;padding-left:18px}
+.out li{margin-bottom:5px}
+.out p{margin:0 0 10px}
+.out b,.out strong{font-weight:600}
+.sheet-act{display:flex;gap:8px;margin-top:16px}
+.sheet-act .btn{flex:1;text-align:center;font-size:14px;padding:11px}
+
+/* ---------- settings ---------- */
+.modal{
+  position:fixed;inset:0;z-index:60;background:var(--paper);overflow-y:auto;
+  padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 40px);
+  transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+}
+.modal.on{transform:translateY(0)}
+.mh{display:flex;align-items:center;margin-bottom:20px}
+.mh h2{font-size:19px;margin:0;font-weight:600;flex:1}
+.row{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.row h4{margin:0 0 4px;font-size:14.5px;font-weight:600}
+.row p{margin:0 0 10px;font-size:12.5px;color:var(--ink2);line-height:1.45}
+.row p:last-child{margin-bottom:0}
+.opt{display:flex;gap:9px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line2)}
+.opt:first-of-type{border-top:none}
+.opt input{margin:3px 0 0;accent-color:var(--green);width:17px;height:17px;flex:none}
+.opt label{font-size:14px;line-height:1.4}
+.opt label small{display:block;color:var(--ink2);font-size:12px;margin-top:2px}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sw span{font-size:14px}
+.toggle{width:48px;height:29px;border-radius:99px;background:var(--line);position:relative;transition:background .2s;flex:none}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:99px;background:#fff;transition:transform .2s;box-shadow:0 1px 3px #0003}
+.toggle.on{background:var(--green)}
+.toggle.on::after{transform:translateX(19px)}
+.note{font-size:12.5px;color:var(--ink2);line-height:1.5;background:#0000000a;border-radius:10px;padding:11px 12px;margin-top:4px}
+.note b{color:var(--warn)}
+
+/* ---------- misc ---------- */
+.spin{width:16px;height:16px;border:2px solid #ffffff55;border-top-color:#fff;border-radius:99px;display:inline-block;animation:sp .7s linear infinite;vertical-align:-2px}
+.spin.dark{border-color:#0000001f;border-top-color:var(--green)}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{
+  position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,14px);
+  background:var(--ink);color:#fff;padding:11px 17px;border-radius:12px;font-size:14px;z-index:70;
+  opacity:0;pointer-events:none;transition:.22s;max-width:88vw;text-align:center;line-height:1.4;
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.prog{height:3px;background:var(--line2);border-radius:9px;overflow:hidden;margin-top:10px}
+.prog i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="bar-in">
+    <button class="iconbtn hid" id="backBtn" aria-label="Geri">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="brand">Kesit<small>İngilizce makale okuyucu</small></div>
+    <div class="bar-sp"></div>
+    <button class="iconbtn" id="setBtn" aria-label="Ayarlar">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.7 1.7 0 008 19.4a1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H2a2 2 0 110-4h.1A1.7 1.7 0 003.6 8a1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H8a1.7 1.7 0 001-1.5V2a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V8a1.7 1.7 0 001.5 1H22a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+<!-- ============ HOME ============ -->
+<section class="screen on max" id="home">
+  <h1 class="lede">Makaleyi aç, anlamadığın yeri <em>seç</em>, karşılığını gör.</h1>
+  <p class="sub">PDF, bağlantı ya da yapıştırdığın metin. Çeviri Gemini üzerinden yapılır, anahtarın yalnızca bu telefonda saklanır.</p>
+
+  <div class="label">Kaynak seç</div>
+
+  <button class="src" id="pickPdf">
+    <span class="ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 12h3"/></svg></span>
+    <span><h3>PDF aç</h3><p>Dergi makalesi, ders notu. Metin seçilemiyorsa sayfayı Gemini okur.</p></span>
+  </button>
+  <input type="file" id="pdfInput" accept="application/pdf" class="hid">
+
+  <button class="src" id="pickLink">
+    <span class="ic"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg></span>
+    <span><h3>Bağlantı aç</h3><p>Haber sitesi veya açık erişim makale. Adresi yapıştır.</p></span>
+  </button>
+  <div class="field hid" id="linkField">
+    <input class="inp" id="linkInp" type="url" inputmode="url" placeholder="https://..." autocapitalize="off" autocorrect="off">
+    <button class="btn" id="linkGo">Aç</button>
+  </div>
+
+  <button class="src" id="pickText">
+    <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
+    <span><h3>Metin yapıştır</h3><p>Her zaman çalışır. Kopyaladığın parçayı buraya bırak.</p></span>
+  </button>
+  <div class="hid" id="textField">
+    <textarea class="inp" id="textInp" placeholder="Metni buraya yapıştır…"></textarea>
+    <div class="field"><button class="btn wide" id="textGo">Okumaya başla</button></div>
+  </div>
+
+  <div id="lastDoc" class="hid">
+    <div class="label">Kaldığın yer</div>
+    <button class="src" id="resumeBtn">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9"/><path d="M3 4v5h5"/></svg></span>
+      <span><h3 id="resumeTitle">Son belge</h3><p id="resumeMeta"></p></span>
+    </button>
+  </div>
+</section>
+
+<!-- ============ READER ============ -->
+<section class="screen max" id="reader">
+  <div id="doctitle"></div>
+  <div id="content"></div>
+</section>
+</main>
+
+<!-- ============ DOCK ============ -->
+<div class="dock hid" id="dock">
+  <button class="mini" id="fontBtn" aria-label="Yazı boyutu">
+    <svg viewBox="0 0 24 24"><path d="M4 19l5-14 5 14M6 14h6"/><path d="M15 19l3-8 3 8M16.2 16.5h3.6"/></svg>
+  </button>
+  <button class="pill green hid" id="selBtn">
+    <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+    <span id="selBtnTxt">Çevir</span>
+  </button>
+  <button class="mini" id="allBtn" aria-label="Tüm metni çevir">
+    <svg viewBox="0 0 24 24"><path d="M5 8h9M9 4v4c0 4-2 7-5 8"/><path d="M9 11c0 3 2.5 5.5 6 6.5"/><path d="M13 21l4.5-10 4.5 10M15 18h6"/></svg>
+  </button>
+</div>
+
+<!-- ============ SHEET ============ -->
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet">
+  <div class="grip"></div>
+  <div class="tabs">
+    <button class="tab on" data-tab="tr">Çeviri</button>
+    <button class="tab" data-tab="gr">Cümle yapısı</button>
+    <div style="flex:1"></div>
+    <button class="tab" id="sheetClose" style="color:var(--ink3);margin-right:0">Kapat</button>
+  </div>
+  <div class="sheet-body">
+    <div class="chosen" id="chosen"></div>
+    <div class="out" id="out"></div>
+  </div>
+</div>
+
+<!-- ============ SETTINGS ============ -->
+<div class="modal" id="settings">
+  <div class="mh">
+    <h2>Ayarlar</h2>
+    <button class="iconbtn" id="setClose" aria-label="Kapat">
+      <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="row">
+    <h4>Gemini API anahtarı</h4>
+    <p>aistudio.google.com adresinden ücretsiz alınır. Yalnızca bu telefonun tarayıcı hafızasında durur, hiçbir yere gönderilmez.</p>
+    <div class="field" style="margin-top:0">
+      <input class="inp" id="keyInp" type="password" placeholder="AIza…" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button class="btn" id="keySave">Kaydet</button>
+    </div>
+    <div class="note" style="margin-top:10px"><b>Anahtarı bu dosyanın içine yazma.</b> GitHub'a herkese açık yüklersen anahtarın çalınır. Buradan gir, kod içinde kalmasın.</div>
+  </div>
+
+  <div class="row">
+    <h4>Model</h4>
+    <p>Anahtar kaydedilince liste Google'dan çekilir. Hızlı okuma için “flash” yeterli.</p>
+    <div class="field" style="margin-top:0">
+      <select class="inp" id="modelSel"><option value="">Önce anahtarı kaydet</option></select>
+      <button class="btn ghost" id="modelRefresh">Yenile</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <h4>Çeviri üslubu</h4>
+    <div class="opt"><input type="radio" name="style" id="s3" value="3"><label for="s3">Türkçe + İngilizce yan yana<small>iskemik inme <i>(ischemic stroke)</i> — terim eşleştirmek için</small></label></div>
+    <div class="opt"><input type="radio" name="style" id="s1" value="1"><label for="s1">İngilizce terim + açıklama<small><i>ischemic stroke</i> (damar tıkanmasına bağlı felç)</small></label></div>
+    <div class="opt"><input type="radio" name="style" id="s2" value="2"><label for="s2">Tam Türkçe<small>Akıcı çeviri, terim eklenmez</small></label></div>
+  </div>
+
+  <div class="row">
+    <div class="sw"><span>Tek dokunuşla kelime çevir</span><div class="toggle" id="tapTog"></div></div>
+    <p style="margin:8px 0 0">Kapalıysa önce metni seçip Çevir düğmesine basarsın.</p>
+  </div>
+
+  <div class="row">
+    <h4>Okuma</h4>
+    <div class="sw" style="margin-bottom:12px"><span>Yazı boyutu</span><input type="range" id="fsRange" min="15" max="24" step="1" style="width:150px;accent-color:var(--green)"></div>
+    <button class="btn ghost wide" id="clearMarks">Sarı işaretleri temizle</button>
+  </div>
+
+  <div class="row">
+    <h4>Bağlantı açma</h4>
+    <p>Tarayıcı güvenlik kuralları yüzünden site içerikleri bir okuyucu servisi üzerinden alınır. Ödeme duvarı olan siteler açılmayabilir; o durumda metni kopyalayıp yapıştır.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+"use strict";
+
+/* ============================================================
+   Depolama — Claude önizlemesinde localStorage kapalı olabilir,
+   o yüzden her erişim korumalı, bellek yedeği var.
+   ============================================================ */
+const mem = {};
+const store = {
+  get(k, d = null) { try { const v = localStorage.getItem("kesit." + k); return v === null ? (k in mem ? mem[k] : d) : v; } catch (e) { return k in mem ? mem[k] : d; } },
+  set(k, v) { mem[k] = v; try { localStorage.setItem("kesit." + k, v); } catch (e) {} },
+  del(k) { delete mem[k]; try { localStorage.removeItem("kesit." + k); } catch (e) {} }
+};
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+const state = {
+  key: store.get("key", ""),
+  model: store.get("model", ""),
+  style: store.get("style", "3"),
+  tapWord: store.get("tapWord", "1") === "1",
+  fs: parseInt(store.get("fs", "17"), 10),
+  blocks: [],
+  title: "",
+  pdf: null,
+  translatingAll: false,
+  lastSel: null
+};
+
+/* ============================================================
+   Küçük yardımcılar
+   ============================================================ */
+let toastT;
+function toast(msg, ms = 2600) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("on");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove("on"), ms);
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ============================================================
+   Gemini
+   ============================================================ */
+const API = "https://generativelanguage.googleapis.com/v1beta";
+const FALLBACK_MODELS = ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
+
+function modelScore(id) {
+  let s = 0;
+  const m = id.match(/gemini-(\d+)\.?(\d+)?/);
+  if (m) s += parseInt(m[1], 10) * 100 + (parseInt(m[2] || "0", 10)) * 10;
+  if (/flash/.test(id)) s += 40;
+  if (/lite/.test(id)) s -= 15;
+  if (/pro/.test(id)) s += 5;
+  if (/preview|exp|thinking|latest/.test(id)) s -= 25;
+  return s;
+}
+
+async function loadModels(quiet) {
+  if (!state.key) return;
+  const sel = $("#modelSel");
+  try {
+    const r = await fetch(`${API}/models?pageSize=200&key=${encodeURIComponent(state.key)}`);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d?.error?.message || "Model listesi alınamadı");
+    const list = (d.models || [])
+      .filter(m => (m.supportedGenerationMethods || []).includes("generateContent"))
+      .map(m => m.name.replace(/^models\//, ""))
+      .filter(id => /^gemini/.test(id) && !/embedding|image|tts|audio|native|live|robotics|veo|imagen/.test(id));
+    if (!list.length) throw new Error("Uygun model bulunamadı");
+    list.sort((a, b) => modelScore(b) - modelScore(a));
+    sel.innerHTML = list.map(id => `<option value="${esc(id)}">${esc(id)}</option>`).join("");
+    if (!state.model || !list.includes(state.model)) { state.model = list[0]; store.set("model", state.model); }
+    sel.value = state.model;
+    if (!quiet) toast("Modeller yüklendi: " + list.length + " adet");
+  } catch (e) {
+    sel.innerHTML = FALLBACK_MODELS.map(id => `<option value="${id}">${id}</option>`).join("");
+    if (!state.model) { state.model = FALLBACK_MODELS[0]; store.set("model", state.model); }
+    sel.value = state.model;
+    if (!quiet) toast("Liste alınamadı: " + e.message);
+  }
+}
+
+async function gemini(parts, system, tries = 2) {
+  if (!state.key) throw new Error("Önce ayarlardan Gemini anahtarını gir.");
+  const model = state.model || FALLBACK_MODELS[0];
+  const body = {
+    contents: [{ role: "user", parts: Array.isArray(parts) ? parts : [{ text: parts }] }],
+    generationConfig: { temperature: 0.2 }
+  };
+  if (system) body.systemInstruction = { parts: [{ text: system }] };
+
+  let lastErr;
+  for (let i = 0; i <= tries; i++) {
+    try {
+      const r = await fetch(`${API}/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(state.key)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const d = await r.json();
+      if (!r.ok) {
+        const msg = d?.error?.message || ("HTTP " + r.status);
+        if ((r.status === 429 || r.status >= 500) && i < tries) { await sleep(1200 * (i + 1)); continue; }
+        throw new Error(msg);
+      }
+      const cand = d.candidates && d.candidates[0];
+      const txt = ((cand?.content?.parts) || []).filter(p => p.text && !p.thought).map(p => p.text).join("").trim();
+      if (!txt) {
+        if (cand?.finishReason === "MAX_TOKENS") throw new Error("Yanıt uzunluk sınırına takıldı. Daha kısa bir parça seç.");
+        if (d.promptFeedback?.blockReason) throw new Error("İçerik engellendi (" + d.promptFeedback.blockReason + ").");
+        throw new Error("Model boş yanıt verdi.");
+      }
+      return txt;
+    } catch (e) {
+      lastErr = e;
+      if (i >= tries) break;
+      await sleep(900);
+    }
+  }
+  throw lastErr;
+}
+
+/* ---------- yönergeler ---------- */
+function styleRule() {
+  if (state.style === "1") return "Tıbbi/teknik terimleri İNGİLİZCE bırak ve hemen arkasından parantez içinde kısa Türkçe açıklama ver. Örnek: atrial fibrillation (kalbin düzensiz atması).";
+  if (state.style === "2") return "Her şeyi akıcı, doğal Türkçeye çevir. İngilizce terim bırakma.";
+  return "Tıbbi/teknik terimleri Türkçeye çevir ve hemen arkasından İngilizce özgün terimi <i> etiketi içinde parantezle ver. Örnek: iskemik inme <i>(ischemic stroke)</i>.";
+}
+const BASE = `Sen tıp ve sağlık bilimleri alanında uzman bir çevirmensin. Kullanıcı Türk bir sağlık çalışanı; YÖKDİL/YDS sınavına hazırlanıyor ve İngilizce makale okuyor.
+Yanıtların yalın HTML olsun: yalnızca <p> <b> <i> <ul> <li> <h4> etiketlerini kullan. Markdown, kod bloğu işareti veya "İşte çevirisi" gibi giriş cümlesi KULLANMA.`;
+
+async function translateSel(text, context) {
+  const isWord = text.trim().split(/\s+/).length <= 3;
+  const sys = BASE + "\n" + styleRule();
+  let prompt;
+  if (isWord) {
+    prompt = `Aşağıdaki İngilizce ifadeyi açıkla.
+İFADE: "${text}"
+GEÇTİĞİ CÜMLE/PARAGRAF: "${(context || "").slice(0, 900)}"
+
+Şu bölümleri ver (başlıkları <h4> ile):
+ANLAMI — Türkçe karşılığı, sözcük türü (isim/fiil/sıfat), varsa yaygın diğer anlamları.
+BURADAKİ ANLAMI — bu metinde tam olarak ne demek, tek cümlede.
+İLİŞKİLİ SÖZCÜKLER — aynı kökten türeyenler veya sık geçen eşdizimler (3-4 madde, <ul> içinde, her biri kısa Türkçe karşılığıyla).`;
+  } else {
+    prompt = `Aşağıdaki İngilizce parçayı Türkçeye çevir. Sadece çeviriyi ver, yorum ekleme.
+${context ? "Bağlam (çevirme, sadece anlamak için): \"" + context.slice(0, 700) + "\"\n" : ""}
+ÇEVRİLECEK: "${text}"`;
+  }
+  return gemini(prompt, sys);
+}
+
+async function grammarSel(text, context) {
+  const sys = BASE + "\nDilbilgisi açıklamalarını Türkçe yaz. Sınava hazırlanan birine anlatır gibi, kısa ve somut ol.";
+  const prompt = `Aşağıdaki İngilizce parçanın cümle yapısını çöz.
+${context ? "Bağlam: \"" + context.slice(0, 500) + "\"\n" : ""}
+PARÇA: "${text}"
+
+Şu bölümleri ver (başlıkları <h4> ile):
+İSKELET — ana cümlenin öznesi ve yüklemi nedir, sade bir İngilizce özet cümleyle göster.
+YAPI — yan cümlecikler, bağlaçlar, ilgi zamirleri, edilgen yapı, participle/gerund gibi öğeleri madde madde (<ul>) açıkla. Her maddede metinden ilgili kısmı <b> ile göster.
+ZAMAN VE KİP — kullanılan zamanlar ve neden seçildiği.
+TUZAK — Türk okuyucunun bu cümlede yanlış anlayabileceği tek nokta.`;
+  return gemini(prompt, sys);
+}
+
+/* ============================================================
+   PDF
+   ============================================================ */
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
+
+function itemsToParagraphs(items, pageWidth) {
+  const marks = items
+    .filter(it => (it.str || "").trim().length)
+    .map(it => ({
+      x: it.transform[4],
+      y: it.transform[5],
+      w: it.width || (it.str.length * 4),
+      h: Math.abs(it.transform[3]) || 10,
+      s: it.str
+    }));
+  if (!marks.length) return [];
+
+  // --- 1. sütun tespiti: ortadan geçen parça var mı?
+  const mid = pageWidth / 2;
+  const band = pageWidth * 0.04;
+  const crossing = marks.filter(m => m.x < mid - band && m.x + m.w > mid + band).length;
+  const leftN = marks.filter(m => m.x + m.w <= mid + band).length;
+  const rightN = marks.filter(m => m.x >= mid - band).length;
+  const twoCol = crossing < marks.length * 0.08 &&
+                 leftN > marks.length * 0.22 &&
+                 rightN > marks.length * 0.22;
+
+  const cols = twoCol
+    ? [marks.filter(m => m.x < mid - band), marks.filter(m => m.x >= mid - band)]
+    : [marks];
+
+  const out = [];
+  cols.forEach(colMarks => {
+    if (!colMarks.length) return;
+
+    // --- 2. sütun içinde satırları kur
+    const rows = [];
+    colMarks.forEach(m => {
+      let row = rows.find(r => Math.abs(r.y - m.y) < m.h * 0.6);
+      if (!row) { row = { y: m.y, h: m.h, items: [] }; rows.push(row); }
+      row.items.push(m);
+      row.h = Math.max(row.h, m.h);
+    });
+    rows.sort((a, b) => b.y - a.y);
+
+    // --- 3. tipik satır aralığı ve sütun sağ kenarı
+    const gaps = [];
+    for (let i = 1; i < rows.length; i++) gaps.push(rows[i - 1].y - rows[i].y);
+    const sorted = gaps.slice().sort((a, b) => a - b);
+    const lead = sorted.length ? sorted[Math.floor(sorted.length * 0.4)] : 12;
+    const rightEdge = Math.max(...rows.map(r => Math.max(...r.items.map(i => i.x + i.w))));
+    const colWidth = rightEdge - Math.min(...rows.map(r => Math.min(...r.items.map(i => i.x))));
+
+    const col = rows;
+    let buf = "", prevY = null, prevX = null, prevRight = null;
+    const flush = () => { const t = buf.replace(/\s+/g, " ").trim(); if (t.length > 1) out.push(t); buf = ""; };
+
+    col.forEach(r => {
+      r.items.sort((a, b) => a.x - b.x);
+      const line = r.items.map(i => i.s).join(" ").replace(/\s+/g, " ").trim();
+      if (!line) return;
+      const x0 = Math.min(...r.items.map(i => i.x));
+      const x1 = Math.max(...r.items.map(i => i.x + i.w));
+
+      if (prevY !== null) {
+        const gap = prevY - r.y;
+        const indent = x0 - prevX;                              // paragraf girintisi
+        const shortLine = prevRight < rightEdge - colWidth * 0.14; // önceki satır sağa dayanmamış
+        if (gap > lead * 1.35 || indent > r.h * 0.7 || shortLine) flush();
+      }
+
+      if (buf.endsWith("-")) buf = buf.slice(0, -1);            // satır sonu tirelemesi
+      else if (buf) buf += " ";
+      buf += line;
+
+      prevY = r.y; prevX = x0; prevRight = x1;
+    });
+    flush();
+  });
+  return out;
+}
+
+function looksLikeHeading(t) {
+  if (t.length > 90) return false;
+  if (/^(abstract|introduction|background|methods?|materials|results|discussion|conclusions?|references|keywords?|acknowledg)/i.test(t)) return true;
+  if (/^\d+(\.\d+)*\.?\s+[A-Z]/.test(t) && t.length < 70) return true;
+  return false;
+}
+
+async function openPdf(file) {
+  if (!window.pdfjsLib) { toast("PDF motoru yüklenemedi. İnternet bağlantını kontrol et."); return; }
+  toast("PDF açılıyor…", 9000);
+  try {
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    state.pdf = pdf;
+    const blocks = [];
+    for (let p = 1; p <= pdf.numPages; p++) {
+      const page = await pdf.getPage(p);
+      const vp = page.getViewport({ scale: 1 });
+      const tc = await page.getTextContent();
+      const paras = itemsToParagraphs(tc.items, vp.width);
+      const charCount = paras.join(" ").length;
+      if (charCount < 120) {
+        blocks.push({ type: "ocr", page: p, text: "" });
+      } else {
+        paras.forEach(t => {
+          if (/^\d{1,4}$/.test(t)) return;               // sayfa numarası
+          blocks.push({ type: looksLikeHeading(t) ? "h" : "p", text: t, page: p });
+        });
+      }
+    }
+    if (!blocks.length) { toast("PDF'ten içerik çıkarılamadı."); return; }
+    openDoc(file.name.replace(/\.pdf$/i, ""), blocks, "PDF · " + pdf.numPages + " sayfa");
+  } catch (e) {
+    toast("PDF açılamadı: " + e.message);
+  }
+}
+
+async function ocrPage(pageNo, el) {
+  if (!state.pdf) return;
+  if (!state.key) { toast("Önce ayarlardan Gemini anahtarını gir."); return; }
+  const btn = el.querySelector("button");
+  btn.innerHTML = '<span class="spin dark"></span> Okunuyor…';
+  btn.disabled = true;
+  try {
+    const page = await state.pdf.getPage(pageNo);
+    const vp = page.getViewport({ scale: 2 });
+    const cv = document.createElement("canvas");
+    cv.width = vp.width; cv.height = vp.height;
+    await page.render({ canvasContext: cv.getContext("2d"), viewport: vp }).promise;
+    const data = cv.toDataURL("image/jpeg", 0.82).split(",")[1];
+    const txt = await gemini([
+      { inlineData: { mimeType: "image/jpeg", data } },
+      { text: "Bu bilimsel makale sayfasındaki metni olduğu gibi çıkar. Paragraf yapısını koru, her paragrafı ayrı satır yap. Sayfa numarasını, dergi üstbilgisini, altbilgiyi ve tablo/şekil içindeki sayı yığınlarını atla. Çeviri yapma, yorum ekleme, sadece özgün metni ver." }
+    ], "Sen bir OCR aracısın. Sadece istenen metni döndürürsün.");
+
+    const paras = txt.split(/\n{1,}/).map(s => s.trim()).filter(s => s.length > 1);
+    const frag = document.createDocumentFragment();
+    paras.forEach(t => {
+      const b = { type: looksLikeHeading(t) ? "h" : "p", text: t, page: pageNo };
+      state.blocks.push(b);
+      frag.appendChild(renderBlock(b));
+    });
+    el.replaceWith(frag);
+    toast("Sayfa " + pageNo + " okundu.");
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = "Tekrar dene";
+    toast("Okunamadı: " + e.message);
+  }
+}
+
+/* ============================================================
+   Bağlantıdan içerik
+   ============================================================ */
+async function openLink(url) {
+  if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+  toast("Sayfa alınıyor…", 12000);
+  let blocks = null, title = url.replace(/^https?:\/\//, "").split("/")[0];
+
+  // 1) okuyucu servisi (markdown döner)
+  try {
+    const r = await fetch("https://r.jina.ai/" + url, { headers: { "Accept": "text/plain" } });
+    if (r.ok) {
+      const md = await r.text();
+      if (md && md.length > 300) {
+        const t = md.match(/^Title:\s*(.+)$/m);
+        if (t) title = t[1].trim();
+        blocks = mdToBlocks(md);
+      }
+    }
+  } catch (e) {}
+
+  // 2) yedek: ham HTML çek, metni ayıkla
+  if (!blocks || blocks.length < 3) {
+    try {
+      const r = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(url));
+      if (r.ok) {
+        const html = await r.text();
+        const doc = new DOMParser().parseFromString(html, "text/html");
+        if (doc.title) title = doc.title.trim();
+        blocks = htmlToBlocks(doc);
+      }
+    } catch (e) {}
+  }
+
+  if (!blocks || blocks.length < 2) { toast("Bu sayfa alınamadı. Metni kopyalayıp yapıştırmayı dene."); return; }
+  openDoc(title, blocks, "Bağlantı");
+}
+
+function mdToBlocks(md) {
+  const body = md.replace(/^Title:.*$|^URL Source:.*$|^Published Time:.*$|^Markdown Content:.*$/gm, "");
+  const out = [];
+  body.split(/\n{2,}/).forEach(chunk => {
+    let t = chunk.replace(/!\[[^\]]*\]\([^)]*\)/g, "")          // görseller
+                 .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")       // bağlantılar
+                 .replace(/[*_`>]+/g, "")
+                 .replace(/\s+/g, " ").trim();
+    if (!t || t.length < 2) return;
+    const h = /^#{1,4}\s/.test(chunk.trim());
+    t = t.replace(/^#{1,4}\s*/, "");
+    if (t.length < 2) return;
+    out.push({ type: h ? "h" : "p", text: t });
+  });
+  return out.filter(b => b.type === "h" || b.text.length > 40 || out.length < 12);
+}
+
+function htmlToBlocks(doc) {
+  doc.querySelectorAll("script,style,nav,footer,header,aside,noscript,form,iframe").forEach(n => n.remove());
+  let best = doc.body, bestScore = 0;
+  doc.querySelectorAll("article, main, div, section").forEach(n => {
+    const ps = n.querySelectorAll(":scope > p");
+    let sc = 0; ps.forEach(p => sc += p.textContent.trim().length);
+    if (sc > bestScore) { bestScore = sc; best = n; }
+  });
+  const out = [];
+  best.querySelectorAll("h1,h2,h3,p,li").forEach(n => {
+    const t = n.textContent.replace(/\s+/g, " ").trim();
+    if (t.length < 2) return;
+    out.push({ type: /^H[123]$/.test(n.tagName) ? "h" : "p", text: t });
+  });
+  return out;
+}
+
+/* ============================================================
+   Okuyucu
+   ============================================================ */
+function renderBlock(b) {
+  if (b.type === "ocr") {
+    const d = document.createElement("div");
+    d.className = "ocrbox";
+    d.dataset.page = b.page;
+    d.innerHTML = `<p>Sayfa ${b.page} taranmış görünüyor — metni seçilemiyor.</p><button class="btn ghost">Sayfayı Gemini ile oku</button>`;
+    d.querySelector("button").addEventListener("click", () => ocrPage(b.page, d));
+    return d;
+  }
+  const el = document.createElement(b.type === "h" ? "h2" : "p");
+  el.textContent = b.text;
+  return el;
+}
+
+function openDoc(title, blocks, meta) {
+  state.blocks = blocks;
+  state.title = title;
+  $("#doctitle").textContent = title;
+  const c = $("#content");
+  c.innerHTML = "";
+  const frag = document.createDocumentFragment();
+  blocks.forEach(b => frag.appendChild(renderBlock(b)));
+  c.appendChild(frag);
+  show("reader");
+  window.scrollTo(0, 0);
+  toast(meta + " · " + blocks.filter(b => b.type === "p").length + " paragraf");
+}
+
+function show(which) {
+  $$(".screen").forEach(s => s.classList.toggle("on", s.id === which));
+  $("#backBtn").classList.toggle("hid", which === "home");
+  $("#dock").classList.toggle("hid", which !== "reader");
+  if (which === "home") { $("#selBtn").classList.add("hid"); closeSheet(); }
+}
+
+/* ---------- seçim ---------- */
+function selInfo() {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+  const txt = sel.toString().replace(/\s+/g, " ").trim();
+  if (!txt) return null;
+  const r = sel.getRangeAt(0);
+  const host = $("#content");
+  if (!host.contains(r.commonAncestorContainer)) return null;
+  let node = r.commonAncestorContainer;
+  if (node.nodeType === 3) node = node.parentNode;
+  const para = node.closest("p, h2, li") || node;
+  return { text: txt, context: para.textContent, range: r.cloneRange() };
+}
+
+let selTimer;
+function refreshSelBtn() {
+  clearTimeout(selTimer);
+  selTimer = setTimeout(() => {
+    const info = selInfo();
+    const btn = $("#selBtn");
+    if (info) {
+      state.lastSel = info;
+      const n = info.text.split(/\s+/).length;
+      $("#selBtnTxt").textContent = n <= 3 ? "Bu kelimeyi çevir" : "Seçimi çevir";
+      btn.classList.remove("hid");
+    } else if (!$("#sheet").classList.contains("on")) {
+      btn.classList.add("hid");
+    }
+  }, 180);
+}
+document.addEventListener("selectionchange", refreshSelBtn);
+
+function markRange(range) {
+  try {
+    const m = document.createElement("mark");
+    m.className = "hl";
+    range.surroundContents(m);
+  } catch (e) { /* birden fazla öğeye yayılan seçim işaretlenmez */ }
+}
+
+// tek dokunuşla kelime
+$("#content").addEventListener("click", e => {
+  if (!state.tapWord) return;
+  const sel = window.getSelection();
+  if (sel && !sel.isCollapsed && sel.toString().trim()) return;
+  if (e.target.closest(".tr, .ocrbox, button")) return;
+  const pos = document.caretRangeFromPoint
+    ? document.caretRangeFromPoint(e.clientX, e.clientY)
+    : null;
+  if (!pos || pos.startContainer.nodeType !== 3) return;
+  const txt = pos.startContainer.data;
+  let a = pos.startOffset, b = pos.startOffset;
+  const isW = ch => ch && /[A-Za-zÀ-ÿ0-9'’\-]/.test(ch);
+  if (!isW(txt[a]) && !isW(txt[a - 1])) return;
+  while (a > 0 && isW(txt[a - 1])) a--;
+  while (b < txt.length && isW(txt[b])) b++;
+  const word = txt.slice(a, b).replace(/^[-'’]+|[-'’]+$/g, "");
+  if (word.length < 2) return;
+  const r = document.createRange();
+  r.setStart(pos.startContainer, a);
+  r.setEnd(pos.startContainer, b);
+  let node = pos.startContainer.parentNode;
+  const para = node.closest("p, h2, li") || node;
+  runSheet({ text: word, context: para.textContent, range: r });
+});
+
+/* ---------- alt panel ---------- */
+let sheetJob = null;
+function openSheet() { $("#sheet").classList.add("on"); $("#scrim").classList.add("on"); }
+function closeSheet() {
+  $("#sheet").classList.remove("on");
+  $("#scrim").classList.remove("on");
+  $("#selBtn").classList.add("hid");
+}
+$("#scrim").addEventListener("click", closeSheet);
+$("#sheetClose").addEventListener("click", closeSheet);
+
+$$(".tab[data-tab]").forEach(t => t.addEventListener("click", () => {
+  $$(".tab[data-tab]").forEach(x => x.classList.toggle("on", x === t));
+  if (sheetJob) runTab(t.dataset.tab);
+}));
+
+async function runSheet(info) {
+  if (!state.key) { toast("Önce ayarlardan Gemini anahtarını gir."); openSettings(); return; }
+  sheetJob = info;
+  markRange(info.range);
+  window.getSelection().removeAllRanges();
+  $("#chosen").textContent = info.text;
+  $$(".tab[data-tab]").forEach(x => x.classList.toggle("on", x.dataset.tab === "tr"));
+  $("#selBtn").classList.add("hid");
+  openSheet();
+  runTab("tr");
+}
+
+async function runTab(tab) {
+  const out = $("#out");
+  const job = sheetJob;
+  out.innerHTML = '<p style="color:var(--ink3)"><span class="spin dark"></span> ' + (tab === "tr" ? "Çevriliyor…" : "Cümle çözümleniyor…") + "</p>";
+  try {
+    const html = tab === "tr"
+      ? await translateSel(job.text, job.context)
+      : await grammarSel(job.text, job.context);
+    if (sheetJob !== job) return;
+    out.innerHTML = clean(html);
+  } catch (e) {
+    if (sheetJob !== job) return;
+    out.innerHTML = `<p style="color:var(--warn)">${esc(e.message)}</p>
+      <p style="font-size:13px;color:var(--ink2)">Anahtar, model ve internet bağlantını kontrol edip tekrar dene.</p>`;
+  }
+}
+
+function clean(html) {
+  return html
+    .replace(/```html|```/g, "")
+    .replace(/<\/?(script|style|iframe|img|a|div|span)[^>]*>/gi, "")
+    .trim();
+}
+
+$("#selBtn").addEventListener("click", () => {
+  const info = selInfo() || state.lastSel;
+  if (!info) return;
+  runSheet(info);
+});
+
+/* ---------- tüm metni çevir ---------- */
+async function translateAll() {
+  if (!state.key) { toast("Önce ayarlardan Gemini anahtarını gir."); openSettings(); return; }
+  if (state.translatingAll) { state.translatingAll = false; toast("Durduruldu."); return; }
+
+  const nodes = Array.from($("#content").children).filter(n => (n.tagName === "P" || n.tagName === "H2") && !n.dataset.done && n.textContent.trim().length > 1);
+  if (!nodes.length) { toast("Çevrilecek yeni paragraf yok."); return; }
+
+  state.translatingAll = true;
+  $("#allBtn").classList.add("on");
+  const sys = BASE + "\n" + styleRule() + "\nSana numaralı parçalar verilecek. Her parçayı çevir ve aynı numara etiketiyle geri ver. Etiket biçimi tam olarak <<<1>>> şeklinde olmalı. Başka hiçbir şey yazma.";
+
+  const SIZE = 5;
+  let done = 0;
+  for (let i = 0; i < nodes.length; i += SIZE) {
+    if (!state.translatingAll) break;
+    const batch = nodes.slice(i, i + SIZE);
+    batch.forEach(n => {
+      if (n.nextElementSibling?.classList?.contains("tr")) return;
+      const d = document.createElement("div");
+      d.className = "tr wait";
+      d.textContent = "çevriliyor…";
+      n.after(d);
+    });
+    const prompt = batch.map((n, k) => `<<<${k + 1}>>>\n${n.textContent.trim()}`).join("\n\n");
+    try {
+      const res = await gemini(prompt, sys);
+      const parts = res.split(/<<<\s*(\d+)\s*>>>/).slice(1);
+      const map = {};
+      for (let k = 0; k < parts.length; k += 2) map[parts[k].trim()] = (parts[k + 1] || "").trim();
+      batch.forEach((n, k) => {
+        const t = map[String(k + 1)];
+        const d = n.nextElementSibling;
+        if (d && d.classList.contains("tr")) {
+          d.classList.remove("wait");
+          d.innerHTML = t ? clean(t).replace(/<i>/g, '<i class="en">') : "—";
+          n.dataset.done = "1";
+        }
+      });
+    } catch (e) {
+      batch.forEach(n => {
+        const d = n.nextElementSibling;
+        if (d && d.classList.contains("tr")) { d.classList.remove("wait"); d.textContent = "Çevrilemedi."; }
+      });
+      toast("Hata: " + e.message, 3500);
+      break;
+    }
+    done += batch.length;
+    toast(done + " / " + nodes.length + " paragraf çevrildi", 1200);
+    await sleep(400);
+  }
+  state.translatingAll = false;
+  $("#allBtn").classList.remove("on");
+}
+
+/* ============================================================
+   Ayarlar / arayüz bağlantıları
+   ============================================================ */
+function openSettings() { $("#settings").classList.add("on"); $("#keyInp").value = state.key; }
+$("#setBtn").addEventListener("click", openSettings);
+$("#setClose").addEventListener("click", () => $("#settings").classList.remove("on"));
+$("#backBtn").addEventListener("click", () => show("home"));
+
+$("#keySave").addEventListener("click", async () => {
+  const v = $("#keyInp").value.trim();
+  if (!v) { toast("Anahtar boş."); return; }
+  state.key = v; store.set("key", v);
+  toast("Kaydedildi. Modeller alınıyor…");
+  await loadModels();
+});
+$("#modelRefresh").addEventListener("click", () => loadModels());
+$("#modelSel").addEventListener("change", e => { state.model = e.target.value; store.set("model", state.model); });
+
+$$('input[name="style"]').forEach(r => {
+  r.checked = r.value === state.style;
+  r.addEventListener("change", () => { state.style = r.value; store.set("style", r.value); });
+});
+
+const tapTog = $("#tapTog");
+tapTog.classList.toggle("on", state.tapWord);
+tapTog.addEventListener("click", () => {
+  state.tapWord = !state.tapWord;
+  store.set("tapWord", state.tapWord ? "1" : "0");
+  tapTog.classList.toggle("on", state.tapWord);
+});
+
+function setFs(v) {
+  state.fs = v; store.set("fs", String(v));
+  document.documentElement.style.setProperty("--fs", v + "px");
+  $("#fsRange").value = v;
+}
+$("#fsRange").addEventListener("input", e => setFs(parseInt(e.target.value, 10)));
+$("#fontBtn").addEventListener("click", () => setFs(state.fs >= 24 ? 15 : state.fs + 2));
+$("#clearMarks").addEventListener("click", () => {
+  $$("#content mark.hl").forEach(m => { const p = m.parentNode; while (m.firstChild) p.insertBefore(m.firstChild, m); m.remove(); p.normalize(); });
+  toast("İşaretler temizlendi.");
+});
+$("#allBtn").addEventListener("click", translateAll);
+
+/* kaynak seçiciler */
+$("#pickPdf").addEventListener("click", () => $("#pdfInput").click());
+$("#pdfInput").addEventListener("change", e => { const f = e.target.files[0]; if (f) openPdf(f); e.target.value = ""; });
+$("#pickLink").addEventListener("click", () => { $("#linkField").classList.toggle("hid"); $("#linkInp").focus(); });
+$("#linkGo").addEventListener("click", () => { const u = $("#linkInp").value.trim(); if (u) openLink(u); });
+$("#linkInp").addEventListener("keydown", e => { if (e.key === "Enter") $("#linkGo").click(); });
+$("#pickText").addEventListener("click", () => { $("#textField").classList.toggle("hid"); $("#textInp").focus(); });
+$("#textGo").addEventListener("click", () => {
+  const t = $("#textInp").value.trim();
+  if (!t) { toast("Metin boş."); return; }
+  const blocks = t.split(/\n{1,}/).map(s => s.replace(/\s+/g, " ").trim()).filter(Boolean)
+    .map(s => ({ type: looksLikeHeading(s) ? "h" : "p", text: s }));
+  openDoc("Yapıştırılan metin", blocks, "Metin");
+});
+
+/* açılış */
+setFs(state.fs);
+if (state.key) loadModels(true);
+else setTimeout(() => toast("Başlamak için ayarlardan Gemini anahtarını gir.", 4000), 700);
+</script>
+</body>
+</html>
