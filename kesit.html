@@ -207,7 +207,47 @@ mark.hl{
 .note{font-size:12.5px;color:var(--ink2);line-height:1.5;background:#0000000a;border-radius:10px;padding:11px 12px;margin-top:4px}
 .note b{color:var(--warn)}
 
-/* ---------- misc ---------- */
+/* ---------- kelime kartı ---------- */
+.w-en{font-family:"Source Serif 4",serif;font-size:15px;color:var(--ink3);margin-bottom:2px}
+.w-tr{font-family:"Source Serif 4",serif;font-size:30px;line-height:1.2;font-weight:600;letter-spacing:-.015em;margin-bottom:8px}
+.w-pos{display:inline-block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);background:var(--green-soft);border-radius:6px;padding:4px 8px;margin-bottom:16px}
+.w-here{font-size:15px;line-height:1.55;color:var(--ink);padding-top:14px;border-top:1px solid var(--line2)}
+.w-here b{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:500;margin-bottom:4px}
+.w-more{margin-top:14px;border-top:1px solid var(--line2);padding-top:10px}
+.w-more summary{font-size:13px;color:var(--ink2);cursor:pointer;list-style:none}
+.w-more summary::-webkit-details-marker{display:none}
+.w-more summary::before{content:"+ ";color:var(--green)}
+.w-more[open] summary::before{content:"– "}
+.w-more ul{margin:10px 0 0;padding-left:16px;font-size:14px;line-height:1.6;color:var(--ink2)}
+.savebtn{width:100%;margin-top:18px;background:var(--green);color:#fff;border-radius:11px;padding:13px;font-size:15px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px}
+.savebtn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.savebtn.done{background:var(--green-soft);color:var(--green)}
+.savebtn.done svg{fill:currentColor}
+
+/* ---------- kelime defteri ---------- */
+.wbar{display:flex;gap:8px;margin-bottom:14px}
+.wbar .btn{flex:1;text-align:center;font-size:14px;padding:11px}
+.witem{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start}
+.witem .wtxt{flex:1;min-width:0}
+.witem .we{font-family:"Source Serif 4",serif;font-size:16px;font-weight:600}
+.witem .wt{font-size:15px;color:var(--green);margin-top:1px}
+.witem .wm{font-size:12px;color:var(--ink3);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.witem .del{color:var(--ink3);padding:2px 4px;font-size:20px;line-height:1;flex:none}
+.empty{text-align:center;color:var(--ink3);font-size:14px;line-height:1.6;padding:50px 20px}
+
+/* ---------- kart çalışması ---------- */
+#flash .fcard{
+  background:var(--card);border:1px solid var(--line);border-radius:18px;
+  min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:30px 22px;margin:10px 0 16px;
+}
+#flash .fe{font-family:"Source Serif 4",serif;font-size:30px;font-weight:600;line-height:1.25}
+#flash .ft{font-size:23px;color:var(--green);margin-top:14px;font-weight:500}
+#flash .fs{font-size:14px;color:var(--ink2);margin-top:16px;line-height:1.5;font-style:italic}
+#flash .hint{font-size:13px;color:var(--ink3);margin-top:18px}
+#flash .fbtns{display:flex;gap:8px}
+#flash .fbtns .btn{flex:1;text-align:center}
+#flash .count{font-size:13px;color:var(--ink2);text-align:center;margin-bottom:4px}
 .spin{width:16px;height:16px;border:2px solid #ffffff55;border-top-color:#fff;border-radius:99px;display:inline-block;animation:sp .7s linear infinite;vertical-align:-2px}
 .spin.dark{border-color:#0000001f;border-top-color:var(--green)}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -231,6 +271,9 @@ mark.hl{
     </button>
     <div class="brand">Kesit<small>İngilizce makale okuyucu</small></div>
     <div class="bar-sp"></div>
+    <button class="iconbtn" id="wordsBtn" aria-label="Kelime defteri">
+      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+    </button>
     <button class="iconbtn" id="setBtn" aria-label="Ayarlar">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.7 1.7 0 008 19.4a1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H2a2 2 0 110-4h.1A1.7 1.7 0 003.6 8a1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H8a1.7 1.7 0 001-1.5V2a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V8a1.7 1.7 0 001.5 1H22a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
     </button>
@@ -283,7 +326,30 @@ mark.hl{
   <div id="doctitle"></div>
   <div id="content"></div>
 </section>
+<!-- ============ KELİME DEFTERİ ============ -->
+<section class="screen max" id="words">
+  <h1 class="lede" style="font-size:22px;margin-bottom:14px">Kelime defteri</h1>
+  <div class="wbar">
+    <button class="btn" id="studyBtn">Kartlarla çalış</button>
+    <button class="btn ghost" id="exportBtn">Yedekle</button>
+  </div>
+  <input class="inp" id="wSearch" placeholder="Ara…" style="margin-bottom:14px" autocapitalize="off">
+  <div id="wList"></div>
+</section>
 </main>
+
+<!-- ============ KART ÇALIŞMASI ============ -->
+<div class="modal" id="flash">
+  <div class="mh">
+    <h2>Kartlarla çalış</h2>
+    <button class="iconbtn" id="flashClose" aria-label="Kapat">
+      <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="count" id="fCount"></div>
+  <div class="fcard" id="fCard"></div>
+  <div class="fbtns" id="fBtns"></div>
+</div>
 
 <!-- ============ DOCK ============ -->
 <div class="dock hid" id="dock">
@@ -351,8 +417,8 @@ mark.hl{
   </div>
 
   <div class="row">
-    <div class="sw"><span>Tek dokunuşla kelime çevir</span><div class="toggle" id="tapTog"></div></div>
-    <p style="margin:8px 0 0">Kapalıysa önce metni seçip Çevir düğmesine basarsın.</p>
+    <div class="sw"><span>Çift dokunuşla kelime çevir</span><div class="toggle" id="tapTog"></div></div>
+    <p style="margin:8px 0 0">Bir kelimeye arka arkaya iki kez dokun. Kapalıysa önce metni seçip Çevir düğmesine basarsın.</p>
   </div>
 
   <div class="row">
@@ -506,24 +572,38 @@ const BASE = `Sen tıp ve sağlık bilimleri alanında uzman bir çevirmensin. K
 Yanıtların yalın HTML olsun: yalnızca <p> <b> <i> <ul> <li> <h4> etiketlerini kullan. Markdown, kod bloğu işareti veya "İşte çevirisi" gibi giriş cümlesi KULLANMA.`;
 
 async function translateSel(text, context) {
-  const isWord = text.trim().split(/\s+/).length <= 3;
   const sys = BASE + "\n" + styleRule();
-  let prompt;
-  if (isWord) {
-    prompt = `Aşağıdaki İngilizce ifadeyi açıkla.
-İFADE: "${text}"
-GEÇTİĞİ CÜMLE/PARAGRAF: "${(context || "").slice(0, 900)}"
-
-Şu bölümleri ver (başlıkları <h4> ile):
-ANLAMI — Türkçe karşılığı, sözcük türü (isim/fiil/sıfat), varsa yaygın diğer anlamları.
-BURADAKİ ANLAMI — bu metinde tam olarak ne demek, tek cümlede.
-İLİŞKİLİ SÖZCÜKLER — aynı kökten türeyenler veya sık geçen eşdizimler (3-4 madde, <ul> içinde, her biri kısa Türkçe karşılığıyla).`;
-  } else {
-    prompt = `Aşağıdaki İngilizce parçayı Türkçeye çevir. Sadece çeviriyi ver, yorum ekleme.
+  const prompt = `Aşağıdaki İngilizce parçayı Türkçeye çevir. Sadece çeviriyi ver, yorum ekleme.
 ${context ? "Bağlam (çevirme, sadece anlamak için): \"" + context.slice(0, 700) + "\"\n" : ""}
 ÇEVRİLECEK: "${text}"`;
-  }
   return gemini(prompt, sys);
+}
+
+function parseJson(raw) {
+  let t = raw.replace(/```json|```/g, "").trim();
+  const a = t.indexOf("{"), b = t.lastIndexOf("}");
+  if (a >= 0 && b > a) t = t.slice(a, b + 1);
+  return JSON.parse(t);
+}
+
+async function lookupWord(word, context) {
+  const sys = `Sen tıp ve sağlık bilimleri sözlüğüsün. Kullanıcı Türk bir sağlık çalışanı, YÖKDİL'e hazırlanıyor.
+SADECE geçerli JSON döndür. Markdown, kod bloğu işareti, açıklama, giriş cümlesi YAZMA.`;
+  const prompt = `KELİME: "${word}"
+GEÇTİĞİ CÜMLE: "${(context || "").slice(0, 700)}"
+
+Şu alanlara sahip bir JSON nesnesi döndür:
+"tr": Türkçe karşılığı. En çok 3 karşılık, virgülle ayrılmış. SADECE karşılık yaz, cümle kurma, açıklama ekleme. Örnek: "artmak, yükselmek"
+"pos": sözcük türü. Tek kelime: isim, fiil, sıfat, zarf, edat, bağlaç.
+"here": bu cümlede tam olarak ne anlama geldiği. Tek kısa cümle, en fazla 15 kelime.
+"forms": aynı kökten türeyen veya sık birlikte kullanılan 3 ifade. Her biri "english = türkçe" biçiminde metin. Dizi olarak ver.`;
+  const d = parseJson(await gemini(prompt, sys));
+  return {
+    tr: String(d.tr || "").trim(),
+    pos: String(d.pos || "").trim().toLowerCase(),
+    here: String(d.here || "").trim(),
+    forms: Array.isArray(d.forms) ? d.forms.map(String).slice(0, 4) : []
+  };
 }
 
 async function grammarSel(text, context) {
@@ -846,12 +926,23 @@ function markRange(range) {
   } catch (e) { /* birden fazla öğeye yayılan seçim işaretlenmez */ }
 }
 
-// tek dokunuşla kelime
+// çift dokunuşla kelime
+let tapT = 0, tapX = 0, tapY = 0;
 $("#content").addEventListener("click", e => {
   if (!state.tapWord) return;
-  const sel = window.getSelection();
-  if (sel && !sel.isCollapsed && sel.toString().trim()) return;
   if (e.target.closest(".tr, .ocrbox, button")) return;
+
+  const now = Date.now();
+  const near = Math.abs(e.clientX - tapX) < 32 && Math.abs(e.clientY - tapY) < 32;
+  const isDouble = (now - tapT) < 450 && near;
+  tapT = now; tapX = e.clientX; tapY = e.clientY;
+  if (!isDouble) return;
+  tapT = 0;                      // üçüncü dokunuş yeni sayılsın
+
+  // iOS çift dokunuşta kelimeyi zaten seçmiş olabilir — varsa onu kullan
+  const picked = selInfo();
+  if (picked && picked.text.split(/\s+/).length <= 4) { runSheet(picked); return; }
+
   const pos = document.caretRangeFromPoint
     ? document.caretRangeFromPoint(e.clientX, e.clientY)
     : null;
@@ -900,16 +991,57 @@ async function runSheet(info) {
   runTab("tr");
 }
 
+function isWordSel(t) { return t.trim().split(/\s+/).length <= 3; }
+
+function wordCardEl(word, d, context) {
+  const wrap = document.createElement("div");
+  wrap.innerHTML =
+    `<div class="w-en">${esc(word)}</div>` +
+    `<div class="w-tr">${esc(d.tr || "—")}</div>` +
+    (d.pos ? `<div class="w-pos">${esc(d.pos)}</div>` : "") +
+    (d.here ? `<div class="w-here"><b>Bu cümlede</b>${esc(d.here)}</div>` : "") +
+    (d.forms.length
+      ? `<details class="w-more"><summary>İlişkili sözcükler</summary><ul>${d.forms.map(f => `<li>${esc(f)}</li>`).join("")}</ul></details>`
+      : "");
+
+  const btn = document.createElement("button");
+  btn.className = "savebtn";
+  const saved = hasWord(word);
+  setSaveBtn(btn, saved);
+  btn.addEventListener("click", () => {
+    if (hasWord(word)) { removeWord(word); setSaveBtn(btn, false); toast("Defterden çıkarıldı."); }
+    else { addWord({ w: word, tr: d.tr, pos: d.pos, here: d.here, s: (context || "").slice(0, 220), src: state.title, t: Date.now() }); setSaveBtn(btn, true); toast("Deftere eklendi."); }
+  });
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+function setSaveBtn(btn, on) {
+  btn.className = "savebtn" + (on ? " done" : "");
+  btn.innerHTML = on
+    ? `<svg viewBox="0 0 24 24"><path d="M12 17.3l-6.2 3.7 1.7-7L2 9.2l7.1-.6L12 2l2.9 6.6 7.1.6-5.5 4.8 1.7 7z"/></svg> Defterde`
+    : `<svg viewBox="0 0 24 24"><path d="M12 17.3l-6.2 3.7 1.7-7L2 9.2l7.1-.6L12 2l2.9 6.6 7.1.6-5.5 4.8 1.7 7z"/></svg> Deftere ekle`;
+}
+
 async function runTab(tab) {
   const out = $("#out");
   const job = sheetJob;
-  out.innerHTML = '<p style="color:var(--ink3)"><span class="spin dark"></span> ' + (tab === "tr" ? "Çevriliyor…" : "Cümle çözümleniyor…") + "</p>";
+  const word = isWordSel(job.text);
+  $("#chosen").classList.toggle("hid", word && tab === "tr");
+  out.innerHTML = '<p style="color:var(--ink3)"><span class="spin dark"></span> ' + (tab === "tr" ? "Bakılıyor…" : "Cümle çözümleniyor…") + "</p>";
   try {
-    const html = tab === "tr"
-      ? await translateSel(job.text, job.context)
-      : await grammarSel(job.text, job.context);
-    if (sheetJob !== job) return;
-    out.innerHTML = clean(html);
+    if (tab === "tr" && word) {
+      const d = await lookupWord(job.text, job.context);
+      if (sheetJob !== job) return;
+      out.innerHTML = "";
+      out.appendChild(wordCardEl(job.text, d, job.context));
+    } else {
+      const html = tab === "tr"
+        ? await translateSel(job.text, job.context)
+        : await grammarSel(job.text, job.context);
+      if (sheetJob !== job) return;
+      out.innerHTML = clean(html);
+    }
   } catch (e) {
     if (sheetJob !== job) return;
     out.innerHTML = `<p style="color:var(--warn)">${esc(e.message)}</p>
@@ -986,12 +1118,105 @@ async function translateAll() {
 }
 
 /* ============================================================
+   Kelime defteri
+   ============================================================ */
+let WORDS = [];
+try { WORDS = JSON.parse(store.get("words", "[]")) || []; } catch (e) { WORDS = []; }
+function saveWords() { store.set("words", JSON.stringify(WORDS)); }
+const norm = w => String(w).toLowerCase().trim();
+function hasWord(w) { return WORDS.some(x => norm(x.w) === norm(w)); }
+function addWord(o) { if (!hasWord(o.w)) { WORDS.unshift(o); saveWords(); } }
+function removeWord(w) { WORDS = WORDS.filter(x => norm(x.w) !== norm(w)); saveWords(); }
+
+function renderWords() {
+  const q = norm($("#wSearch").value);
+  const list = q ? WORDS.filter(x => norm(x.w).includes(q) || norm(x.tr).includes(q)) : WORDS;
+  const box = $("#wList");
+  if (!WORDS.length) {
+    box.innerHTML = '<div class="empty">Defter boş.<br>Bir makale açıp kelimeye çift dokun, açılan kartta “Deftere ekle”ye bas.</div>';
+    return;
+  }
+  if (!list.length) { box.innerHTML = '<div class="empty">Eşleşen kelime yok.</div>'; return; }
+  box.innerHTML = list.map(x => `
+    <div class="witem" data-w="${esc(x.w)}">
+      <div class="wtxt">
+        <div class="we">${esc(x.w)}</div>
+        <div class="wt">${esc(x.tr || "")}</div>
+        ${x.here || x.src ? `<div class="wm">${esc(x.here || x.src || "")}</div>` : ""}
+      </div>
+      <button class="del" aria-label="Sil">×</button>
+    </div>`).join("");
+  box.querySelectorAll(".del").forEach(b => b.addEventListener("click", e => {
+    const w = e.target.closest(".witem").dataset.w;
+    removeWord(w); renderWords(); toast("Silindi.");
+  }));
+}
+
+$("#wordsBtn").addEventListener("click", () => { renderWords(); show("words"); window.scrollTo(0, 0); });
+$("#wSearch").addEventListener("input", renderWords);
+
+/* ---------- yedekleme ---------- */
+$("#exportBtn").addEventListener("click", async () => {
+  if (!WORDS.length) { toast("Defter boş."); return; }
+  const txt = WORDS.map(x => [x.w, x.tr, x.pos || "", (x.s || "").replace(/\t/g, " ")].join("\t")).join("\n");
+  try {
+    await navigator.clipboard.writeText(txt);
+    toast(WORDS.length + " kelime panoya kopyalandı. Notlara yapıştırıp saklayabilirsin.", 3800);
+  } catch (e) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([txt], { type: "text/plain" }));
+    a.download = "kelime-defteri.txt";
+    a.click();
+    toast("Dosya olarak indirildi.");
+  }
+});
+
+/* ---------- kartlarla çalışma ---------- */
+let deck = [], deckI = 0, flipped = false;
+
+$("#studyBtn").addEventListener("click", () => {
+  if (WORDS.length < 2) { toast("En az 2 kelime gerekli."); return; }
+  deck = WORDS.slice().sort(() => Math.random() - 0.5);
+  deckI = 0; flipped = false;
+  $("#flash").classList.add("on");
+  drawCard();
+});
+$("#flashClose").addEventListener("click", () => $("#flash").classList.remove("on"));
+
+function drawCard() {
+  const c = $("#fCard"), b = $("#fBtns");
+  if (deckI >= deck.length) {
+    $("#fCount").textContent = "";
+    c.innerHTML = '<div class="fe">Bitti</div><div class="hint">Tüm kartları gördün.</div>';
+    b.innerHTML = '<button class="btn wide" id="fAgain">Baştan başla</button>';
+    $("#fAgain").addEventListener("click", () => { deck.sort(() => Math.random() - 0.5); deckI = 0; flipped = false; drawCard(); });
+    return;
+  }
+  const x = deck[deckI];
+  $("#fCount").textContent = (deckI + 1) + " / " + deck.length;
+  if (!flipped) {
+    c.innerHTML = `<div class="fe">${esc(x.w)}</div><div class="hint">Karta dokun, karşılığı görünsün</div>`;
+    b.innerHTML = "";
+  } else {
+    c.innerHTML = `<div class="fe">${esc(x.w)}</div><div class="ft">${esc(x.tr || "—")}</div>` +
+      (x.s ? `<div class="fs">${esc(x.s.slice(0, 160))}</div>` : "");
+    b.innerHTML = '<button class="btn ghost" id="fNo">Tekrar sor</button><button class="btn" id="fYes">Biliyorum</button>';
+    $("#fNo").addEventListener("click", () => { deck.push(deck[deckI]); deckI++; flipped = false; drawCard(); });
+    $("#fYes").addEventListener("click", () => { deckI++; flipped = false; drawCard(); });
+  }
+}
+$("#fCard").addEventListener("click", () => { if (deckI < deck.length && !flipped) { flipped = true; drawCard(); } });
+
+/* ============================================================
    Ayarlar / arayüz bağlantıları
    ============================================================ */
 function openSettings() { $("#settings").classList.add("on"); $("#keyInp").value = state.key; }
 $("#setBtn").addEventListener("click", openSettings);
 $("#setClose").addEventListener("click", () => $("#settings").classList.remove("on"));
-$("#backBtn").addEventListener("click", () => show("home"));
+$("#backBtn").addEventListener("click", () => {
+  const inWords = $("#words").classList.contains("on");
+  show(inWords && state.blocks.length ? "reader" : "home");
+});
 
 $("#keySave").addEventListener("click", async () => {
   const v = $("#keyInp").value.trim();
