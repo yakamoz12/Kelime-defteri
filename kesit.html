@@ -248,6 +248,29 @@ mark.hl{
 #flash .fbtns{display:flex;gap:8px}
 #flash .fbtns .btn{flex:1;text-align:center}
 #flash .count{font-size:13px;color:var(--ink2);text-align:center;margin-bottom:4px}
+
+/* ---------- defter: cümle detayı ---------- */
+.witem{flex-wrap:wrap}
+.witem .acts{display:flex;gap:2px;flex:none;align-items:center}
+.witem .gen{color:var(--green);padding:4px;line-height:1}
+.witem .gen svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.witem .gen.busy{opacity:.4}
+.wdet{flex-basis:100%;margin-top:11px;padding-top:11px;border-top:1px solid var(--line2);display:none}
+.witem.open .wdet{display:block}
+.wdet .sen{font-family:"Source Serif 4",serif;font-size:15px;line-height:1.55;margin-bottom:7px}
+.wdet .sen.trs{color:var(--ink2)}
+.wdet .none{font-size:13px;color:var(--ink3)}
+.wdet .again{margin-top:9px;font-size:13px;color:var(--green);border:1px solid var(--line);border-radius:9px;padding:8px 12px}
+.c0{color:#C0392B}.c1{color:#1F6FB2}.c2{color:#1E7A45}.c3{color:#8E44AD}.c4{color:#B9770E}
+.wdet .sen .c0,.wdet .sen .c1,.wdet .sen .c2,.wdet .sen .c3,.wdet .sen .c4{font-weight:600}
+
+/* ---------- ilerleme perdesi ---------- */
+.busyv{position:fixed;inset:0;z-index:80;background:rgba(237,235,228,.97);display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
+.busyv.on{display:flex}
+.busyv h3{font-family:"Source Serif 4",serif;font-size:20px;margin:14px 0 6px;font-weight:600}
+.busyv p{font-size:14px;color:var(--ink2);margin:0;line-height:1.5}
+.busyv .prog{width:min(280px,80vw);margin-top:18px}
+.busyv .btn{margin-top:22px}
 .spin{width:16px;height:16px;border:2px solid #ffffff55;border-top-color:#fff;border-radius:99px;display:inline-block;animation:sp .7s linear infinite;vertical-align:-2px}
 .spin.dark{border-color:#0000001f;border-top-color:var(--green)}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -330,7 +353,8 @@ mark.hl{
 <section class="screen max" id="words">
   <h1 class="lede" style="font-size:22px;margin-bottom:14px">Kelime defteri</h1>
   <div class="wbar">
-    <button class="btn" id="studyBtn">Kartlarla çalış</button>
+    <button class="btn" id="pdfBtn">PDF çıkar</button>
+    <button class="btn ghost" id="studyBtn">Kartlar</button>
     <button class="btn ghost" id="exportBtn">Yedekle</button>
   </div>
   <input class="inp" id="wSearch" placeholder="Ara…" style="margin-bottom:14px" autocapitalize="off">
@@ -433,9 +457,18 @@ mark.hl{
   </div>
 </div>
 
+<div class="busyv" id="busyv">
+  <span class="spin dark" style="width:26px;height:26px;border-width:3px"></span>
+  <h3 id="busyTitle">Hazırlanıyor</h3>
+  <p id="busyMsg"></p>
+  <div class="prog"><i id="busyBar"></i></div>
+  <button class="btn ghost" id="busyStop">Durdur</button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 "use strict";
 
@@ -522,12 +555,13 @@ async function loadModels(quiet) {
   }
 }
 
-async function gemini(parts, system, tries = 2) {
+async function gemini(parts, system, opts = {}) {
+  const tries = opts.tries === undefined ? 2 : opts.tries;
   if (!state.key) throw new Error("Önce ayarlardan Gemini anahtarını gir.");
   const model = state.model || FALLBACK_MODELS[0];
   const body = {
     contents: [{ role: "user", parts: Array.isArray(parts) ? parts : [{ text: parts }] }],
-    generationConfig: { temperature: 0.2 }
+    generationConfig: { temperature: opts.temp === undefined ? 0.2 : opts.temp }
   };
   if (system) body.systemInstruction = { parts: [{ text: system }] };
 
@@ -1118,6 +1152,77 @@ async function translateAll() {
 }
 
 /* ============================================================
+   Akademik örnek cümle + renk eşleştirme
+   ============================================================ */
+const PAL = [[192, 57, 43], [31, 111, 178], [30, 122, 69], [142, 68, 173], [185, 119, 14]];
+
+const SEN_SYS = `Sen akademik İngilizce öğreten bir dil uzmanısın. Kullanıcı Türk bir sağlık çalışanı, YÖKDİL sınavına hazırlanıyor.
+SADECE geçerli JSON döndür. Markdown, kod bloğu işareti, açıklama YAZMA.`;
+
+function senPrompt(word, tr, avoid) {
+  return `KELİME: "${word}"${tr ? ' (Türkçesi: "' + tr + '")' : ""}
+
+Bu kelimeyi kullanan akademik bir örnek cümle kur.
+Kurallar:
+- Cümle 12-18 kelime olsun, tıp/sağlık bilimleri makalelerinin diliyle yazılsın.
+- Kelime cümlede doğal ve sık kullanılan bir kalıpla geçsin.
+- Cümle tek başına anlaşılır olsun, önceki bir cümleye gönderme yapmasın.
+${avoid ? '- ŞU CÜMLEDEN TAMAMEN FARKLI olsun, başka bir konu ve başka bir yapı kullan: "' + avoid + '"' : ""}
+
+Şu alanlara sahip JSON döndür:
+"en": kurduğun İngilizce cümle.
+"tr": bu cümlenin akıcı Türkçe çevirisi.
+"pairs": 3 ile 5 arası nesne içeren dizi. Her nesne {"en": ..., "tr": ...} biçiminde, cümlenin anahtar öğelerini eşleştirir.
+  - İLK nesne mutlaka hedef kelime "${word}" ve onun bu cümledeki Türkçe karşılığı olsun.
+  - Diğerleri cümlenin anlamını taşıyan sözcük veya sözcük öbekleri olsun.
+  - "en" değeri İngilizce cümlede AYNEN geçen bir parça olmalı, harfi harfine kopyala.
+  - "tr" değeri Türkçe cümlede AYNEN geçen bir parça olmalı, harfi harfine kopyala.`;
+}
+
+function normSen(d) {
+  const en = String(d.en || "").trim();
+  const tr = String(d.tr || "").trim();
+  const pairs = (Array.isArray(d.pairs) ? d.pairs : [])
+    .map(p => ({ en: String(p.en || "").trim(), tr: String(p.tr || "").trim() }))
+    .filter(p => p.en && p.tr)
+    .slice(0, 5);
+  return { en, tr, pairs };
+}
+
+async function makeSentence(word, tr, avoid) {
+  const d = parseJson(await gemini(senPrompt(word, tr, avoid), SEN_SYS, { temp: 0.95 }));
+  return normSen(d);
+}
+
+/* metni renkli parçalara böl: [{text, c}] — c: -1 renksiz, 0..4 palet */
+function segment(text, pairs, key) {
+  const marks = [];
+  pairs.forEach((p, i) => {
+    const needle = (p[key] || "").trim();
+    if (!needle) return;
+    const idx = text.toLocaleLowerCase("tr").indexOf(needle.toLocaleLowerCase("tr"));
+    if (idx < 0) return;
+    const end = idx + needle.length;
+    if (marks.some(m => idx < m.end && end > m.start)) return;   // örtüşmeyi atla
+    marks.push({ start: idx, end, c: i % PAL.length });
+  });
+  marks.sort((a, b) => a.start - b.start);
+  const runs = [];
+  let pos = 0;
+  marks.forEach(m => {
+    if (m.start > pos) runs.push({ text: text.slice(pos, m.start), c: -1 });
+    runs.push({ text: text.slice(m.start, m.end), c: m.c });
+    pos = m.end;
+  });
+  if (pos < text.length) runs.push({ text: text.slice(pos), c: -1 });
+  return runs.length ? runs : [{ text, c: -1 }];
+}
+
+function runsToHtml(runs) {
+  return runs.map(r => r.c < 0 ? esc(r.text) : `<span class="c${r.c}">${esc(r.text)}</span>`).join("");
+}
+
+/* ============================================================
    Kelime defteri
    ============================================================ */
 let WORDS = [];
@@ -1137,6 +1242,7 @@ function renderWords() {
     return;
   }
   if (!list.length) { box.innerHTML = '<div class="empty">Eşleşen kelime yok.</div>'; return; }
+
   box.innerHTML = list.map(x => `
     <div class="witem" data-w="${esc(x.w)}">
       <div class="wtxt">
@@ -1144,12 +1250,57 @@ function renderWords() {
         <div class="wt">${esc(x.tr || "")}</div>
         ${x.here || x.src ? `<div class="wm">${esc(x.here || x.src || "")}</div>` : ""}
       </div>
-      <button class="del" aria-label="Sil">×</button>
+      <div class="acts">
+        <button class="gen" aria-label="Cümle üret">
+          <svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
+        </button>
+        <button class="del" aria-label="Sil">×</button>
+      </div>
+      <div class="wdet">${detHtml(x)}</div>
     </div>`).join("");
-  box.querySelectorAll(".del").forEach(b => b.addEventListener("click", e => {
-    const w = e.target.closest(".witem").dataset.w;
-    removeWord(w); renderWords(); toast("Silindi.");
-  }));
+
+  box.querySelectorAll(".witem").forEach(el => {
+    const w = el.dataset.w;
+    el.querySelector(".del").addEventListener("click", e => {
+      e.stopPropagation();
+      removeWord(w); renderWords(); toast("Silindi.");
+    });
+    el.querySelector(".gen").addEventListener("click", e => {
+      e.stopPropagation();
+      el.classList.add("open");
+      genFor(w, el);
+    });
+    el.querySelector(".wtxt").addEventListener("click", () => el.classList.toggle("open"));
+    const again = el.querySelector(".again");
+    if (again) again.addEventListener("click", e => { e.stopPropagation(); genFor(w, el); });
+  });
+}
+
+function detHtml(x) {
+  if (!x.ex) return '<div class="none">Henüz örnek cümle yok. Sağdaki yıldıza dokun.</div>';
+  const p = x.pairs || [];
+  return `<div class="sen">${runsToHtml(segment(x.ex, p, "en"))}</div>
+          <div class="sen trs">${runsToHtml(segment(x.exTr || "", p, "tr"))}</div>
+          <button class="again">Yeni cümle üret</button>`;
+}
+
+async function genFor(word, el) {
+  if (!state.key) { toast("Önce ayarlardan Gemini anahtarını gir."); openSettings(); return; }
+  const rec = WORDS.find(x => norm(x.w) === norm(word));
+  if (!rec) return;
+  const btn = el.querySelector(".gen");
+  btn.classList.add("busy");
+  el.querySelector(".wdet").innerHTML = '<div class="none"><span class="spin dark"></span> Cümle kuruluyor…</div>';
+  try {
+    const s = await makeSentence(rec.w, rec.tr, rec.ex);
+    rec.ex = s.en; rec.exTr = s.tr; rec.pairs = s.pairs;
+    saveWords();
+    el.querySelector(".wdet").innerHTML = detHtml(rec);
+    el.querySelector(".again").addEventListener("click", e => { e.stopPropagation(); genFor(word, el); });
+  } catch (e) {
+    el.querySelector(".wdet").innerHTML = `<div class="none" style="color:var(--warn)">${esc(e.message)}</div>`;
+  }
+  btn.classList.remove("busy");
 }
 
 $("#wordsBtn").addEventListener("click", () => { renderWords(); show("words"); window.scrollTo(0, 0); });
@@ -1206,6 +1357,233 @@ function drawCard() {
   }
 }
 $("#fCard").addEventListener("click", () => { if (deckI < deck.length && !flipped) { flipped = true; drawCard(); } });
+
+/* ============================================================
+   PDF çıktısı
+   ============================================================ */
+let KALAM = null, stopFlag = false;
+
+function busyShow(title, msg) {
+  stopFlag = false;
+  $("#busyTitle").textContent = title;
+  $("#busyMsg").textContent = msg || "";
+  $("#busyBar").style.width = "0%";
+  $("#busyv").classList.add("on");
+}
+function busyUpd(msg, pct) {
+  $("#busyMsg").textContent = msg;
+  if (pct !== undefined) $("#busyBar").style.width = Math.round(pct) + "%";
+}
+function busyHide() { $("#busyv").classList.remove("on"); }
+$("#busyStop").addEventListener("click", () => { stopFlag = true; busyUpd("Durduruluyor…"); });
+
+async function fetchFont(file) {
+  const r = await fetch(file);
+  if (!r.ok) throw new Error(file + " bulunamadı");
+  const bytes = new Uint8Array(await r.arrayBuffer());
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 8192) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+  return btoa(bin);
+}
+
+async function ensureFonts() {
+  if (KALAM) return KALAM;
+  const reg = await fetchFont("Kalam-Regular.ttf");
+  const bold = await fetchFont("Kalam-Bold.ttf").catch(() => null);
+  const light = await fetchFont("Kalam-Light.ttf").catch(() => null);
+  KALAM = { reg, bold, light };
+  return KALAM;
+}
+
+function regFonts(doc, k) {
+  doc.addFileToVFS("KalamR.ttf", k.reg);
+  doc.addFont("KalamR.ttf", "Kalam", "normal");
+  if (k.bold) { doc.addFileToVFS("KalamB.ttf", k.bold); doc.addFont("KalamB.ttf", "Kalam", "bold"); }
+  if (k.light) { doc.addFileToVFS("KalamL.ttf", k.light); doc.addFont("KalamL.ttf", "KalamLight", "normal"); }
+}
+
+const M = { l: 15, r: 15, t: 19, b: 14 };
+const PW = 210, PH = 297;
+const CW = PW - M.l - M.r;
+const LEAD = 5.3;
+
+function runFont(doc, c) { doc.setFont("Kalam", (c === 0 && KALAM.bold) ? "bold" : "normal"); }
+
+/* renkli parçaları satır sararak akıt. draw=false ise sadece ölçer. */
+function flowRuns(doc, runs, x, y, maxW, lineH, draw) {
+  let cx = x, cy = y, lines = 1;
+  runs.forEach(run => {
+    runFont(doc, run.c);
+    if (draw) { const g = run.c < 0 ? [26, 26, 26] : PAL[run.c]; doc.setTextColor(g[0], g[1], g[2]); }
+    const sp = doc.getTextWidth(" ");
+    run.text.split(/(\s+)/).forEach(tok => {
+      if (!tok) return;
+      if (/^\s+$/.test(tok)) { if (cx > x) cx += sp; return; }
+      const w = doc.getTextWidth(tok);
+      if (cx + w > x + maxW && cx > x) { cx = x; cy += lineH; lines++; }
+      if (draw) doc.text(tok, cx, cy);
+      cx += w;
+    });
+  });
+  return { y: cy, lines };
+}
+
+function pdfHeader(doc, sub, page) {
+  doc.setFont(KALAM.light ? "KalamLight" : "Kalam", "normal");
+  doc.setFontSize(9.5);
+  doc.setTextColor(140, 140, 140);
+  doc.text("Kelime defteri · " + sub, M.l, 11);
+  doc.text(String(page), PW - M.r, 11, { align: "right" });
+  doc.setDrawColor(214, 210, 200);
+  doc.setLineWidth(0.2);
+  doc.line(M.l, 13.5, PW - M.r, 13.5);
+}
+
+function studyHeight(doc, x) {
+  const p = x.pairs || [];
+  doc.setFontSize(11);
+  const a = flowRuns(doc, segment(x.ex || "", p, "en"), 0, 0, CW, LEAD, false).lines;
+  const b = flowRuns(doc, segment(x.exTr || "", p, "tr"), 0, 0, CW, LEAD, false).lines;
+  return 6.9 + a * LEAD + 1.8 + b * LEAD + 6.0;
+}
+
+function studyEntry(doc, x, y) {
+  const p = x.pairs || [];
+  doc.setFont("Kalam", KALAM.bold ? "bold" : "normal");
+  doc.setFontSize(14);
+  doc.setTextColor(20, 24, 26);
+  doc.text(x.w, M.l, y);
+  const wEnd = M.l + doc.getTextWidth(x.w);
+  doc.setFont("Kalam", "normal");
+  doc.setFontSize(12.5);
+  doc.setTextColor(30, 91, 82);
+  doc.text("  —  " + (x.tr || ""), wEnd, y);
+  y += 6.9;
+
+  doc.setFontSize(11);
+  y = flowRuns(doc, segment(x.ex || "", p, "en"), M.l, y, CW, LEAD, true).y + LEAD + 1.8;
+  y = flowRuns(doc, segment(x.exTr || "", p, "tr"), M.l, y, CW, LEAD, true).y + 3.8;
+
+  doc.setDrawColor(228, 224, 214);
+  doc.setLineWidth(0.15);
+  doc.line(M.l, y, PW - M.r, y);
+  return y + 5.4;
+}
+
+function blankSentence(x) {
+  const t = (x.pairs && x.pairs[0] && x.pairs[0].en) || x.w;
+  return (x.ex || "").replace(new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"), "__________");
+}
+
+function examHeight(doc, x) {
+  doc.setFontSize(11);
+  const n = flowRuns(doc, [{ text: blankSentence(x), c: -1 }], 0, 0, CW, LEAD, false).lines;
+  return 6.9 + n * LEAD + 8.5;
+}
+
+function examEntry(doc, x, y) {
+  doc.setFont("Kalam", KALAM.bold ? "bold" : "normal");
+  doc.setFontSize(13);
+  doc.setTextColor(30, 91, 82);
+  const cue = x.tr || "—";
+  doc.text(cue, M.l, y);
+  const cueEnd = M.l + doc.getTextWidth(cue) + 6;
+  doc.setDrawColor(196, 192, 184);
+  doc.setLineWidth(0.25);
+  doc.setLineDashPattern([0.6, 1.1], 0);
+  doc.line(cueEnd, y + 0.8, PW - M.r, y + 0.8);
+  doc.setLineDashPattern([], 0);
+  y += 6.9;
+
+  doc.setFont("Kalam", "normal");
+  doc.setFontSize(11);
+  doc.setTextColor(60, 66, 70);
+  y = flowRuns(doc, [{ text: blankSentence(x), c: -1 }], M.l, y, CW, LEAD, true).y + 5.5;
+
+  doc.setDrawColor(228, 224, 214);
+  doc.setLineWidth(0.15);
+  doc.line(M.l, y, PW - M.r, y);
+  return y + 6.2;
+}
+
+async function buildPdf() {
+  if (!WORDS.length) { toast("Defter boş."); return; }
+  const missing = WORDS.filter(x => !x.ex);
+
+  busyShow("PDF hazırlanıyor", "Font yükleniyor…");
+  try {
+    await ensureFonts();
+  } catch (e) {
+    busyHide();
+    toast("Font dosyaları repoda yok. Kalam-Regular.ttf, Kalam-Bold.ttf ve Kalam-Light.ttf dosyalarını kesit.html'in yanına yükle.", 6000);
+    return;
+  }
+
+  // eksik cümleleri üret
+  if (missing.length) {
+    if (!state.key) { busyHide(); toast("Cümle üretmek için Gemini anahtarı gerekli."); openSettings(); return; }
+    for (let i = 0; i < missing.length; i++) {
+      if (stopFlag) { busyHide(); toast("Durduruldu."); return; }
+      busyUpd("Örnek cümleler kuruluyor · " + (i + 1) + " / " + missing.length, (i / missing.length) * 100);
+      try {
+        const s = await makeSentence(missing[i].w, missing[i].tr);
+        missing[i].ex = s.en; missing[i].exTr = s.tr; missing[i].pairs = s.pairs;
+        saveWords();
+      } catch (e) {
+        missing[i].ex = missing[i].ex || "";
+      }
+      await sleep(250);
+    }
+  }
+
+  busyUpd("Sayfalar diziliyor…", 100);
+  await sleep(60);
+
+  const ready = WORDS.filter(x => x.ex);
+  if (!ready.length) { busyHide(); toast("Hiç cümle üretilemedi."); return; }
+
+  const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+  regFonts(doc, KALAM);
+
+  const stamp = new Date().toLocaleDateString("tr-TR");
+  const groups = [];
+  for (let i = 0; i < ready.length; i += 10) groups.push(ready.slice(i, i + 10));
+
+  let page = 0, y = 0, sub = stamp;
+  const limit = PH - M.b;
+  const newPage = () => {
+    if (page) doc.addPage();
+    page++;
+    pdfHeader(doc, sub, page);
+    y = M.t + 3;
+  };
+
+  // çalışma sayfaları
+  groups.forEach(grp => {
+    newPage();
+    grp.forEach(x => {
+      if (y + studyHeight(doc, x) > limit) newPage();
+      y = studyEntry(doc, x, y);
+    });
+  });
+
+  // sınav sayfaları
+  sub = "sınav · cevaplar çalışma sayfalarında";
+  groups.forEach(grp => {
+    newPage();
+    grp.forEach(x => {
+      if (y + examHeight(doc, x) > limit) newPage();
+      y = examEntry(doc, x, y);
+    });
+  });
+
+  const name = "kelime-defteri-" + new Date().toISOString().slice(0, 10) + ".pdf";
+  doc.save(name);
+  busyHide();
+  toast(ready.length + " kelime · " + page + " sayfa hazır.", 4000);
+}
+
+$("#pdfBtn").addEventListener("click", buildPdf);
 
 /* ============================================================
    Ayarlar / arayüz bağlantıları
