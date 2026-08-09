@@ -124,6 +124,23 @@ textarea.inp{min-height:150px;resize:vertical;line-height:1.5}
 #content .tr.wait{color:var(--ink3);background:var(--line2);border-left-color:var(--line)}
 mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 ::selection{background:var(--marker);color:#1A1F35}
+#content .bm{position:relative}
+#content .bm::before{
+  content:"";position:absolute;left:-16px;right:-4px;top:-9px;height:2px;
+  background:linear-gradient(90deg,var(--acc),transparent 78%);border-radius:2px;
+}
+#content .bm::after{
+  content:"kaldığın yer";position:absolute;left:-16px;top:-24px;
+  font-family:Archivo,sans-serif;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  font-weight:700;color:var(--acc);
+}
+.backmark{
+  position:fixed;right:14px;bottom:calc(118px + env(safe-area-inset-bottom));z-index:39;
+  background:var(--card);border:1px solid var(--acc);color:var(--acc);
+  border-radius:999px;padding:9px 15px;font-size:13px;font-weight:600;box-shadow:var(--sh);
+  display:none;align-items:center;gap:6px;
+}
+.backmark.on{display:flex}
 .ocrbox{border:1px dashed var(--line);border-radius:13px;padding:16px;text-align:center;margin:0 0 16px;
   background:var(--card2);font-family:Archivo,sans-serif}
 .ocrbox p{font-size:13px !important;color:var(--ink2);margin:0 0 10px !important}
@@ -176,6 +193,32 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .savebtn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .savebtn.done{background:var(--acc-soft);color:var(--acc-ink)}
 .savebtn.done svg{fill:currentColor}
+
+/* ---------- sorular ---------- */
+.qhead{display:flex;align-items:center;font-size:13px;color:var(--ink2);font-weight:600;margin-bottom:8px}
+.qlink{font-size:13px;color:var(--acc);font-weight:600}
+.qpassage{font-family:"Source Serif 4",serif;font-size:15.5px;line-height:1.6;background:var(--card2);
+  border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:14px;max-height:38vh;overflow:auto}
+.qstem{font-family:"Source Serif 4",serif;font-size:18px;line-height:1.55;margin-bottom:16px;font-weight:600}
+.qopt{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;background:var(--card);
+  border:1.5px solid var(--line);border-radius:13px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--sh)}
+.qopt .ltr{width:25px;height:25px;flex:none;border-radius:8px;background:var(--card2);color:var(--ink2);
+  display:grid;place-items:center;font-size:13px;font-weight:700}
+.qopt .txt{flex:1;font-family:"Source Serif 4",serif;font-size:16px;line-height:1.45}
+.qopt.sel{border-color:var(--deep)}
+.qopt.ok{border-color:#1E7A45;background:#1E7A450F}
+.qopt.ok .ltr{background:#1E7A45;color:#fff}
+.qopt.no{border-color:var(--acc);background:var(--acc-soft)}
+.qopt.no .ltr{background:var(--acc);color:#fff}
+.qfeed{border-radius:13px;padding:14px;margin-top:14px;font-size:15px;line-height:1.6}
+.qfeed.good{background:#1E7A4514;border:1px solid #1E7A4540}
+.qfeed.bad{background:var(--acc-soft);border:1px solid var(--acc)}
+.qfeed h4{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin:14px 0 6px;font-weight:600}
+.qfeed h4:first-child{margin-top:0}
+.qfeed p{margin:0 0 9px}
+.qfeed ul{margin:6px 0 9px;padding-left:18px}
+.qfeed li{margin-bottom:5px}
+.qwarn{font-size:12.5px;color:var(--warn);margin-top:10px;line-height:1.45}
 
 /* ---------- defterler ---------- */
 .wbar{display:flex;gap:8px;margin-bottom:12px}
@@ -302,6 +345,11 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
     <span><h3 id="resumeTitle">Son belge</h3><p id="resumeMeta"></p></span>
   </button>
 
+  <div id="libWrap" class="hid">
+    <div class="label">Kitaplığım</div>
+    <div id="libList"></div>
+  </div>
+
   <div class="label">Kaynak seç</div>
 
   <button class="src" id="pickPdf">
@@ -342,10 +390,65 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   <div class="wbar" style="margin-bottom:16px">
     <button class="btn ghost" id="aiCleanBtn" style="flex:1;font-size:13.5px;padding:10px">Gemini ile temizle</button>
     <button class="btn ghost" id="rawBtn" style="flex:1;font-size:13.5px;padding:10px">Ham metni göster</button>
-    <button class="btn ghost" id="newSrcBtn" style="flex:0 0 auto;font-size:13.5px;padding:10px 14px">Yeni kaynak</button>
+    <button class="btn" id="saveDocBtn" style="flex:0 0 auto;font-size:13.5px;padding:10px 14px">Kaydet</button>
+    <button class="btn ghost" id="newSrcBtn" style="flex:0 0 auto;font-size:13.5px;padding:10px 14px">Yeni</button>
   </div>
   <div id="content"></div>
 </section>
+<!-- ============ SORULAR ============ -->
+<section class="screen max" id="quiz">
+  <div id="qStart">
+    <h1 class="lede" style="font-size:23px;margin-bottom:6px">Soru çöz</h1>
+    <p class="sub">Soru kitapçığı yükle ya da tek bir soruyu yapıştır. Şıkları işaretle, takıldığında çözümü anlattır.</p>
+    <button class="src" id="qPdf">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+      <span><h3>PDF yükle</h3><p>Deneme, çıkmış sorular, çalışma kitabı. Sorular tek tek ayıklanır.</p></span>
+    </button>
+    <input type="file" id="qFile" accept="application/pdf" class="hid">
+    <button class="src" id="qPaste">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
+      <span><h3>Soru yapıştır</h3><p>Tek bir soru ya da birkaç tanesi. Kopyala yapıştır yeter.</p></span>
+    </button>
+    <div class="hid" id="qPasteBox">
+      <textarea class="inp" id="qText" placeholder="Soruyu şıklarıyla birlikte yapıştır…"></textarea>
+      <div class="field"><button class="btn wide" id="qTextGo">Soruları çıkar</button></div>
+    </div>
+    <div id="qResume" class="hid">
+      <div class="label">Kaldığın deneme</div>
+      <button class="src" id="qResumeBtn">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9"/><path d="M3 4v5h5"/></svg></span>
+        <span><h3 id="qResumeTitle"></h3><p id="qResumeMeta"></p></span>
+      </button>
+    </div>
+    <div id="qWrongWrap" class="hid">
+      <div class="label">Yanlışlarım</div>
+      <button class="src" id="qWrongBtn">
+        <span class="ic" style="background:var(--acc-soft);color:var(--acc-ink)"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></span>
+        <span><h3 id="qWrongTitle"></h3><p>Yanlış yaptığın soruları tekrar çöz</p></span>
+      </button>
+    </div>
+  </div>
+
+  <div id="qRun" class="hid">
+    <div class="qhead">
+      <span id="qCount"></span>
+      <div style="flex:1"></div>
+      <button id="qQuit" class="qlink">Bitir</button>
+    </div>
+    <div class="prog" style="margin:0 0 16px"><i id="qBar"></i></div>
+    <div id="qPassage" class="qpassage hid"></div>
+    <div id="qStem" class="qstem"></div>
+    <div id="qOpts"></div>
+    <div id="qFeed"></div>
+    <div class="field" style="margin-top:16px">
+      <button class="btn ghost" id="qPrev" style="flex:0 0 auto">‹</button>
+      <button class="btn ghost" id="qWhy" style="flex:1">Çözümü anlat</button>
+      <button class="btn" id="qNext" style="flex:1">Sonraki ›</button>
+    </div>
+    <button class="qlink" id="qBad" style="margin-top:14px;display:block;width:100%;text-align:center">Bu soru hatalı, at</button>
+  </div>
+</section>
+
 <!-- ============ KELİME DEFTERİ ============ -->
 <section class="screen max" id="words">
   <h1 class="lede" style="font-size:22px;margin-bottom:14px">Kelime defteri</h1>
@@ -383,6 +486,7 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 </div>
 
 <!-- ============ DOCK ============ -->
+<button class="backmark" id="backMark">↑ Ayraca dön</button>
 <div class="dock hid" id="dock">
   <button class="pill hid" id="selBtn">
     <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
@@ -493,6 +597,10 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
     <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 016.5 3H11v18H6.5A2.5 2.5 0 014 18.5z"/><path d="M20 5.5A2.5 2.5 0 0017.5 3H13v18h4.5a2.5 2.5 0 002.5-2.5z"/></svg>
     <span>Oku</span>
   </button>
+  <button class="tb" data-go="quiz">
+    <svg viewBox="0 0 24 24"><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9.5"/></svg>
+    <span>Sorular</span>
+  </button>
   <button class="tb" data-go="words">
     <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M9 7h7"/></svg>
     <span>Defter</span>
@@ -546,6 +654,8 @@ const state = {
   raw: [],
   showRaw: false,
   docY: 0,
+  mark: null,
+  libId: null,
   title: "",
   pdf: null,
   translatingAll: false,
@@ -1075,8 +1185,38 @@ function renderDoc(blocks) {
   const c = $("#content");
   c.innerHTML = "";
   const frag = document.createDocumentFragment();
-  blocks.forEach(b => frag.appendChild(renderBlock(b)));
+  blocks.forEach((b, i) => {
+    const el = renderBlock(b);
+    el.dataset.i = i;
+    frag.appendChild(el);
+  });
   c.appendChild(frag);
+  paintMark();
+}
+
+/* ---------- ayraç ---------- */
+function paintMark() {
+  $$("#content .bm").forEach(e => e.classList.remove("bm"));
+  if (state.mark == null) return;
+  const el = $('#content [data-i="' + state.mark + '"]');
+  if (el) el.classList.add("bm");
+}
+
+function markEl() { return state.mark == null ? null : $('#content [data-i="' + state.mark + '"]'); }
+
+function gotoMark() {
+  const el = markEl();
+  if (!el) { toast("Ayraç bu belgede yok."); return; }
+  window.scrollTo({ top: window.scrollY + el.getBoundingClientRect().top - 110, behavior: "smooth" });
+}
+
+function updateBackMark() {
+  const el = markEl();
+  const btn = $("#backMark");
+  if (!el || state.screen !== "reader") { btn.classList.remove("on"); return; }
+  const t = el.getBoundingClientRect().top;
+  btn.classList.toggle("on", t < -window.innerHeight * 0.8 || t > window.innerHeight * 1.6);
+  btn.innerHTML = t < 0 ? "↑ Ayraca dön" : "↓ Ayraca dön";
 }
 
 function openDoc(title, blocks, meta) {
@@ -1088,6 +1228,7 @@ function openDoc(title, blocks, meta) {
   state.title = title;
   state.section = "Başlangıç";
   state.docY = 0;
+  state.mark = null;
   renderDoc(kept);
   saveDoc();
   show("reader");
@@ -1097,13 +1238,13 @@ function openDoc(title, blocks, meta) {
 
 function show(which) {
   $$(".screen").forEach(s => s.classList.toggle("on", s.id === which));
-  $("#dock").classList.toggle("hid", which !== "reader");
+  $("#dock").classList.toggle("hid", which !== "reader" && which !== "quiz");
   $("#fontBtn").classList.toggle("hid", which !== "reader");
   $("#allBtn").classList.toggle("hid", which !== "reader");
-  if (which !== "reader") { $("#selBtn").classList.add("hid"); closeSheet(); }
-  const tabOf = { home: "home", reader: "home", words: "words", gram: "gram" };
+  if (which !== "reader" && which !== "quiz") { $("#selBtn").classList.add("hid"); closeSheet(); }
+  const tabOf = { home: "home", reader: "home", quiz: "quiz", words: "words", gram: "gram" };
   $$(".tb").forEach(b => b.classList.toggle("on", b.dataset.go === tabOf[which]));
-  const titles = { home: ["Kesit", "İngilizce makale okuyucu"], words: ["Defter", "Kelimelerim"], gram: ["Defter", "Gramer notlarım"] };
+  const titles = { home: ["Kesit", "İngilizce makale okuyucu"], quiz: ["Çalışma", "Soru çöz"], words: ["Defter", "Kelimelerim"], gram: ["Defter", "Gramer notlarım"] };
   if (which !== "reader") {
     $("#crumbTop").textContent = titles[which][0];
     $("#crumbMain").textContent = titles[which][1];
@@ -1113,14 +1254,15 @@ function show(which) {
     $("#crumbMain").textContent = state.section || "Başlangıç";
   }
   state.screen = which;
-  if (which === "reader") window.scrollTo(0, state.docY || 0);
-  else window.scrollTo(0, 0);
+  if (which === "reader") { window.scrollTo(0, state.docY || 0); setTimeout(updateBackMark, 60); }
+  else { window.scrollTo(0, 0); $("#backMark").classList.remove("on"); }
 }
 
 $$(".tb").forEach(b => b.addEventListener("click", () => {
   const go = b.dataset.go;
   if (go === "set") { openSettings(); return; }
   if (go === "home") { show(state.blocks.length && state.screen !== "reader" ? "reader" : "home"); return; }
+  if (go === "quiz") refreshQuizHome();
   if (go === "words") renderWords();
   if (go === "gram") renderGrams();
   show(go);
@@ -1142,6 +1284,12 @@ window.addEventListener("scroll", () => {
       state.section = cur;
       $("#crumbMain").textContent = cur;
     }
+    let idx = null;
+    $$("#content [data-i]").forEach(el => {
+      if (el.getBoundingClientRect().top < 120) idx = parseInt(el.dataset.i, 10);
+    });
+    if (idx != null && idx !== state.mark) { state.mark = idx; paintMark(); }
+    updateBackMark();
     state.docY = window.scrollY;
     saveDoc();
   }, 90);
@@ -1156,7 +1304,7 @@ function saveDoc() {
   docSaveT = setTimeout(() => {
     if (!state.raw.length) return;
     try {
-      const j = JSON.stringify({ title: state.title, raw: state.raw, y: state.docY || 0, at: Date.now() });
+      const j = JSON.stringify({ title: state.title, raw: state.raw, y: state.docY || 0, mark: state.mark, at: Date.now() });
       if (j.length > DOC_LIMIT) { store.del("doc"); return; }
       store.set("doc", j);
     } catch (e) {}
@@ -1170,6 +1318,7 @@ function restoreDoc() {
   state.raw = d.raw;
   state.title = d.title || "Makale";
   state.docY = d.y || 0;
+  state.mark = (d.mark == null ? null : d.mark);
   state.showRaw = false;
   state.blocks = cleanBlocks(d.raw);
   renderDoc(state.blocks);
@@ -1190,8 +1339,7 @@ function selInfo() {
   const txt = sel.toString().replace(/\s+/g, " ").trim();
   if (!txt) return null;
   const r = sel.getRangeAt(0);
-  const host = $("#content");
-  if (!host.contains(r.commonAncestorContainer)) return null;
+  if (!$("#content").contains(r.commonAncestorContainer) && !$("#quiz").contains(r.commonAncestorContainer)) return null;
   let node = r.commonAncestorContainer;
   if (node.nodeType === 3) node = node.parentNode;
   const para = node.closest("p, h2, li") || node;
@@ -1226,9 +1374,9 @@ function markRange(range) {
 
 // çift dokunuşla kelime
 let tapT = 0, tapX = 0, tapY = 0;
-$("#content").addEventListener("click", e => {
+[$("#content"), $("#quiz")].forEach(host => host.addEventListener("click", e => {
   if (!state.tapWord) return;
-  if (e.target.closest(".tr, .ocrbox, button")) return;
+  if (e.target.closest(".tr, .ocrbox, .src, .tb, .btn, .qlink")) return;
 
   const now = Date.now();
   const near = Math.abs(e.clientX - tapX) < 32 && Math.abs(e.clientY - tapY) < 32;
@@ -1257,9 +1405,9 @@ $("#content").addEventListener("click", e => {
   r.setStart(pos.startContainer, a);
   r.setEnd(pos.startContainer, b);
   let node = pos.startContainer.parentNode;
-  const para = node.closest("p, h2, li") || node;
+  const para = node.closest("p, h2, li, .qstem, .qpassage, .txt, .qfeed") || node;
   runSheet({ text: word, context: para.textContent, range: r });
-});
+}));
 
 /* ---------- alt panel ---------- */
 let sheetJob = null;
@@ -1287,6 +1435,31 @@ async function runSheet(info) {
   $("#selBtn").classList.add("hid");
   openSheet();
   runTab("tr");
+}
+
+
+/* ---------- cümle sınırı: kısaltmalara ve ondalıklara takılmadan ---------- */
+const ABBR = /\b(et al|e\.g|i\.e|vs|cf|approx|Fig|Figs|Tab|Eq|Ref|Refs|No|Dr|Prof|Mr|Mrs|Ms|St|Inc|Ltd|Jr|Sr|ca|viz|etc|ibid|min|max|sec|hr|wk|mo|yr|mg|kg|mL|dL|mmHg|i\.v|p\.o|b\.i\.d|t\.i\.d)\./gi;
+const MARK = "\u0001";
+
+function splitSentences(text) {
+  let t = String(text || "");
+  t = t.replace(ABBR, m => m.replace(/\./g, MARK));          // kısaltmalar
+  t = t.replace(/(\d)\.(\d)/g, "$1" + MARK + "$2");           // 0.5 mg
+  t = t.replace(/\b([A-Z])\./g, "$1" + MARK);                 // J. Smith
+  const parts = t.split(/(?<=[.!?])["')\]]?\s+(?=[A-Z"'(\[])/);
+  return parts.map(x => x.split(MARK).join(".").trim()).filter(x => x.length > 1);
+}
+
+/* bir kelimenin içinde bulunduğu cümleyi bul */
+function sentenceAround(context, word) {
+  const ctx = String(context || "");
+  if (!ctx) return word;
+  const sents = splitSentences(ctx);
+  if (!sents.length) return ctx;
+  const w = String(word || "").toLowerCase();
+  const hit = sents.find(x => new RegExp("(^|[^a-z])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "([^a-z]|$)", "i").test(x));
+  return hit || sents[0];
 }
 
 function isWordSel(t) { return t.trim().split(/\s+/).length <= 3; }
@@ -1338,10 +1511,13 @@ async function runTab(tab) {
       if (sheetJob !== job) return;
       out.innerHTML = clean(html);
     } else {
-      const g = await grammarSel(job.text, job.context);
+      const target = word ? sentenceAround(job.context, job.text) : job.text;
+      $("#chosen").classList.remove("hid");
+      $("#chosen").textContent = target;
+      const g = await grammarSel(target, job.context);
       if (sheetJob !== job) return;
       out.innerHTML = "";
-      out.appendChild(gramCardEl(job.text, g));
+      out.appendChild(gramCardEl(target, g));
     }
   } catch (e) {
     if (sheetJob !== job) return;
@@ -2062,6 +2238,388 @@ async function buildGramPdf() {
 }
 $("#gpdfBtn").addEventListener("click", buildGramPdf);
 
+
+
+/* ============================================================
+   Soru çözme
+   ============================================================ */
+let QZ = { title: "", qs: [], i: 0, mode: "normal" };
+try { QZ = JSON.parse(store.get("quiz", "null")) || QZ; } catch (e) {}
+function saveQuiz() { try { store.set("quiz", JSON.stringify(QZ)); } catch (e) {} }
+
+let WRONG = [];
+try { WRONG = JSON.parse(store.get("wrong", "[]")) || []; } catch (e) { WRONG = []; }
+function saveWrong() { store.set("wrong", JSON.stringify(WRONG)); }
+
+/* --- cevap anahtarını metinden yakala: "1.A 2.C" / "1-A" / "1) A" --- */
+function parseKey(text) {
+  const key = {};
+  const rx = /(?:^|[\s;,])(\d{1,3})\s*[).\-:]?\s*([A-EÂ])(?![A-Za-z])/g;
+  let m, hits = 0;
+  while ((m = rx.exec(text))) {
+    const n = parseInt(m[1], 10);
+    if (n < 1 || n > 200) continue;
+    key[n] = m[2].toUpperCase();
+    hits++;
+  }
+  return hits >= 5 ? key : null;
+}
+
+const QSYS = `Sen YÖKDİL Sağlık sınavına hazırlanan bir öğrenciye yardım eden bir uzmansın.
+SADECE geçerli JSON döndür. Markdown, kod bloğu işareti, açıklama YAZMA.`;
+
+async function extractQuestions(text) {
+  const chunks = [];
+  const CH = 6000;
+  for (let i = 0; i < text.length; i += CH) chunks.push(text.slice(i, i + CH));
+  const all = [];
+  for (let i = 0; i < chunks.length; i++) {
+    if (stopFlag) break;
+    busyUpd("Sorular ayıklanıyor · " + (i + 1) + " / " + chunks.length, (i / chunks.length) * 100);
+    const prompt = `Aşağıdaki metinden çoktan seçmeli soruları çıkar.
+
+Şu alanlara sahip nesnelerden oluşan bir JSON DİZİSİ döndür:
+"n": sorunun numarası (metinde varsa). Yoksa 0.
+"stem": sorunun kökü. Boşluk doldurma sorusunda boşluğu ---- olarak bırak.
+"options": {"A": "...", "B": "...", "C": "...", "D": "...", "E": "..."} biçiminde nesne. Şık sayısı azsa olanları ver.
+"passage": soru bir okuma parçasına bağlıysa o parçanın metni. Değilse boş bırak. Aynı parçaya bağlı sorularda parçayı her birine yaz.
+
+Kurallar:
+- Metni AYNEN kopyala, düzeltme veya çeviri yapma.
+- Cevap anahtarı, sayfa numarası, başlık, yönerge satırlarını soru sayma.
+- Yarım kalmış, şıkları eksik soruları atla.
+- Hiç soru yoksa boş dizi döndür: []
+
+METİN:
+${chunks[i]}`;
+    try {
+      const raw = await gemini(prompt, QSYS, { temp: 0 });
+      let t = raw.replace(/```json|```/g, "").trim();
+      const a = t.indexOf("["), b = t.lastIndexOf("]");
+      if (a >= 0 && b > a) t = t.slice(a, b + 1);
+      const arr = JSON.parse(t);
+      (Array.isArray(arr) ? arr : []).forEach(q => {
+        const opts = q.options || {};
+        const keys = Object.keys(opts).filter(k => String(opts[k] || "").trim());
+        if (!q.stem || keys.length < 2) return;
+        all.push({
+          n: parseInt(q.n, 10) || 0,
+          stem: String(q.stem).trim(),
+          options: opts,
+          passage: String(q.passage || "").trim(),
+          answer: null, fromKey: false, pick: null, why: null
+        });
+      });
+    } catch (e) { /* bu parça atlanır */ }
+    await sleep(200);
+  }
+  return all;
+}
+
+async function startQuiz(text, title) {
+  if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
+  busyShow("Sorular hazırlanıyor", "Metin okunuyor…");
+  const qs = await extractQuestions(text);
+  if (!qs.length) { busyHide(); toast("Soru bulunamadı. Metni kontrol et."); return; }
+  const key = parseKey(text);
+  if (key) qs.forEach(q => { if (key[q.n]) { q.answer = key[q.n]; q.fromKey = true; } });
+  QZ = { title: title || "Sorular", qs, i: 0, mode: "normal" };
+  saveQuiz();
+  busyHide();
+  toast(qs.length + " soru bulundu" + (key ? " · cevap anahtarı okundu" : " · anahtar yok, cevaplar modelce bulunacak"), 4000);
+  showQuiz();
+}
+
+function showQuiz() {
+  $("#qStart").classList.add("hid");
+  $("#qRun").classList.remove("hid");
+  drawQ();
+}
+function endQuiz() {
+  $("#qRun").classList.add("hid");
+  $("#qStart").classList.remove("hid");
+  refreshQuizHome();
+}
+
+function curQ() { return QZ.qs[QZ.i]; }
+
+function drawQ() {
+  const q = curQ();
+  if (!q) { endQuiz(); return; }
+  $("#qCount").textContent = (QZ.i + 1) + " / " + QZ.qs.length + (QZ.mode === "wrong" ? " · yanlışlarım" : "");
+  $("#qBar").style.width = ((QZ.i + 1) / QZ.qs.length * 100) + "%";
+  const pas = $("#qPassage");
+  pas.classList.toggle("hid", !q.passage);
+  if (q.passage) pas.textContent = q.passage;
+  $("#qStem").textContent = (q.n ? q.n + ". " : "") + q.stem;
+
+  const box = $("#qOpts");
+  box.innerHTML = Object.keys(q.options).sort().map(k =>
+    `<button class="qopt" data-k="${k}"><span class="ltr">${k}</span><span class="txt">${esc(q.options[k])}</span></button>`).join("");
+  box.querySelectorAll(".qopt").forEach(b => b.addEventListener("click", () => pick(b.dataset.k)));
+  $("#qFeed").innerHTML = "";
+  if (q.pick) paintPick();
+  if (q.why) showWhy(q.why);
+}
+
+function paintPick() {
+  const q = curQ();
+  $$("#qOpts .qopt").forEach(b => {
+    const k = b.dataset.k;
+    b.classList.remove("sel", "ok", "no");
+    if (q.answer && k === q.answer) b.classList.add("ok");
+    else if (k === q.pick) b.classList.add(q.answer ? "no" : "sel");
+  });
+}
+
+async function pick(k) {
+  const q = curQ();
+  if (q.pick) return;
+  q.pick = k;
+  saveQuiz();
+
+  if (!q.answer) {
+    $("#qFeed").innerHTML = '<div class="qfeed"><span class="spin dark"></span> Doğru cevap aranıyor…</div>';
+    try { await solveQ(q); } catch (e) { $("#qFeed").innerHTML = '<div class="qfeed bad">' + esc(e.message) + "</div>"; return; }
+  }
+  paintPick();
+  const right = q.pick === q.answer;
+  $("#qFeed").innerHTML = `<div class="qfeed ${right ? "good" : "bad"}">
+    <b>${right ? "Doğru." : "Yanlış. Doğrusu " + esc(q.answer || "?") + "."}</b>
+    ${q.fromKey ? "" : '<div class="qwarn">Bu cevap kitapçığın anahtarından değil, model tarafından bulundu. Şüphelenirsen doğrula.</div>'}
+  </div>`;
+  if (!right) {
+    const id = (q.n || 0) + "|" + q.stem.slice(0, 60);
+    if (!WRONG.some(x => x.id === id)) { WRONG.push({ id, q: JSON.parse(JSON.stringify(q)), at: Date.now() }); saveWrong(); }
+  }
+  saveQuiz();
+}
+
+async function solveQ(q) {
+  const opts = Object.keys(q.options).sort().map(k => k + ") " + q.options[k]).join("\n");
+  const d = parseJson(await gemini(
+    `Aşağıdaki çoktan seçmeli sorunun doğru cevabını bul.
+SORU: ${q.stem}
+${q.passage ? "PARÇA: " + q.passage.slice(0, 2500) + "\n" : ""}ŞIKLAR:
+${opts}
+
+Şu alanlara sahip JSON döndür:
+"answer": doğru şıkkın harfi. Sadece harf.
+"sure": 0 ile 100 arası, ne kadar emin olduğun.`, QSYS, { temp: 0 }));
+  q.answer = String(d.answer || "").trim().toUpperCase().slice(0, 1);
+  q.sure = parseInt(d.sure, 10) || 0;
+  saveQuiz();
+}
+
+async function explainQ() {
+  const q = curQ();
+  if (!q) return;
+  if (!q.answer) { await solveQ(q).catch(() => {}); paintPick(); }
+  $("#qFeed").innerHTML = '<div class="qfeed"><span class="spin dark"></span> Çözüm hazırlanıyor…</div>';
+  const opts = Object.keys(q.options).sort().map(k => k + ") " + q.options[k]).join("\n");
+  try {
+    const d = parseJson(await gemini(
+      `Aşağıdaki soruyu, konuyu hiç bilmeyen bir öğrenciye anlatır gibi çöz. Türkçe yaz, sade ol.
+SORU: ${q.stem}
+${q.passage ? "PARÇA: " + q.passage.slice(0, 2500) + "\n" : ""}ŞIKLAR:
+${opts}
+DOĞRU CEVAP: ${q.answer}
+ÖĞRENCİNİN İŞARETLEDİĞİ: ${q.pick || "-"}
+
+Şu alanlara sahip JSON döndür:
+"soru": soru ne istiyor, tek cümlede.
+"anahtar": cümlede doğru cevabı ele veren ipucu nedir. Metindeki ilgili kısmı tırnak içinde göster.
+"cozum": doğru cevabın neden doğru olduğu. 2-3 cümle.
+"eleme": her yanlış şık için bir madde içeren dizi. Her madde "B) ... çünkü ..." biçiminde başlasın ve neden elendiğini açıklasın.
+"ders": bu sorudan çıkarılacak genel kural. Tek cümle, benzer sorularda işe yarasın.`, QSYS, { temp: 0.3 }));
+    q.why = d;
+    saveQuiz();
+    showWhy(d);
+  } catch (e) {
+    $("#qFeed").innerHTML = '<div class="qfeed bad">' + esc(e.message) + "</div>";
+  }
+}
+
+function showWhy(d) {
+  const right = curQ().pick === curQ().answer;
+  $("#qFeed").innerHTML = `<div class="qfeed ${right ? "good" : "bad"}">
+    ${curQ().pick ? `<b>${right ? "Doğru." : "Yanlış. Doğrusu " + esc(curQ().answer || "?") + "."}</b>` : ""}
+    ${d.soru ? "<h4>Soru ne istiyor</h4><p>" + esc(d.soru) + "</p>" : ""}
+    ${d.anahtar ? "<h4>Anahtar ipucu</h4><p>" + esc(d.anahtar) + "</p>" : ""}
+    ${d.cozum ? "<h4>Neden bu cevap</h4><p>" + esc(d.cozum) + "</p>" : ""}
+    ${Array.isArray(d.eleme) && d.eleme.length ? "<h4>Diğer şıklar neden değil</h4><ul>" + d.eleme.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>" : ""}
+    ${d.ders ? "<h4>Aklında kalsın</h4><p>" + esc(d.ders) + "</p>" : ""}
+    ${curQ().fromKey ? "" : '<div class="qwarn">Doğru cevap kitapçık anahtarından değil, model tarafından bulundu.</div>'}
+  </div>`;
+}
+
+function refreshQuizHome() {
+  const r = $("#qResume");
+  if (QZ.qs && QZ.qs.length) {
+    r.classList.remove("hid");
+    $("#qResumeTitle").textContent = QZ.title || "Sorular";
+    const done = QZ.qs.filter(q => q.pick).length;
+    $("#qResumeMeta").textContent = done + " / " + QZ.qs.length + " çözüldü";
+  } else r.classList.add("hid");
+  const w = $("#qWrongWrap");
+  if (WRONG.length) { w.classList.remove("hid"); $("#qWrongTitle").textContent = WRONG.length + " yanlış soru"; }
+  else w.classList.add("hid");
+}
+
+/* --- düğmeler --- */
+$("#qPdf").addEventListener("click", () => $("#qFile").click());
+$("#qFile").addEventListener("change", async e => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  if (!window.pdfjsLib) { toast("PDF motoru yüklenemedi."); return; }
+  busyShow("PDF okunuyor", "Sayfalar taranıyor…");
+  try {
+    const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+    let text = "";
+    for (let p = 1; p <= pdf.numPages; p++) {
+      busyUpd("Sayfa " + p + " / " + pdf.numPages, (p / pdf.numPages) * 40);
+      const page = await pdf.getPage(p);
+      const vp = page.getViewport({ scale: 1 });
+      text += itemsToParagraphs((await page.getTextContent()).items, vp.width).join("\n") + "\n";
+    }
+    if (text.trim().length < 200) { busyHide(); toast("Bu PDF'ten metin çıkmadı, taranmış olabilir."); return; }
+    await startQuiz(text, f.name.replace(/\.pdf$/i, ""));
+  } catch (e) { busyHide(); toast("Okunamadı: " + e.message); }
+});
+$("#qPaste").addEventListener("click", () => { $("#qPasteBox").classList.toggle("hid"); $("#qText").focus(); });
+$("#qTextGo").addEventListener("click", () => {
+  const t = $("#qText").value.trim();
+  if (t.length < 20) { toast("Soruyu yapıştır."); return; }
+  startQuiz(t, "Yapıştırılan soru");
+});
+$("#qResumeBtn").addEventListener("click", () => { QZ.mode = "normal"; showQuiz(); });
+$("#qWrongBtn").addEventListener("click", () => {
+  if (!WRONG.length) return;
+  QZ = { title: "Yanlışlarım", qs: WRONG.map(x => Object.assign({}, x.q, { pick: null, why: null })), i: 0, mode: "wrong" };
+  saveQuiz(); showQuiz();
+});
+$("#qNext").addEventListener("click", () => { if (QZ.i < QZ.qs.length - 1) { QZ.i++; saveQuiz(); drawQ(); } else { toast("Son soru."); endQuiz(); } });
+$("#qPrev").addEventListener("click", () => { if (QZ.i > 0) { QZ.i--; saveQuiz(); drawQ(); } });
+$("#qWhy").addEventListener("click", explainQ);
+$("#qQuit").addEventListener("click", endQuiz);
+$("#qBad").addEventListener("click", () => {
+  if (!QZ.qs.length) return;
+  QZ.qs.splice(QZ.i, 1);
+  if (QZ.i >= QZ.qs.length) QZ.i = Math.max(0, QZ.qs.length - 1);
+  saveQuiz();
+  toast("Soru atıldı.");
+  QZ.qs.length ? drawQ() : endQuiz();
+});
+
+/* ============================================================
+   Kitaplık — kaydedilen belgeler
+   ============================================================ */
+let LIB = [];
+try { LIB = JSON.parse(store.get("lib", "[]")) || []; } catch (e) { LIB = []; }
+function saveLib() { store.set("lib", JSON.stringify(LIB)); }
+
+function fbNode(path, tok) {
+  return FB.db.replace(/\/+$/, "") + "/users/" + FB.uid + "/" + path + ".json?auth=" + encodeURIComponent(tok);
+}
+
+async function libPut(id, body) {
+  if (!FB.refresh) return false;
+  const tok = await fbToken();
+  const r = await fetch(fbNode("docs/" + id, tok), {
+    method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
+  });
+  return r.ok;
+}
+async function libGet(id) {
+  if (!FB.refresh) return null;
+  const tok = await fbToken();
+  const r = await fetch(fbNode("docs/" + id, tok), { cache: "no-store" });
+  if (!r.ok) return null;
+  return await r.json();
+}
+async function libDel(id) {
+  if (!FB.refresh) return;
+  const tok = await fbToken();
+  await fetch(fbNode("docs/" + id, tok), { method: "DELETE" });
+}
+
+async function saveCurrentDoc() {
+  if (!state.raw.length) { toast("Önce bir belge aç."); return; }
+  const name = prompt("Belgeye bir ad ver:", state.title || "Makale");
+  if (name === null) return;
+  const title = (name || "Makale").trim().slice(0, 120);
+  const id = state.libId || ("d" + Date.now().toString(36));
+  const body = { blocks: state.raw, title, at: Date.now() };
+
+  try { store.set("body_" + id, JSON.stringify(body)); } catch (e) {}
+
+  const rec = { id, title, at: Date.now(), n: state.raw.filter(b => b.type === "p").length, t: Date.now() };
+  LIB = LIB.filter(x => x.id !== id);
+  LIB.unshift(rec);
+  saveLib();
+  state.libId = id;
+  state.title = title;
+  $("#crumbTop").textContent = title;
+  renderLib();
+refreshQuizHome();
+
+  if (FB.refresh) {
+    toast("Kaydediliyor…");
+    const ok = await libPut(id, body).catch(() => false);
+    toast(ok ? "Kitaplığa kaydedildi." : "Cihaza kaydedildi, buluta gönderilemedi.");
+    syncSoon();
+  } else {
+    toast("Bu cihaza kaydedildi. Eşitleme kurulursa diğer cihazlara da gider.");
+  }
+}
+
+async function openLib(id) {
+  const rec = LIB.find(x => x.id === id);
+  if (!rec) return;
+  let body = null;
+  try { body = JSON.parse(store.get("body_" + id, "null")); } catch (e) {}
+  if (!body) {
+    toast("Buluttan alınıyor…");
+    body = await libGet(id).catch(() => null);
+    if (body) { try { store.set("body_" + id, JSON.stringify(body)); } catch (e) {} }
+  }
+  if (!body || !body.blocks) { toast("Belge bulunamadı."); return; }
+  state.libId = id;
+  openDoc(body.title || rec.title, body.blocks, "Kitaplık");
+}
+
+function removeLib(id) {
+  LIB = LIB.filter(x => x.id !== id);
+  saveLib();
+  tomb("l:" + id);
+  store.del("body_" + id);
+  libDel(id).catch(() => {});
+  if (state.libId === id) state.libId = null;
+  renderLib();
+  syncSoon();
+}
+
+function renderLib() {
+  const box = $("#libList"), wrap = $("#libWrap");
+  if (!LIB.length) { wrap.classList.add("hid"); return; }
+  wrap.classList.remove("hid");
+  box.innerHTML = LIB.slice(0, 40).map(x => `
+    <div class="witem" data-id="${esc(x.id)}" style="padding:13px 14px">
+      <div class="wtxt">
+        <div class="we" style="font-size:15.5px">${esc(x.title)}</div>
+        <div class="wm">${x.n || 0} paragraf · ${new Date(x.at).toLocaleDateString("tr-TR")}</div>
+      </div>
+      <div class="acts"><button class="del" aria-label="Sil">×</button></div>
+    </div>`).join("");
+  box.querySelectorAll(".witem").forEach(el => {
+    el.querySelector(".del").addEventListener("click", e => {
+      e.stopPropagation();
+      if (confirm("Bu belge silinsin mi?")) removeLib(el.dataset.id);
+    });
+    el.querySelector(".wtxt").addEventListener("click", () => openLib(el.dataset.id));
+  });
+}
+
 /* ============================================================
    Firebase eşitleme — asıl kopya bulutta, cihazlar ondan beslenir
    ============================================================ */
@@ -2200,12 +2758,14 @@ async function syncNow(quiet) {
     tombIn(remote && remote.tomb);
     WORDS = mergeList(WORDS, remote && remote.words, x => "w:" + norm(x.w));
     GRAMS = mergeList(GRAMS, remote && remote.grams, x => "g:" + gkey(x.s));
-    saveWords(); saveGrams();
-    await fbPush({ v: 1, at: new Date().toISOString(), words: WORDS, grams: GRAMS, tomb: tombOut() });
+    LIB = mergeList(LIB, remote && remote.lib, x => "l:" + x.id);
+    saveWords(); saveGrams(); saveLib();
+    await fbPush({ v: 1, at: new Date().toISOString(), words: WORDS, grams: GRAMS, lib: LIB, tomb: tombOut() });
     fbSet("last", new Date().toISOString());
     setSyncMsg(syncLabel());
     if (state.screen === "words") renderWords();
     if (state.screen === "gram") renderGrams();
+    renderLib();
     if (!quiet) toast("Eşitlendi · " + WORDS.length + " kelime, " + GRAMS.length + " not");
   } catch (e) {
     setSyncMsg("Eşitlenemedi: " + e.message);
@@ -2385,6 +2945,8 @@ $("#rawBtn").addEventListener("click", () => {
 });
 
 $("#newSrcBtn").addEventListener("click", () => show("home"));
+$("#backMark").addEventListener("click", gotoMark);
+$("#saveDocBtn").addEventListener("click", saveCurrentDoc);
 $("#resumeCard").addEventListener("click", () => show("reader"));
 
 /* kaynak seçiciler */
@@ -2405,6 +2967,7 @@ $("#textGo").addEventListener("click", () => {
 /* açılış */
 setFs(state.fs);
 restoreDoc();
+renderLib();
 if (FB.key && FB.db && FB.refresh) syncNow(true);
 if (state.key) loadModels(true);
 else setTimeout(() => toast("Başlamak için ayarlardan Gemini anahtarını gir.", 4000), 700);
