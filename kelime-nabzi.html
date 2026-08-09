@@ -388,7 +388,11 @@
 
       <div class="panel">
         <label class="field-label">Hoca (sesli sohbet) modeli</label>
-        <input type="text" id="live-model-input" placeholder="models/gemini-live-2.5-flash-native-audio">
+        <select id="live-model-input"><option value="">Önce "Modelleri Listele"ye bas</option></select>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="list-models-btn" style="flex:1;">Modelleri Listele</button>
+        </div>
+        <div id="list-models-status"></div>
         <div style="height:12px"></div>
         <label class="field-label">Hoca sesi</label>
         <select id="live-voice-select">
@@ -514,12 +518,61 @@
   const liveModelInput = document.getElementById("live-model-input");
   const liveVoiceSelect = document.getElementById("live-voice-select");
   const liveIncludeWords = document.getElementById("live-include-words");
-  liveModelInput.value = localStorage.getItem(LS_KEY_LIVE_MODEL) || "models/gemini-live-2.5-flash-native-audio";
+  const savedLiveModel = localStorage.getItem(LS_KEY_LIVE_MODEL) || "";
+  if(savedLiveModel){
+    liveModelInput.innerHTML = '<option value="'+savedLiveModel+'">'+savedLiveModel+'</option>';
+  }
   liveVoiceSelect.value = localStorage.getItem(LS_KEY_LIVE_VOICE) || "Kore";
   liveIncludeWords.checked = localStorage.getItem(LS_KEY_LIVE_INCLUDE_WORDS) !== "0";
   liveModelInput.addEventListener("change", ()=>localStorage.setItem(LS_KEY_LIVE_MODEL, liveModelInput.value.trim()));
   liveVoiceSelect.addEventListener("change", ()=>localStorage.setItem(LS_KEY_LIVE_VOICE, liveVoiceSelect.value));
   liveIncludeWords.addEventListener("change", ()=>localStorage.setItem(LS_KEY_LIVE_INCLUDE_WORDS, liveIncludeWords.checked ? "1" : "0"));
+
+  document.getElementById("list-models-btn").addEventListener("click", async ()=>{
+    const statusBox = document.getElementById("list-models-status");
+    if(!getApiKey()){
+      statusBox.innerHTML = '<div class="error-box">Önce API anahtarını kaydet.</div>';
+      return;
+    }
+    const btn = document.getElementById("list-models-btn");
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Listeleniyor…';
+    statusBox.innerHTML = "";
+    try{
+      const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models?key="+encodeURIComponent(getApiKey())+"&pageSize=200");
+      if(!res.ok){
+        const err = await res.json().catch(()=>({}));
+        throw new Error((err.error && err.error.message) || ("HTTP "+res.status));
+      }
+      const data = await res.json();
+      const liveModels = (data.models || []).filter(m=>{
+        const methods = m.supportedGenerationMethods || m.supported_generation_methods || [];
+        return methods.includes("bidiGenerateContent");
+      });
+      if(liveModels.length === 0){
+        liveModelInput.innerHTML = '<option value="">Bu anahtarla sesli sohbet modeli bulunamadı</option>';
+        statusBox.innerHTML = '<div class="error-box">Anahtarınla eşleşen bir Live API modeli bulunamadı. Google AI Studio\'da hesabına Live API erişimi tanımlı mı kontrol et.</div>';
+        return;
+      }
+      liveModelInput.innerHTML = "";
+      liveModels.forEach(m=>{
+        const o = document.createElement("option");
+        o.value = m.name; // already like "models/xxx"
+        o.textContent = (m.displayName || m.name) + " — " + m.name;
+        liveModelInput.appendChild(o);
+      });
+      const saved = localStorage.getItem(LS_KEY_LIVE_MODEL);
+      if(saved && liveModels.some(m=>m.name===saved)) liveModelInput.value = saved;
+      localStorage.setItem(LS_KEY_LIVE_MODEL, liveModelInput.value);
+      statusBox.innerHTML = '<div class="status-box">'+liveModels.length+' model bulundu.</div>';
+    }catch(e){
+      statusBox.innerHTML = '<div class="error-box">Liste alınamadı: '+escapeHtml(e.message)+'</div>';
+    }finally{
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
 
   document.getElementById("clear-data-btn").addEventListener("click", ()=>{
     if(confirm("Tüm kayıtlı listeler ve diyaloglar silinsin mi? Bu işlem geri alınamaz.")){
@@ -1100,7 +1153,13 @@ Görevlerin:
       sessionState = "connecting";
       setStatus("", "Bağlanıyor…");
       const apiKey = getApiKey();
-      const model = liveModelInput.value.trim() || "models/gemini-live-2.5-flash-native-audio";
+      const model = document.getElementById("live-model-input").value.trim();
+      if(!model){
+        showHocaError('Önce Ayarlar\'dan "Modelleri Listele"ye basıp bir model seç.');
+        resetMicUI();
+        sessionState = "idle";
+        return;
+      }
       const voice = liveVoiceSelect.value || "Kore";
       const url = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key="+encodeURIComponent(apiKey);
 
