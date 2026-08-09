@@ -5,301 +5,282 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#EDEBE4">
+<meta name="theme-color" content="#F1F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F111B" media="(prefers-color-scheme: dark)">
 <title>Kesit — İngilizce makale okuyucu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#14181A;
-  --ink2:#5A6468;
-  --ink3:#8B9296;
-  --paper:#EDEBE4;
-  --card:#FFFFFF;
-  --line:#D9D5CB;
-  --line2:#EAE7DF;
-  --green:#1E5B52;
-  --green2:#2F7E71;
-  --green-soft:#E4EEEA;
-  --marker:#FFE066;
-  --warn:#A8412B;
-  --r:14px;
-  --fs:17px;
-  --sheet-h:0px;
+  --bg:#F1F2F7; --card:#FFFFFF; --card2:#F7F8FB;
+  --ink:#1A1F35; --ink2:#5F6784; --ink3:#98A0B8;
+  --line:#E1E3EE; --line2:#EDEFF5;
+  --acc:#C2255C; --acc-ink:#A11648; --acc-soft:#FBE7EF;
+  --deep:#2E3A66; --deep-soft:#E8EBF5;
+  --marker:#FFE066; --mark-bg:#FFE066;
+  --warn:#B3341F;
+  --r:15px; --fs:17.5px;
+  --sh:0 1px 2px #1A1F350A, 0 6px 22px #1A1F3510;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0F111B; --card:#181C2A; --card2:#1E2333;
+    --ink:#E9EBF4; --ink2:#9AA2BD; --ink3:#6B7390;
+    --line:#282D40; --line2:#212639;
+    --acc:#F1699C; --acc-ink:#F794B8; --acc-soft:#2C1626;
+    --deep:#A8B4E4; --deep-soft:#1C2138;
+    --marker:#7A6410; --mark-bg:#6E5A0F;
+    --warn:#E8785F;
+    --sh:0 1px 2px #0006, 0 6px 22px #0008;
+  }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;height:100%}
 body{
-  background:var(--paper);color:var(--ink);
-  font-family:"Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  -webkit-text-size-adjust:100%;
-  overscroll-behavior-y:none;
+  background:var(--bg);color:var(--ink);
+  font-family:Archivo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%;overscroll-behavior-y:none;
 }
 button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
 input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.hid{display:none !important}
 
-/* ---------- app bar ---------- */
+/* ---------- üst çubuk ---------- */
 .bar{
   position:fixed;top:0;left:0;right:0;z-index:40;
-  background:rgba(237,235,228,.92);
-  -webkit-backdrop-filter:saturate(180%) blur(14px);backdrop-filter:saturate(180%) blur(14px);
-  border-bottom:1px solid var(--line);
-  padding-top:env(safe-area-inset-top);
+  background:var(--bg);background:color-mix(in srgb,var(--bg) 88%,transparent);
+  -webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px);
+  border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top);
 }
-.bar-in{display:flex;align-items:center;gap:10px;height:52px;padding:0 14px}
-.brand{font-weight:600;letter-spacing:.16em;font-size:13px;text-transform:uppercase}
-.brand small{display:block;letter-spacing:.02em;text-transform:none;font-size:11px;color:var(--ink2);font-weight:400;margin-top:-1px}
-.bar-sp{flex:1}
-.iconbtn{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;border:1px solid transparent}
-.iconbtn:active{background:#00000010}
-.iconbtn.on{background:var(--green);color:#fff}
-.iconbtn svg{width:20px;height:20px;stroke-width:1.7;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+.readbar{height:2px;background:transparent}
+.readbar i{display:block;height:100%;width:0;background:var(--acc);transition:width .12s linear}
+.bar-in{display:flex;align-items:center;gap:8px;height:50px;padding:0 14px}
+.crumb{flex:1;min-width:0}
+.crumb span{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb b{display:block;font-size:15.5px;font-weight:600;letter-spacing:-.01em;margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iconbtn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;color:var(--ink2)}
+.iconbtn:active{background:var(--line2)}
+.iconbtn.on{background:var(--acc);color:#fff}
+.iconbtn svg{width:21px;height:21px;stroke-width:1.7;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+.iconbtn b{font-family:"Source Serif 4",serif;font-size:17px;font-weight:600}
 
-/* ---------- screens ---------- */
-main{padding:calc(52px + env(safe-area-inset-top) + 18px) 16px calc(120px + env(safe-area-inset-bottom))}
+/* ---------- alt sekmeler ---------- */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:42;display:flex;
+  background:var(--card);background:color-mix(in srgb,var(--card) 92%,transparent);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);
+}
+.tb{flex:1;padding:9px 2px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--ink3)}
+.tb svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tb span{font-size:10.5px;font-weight:500;letter-spacing:.01em}
+.tb.on{color:var(--acc)}
+
+/* ---------- ekranlar ---------- */
+main{padding:calc(52px + env(safe-area-inset-top) + 16px) 16px calc(96px + env(safe-area-inset-bottom))}
 .screen{display:none}
 .screen.on{display:block}
 .max{max-width:720px;margin:0 auto}
+.lede{font-family:"Source Serif 4",Georgia,serif;font-size:27px;line-height:1.24;letter-spacing:-.015em;margin:2px 0 8px;font-weight:600}
+.lede em{font-style:italic;color:var(--acc)}
+.sub{color:var(--ink2);font-size:14.5px;line-height:1.55;margin:0 0 24px}
+.label{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);font-weight:600;margin:26px 0 10px}
 
-/* ---------- home ---------- */
-.lede{font-family:"Source Serif 4",Georgia,serif;font-size:26px;line-height:1.25;letter-spacing:-.01em;margin:6px 0 6px}
-.lede em{font-style:italic;color:var(--green)}
-.sub{color:var(--ink2);font-size:14.5px;line-height:1.5;margin:0 0 22px}
-.label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:500;margin:26px 0 10px}
-.src{
-  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
-  padding:16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;
-}
-.src:active{border-color:var(--green2)}
-.src .ic{width:38px;height:38px;flex:none;border-radius:10px;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
-.src .ic svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.src h3{margin:1px 0 3px;font-size:15.5px;font-weight:600}
+/* ---------- kaynak kartları ---------- */
+.src{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);
+  padding:15px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left}
+.src:active{border-color:var(--acc)}
+.src .ic{width:40px;height:40px;flex:none;border-radius:12px;background:var(--acc-soft);color:var(--acc-ink);display:grid;place-items:center}
+.src .ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.src h3{margin:2px 0 3px;font-size:16px;font-weight:600}
 .src p{margin:0;font-size:13px;color:var(--ink2);line-height:1.45}
 .field{display:flex;gap:8px;margin-top:8px}
-.inp{
-  flex:1;background:var(--card);border:1px solid var(--line);border-radius:11px;
-  padding:12px 13px;font-size:16px;outline:none;width:100%;
-}
-.inp:focus{border-color:var(--green2);box-shadow:0 0 0 3px var(--green-soft)}
+.inp{flex:1;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px;font-size:16px;outline:none;color:var(--ink)}
+.inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
 textarea.inp{min-height:150px;resize:vertical;line-height:1.5}
-.btn{
-  background:var(--green);color:#fff;border-radius:11px;padding:12px 18px;
-  font-size:15px;font-weight:500;white-space:nowrap;
-}
+.btn{background:var(--acc);color:#fff;border-radius:12px;padding:13px 18px;font-size:15px;font-weight:600;white-space:nowrap}
 .btn:disabled{opacity:.45}
-.btn.ghost{background:transparent;color:var(--green);border:1px solid var(--line)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .btn.wide{width:100%;text-align:center}
-.hid{display:none !important}
 
-/* ---------- reader ---------- */
-#doctitle{font-family:"Source Serif 4",serif;font-size:15px;color:var(--ink2);margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
-#content{
-  font-family:"Source Serif 4",Georgia,serif;
-  font-size:var(--fs);line-height:1.62;
-  -webkit-user-select:text;user-select:text;
+/* ---------- okuma ---------- */
+#content{font-family:"Source Serif 4",Georgia,serif;font-size:var(--fs);line-height:1.66;
+  -webkit-user-select:text;user-select:text}
+#content h2{
+  font-family:Archivo,sans-serif;font-size:calc(var(--fs) - 1px);font-weight:700;
+  letter-spacing:.02em;text-transform:uppercase;line-height:1.3;
+  margin:32px 0 12px;padding-left:11px;border-left:3px solid var(--acc);
 }
-#content h2{font-size:calc(var(--fs) + 3px);font-weight:600;line-height:1.35;margin:26px 0 8px;letter-spacing:-.01em}
-#content p{margin:0 0 15px}
-#content .tr{
-  font-family:"Instrument Sans",sans-serif;
-  font-size:calc(var(--fs) - 2px);line-height:1.55;
-  color:var(--ink);background:var(--green-soft);
-  border-left:2px solid var(--green2);
-  padding:10px 12px;border-radius:0 8px 8px 0;margin:-6px 0 18px;
-}
-#content .tr i,.out i{color:var(--green);font-style:italic}
-#content .tr.wait{color:var(--ink3);background:#0000000a;border-left-color:var(--line)}
-mark.hl{
-  background:linear-gradient(180deg,transparent 8%,var(--marker) 8%,var(--marker) 92%,transparent 92%);
-  mix-blend-mode:multiply;color:inherit;padding:0 1px;border-radius:2px;
-}
-.ocrbox{
-  border:1px dashed var(--line);border-radius:12px;padding:16px;text-align:center;
-  margin:0 0 16px;background:#00000006;
-  font-family:"Instrument Sans",sans-serif;
-}
+#content h2:first-child{margin-top:4px}
+#content p{margin:0 0 16px}
+#content .tr{font-family:Archivo,sans-serif;font-size:calc(var(--fs) - 2.5px);line-height:1.55;
+  color:var(--ink);background:var(--deep-soft);border-left:2px solid var(--deep);
+  padding:11px 13px;border-radius:0 10px 10px 0;margin:-8px 0 18px}
+#content .tr i,.out i{color:var(--acc-ink);font-style:italic}
+#content .tr.wait{color:var(--ink3);background:var(--line2);border-left-color:var(--line)}
+mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+::selection{background:var(--marker);color:#1A1F35}
+.ocrbox{border:1px dashed var(--line);border-radius:13px;padding:16px;text-align:center;margin:0 0 16px;
+  background:var(--card2);font-family:Archivo,sans-serif}
 .ocrbox p{font-size:13px !important;color:var(--ink2);margin:0 0 10px !important}
-::selection{background:var(--marker);color:var(--ink)}
 
-/* ---------- floating controls ---------- */
-.dock{
-  position:fixed;left:0;right:0;bottom:0;z-index:35;
-  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
-  display:flex;gap:8px;justify-content:center;align-items:center;
-  background:linear-gradient(to top,var(--paper) 62%,transparent);
-  pointer-events:none;
-}
+/* ---------- seçim düğmesi ---------- */
+.dock{position:fixed;left:0;right:0;bottom:calc(62px + env(safe-area-inset-bottom));z-index:41;
+  display:flex;justify-content:center;pointer-events:none;padding:0 14px}
 .dock>*{pointer-events:auto}
-.pill{
-  background:var(--ink);color:#fff;border-radius:999px;padding:13px 22px;font-size:15px;font-weight:500;
-  box-shadow:0 6px 22px #00000030;display:flex;align-items:center;gap:8px;
-}
-.pill.green{background:var(--green)}
-.pill svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.mini{
-  background:var(--card);border:1px solid var(--line);border-radius:999px;
-  width:46px;height:46px;display:grid;place-items:center;box-shadow:0 4px 14px #0000001a;
-}
-.mini.on{background:var(--green);color:#fff;border-color:var(--green)}
-.mini svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.pill{background:var(--acc);color:#fff;border-radius:999px;padding:13px 22px;font-size:15px;font-weight:600;
+  box-shadow:0 6px 24px #C2255C4D;display:flex;align-items:center;gap:8px}
+.pill svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-/* ---------- bottom sheet ---------- */
-.scrim{position:fixed;inset:0;background:#14181A55;z-index:45;opacity:0;pointer-events:none;transition:opacity .22s}
+/* ---------- alt panel ---------- */
+.scrim{position:fixed;inset:0;background:#0B0E1899;z-index:45;opacity:0;pointer-events:none;transition:opacity .22s}
 .scrim.on{opacity:1;pointer-events:auto}
-.sheet{
-  position:fixed;left:0;right:0;bottom:0;z-index:50;
-  background:var(--card);border-radius:20px 20px 0 0;
-  box-shadow:0 -8px 40px #00000026;
-  transform:translateY(101%);transition:transform .26s cubic-bezier(.32,.72,0,1);
-  max-height:80vh;display:flex;flex-direction:column;
-  padding-bottom:env(safe-area-inset-bottom);
-}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--card);border-radius:22px 22px 0 0;
+  box-shadow:0 -8px 44px #0B0E1833;transform:translateY(101%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+  max-height:84vh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
 .sheet.on{transform:translateY(0)}
-.grip{width:36px;height:4px;border-radius:99px;background:var(--line);margin:9px auto 4px;flex:none}
-.tabs{display:flex;gap:4px;padding:6px 14px 0;border-bottom:1px solid var(--line2);flex:none}
-.tab{
-  padding:9px 2px;margin-right:18px;font-size:14px;font-weight:500;color:var(--ink3);
-  border-bottom:2px solid transparent;margin-bottom:-1px;
-}
-.tab.on{color:var(--ink);border-bottom-color:var(--green)}
-.sheet-body{padding:14px 16px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.chosen{
-  font-family:"Source Serif 4",serif;font-size:15px;line-height:1.5;color:var(--ink2);
-  background:#0000000a;border-radius:10px;padding:9px 11px;margin-bottom:14px;
-  max-height:74px;overflow:auto;
-}
+.grip{width:38px;height:4px;border-radius:99px;background:var(--line);margin:9px auto 2px;flex:none}
+.tabs{display:flex;align-items:center;padding:6px 16px 0;border-bottom:1px solid var(--line2);flex:none}
+.tab{padding:10px 2px;margin-right:20px;font-size:14.5px;font-weight:600;color:var(--ink3);
+  border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:var(--ink);border-bottom-color:var(--acc)}
+.sheet-body{padding:15px 16px 22px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.chosen{font-family:"Source Serif 4",serif;font-size:15px;line-height:1.5;color:var(--ink2);
+  background:var(--card2);border-radius:11px;padding:10px 12px;margin-bottom:14px;max-height:78px;overflow:auto}
 .out{font-size:16px;line-height:1.62}
-.out .en{color:var(--green);font-style:italic}
-.out h4{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);margin:16px 0 6px;font-weight:500}
+.out h4{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin:18px 0 6px;font-weight:600}
 .out h4:first-child{margin-top:0}
 .out ul{margin:6px 0 10px;padding-left:18px}
-.out li{margin-bottom:5px}
+.out li{margin-bottom:6px}
 .out p{margin:0 0 10px}
-.out b,.out strong{font-weight:600}
-.sheet-act{display:flex;gap:8px;margin-top:16px}
-.sheet-act .btn{flex:1;text-align:center;font-size:14px;padding:11px}
-
-/* ---------- settings ---------- */
-.modal{
-  position:fixed;inset:0;z-index:60;background:var(--paper);overflow-y:auto;
-  padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 40px);
-  transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);
-}
-.modal.on{transform:translateY(0)}
-.mh{display:flex;align-items:center;margin-bottom:20px}
-.mh h2{font-size:19px;margin:0;font-weight:600;flex:1}
-.row{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:10px}
-.row h4{margin:0 0 4px;font-size:14.5px;font-weight:600}
-.row p{margin:0 0 10px;font-size:12.5px;color:var(--ink2);line-height:1.45}
-.row p:last-child{margin-bottom:0}
-.opt{display:flex;gap:9px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line2)}
-.opt:first-of-type{border-top:none}
-.opt input{margin:3px 0 0;accent-color:var(--green);width:17px;height:17px;flex:none}
-.opt label{font-size:14px;line-height:1.4}
-.opt label small{display:block;color:var(--ink2);font-size:12px;margin-top:2px}
-.sw{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.sw span{font-size:14px}
-.toggle{width:48px;height:29px;border-radius:99px;background:var(--line);position:relative;transition:background .2s;flex:none}
-.toggle::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:99px;background:#fff;transition:transform .2s;box-shadow:0 1px 3px #0003}
-.toggle.on{background:var(--green)}
-.toggle.on::after{transform:translateX(19px)}
-.note{font-size:12.5px;color:var(--ink2);line-height:1.5;background:#0000000a;border-radius:10px;padding:11px 12px;margin-top:4px}
-.note b{color:var(--warn)}
 
 /* ---------- kelime kartı ---------- */
-.w-en{font-family:"Source Serif 4",serif;font-size:15px;color:var(--ink3);margin-bottom:2px}
-.w-tr{font-family:"Source Serif 4",serif;font-size:30px;line-height:1.2;font-weight:600;letter-spacing:-.015em;margin-bottom:8px}
-.w-pos{display:inline-block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);background:var(--green-soft);border-radius:6px;padding:4px 8px;margin-bottom:16px}
-.w-here{font-size:15px;line-height:1.55;color:var(--ink);padding-top:14px;border-top:1px solid var(--line2)}
-.w-here b{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:500;margin-bottom:4px}
-.w-more{margin-top:14px;border-top:1px solid var(--line2);padding-top:10px}
-.w-more summary{font-size:13px;color:var(--ink2);cursor:pointer;list-style:none}
+.w-en{font-family:"Source Serif 4",serif;font-size:15px;color:var(--ink3);margin-bottom:3px}
+.w-tr{font-family:"Source Serif 4",serif;font-size:31px;line-height:1.18;font-weight:600;letter-spacing:-.02em;margin-bottom:9px}
+.w-pos{display:inline-block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--acc-ink);
+  background:var(--acc-soft);border-radius:7px;padding:4px 9px;margin-bottom:16px;font-weight:600}
+.w-here{font-size:15px;line-height:1.55;padding-top:14px;border-top:1px solid var(--line2)}
+.w-here b{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:600;margin-bottom:5px}
+.w-more{margin-top:14px;border-top:1px solid var(--line2);padding-top:11px}
+.w-more summary{font-size:13.5px;color:var(--ink2);cursor:pointer;list-style:none}
 .w-more summary::-webkit-details-marker{display:none}
-.w-more summary::before{content:"+ ";color:var(--green)}
+.w-more summary::before{content:"+ ";color:var(--acc)}
 .w-more[open] summary::before{content:"– "}
 .w-more ul{margin:10px 0 0;padding-left:16px;font-size:14px;line-height:1.6;color:var(--ink2)}
-.savebtn{width:100%;margin-top:18px;background:var(--green);color:#fff;border-radius:11px;padding:13px;font-size:15px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px}
+.savebtn{width:100%;margin-top:18px;background:var(--acc);color:#fff;border-radius:12px;padding:13px;font-size:15px;
+  font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px}
 .savebtn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.savebtn.done{background:var(--green-soft);color:var(--green)}
+.savebtn.done{background:var(--acc-soft);color:var(--acc-ink)}
 .savebtn.done svg{fill:currentColor}
 
-/* ---------- kelime defteri ---------- */
-.wbar{display:flex;gap:8px;margin-bottom:14px}
-.wbar .btn{flex:1;text-align:center;font-size:14px;padding:11px}
-.witem{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start}
+/* ---------- defterler ---------- */
+.wbar{display:flex;gap:8px;margin-bottom:12px}
+.wbar .btn{flex:1;text-align:center;font-size:14px;padding:12px 8px}
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;-webkit-overflow-scrolling:touch}
+.chip{flex:none;font-size:13px;font-weight:500;padding:7px 13px;border-radius:999px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink2);white-space:nowrap}
+.chip.on{background:var(--deep);color:#fff;border-color:var(--deep)}
+.witem{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);
+  padding:14px;margin-bottom:9px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .witem .wtxt{flex:1;min-width:0}
-.witem .we{font-family:"Source Serif 4",serif;font-size:16px;font-weight:600}
-.witem .wt{font-size:15px;color:var(--green);margin-top:1px}
-.witem .wm{font-size:12px;color:var(--ink3);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.witem .del{color:var(--ink3);padding:2px 4px;font-size:20px;line-height:1;flex:none}
-.empty{text-align:center;color:var(--ink3);font-size:14px;line-height:1.6;padding:50px 20px}
-
-/* ---------- kart çalışması ---------- */
-#flash .fcard{
-  background:var(--card);border:1px solid var(--line);border-radius:18px;
-  min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:30px 22px;margin:10px 0 16px;
+.witem .we{font-family:"Source Serif 4",serif;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.witem .wt{font-size:15px;color:var(--acc-ink);margin-top:2px}
+.witem .wm{font-size:12.5px;color:var(--ink3);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.witem .acts{display:flex;gap:2px;flex:none;align-items:center}
+.witem .gen{color:var(--acc);padding:6px;line-height:1}
+.witem .gen svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.witem .gen.busy{opacity:.4}
+.witem .del{color:var(--ink3);padding:4px 6px;font-size:21px;line-height:1;flex:none}
+.wdet{flex-basis:100%;margin-top:12px;padding-top:12px;border-top:1px solid var(--line2);display:none}
+.witem.open .wdet{display:block}
+.wdet .sen{font-family:"Source Serif 4",serif;font-size:15.5px;line-height:1.55;margin-bottom:8px}
+.wdet .sen.trs{color:var(--ink2)}
+.wdet .none{font-size:13px;color:var(--ink3)}
+.wdet .again{margin-top:10px;font-size:13px;font-weight:500;color:var(--acc-ink);border:1px solid var(--line);border-radius:10px;padding:9px 13px}
+.c0{color:#C2255C}.c1{color:#1F6FB2}.c2{color:#1E7A45}.c3{color:#7A3EA8}.c4{color:#B0710B}
+@media (prefers-color-scheme:dark){
+  .c0{color:#F1699C}.c1{color:#6FB3F2}.c2{color:#5FC98C}.c3{color:#C79BEC}.c4{color:#E8B25A}
 }
-#flash .fe{font-family:"Source Serif 4",serif;font-size:30px;font-weight:600;line-height:1.25}
-#flash .ft{font-size:23px;color:var(--green);margin-top:14px;font-weight:500}
-#flash .fs{font-size:14px;color:var(--ink2);margin-top:16px;line-height:1.5;font-style:italic}
-#flash .hint{font-size:13px;color:var(--ink3);margin-top:18px}
+.wdet .sen .c0,.wdet .sen .c1,.wdet .sen .c2,.wdet .sen .c3,.wdet .sen .c4{font-weight:600}
+.gtop{display:inline-block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:600;
+  color:var(--deep);background:var(--deep-soft);border-radius:7px;padding:4px 9px;margin-bottom:8px}
+.gsen{font-family:"Source Serif 4",serif;font-size:16px;line-height:1.5;font-weight:600}
+.gtr{font-size:14.5px;color:var(--ink2);margin-top:4px;line-height:1.5}
+.empty{text-align:center;color:var(--ink3);font-size:14px;line-height:1.65;padding:56px 20px}
+
+/* ---------- kartlar ---------- */
+#flash .fcard{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh);
+  min-height:270px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:32px 22px;margin:10px 0 16px}
+#flash .fe{font-family:"Source Serif 4",serif;font-size:31px;font-weight:600;line-height:1.22}
+#flash .ft{font-size:23px;color:var(--acc-ink);margin-top:15px;font-weight:600}
+#flash .fs{font-size:14px;color:var(--ink2);margin-top:18px;line-height:1.5;font-style:italic}
+#flash .hint{font-size:13px;color:var(--ink3);margin-top:20px}
 #flash .fbtns{display:flex;gap:8px}
 #flash .fbtns .btn{flex:1;text-align:center}
 #flash .count{font-size:13px;color:var(--ink2);text-align:center;margin-bottom:4px}
 
-/* ---------- defter: cümle detayı ---------- */
-.witem{flex-wrap:wrap}
-.witem .acts{display:flex;gap:2px;flex:none;align-items:center}
-.witem .gen{color:var(--green);padding:4px;line-height:1}
-.witem .gen svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.witem .gen.busy{opacity:.4}
-.wdet{flex-basis:100%;margin-top:11px;padding-top:11px;border-top:1px solid var(--line2);display:none}
-.witem.open .wdet{display:block}
-.wdet .sen{font-family:"Source Serif 4",serif;font-size:15px;line-height:1.55;margin-bottom:7px}
-.wdet .sen.trs{color:var(--ink2)}
-.wdet .none{font-size:13px;color:var(--ink3)}
-.wdet .again{margin-top:9px;font-size:13px;color:var(--green);border:1px solid var(--line);border-radius:9px;padding:8px 12px}
-.c0{color:#C0392B}.c1{color:#1F6FB2}.c2{color:#1E7A45}.c3{color:#8E44AD}.c4{color:#B9770E}
-.wdet .sen .c0,.wdet .sen .c1,.wdet .sen .c2,.wdet .sen .c3,.wdet .sen .c4{font-weight:600}
+/* ---------- ayarlar ---------- */
+.modal{position:fixed;inset:0;z-index:60;background:var(--bg);overflow-y:auto;
+  padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 44px);
+  transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1)}
+.modal.on{transform:translateY(0)}
+.mh{display:flex;align-items:center;margin-bottom:20px}
+.mh h2{font-family:"Source Serif 4",serif;font-size:22px;margin:0;font-weight:600;flex:1}
+.row{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px;margin-bottom:10px;box-shadow:var(--sh)}
+.row h4{margin:0 0 5px;font-size:15px;font-weight:600}
+.row p{margin:0 0 10px;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.row p:last-child{margin-bottom:0}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line2)}
+.opt:first-of-type{border-top:none}
+.opt input{margin:3px 0 0;accent-color:var(--acc);width:18px;height:18px;flex:none}
+.opt label{font-size:14.5px;line-height:1.4}
+.opt label small{display:block;color:var(--ink2);font-size:12.5px;margin-top:3px}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sw span{font-size:14.5px}
+.toggle{width:50px;height:30px;border-radius:99px;background:var(--line);position:relative;transition:background .2s;flex:none}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:99px;background:#fff;
+  transition:transform .2s;box-shadow:0 1px 3px #0003}
+.toggle.on{background:var(--acc)}
+.toggle.on::after{transform:translateX(20px)}
+.note{font-size:12.5px;color:var(--ink2);line-height:1.5;background:var(--card2);border-radius:11px;padding:12px;margin-top:4px}
+.note b{color:var(--warn)}
 
-/* ---------- ilerleme perdesi ---------- */
-.busyv{position:fixed;inset:0;z-index:80;background:rgba(237,235,228,.97);display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
+/* ---------- ilerleme / bildirim ---------- */
+.prog{height:3px;background:var(--line2);border-radius:9px;overflow:hidden;margin-top:10px}
+.prog i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.busyv{position:fixed;inset:0;z-index:80;background:var(--bg);background:color-mix(in srgb,var(--bg) 97%,transparent);
+  display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
 .busyv.on{display:flex}
-.busyv h3{font-family:"Source Serif 4",serif;font-size:20px;margin:14px 0 6px;font-weight:600}
+.busyv h3{font-family:"Source Serif 4",serif;font-size:21px;margin:14px 0 6px;font-weight:600}
 .busyv p{font-size:14px;color:var(--ink2);margin:0;line-height:1.5}
 .busyv .prog{width:min(280px,80vw);margin-top:18px}
 .busyv .btn{margin-top:22px}
-.spin{width:16px;height:16px;border:2px solid #ffffff55;border-top-color:#fff;border-radius:99px;display:inline-block;animation:sp .7s linear infinite;vertical-align:-2px}
-.spin.dark{border-color:#0000001f;border-top-color:var(--green)}
+.spin{width:16px;height:16px;border:2px solid #ffffff55;border-top-color:#fff;border-radius:99px;
+  display:inline-block;animation:sp .7s linear infinite;vertical-align:-2px}
+.spin.dark{border-color:var(--line);border-top-color:var(--acc)}
 @keyframes sp{to{transform:rotate(360deg)}}
-.toast{
-  position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,14px);
-  background:var(--ink);color:#fff;padding:11px 17px;border-radius:12px;font-size:14px;z-index:70;
-  opacity:0;pointer-events:none;transition:.22s;max-width:88vw;text-align:center;line-height:1.4;
-}
+.toast{position:fixed;left:50%;bottom:calc(112px + env(safe-area-inset-bottom));transform:translate(-50%,14px);
+  background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:13px;font-size:14px;z-index:70;
+  opacity:0;pointer-events:none;transition:.22s;max-width:88vw;text-align:center;line-height:1.4;font-weight:500}
 .toast.on{opacity:1;transform:translate(-50%,0)}
-.prog{height:3px;background:var(--line2);border-radius:9px;overflow:hidden;margin-top:10px}
-.prog i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 </style>
 </head>
 <body>
 
 <header class="bar">
+  <div class="readbar"><i id="readBar"></i></div>
   <div class="bar-in">
-    <button class="iconbtn hid" id="backBtn" aria-label="Geri">
-      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    <div class="crumb"><span id="crumbTop">Kesit</span><b id="crumbMain">İngilizce makale okuyucu</b></div>
+    <button class="iconbtn hid" id="allBtn" aria-label="Tüm metni çevir">
+      <svg viewBox="0 0 24 24"><path d="M5 8h9M9 4v4c0 4-2 7-5 8"/><path d="M9 11c0 3 2.5 5.5 6 6.5"/><path d="M13 21l4.5-10 4.5 10M15 18h6"/></svg>
     </button>
-    <div class="brand">Kesit<small>İngilizce makale okuyucu</small></div>
-    <div class="bar-sp"></div>
-    <button class="iconbtn" id="wordsBtn" aria-label="Kelime defteri">
-      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-    </button>
-    <button class="iconbtn" id="setBtn" aria-label="Ayarlar">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.7 1.7 0 008 19.4a1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H2a2 2 0 110-4h.1A1.7 1.7 0 003.6 8a1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H8a1.7 1.7 0 001-1.5V2a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V8a1.7 1.7 0 001.5 1H22a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
-    </button>
+    <button class="iconbtn hid" id="fontBtn" aria-label="Yazı boyutu"><b>Aa</b></button>
   </div>
 </header>
 
@@ -346,7 +327,10 @@ mark.hl{
 
 <!-- ============ READER ============ -->
 <section class="screen max" id="reader">
-  <div id="doctitle"></div>
+  <div class="wbar" style="margin-bottom:16px">
+    <button class="btn ghost" id="aiCleanBtn" style="flex:1;font-size:13.5px;padding:10px">Gemini ile temizle</button>
+    <button class="btn ghost" id="rawBtn" style="flex:1;font-size:13.5px;padding:10px">Ham metni göster</button>
+  </div>
   <div id="content"></div>
 </section>
 <!-- ============ KELİME DEFTERİ ============ -->
@@ -359,6 +343,16 @@ mark.hl{
   </div>
   <input class="inp" id="wSearch" placeholder="Ara…" style="margin-bottom:14px" autocapitalize="off">
   <div id="wList"></div>
+</section>
+<!-- ============ GRAMER DEFTERİ ============ -->
+<section class="screen max" id="gram">
+  <h1 class="lede" style="font-size:23px;margin-bottom:14px">Gramer defteri</h1>
+  <div class="wbar">
+    <button class="btn" id="gpdfBtn">PDF çıkar</button>
+    <button class="btn ghost" id="gexportBtn">Yedekle</button>
+  </div>
+  <div class="chips" id="gChips"></div>
+  <div id="gList"></div>
 </section>
 </main>
 
@@ -377,19 +371,11 @@ mark.hl{
 
 <!-- ============ DOCK ============ -->
 <div class="dock hid" id="dock">
-  <button class="mini" id="fontBtn" aria-label="Yazı boyutu">
-    <svg viewBox="0 0 24 24"><path d="M4 19l5-14 5 14M6 14h6"/><path d="M15 19l3-8 3 8M16.2 16.5h3.6"/></svg>
-  </button>
-  <button class="pill green hid" id="selBtn">
+  <button class="pill hid" id="selBtn">
     <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
     <span id="selBtnTxt">Çevir</span>
   </button>
-  <button class="mini" id="allBtn" aria-label="Tüm metni çevir">
-    <svg viewBox="0 0 24 24"><path d="M5 8h9M9 4v4c0 4-2 7-5 8"/><path d="M9 11c0 3 2.5 5.5 6 6.5"/><path d="M13 21l4.5-10 4.5 10M15 18h6"/></svg>
-  </button>
 </div>
-
-<!-- ============ SHEET ============ -->
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet">
   <div class="grip"></div>
@@ -446,6 +432,12 @@ mark.hl{
   </div>
 
   <div class="row">
+    <h4>Makale temizliği</h4>
+    <div class="sw"><span>Gereksiz metni ayıkla</span><div class="toggle" id="filtTog"></div></div>
+    <p style="margin:9px 0 0">Dergi başlıkları, yazar adresleri, DOI, şekil-tablo açıklamaları, kaynakça ve fon beyanları atılır. Bir PDF inatçı çıkarsa okuma ekranında “Gemini ile temizle” düğmesini kullan.</p>
+  </div>
+
+  <div class="row">
     <h4>Okuma</h4>
     <div class="sw" style="margin-bottom:12px"><span>Yazı boyutu</span><input type="range" id="fsRange" min="15" max="24" step="1" style="width:150px;accent-color:var(--green)"></div>
     <button class="btn ghost wide" id="clearMarks">Sarı işaretleri temizle</button>
@@ -456,6 +448,25 @@ mark.hl{
     <p>Tarayıcı güvenlik kuralları yüzünden site içerikleri bir okuyucu servisi üzerinden alınır. Ödeme duvarı olan siteler açılmayabilir; o durumda metni kopyalayıp yapıştır.</p>
   </div>
 </div>
+
+<nav class="tabbar">
+  <button class="tb on" data-go="home">
+    <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 016.5 3H11v18H6.5A2.5 2.5 0 014 18.5z"/><path d="M20 5.5A2.5 2.5 0 0017.5 3H13v18h4.5a2.5 2.5 0 002.5-2.5z"/></svg>
+    <span>Oku</span>
+  </button>
+  <button class="tb" data-go="words">
+    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M9 7h7"/></svg>
+    <span>Defter</span>
+  </button>
+  <button class="tb" data-go="gram">
+    <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h13"/><circle cx="18.5" cy="12" r="2.2"/></svg>
+    <span>Gramer</span>
+  </button>
+  <button class="tb" data-go="set">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.7 1.7 0 008 19.4a1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H2a2 2 0 110-4h.1A1.7 1.7 0 003.6 8a1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H8a1.7 1.7 0 001-1.5V2a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V8a1.7 1.7 0 001.5 1H22a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+    <span>Ayarlar</span>
+  </button>
+</nav>
 
 <div class="busyv" id="busyv">
   <span class="spin dark" style="width:26px;height:26px;border-width:3px"></span>
@@ -493,10 +504,15 @@ const state = {
   tapWord: store.get("tapWord", "1") === "1",
   fs: parseInt(store.get("fs", "17"), 10),
   blocks: [],
+  raw: [],
+  showRaw: false,
   title: "",
   pdf: null,
   translatingAll: false,
-  lastSel: null
+  lastSel: null,
+  filter: store.get("filter", "1") === "1",
+  screen: "home",
+  section: ""
 };
 
 /* ============================================================
@@ -641,17 +657,28 @@ GEÇTİĞİ CÜMLE: "${(context || "").slice(0, 700)}"
 }
 
 async function grammarSel(text, context) {
-  const sys = BASE + "\nDilbilgisi açıklamalarını Türkçe yaz. Sınava hazırlanan birine anlatır gibi, kısa ve somut ol.";
+  const sys = `Sen İngilizce dilbilgisi öğreten bir uzmansın. Kullanıcı Türk bir sağlık çalışanı, YÖKDİL'e hazırlanıyor.
+Açıklamaları Türkçe yaz, kısa ve somut ol. SADECE geçerli JSON döndür, başka hiçbir şey yazma.`;
   const prompt = `Aşağıdaki İngilizce parçanın cümle yapısını çöz.
-${context ? "Bağlam: \"" + context.slice(0, 500) + "\"\n" : ""}
+${context ? 'Bağlam: "' + context.slice(0, 400) + '"\n' : ""}
 PARÇA: "${text}"
 
-Şu bölümleri ver (başlıkları <h4> ile):
-İSKELET — ana cümlenin öznesi ve yüklemi nedir, sade bir İngilizce özet cümleyle göster.
-YAPI — yan cümlecikler, bağlaçlar, ilgi zamirleri, edilgen yapı, participle/gerund gibi öğeleri madde madde (<ul>) açıkla. Her maddede metinden ilgili kısmı <b> ile göster.
-ZAMAN VE KİP — kullanılan zamanlar ve neden seçildiği.
-TUZAK — Türk okuyucunun bu cümlede yanlış anlayabileceği tek nokta.`;
-  return gemini(prompt, sys);
+Şu alanlara sahip JSON döndür:
+"topic": cümlenin öne çıkan TEK dilbilgisi konusu. Şu listeden en uygun olanı seç ve aynen yaz: relative clause, passive voice, participle, gerund, infinitive, conditional, noun clause, comparison, modal, perfect tense, inversion, conjunction.
+"tr": parçanın akıcı Türkçe çevirisi.
+"skeleton": ana cümlenin iskeleti. Özne ve yüklemi sade bir İngilizce cümleyle göster, en fazla 8 kelime.
+"points": 2-4 maddelik dizi. Her madde cümledeki bir yapıyı açıklar. Her maddede metinden ilgili kısmı tırnak içinde göster.
+"tense": kullanılan zaman/kip ve neden seçildiği. Tek cümle.
+"trap": Türk okuyucunun bu cümlede yanlış anlayabileceği tek nokta. Tek cümle.`;
+  const d = parseJson(await gemini(prompt, sys));
+  return {
+    topic: String(d.topic || "genel").trim().toLowerCase(),
+    tr: String(d.tr || "").trim(),
+    skeleton: String(d.skeleton || "").trim(),
+    points: Array.isArray(d.points) ? d.points.map(String).slice(0, 4) : [],
+    tense: String(d.tense || "").trim(),
+    trap: String(d.trap || "").trim()
+  };
 }
 
 /* ============================================================
@@ -881,6 +908,103 @@ function htmlToBlocks(doc) {
   return out;
 }
 
+
+/* ============================================================
+   Makale temizleyici
+   ============================================================ */
+/* satır başına sabitli desenler: her zaman atılır */
+const JUNK_HEAD = [
+  /^\s*(doi|https?:|www\.|issn|isbn)\b/i,
+  /^\s*(©|copyright)/i,
+  /^\s*(received|accepted|revised|published|available online|first published)\s*[:\d]/i,
+  /^\s*(correspondence|corresponding author|reprints?)\b/i,
+  /^\s*(conflicts? of interest|competing interests?|declarations? of|disclosures?)\b/i,
+  /^\s*(funding|financial support|grant support|acknowledg)/i,
+  /^\s*(author contributions?|data availability|ethics? (approval|statement)|informed consent)\b/i,
+  /^\s*(supplementary|appendix|keywords?\s*:|abbreviations?\s*:)/i,
+  /^\s*(fig(ure)?s?\.?|table|chart|box|scheme|plate)\s*\.?\s*\d/i
+];
+/* metin içinde geçen desenler: yalnızca KISA satırlarda atılır,
+   yoksa gövde paragrafının içindeki bir bağlantı tüm paragrafı götürür */
+const JUNK_IN = [
+  /\bdoi\.org\//i, /\bdownloaded\s+from\b/i, /\ball rights reserved\b/i,
+  /\bcreative commons\b/i, /@[\w.-]+\.[a-z]{2,}/i,
+  /\b(pubmed|crossref|scopus|elsevier|springer|wiley|sciencedirect)\b/i
+];
+const SHORT = 150;
+const AFFIL = /\b(department|departamento|university|universit|hospital|faculty|institute|school of|college of|clinic|centre for|center for)\b/i;
+const REFHEAD = /^\s*(references?|bibliography|literature cited|kaynak(ça|lar)?)\s*$/i;
+const REFLINE = /^\s*\[?\d{1,3}[\].)]\s+[A-ZÀ-Ý][\w'-]+[\s,]+[A-ZÀ-Ý]{1,3}\b/;
+
+function normLine(t) { return t.toLowerCase().replace(/\d+/g, "#").replace(/\s+/g, " ").trim(); }
+
+function cleanBlocks(blocks) {
+  if (!state.filter) return blocks;
+
+  // 1) sayfalarda tekrar eden üstbilgi/altbilgi satırlarını bul
+  const seen = {};
+  blocks.forEach(b => {
+    if (b.type === "ocr" || b.text.length > 110) return;
+    const k = normLine(b.text);
+    if (!k) return;
+    (seen[k] = seen[k] || new Set()).add(b.page || 0);
+  });
+  const pages = new Set(blocks.map(b => b.page || 0)).size;
+  const running = new Set(Object.keys(seen).filter(k =>
+    seen[k].size >= Math.max(3, Math.ceil(pages * 0.3))));
+
+  const out = [];
+  let inRefs = false;
+  blocks.forEach((b, i) => {
+    if (b.type === "ocr") { out.push(b); return; }
+    const t = b.text.trim();
+
+    if (REFHEAD.test(t)) { inRefs = true; return; }      // kaynakçadan sonrası gitsin
+    if (inRefs) return;
+    if (REFLINE.test(t) && t.length < 400) return;
+
+    if (running.has(normLine(t))) return;                 // tekrar eden dergi başlığı
+    if (/^\s*\d{1,4}\s*$/.test(t)) return;                // yalnız sayfa numarası
+    if (JUNK_HEAD.some(rx => rx.test(t))) return;
+    if (t.length < SHORT && JUNK_IN.some(rx => rx.test(t))) return;
+    if (i < 12 && AFFIL.test(t) && t.length < 260) return; // yazar adresleri
+    if (b.type === "p" && t.length < 28 && !/[.!?]$/.test(t)) return;
+
+    out.push(b);
+  });
+  return out.length > 2 ? out : blocks;
+}
+
+async function aiClean() {
+  if (!state.blocks.length) return;
+  if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
+  busyShow("Metin temizleniyor", "Gövde metni ayıklanıyor…");
+  const src = state.blocks.filter(b => b.type !== "ocr");
+  const keep = [];
+  const SZ = 25;
+  try {
+    for (let i = 0; i < src.length; i += SZ) {
+      if (stopFlag) break;
+      const grp = src.slice(i, i + SZ);
+      busyUpd("Paragraflar inceleniyor · " + Math.min(i + SZ, src.length) + " / " + src.length, (i / src.length) * 100);
+      const list = grp.map((b, k) => (k + 1) + ") " + b.text.slice(0, 220)).join("\n");
+      const res = await gemini(
+        `Aşağıda bir bilimsel makaleden çıkarılmış numaralı parçalar var. Hangileri makalenin GÖVDE metnidir (giriş, yöntem, bulgular, tartışma, başlıklar)?
+Gövde OLMAYANLAR: dergi adı, sayfa bilgisi, yazar isimleri, kurum adresleri, e-posta, telif, DOI, şekil/tablo açıklaması, kaynakça, teşekkür, fon beyanı.
+Sadece gövde olanların numaralarını virgülle ayırıp yaz. Başka hiçbir şey yazma. Örnek: 1,3,4,7\n\n${list}`,
+        "Sadece sayı listesi döndür.", { temp: 0 });
+      const ok = new Set(res.match(/\d+/g) || []);
+      grp.forEach((b, k) => { if (ok.has(String(k + 1))) keep.push(b); });
+      await sleep(200);
+    }
+  } catch (e) { busyHide(); toast("Temizlenemedi: " + e.message); return; }
+  busyHide();
+  if (keep.length < 2) { toast("Temizlik sonuç vermedi, metin olduğu gibi kaldı."); return; }
+  const removed = src.length - keep.length;
+  openDoc(state.title, keep, "Temizlendi");
+  toast(removed + " parça atıldı.");
+}
+
 /* ============================================================
    Okuyucu
    ============================================================ */
@@ -898,26 +1022,76 @@ function renderBlock(b) {
   return el;
 }
 
-function openDoc(title, blocks, meta) {
-  state.blocks = blocks;
-  state.title = title;
-  $("#doctitle").textContent = title;
+function renderDoc(blocks) {
   const c = $("#content");
   c.innerHTML = "";
   const frag = document.createDocumentFragment();
   blocks.forEach(b => frag.appendChild(renderBlock(b)));
   c.appendChild(frag);
+}
+
+function openDoc(title, blocks, meta) {
+  state.raw = blocks;
+  state.showRaw = false;
+  $("#rawBtn").textContent = "Ham metni göster";
+  const kept = cleanBlocks(blocks);
+  state.blocks = kept;
+  state.title = title;
+  state.section = "Başlangıç";
+  renderDoc(kept);
   show("reader");
-  window.scrollTo(0, 0);
-  toast(meta + " · " + blocks.filter(b => b.type === "p").length + " paragraf");
+  const dropped = blocks.length - kept.length;
+  toast(meta + " · " + kept.filter(b => b.type === "p").length + " paragraf" + (dropped > 0 ? " · " + dropped + " parça atıldı" : ""));
 }
 
 function show(which) {
   $$(".screen").forEach(s => s.classList.toggle("on", s.id === which));
-  $("#backBtn").classList.toggle("hid", which === "home");
   $("#dock").classList.toggle("hid", which !== "reader");
-  if (which === "home") { $("#selBtn").classList.add("hid"); closeSheet(); }
+  $("#fontBtn").classList.toggle("hid", which !== "reader");
+  $("#allBtn").classList.toggle("hid", which !== "reader");
+  if (which !== "reader") { $("#selBtn").classList.add("hid"); closeSheet(); }
+  const tabOf = { home: "home", reader: "home", words: "words", gram: "gram" };
+  $$(".tb").forEach(b => b.classList.toggle("on", b.dataset.go === tabOf[which]));
+  const titles = { home: ["Kesit", "İngilizce makale okuyucu"], words: ["Defter", "Kelimelerim"], gram: ["Defter", "Gramer notlarım"] };
+  if (which !== "reader") {
+    $("#crumbTop").textContent = titles[which][0];
+    $("#crumbMain").textContent = titles[which][1];
+    $("#readBar").style.width = "0%";
+  } else {
+    $("#crumbTop").textContent = state.title || "Makale";
+    $("#crumbMain").textContent = state.section || "Başlangıç";
+  }
+  state.screen = which;
+  window.scrollTo(0, 0);
 }
+
+$$(".tb").forEach(b => b.addEventListener("click", () => {
+  const go = b.dataset.go;
+  if (go === "set") { openSettings(); return; }
+  if (go === "home" && state.blocks.length && state.screen === "home") { show("reader"); return; }
+  if (go === "words") renderWords();
+  if (go === "gram") renderGrams();
+  show(go);
+}));
+
+/* okurken hangi bölümdeyiz + ne kadarı bitti */
+let scrollT;
+window.addEventListener("scroll", () => {
+  if (state.screen !== "reader") return;
+  clearTimeout(scrollT);
+  scrollT = setTimeout(() => {
+    const h = document.body.scrollHeight - window.innerHeight;
+    $("#readBar").style.width = (h > 0 ? Math.min(100, (window.scrollY / h) * 100) : 0) + "%";
+    let cur = "";
+    $$("#content h2").forEach(el => {
+      if (el.getBoundingClientRect().top < 90) cur = el.textContent;
+    });
+    if (cur && cur !== state.section) {
+      state.section = cur;
+      $("#crumbMain").textContent = cur;
+    }
+  }, 90);
+}, { passive: true });
 
 /* ---------- seçim ---------- */
 function selInfo() {
@@ -1069,18 +1243,51 @@ async function runTab(tab) {
       if (sheetJob !== job) return;
       out.innerHTML = "";
       out.appendChild(wordCardEl(job.text, d, job.context));
-    } else {
-      const html = tab === "tr"
-        ? await translateSel(job.text, job.context)
-        : await grammarSel(job.text, job.context);
+    } else if (tab === "tr") {
+      const html = await translateSel(job.text, job.context);
       if (sheetJob !== job) return;
       out.innerHTML = clean(html);
+    } else {
+      const g = await grammarSel(job.text, job.context);
+      if (sheetJob !== job) return;
+      out.innerHTML = "";
+      out.appendChild(gramCardEl(job.text, g));
     }
   } catch (e) {
     if (sheetJob !== job) return;
     out.innerHTML = `<p style="color:var(--warn)">${esc(e.message)}</p>
       <p style="font-size:13px;color:var(--ink2)">Anahtar, model ve internet bağlantını kontrol edip tekrar dene.</p>`;
   }
+}
+
+function gramCardEl(sen, g) {
+  const wrap = document.createElement("div");
+  wrap.innerHTML =
+    `<div class="gtop">${esc(g.topic)}</div>` +
+    (g.tr ? `<p style="font-size:15px;color:var(--ink2);margin:0 0 14px">${esc(g.tr)}</p>` : "") +
+    (g.skeleton ? `<h4>İskelet</h4><p>${esc(g.skeleton)}</p>` : "") +
+    (g.points.length ? `<h4>Yapı</h4><ul>${g.points.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "") +
+    (g.tense ? `<h4>Zaman ve kip</h4><p>${esc(g.tense)}</p>` : "") +
+    (g.trap ? `<h4>Tuzak</h4><p>${esc(g.trap)}</p>` : "");
+  const btn = document.createElement("button");
+  btn.className = "savebtn";
+  setGramBtn(btn, hasGram(sen));
+  btn.addEventListener("click", () => {
+    if (hasGram(sen)) { removeGram(sen); setGramBtn(btn, false); toast("Gramer defterinden çıkarıldı."); }
+    else {
+      GRAMS.unshift({ s: sen, tr: g.tr, topic: g.topic, skeleton: g.skeleton, points: g.points, tense: g.tense, trap: g.trap, src: state.title, t: Date.now() });
+      saveGrams(); setGramBtn(btn, true); toast("Gramer defterine eklendi.");
+    }
+  });
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+function setGramBtn(btn, on) {
+  btn.className = "savebtn" + (on ? " done" : "");
+  btn.innerHTML = on
+    ? '<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Gramer defterinde'
+    : '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Gramer defterine ekle';
 }
 
 function clean(html) {
@@ -1303,7 +1510,6 @@ async function genFor(word, el) {
   btn.classList.remove("busy");
 }
 
-$("#wordsBtn").addEventListener("click", () => { renderWords(); show("words"); window.scrollTo(0, 0); });
 $("#wSearch").addEventListener("input", renderWords);
 
 /* ---------- yedekleme ---------- */
@@ -1586,15 +1792,140 @@ async function buildPdf() {
 $("#pdfBtn").addEventListener("click", buildPdf);
 
 /* ============================================================
+   Gramer defteri
+   ============================================================ */
+let GRAMS = [];
+try { GRAMS = JSON.parse(store.get("grams", "[]")) || []; } catch (e) { GRAMS = []; }
+function saveGrams() { store.set("grams", JSON.stringify(GRAMS)); }
+const gkey = t => String(t).toLowerCase().replace(/\s+/g, " ").trim().slice(0, 120);
+function hasGram(sen) { return GRAMS.some(x => gkey(x.s) === gkey(sen)); }
+function removeGram(sen) { GRAMS = GRAMS.filter(x => gkey(x.s) !== gkey(sen)); saveGrams(); }
+
+let gFilter = "";
+
+function renderGrams() {
+  const chips = $("#gChips"), box = $("#gList");
+  if (!GRAMS.length) {
+    chips.innerHTML = "";
+    box.innerHTML = '<div class="empty">Gramer defteri boş.<br>Bir makalede cümle seç, “Cümle yapısı” sekmesine geç, alttaki düğmeyle kaydet.</div>';
+    return;
+  }
+  const topics = [...new Set(GRAMS.map(x => x.topic || "genel"))].sort();
+  chips.innerHTML = `<button class="chip${gFilter ? "" : " on"}" data-t="">Hepsi ${GRAMS.length}</button>` +
+    topics.map(t => {
+      const n = GRAMS.filter(x => (x.topic || "genel") === t).length;
+      return `<button class="chip${gFilter === t ? " on" : ""}" data-t="${esc(t)}">${esc(t)} ${n}</button>`;
+    }).join("");
+  chips.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
+    gFilter = c.dataset.t; renderGrams();
+  }));
+
+  const list = gFilter ? GRAMS.filter(x => (x.topic || "genel") === gFilter) : GRAMS;
+  box.innerHTML = list.map((x, i) => `
+    <div class="witem" data-k="${esc(gkey(x.s))}">
+      <div class="wtxt">
+        <div class="gtop">${esc(x.topic || "genel")}</div>
+        <div class="gsen">${esc(x.s)}</div>
+        <div class="gtr">${esc(x.tr || "")}</div>
+      </div>
+      <div class="acts"><button class="del" aria-label="Sil">×</button></div>
+      <div class="wdet">
+        ${x.skeleton ? `<div class="none" style="color:var(--ink2)"><b>İskelet:</b> ${esc(x.skeleton)}</div>` : ""}
+        ${(x.points || []).length ? `<ul style="margin:9px 0 0;padding-left:17px;font-size:14px;line-height:1.6;color:var(--ink2)">${x.points.map(q => `<li>${esc(q)}</li>`).join("")}</ul>` : ""}
+        ${x.tense ? `<div class="none" style="margin-top:9px;color:var(--ink2)"><b>Zaman:</b> ${esc(x.tense)}</div>` : ""}
+        ${x.trap ? `<div class="none" style="margin-top:7px;color:var(--acc-ink)"><b>Tuzak:</b> ${esc(x.trap)}</div>` : ""}
+      </div>
+    </div>`).join("");
+
+  box.querySelectorAll(".witem").forEach(el => {
+    el.querySelector(".del").addEventListener("click", e => {
+      e.stopPropagation();
+      GRAMS = GRAMS.filter(x => gkey(x.s) !== el.dataset.k); saveGrams(); renderGrams(); toast("Silindi.");
+    });
+    el.querySelector(".wtxt").addEventListener("click", () => el.classList.toggle("open"));
+  });
+}
+
+$("#gexportBtn").addEventListener("click", async () => {
+  if (!GRAMS.length) { toast("Gramer defteri boş."); return; }
+  const txt = GRAMS.map(x => [x.topic, x.s, x.tr].join("\t")).join("\n");
+  try { await navigator.clipboard.writeText(txt); toast(GRAMS.length + " not panoya kopyalandı.", 3500); }
+  catch (e) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([txt], { type: "text/plain" }));
+    a.download = "gramer-defteri.txt"; a.click();
+    toast("Dosya olarak indirildi.");
+  }
+});
+
+async function buildGramPdf() {
+  if (!GRAMS.length) { toast("Gramer defteri boş."); return; }
+  busyShow("PDF hazırlanıyor", "Font yükleniyor…");
+  try { await ensureFonts(); }
+  catch (e) { busyHide(); toast("Kalam font dosyaları repoda yok.", 5000); return; }
+
+  const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+  regFonts(doc, KALAM);
+  const stamp = new Date().toLocaleDateString("tr-TR");
+  const list = gFilter ? GRAMS.filter(x => (x.topic || "genel") === gFilter) : GRAMS;
+
+  let page = 0, y = 0;
+  const limit = PH - M.b;
+  const newPage = () => { if (page) doc.addPage(); page++; pdfHeader(doc, "gramer · " + stamp, page); y = M.t + 3; };
+
+  const height = x => {
+    doc.setFontSize(11);
+    const a = flowRuns(doc, [{ text: x.s, c: -1 }], 0, 0, CW, LEAD, false).lines;
+    doc.setFontSize(10);
+    const b = flowRuns(doc, [{ text: x.tr || "", c: -1 }], 0, 0, CW, LEAD - 0.4, false).lines;
+    const pts = (x.points || []).length;
+    return 5.5 + a * LEAD + 1.5 + b * (LEAD - 0.4) + 2 + pts * (LEAD - 0.3) + 7;
+  };
+
+  newPage();
+  list.forEach(x => {
+    if (y + height(x) > limit) newPage();
+    doc.setFont("Kalam", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(46, 58, 102);
+    doc.text((x.topic || "genel").toUpperCase(), M.l, y);
+    y += 5.5;
+
+    doc.setFont("Kalam", KALAM.bold ? "bold" : "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(20, 24, 26);
+    y = flowRuns(doc, [{ text: x.s, c: -1 }], M.l, y, CW, LEAD, true).y + LEAD + 1.5;
+
+    doc.setFont("Kalam", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(95, 103, 132);
+    y = flowRuns(doc, [{ text: x.tr || "", c: -1 }], M.l, y, CW, LEAD - 0.4, true).y + 2;
+
+    doc.setFontSize(9.5);
+    doc.setTextColor(70, 78, 100);
+    (x.points || []).forEach(q => {
+      y += LEAD - 0.3;
+      y = flowRuns(doc, [{ text: "· " + q, c: -1 }], M.l + 2, y, CW - 2, LEAD - 0.3, true).y;
+    });
+
+    y += 4;
+    doc.setDrawColor(228, 224, 214);
+    doc.setLineWidth(0.15);
+    doc.line(M.l, y, PW - M.r, y);
+    y += 5.5;
+  });
+
+  doc.save("gramer-defteri-" + new Date().toISOString().slice(0, 10) + ".pdf");
+  busyHide();
+  toast(list.length + " not · " + page + " sayfa hazır.", 3500);
+}
+$("#gpdfBtn").addEventListener("click", buildGramPdf);
+
+/* ============================================================
    Ayarlar / arayüz bağlantıları
    ============================================================ */
 function openSettings() { $("#settings").classList.add("on"); $("#keyInp").value = state.key; }
-$("#setBtn").addEventListener("click", openSettings);
 $("#setClose").addEventListener("click", () => $("#settings").classList.remove("on"));
-$("#backBtn").addEventListener("click", () => {
-  const inWords = $("#words").classList.contains("on");
-  show(inWords && state.blocks.length ? "reader" : "home");
-});
 
 $("#keySave").addEventListener("click", async () => {
   const v = $("#keyInp").value.trim();
@@ -1631,6 +1962,27 @@ $("#clearMarks").addEventListener("click", () => {
   toast("İşaretler temizlendi.");
 });
 $("#allBtn").addEventListener("click", translateAll);
+
+
+/* filtre anahtarı ve temizleme düğmeleri */
+const filtTog = $("#filtTog");
+filtTog.classList.toggle("on", state.filter);
+filtTog.addEventListener("click", () => {
+  state.filter = !state.filter;
+  store.set("filter", state.filter ? "1" : "0");
+  filtTog.classList.toggle("on", state.filter);
+  toast(state.filter ? "Temizlik açık. Sonraki makalede geçerli." : "Temizlik kapalı.");
+});
+$("#aiCleanBtn").addEventListener("click", aiClean);
+$("#rawBtn").addEventListener("click", () => {
+  if (!state.raw.length) { toast("Önce bir makale aç."); return; }
+  state.showRaw = !state.showRaw;
+  const blocks = state.showRaw ? state.raw : cleanBlocks(state.raw);
+  state.blocks = blocks;
+  renderDoc(blocks);
+  $("#rawBtn").textContent = state.showRaw ? "Temizlenmişi göster" : "Ham metni göster";
+  toast(state.showRaw ? "Ham metin · " + blocks.length + " parça" : "Temizlenmiş · " + blocks.length + " parça");
+});
 
 /* kaynak seçiciler */
 $("#pickPdf").addEventListener("click", () => $("#pdfInput").click());
