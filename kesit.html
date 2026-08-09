@@ -410,19 +410,27 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   <div class="row">
     <h4>Eşitleme</h4>
     <p id="syncMsg" style="color:var(--acc-ink);font-weight:500">Kurulu değil.</p>
-    <div class="field" style="margin-top:10px">
-      <input class="inp" id="ghRepo" placeholder="kullanici/depo-adi" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <p style="margin:10px 0 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:600">Firebase bilgileri</p>
+    <div class="field" style="margin-top:0">
+      <input class="inp" id="fbKey" type="password" placeholder="Web API anahtarı" autocapitalize="off" autocorrect="off" spellcheck="false">
     </div>
     <div class="field">
-      <input class="inp" id="ghToken" type="password" placeholder="github_pat_…" autocapitalize="off" autocorrect="off" spellcheck="false">
-      <button class="btn" id="ghSave">Bağla</button>
+      <input class="inp" id="fbDb" placeholder="https://...firebasedatabase.app" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+    <p style="margin:12px 0 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:600">Hesabın</p>
+    <div class="field" style="margin-top:0">
+      <input class="inp" id="fbMail" type="email" placeholder="e-posta" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <input class="inp" id="fbPass" type="password" placeholder="parola (en az 6 karakter)" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button class="btn" id="fbConnect">Bağla</button>
     </div>
     <div class="field">
       <button class="btn ghost" id="ghSync" style="flex:1">Şimdi eşitle</button>
       <button class="btn ghost" id="ghTestBtn" style="flex:1">Bağlantıyı sına</button>
     </div>
     <div id="syncDiag" style="font-size:12.5px;line-height:1.5;margin-top:8px"></div>
-    <div class="note" style="margin-top:10px">Kelime ve gramer defterin bu depodaki bir dosyada tutulur. Telefon, tablet ve bilgisayar aynı defteri görür. Depoyu <b>private</b> aç ve uygulamanın durduğu depodan farklı olsun.</div>
+    <div class="note" style="margin-top:10px">Aynı e-posta ve parolayla girdiğin her cihaz aynı defteri görür. Parolan Firebase'de tutulur, uygulamada saklanmaz.</div>
   </div>
 
   <div class="row">
@@ -2001,66 +2009,203 @@ async function buildGramPdf() {
 $("#gpdfBtn").addEventListener("click", buildGramPdf);
 
 /* ============================================================
-   GitHub eşitleme — asıl kopya sunucuda, cihazlar ondan beslenir
+   Firebase eşitleme — asıl kopya bulutta, cihazlar ondan beslenir
    ============================================================ */
-const GH = {
-  token: store.get("gh_token", ""),
-  repo: store.get("gh_repo", ""),
-  file: "kesit-veri.json",
-  sha: store.get("gh_sha", ""),
-  last: store.get("gh_last", "")
+const FB = {
+  key: store.get("fb_key", ""),
+  db: store.get("fb_db", ""),
+  email: store.get("fb_email", ""),
+  uid: store.get("fb_uid", ""),
+  refresh: store.get("fb_refresh", ""),
+  idToken: "",
+  expires: 0,
+  last: store.get("fb_last", "")
 };
 let TOMB = {};
 try { TOMB = JSON.parse(store.get("tomb", "{}")) || {}; } catch (e) { TOMB = {}; }
 function saveTomb() { store.set("tomb", JSON.stringify(TOMB)); }
 function tomb(key) { TOMB[key] = Date.now(); saveTomb(); }
 
-const b64enc = str => {
-  const b = new TextEncoder().encode(str);
-  let s = "";
-  for (let i = 0; i < b.length; i += 8192) s += String.fromCharCode.apply(null, b.subarray(i, i + 8192));
-  return btoa(s);
-};
-const b64dec = b64 => {
-  const bin = atob(b64.replace(/\s/g, ""));
-  const u = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-  return new TextDecoder().decode(u);
-};
+const AUTH = "https://identitytoolkit.googleapis.com/v1/accounts:";
+const fbSet = (k, v) => { FB[k] = v; store.set("fb_" + k, v); };
 
-function ghUrl() { return `https://api.github.com/repos/${GH.repo}/contents/${GH.file}`; }
-function ghHead() {
-  return { Authorization: "Bearer " + GH.token, Accept: "application/vnd.github+json", "Content-Type": "application/json" };
+async function fbPost(url, body) {
+  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const m = (d.error && d.error.message) || ("HTTP " + r.status);
+    const tr = {
+      EMAIL_EXISTS: "Bu e-posta zaten kayıtlı, parolan yanlış olabilir.",
+      INVALID_PASSWORD: "Parola yanlış.",
+      INVALID_LOGIN_CREDENTIALS: "E-posta veya parola yanlış.",
+      EMAIL_NOT_FOUND: "Bu e-posta kayıtlı değil.",
+      WEAK_PASSWORD: "Parola en az 6 karakter olmalı.",
+      INVALID_EMAIL: "E-posta biçimi hatalı.",
+      OPERATION_NOT_ALLOWED: "Firebase'de e-posta/parola girişi açık değil.",
+      API_KEY_INVALID: "Web API anahtarı geçersiz."
+    };
+    const code = m.split(" : ")[0].trim();
+    const err = new Error(tr[code] || m);
+    err.code = code;
+    throw err;
+  }
+  return d;
 }
 
-async function ghGet() {
-  const r = await fetch(ghUrl() + "?ref=HEAD&t=" + Date.now(), { headers: ghHead(), cache: "no-store" });
-  if (r.status === 404) return { data: null, sha: "" };
+/* ilk cihazda hesabı açar, sonrakilerde giriş yapar */
+async function fbSignIn(email, pass) {
+  let d = null;
+  try {
+    d = await fbPost(AUTH + "signInWithPassword?key=" + FB.key, { email, password: pass, returnSecureToken: true });
+  } catch (e) {
+    // Firebase "e-posta yok" ile "parola yanlış" durumlarını aynı kodla döndürebiliyor,
+    // bu yüzden hesap açmayı deneyip sonucuna göre karar veriyoruz.
+    const maybeNew = ["EMAIL_NOT_FOUND", "INVALID_LOGIN_CREDENTIALS", "INVALID_PASSWORD"].includes(e.code);
+    if (!maybeNew) throw e;
+    try {
+      d = await fbPost(AUTH + "signUp?key=" + FB.key, { email, password: pass, returnSecureToken: true });
+    } catch (e2) {
+      if (e2.code === "EMAIL_EXISTS") throw new Error("Bu e-posta kayıtlı ama parola tutmadı.");
+      throw e2;
+    }
+  }
+  FB.idToken = d.idToken;
+  FB.expires = Date.now() + (parseInt(d.expiresIn || "3600", 10) - 120) * 1000;
+  fbSet("uid", d.localId);
+  fbSet("refresh", d.refreshToken);
+  fbSet("email", email);
+  return d;
+}
+
+async function fbToken() {
+  if (FB.idToken && Date.now() < FB.expires) return FB.idToken;
+  if (!FB.refresh) throw new Error("Oturum yok. Ayarlardan e-posta ve parolayla bağlan.");
+  const d = await fbPost("https://securetoken.googleapis.com/v1/token?key=" + FB.key,
+    { grant_type: "refresh_token", refresh_token: FB.refresh });
+  FB.idToken = d.id_token || d.access_token;
+  FB.expires = Date.now() + (parseInt(d.expires_in || "3600", 10) - 120) * 1000;
+  if (d.refresh_token) fbSet("refresh", d.refresh_token);
+  return FB.idToken;
+}
+
+function fbUrl(tok) {
+  const base = FB.db.replace(/\/+$/, "");
+  return `${base}/users/${FB.uid}/kesit.json?auth=${encodeURIComponent(tok)}`;
+}
+
+async function fbPull() {
+  const tok = await fbToken();
+  const r = await fetch(fbUrl(tok), { cache: "no-store" });
   if (!r.ok) {
     const d = await r.json().catch(() => ({}));
-    throw new Error(r.status === 401 ? "Anahtar geçersiz." :
-                    r.status === 403 ? "Bu depoya erişim yetkisi yok." :
-                    (d.message || "Sunucu hatası " + r.status));
+    throw new Error(r.status === 401 ? "Veritabanı kuralları erişime izin vermiyor." : (d.error || "Okunamadı " + r.status));
   }
-  const j = await r.json();
-  return { data: JSON.parse(b64dec(j.content)), sha: j.sha };
+  return await r.json();
 }
 
-async function ghPut(payload, sha) {
-  const body = { message: "kesit " + new Date().toISOString(), content: b64enc(JSON.stringify(payload)) };
-  if (sha) body.sha = sha;
-  const r = await fetch(ghUrl(), { method: "PUT", headers: ghHead(), body: JSON.stringify(body) });
+async function fbPush(payload) {
+  const tok = await fbToken();
+  const r = await fetch(fbUrl(tok), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
   if (!r.ok) {
     const d = await r.json().catch(() => ({}));
-    const e = new Error(d.message || "Yazılamadı " + r.status);
-    e.conflict = (r.status === 409 || r.status === 422);
-    throw e;
+    throw new Error(d.error || "Yazılamadı " + r.status);
   }
-  const j = await r.json();
-  return j.content.sha;
 }
 
-/* iki listeyi zaman damgasına göre birleştir, silinenleri diriltme */
+/* Realtime Database anahtarlarda nokta kabul etmez, mezar taşlarını dizi olarak taşı */
+const tombOut = () => Object.keys(TOMB).map(k => ({ k, t: TOMB[k] }));
+const tombIn = arr => { (arr || []).forEach(x => { if (x && x.k && (!TOMB[x.k] || x.t > TOMB[x.k])) TOMB[x.k] = x.t; }); saveTomb(); };
+
+let syncTimer = null, syncing = false;
+function syncSoon() {
+  if (!FB.key || !FB.db || !FB.refresh) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => syncNow(true), 4000);
+}
+
+async function syncNow(quiet) {
+  if (!FB.key || !FB.db) { if (!quiet) toast("Önce ayarlardan eşitlemeyi kur."); return; }
+  if (!FB.refresh) { if (!quiet) toast("E-posta ve parolayla bağlan."); return; }
+  if (syncing) return;
+  syncing = true;
+  setSyncMsg("Eşitleniyor…");
+  try {
+    const remote = await fbPull();
+    tombIn(remote && remote.tomb);
+    WORDS = mergeList(WORDS, remote && remote.words, x => "w:" + norm(x.w));
+    GRAMS = mergeList(GRAMS, remote && remote.grams, x => "g:" + gkey(x.s));
+    saveWords(); saveGrams();
+    await fbPush({ v: 1, at: new Date().toISOString(), words: WORDS, grams: GRAMS, tomb: tombOut() });
+    fbSet("last", new Date().toISOString());
+    setSyncMsg(syncLabel());
+    if (state.screen === "words") renderWords();
+    if (state.screen === "gram") renderGrams();
+    if (!quiet) toast("Eşitlendi · " + WORDS.length + " kelime, " + GRAMS.length + " not");
+  } catch (e) {
+    setSyncMsg("Eşitlenemedi: " + e.message);
+    if (!quiet) toast("Eşitlenemedi: " + e.message, 4500);
+  }
+  syncing = false;
+}
+
+function setSyncMsg(t) { const el = $("#syncMsg"); if (el) el.textContent = t; }
+
+function syncLabel() {
+  if (!FB.key || !FB.db) return "Kurulu değil. Aşağıdaki alanları doldur.";
+  if (!FB.refresh) return "Firebase tanımlı. Şimdi e-posta ve parolayla bağlan.";
+  const d = FB.last ? new Date(FB.last).toLocaleString("tr-TR") : "henüz yok";
+  return FB.email + " · son eşitleme: " + d + " · " + WORDS.length + " kelime, " + GRAMS.length + " not";
+}
+
+document.addEventListener("visibilitychange", () => { if (document.hidden) { clearTimeout(syncTimer); syncNow(true); } });
+
+/* ---------- bağlantı sınaması ---------- */
+async function ghTest() {
+  const box = $("#syncDiag");
+  const lines = [];
+  const say = (ok, msg) => {
+    lines.push((ok ? "✓ " : "✗ ") + msg);
+    box.innerHTML = lines.map(l => `<div style="margin:3px 0;color:${l[0] === "✓" ? "var(--ink2)" : "var(--warn)"}">${esc(l)}</div>`).join("");
+  };
+  box.innerHTML = '<div style="color:var(--ink3)"><span class="spin dark"></span> Sınanıyor…</div>';
+
+  if (location.protocol === "file:") {
+    say(false, "Sayfa dosyadan açılmış (file://). Tarayıcı bu durumda dış isteklere izin vermez. Uygulamayı github.io adresinden aç.");
+    return;
+  }
+  say(true, "Adres: " + location.protocol + "//" + location.host);
+
+  if (!FB.key) { say(false, "Web API anahtarı girilmemiş."); return; }
+  if (!FB.db) { say(false, "Veritabanı adresi girilmemiş."); return; }
+  if (!/^https:\/\/[\w.-]+\.(firebaseio\.com|firebasedatabase\.app)$/.test(FB.db.replace(/\/+$/, ""))) {
+    say(false, "Veritabanı adresi hatalı görünüyor. https://... .firebasedatabase.app biçiminde olmalı. Şu an: " + FB.db);
+  } else say(true, "Veritabanı adresi biçimi uygun");
+
+  try {
+    const r = await fetch("https://identitytoolkit.googleapis.com/v1/projects?key=" + FB.key, { cache: "no-store" });
+    if (r.status === 400 || r.status === 403) {
+      const d = await r.json().catch(() => ({}));
+      const m = (d.error && d.error.message) || "";
+      if (/API_KEY_INVALID|API key not valid/i.test(m)) { say(false, "Web API anahtarı geçersiz."); return; }
+    }
+    say(true, "Firebase sunucusuna ulaşıldı");
+  } catch (e) {
+    say(false, "Firebase'e hiç ulaşılamıyor. İnternet, VPN veya içerik engelleyici olabilir. (" + e.message + ")");
+    return;
+  }
+
+  if (!FB.refresh) { say(false, "Henüz giriş yapılmamış. E-posta ve parola yazıp Bağla'ya bas."); return; }
+  try { await fbToken(); say(true, "Oturum geçerli: " + FB.email); }
+  catch (e) { say(false, "Oturum yenilenemedi: " + e.message); return; }
+
+  try {
+    const d = await fbPull();
+    say(true, d ? "Veri okundu: " + ((d.words || []).length) + " kelime, " + ((d.grams || []).length) + " not" : "Veri dosyası henüz boş, ilk eşitlemede oluşacak.");
+  } catch (e) { say(false, "Veritabanı okunamadı: " + e.message + "  — Realtime Database kurallarını kontrol et."); return; }
+
+  say(true, "Her şey hazır.");
+}
+
 function mergeList(local, remote, keyOf) {
   const map = {};
   const put = x => {
@@ -2076,124 +2221,6 @@ function mergeList(local, remote, keyOf) {
     .map(k => map[k])
     .sort((a, b) => (b.t || 0) - (a.t || 0));
 }
-
-let syncTimer = null, syncing = false;
-function syncSoon() {
-  if (!GH.token || !GH.repo) return;
-  clearTimeout(syncTimer);
-  syncTimer = setTimeout(() => syncNow(true), 4000);
-}
-
-async function syncNow(quiet) {
-  if (!GH.token || !GH.repo) { if (!quiet) toast("Önce ayarlardan eşitlemeyi kur."); return; }
-  if (syncing) return;
-  syncing = true;
-  setSyncMsg("Eşitleniyor…");
-  try {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const { data, sha } = await ghGet();
-      Object.assign(TOMB, (data && data.tomb) || {});
-      saveTomb();
-      WORDS = mergeList(WORDS, data && data.words, x => "w:" + norm(x.w));
-      GRAMS = mergeList(GRAMS, data && data.grams, x => "g:" + gkey(x.s));
-      saveWords(); saveGrams();
-      const payload = { v: 1, at: new Date().toISOString(), words: WORDS, grams: GRAMS, tomb: TOMB };
-      try {
-        GH.sha = await ghPut(payload, sha || GH.sha);
-        store.set("gh_sha", GH.sha);
-        break;
-      } catch (e) {
-        if (e.conflict && attempt === 0) continue;
-        throw e;
-      }
-    }
-    GH.last = new Date().toISOString();
-    store.set("gh_last", GH.last);
-    setSyncMsg("Son eşitleme: az önce · " + WORDS.length + " kelime, " + GRAMS.length + " gramer notu");
-    if (state.screen === "words") renderWords();
-    if (state.screen === "gram") renderGrams();
-    if (!quiet) toast("Eşitlendi.");
-  } catch (e) {
-    setSyncMsg("Eşitlenemedi: " + e.message);
-    if (!quiet) toast("Eşitlenemedi: " + e.message, 4000);
-  }
-  syncing = false;
-}
-
-
-/* ---------- bağlantı sınaması: hangi adımda takıldığını söyler ---------- */
-async function ghTest() {
-  const box = $("#syncDiag");
-  const lines = [];
-  const say = (ok, msg) => {
-    lines.push((ok ? "✓ " : "✗ ") + msg);
-    box.innerHTML = lines.map(l => `<div style="margin:3px 0;color:${l[0] === "✓" ? "var(--ink2)" : "var(--warn)"}">${esc(l)}</div>`).join("");
-  };
-  box.innerHTML = '<div style="color:var(--ink3)"><span class="spin dark"></span> Sınanıyor…</div>';
-
-  // 1) sayfa nereden açılmış
-  if (location.protocol === "file:") {
-    say(false, "Sayfa dosyadan açılmış (file://). Tarayıcı bu durumda dış isteklere izin vermez. Uygulamayı github.io adresinden aç.");
-    return;
-  }
-  say(location.protocol === "https:", "Adres: " + location.protocol + "//" + location.host);
-
-  // 2) internet ve GitHub erişimi
-  try {
-    const r = await fetch("https://api.github.com/rate_limit", { cache: "no-store" });
-    say(r.ok, "GitHub sunucusuna ulaşıldı (" + r.status + ")");
-  } catch (e) {
-    say(false, "GitHub'a hiç ulaşılamıyor. İnternet bağlantısı, VPN veya içerik engelleyici olabilir. (" + e.message + ")");
-    return;
-  }
-
-  // 3) anahtar geçerli mi
-  if (!GH.token) { say(false, "Erişim anahtarı girilmemiş."); return; }
-  if (!/^[\x21-\x7E]+$/.test(GH.token)) {
-    say(false, "Anahtarda boşluk veya geçersiz karakter var. Kopyalarken fazladan boşluk gelmiş olabilir, yeniden yapıştır.");
-    return;
-  }
-  say(true, "Anahtar biçimi uygun (" + GH.token.length + " karakter, " + GH.token.slice(0, 8) + "…)");
-
-  try {
-    const r = await fetch("https://api.github.com/user", { headers: ghHead(), cache: "no-store" });
-    if (r.status === 401) { say(false, "Anahtar geçersiz veya süresi dolmuş. Yenisini üret."); return; }
-    const j = await r.json();
-    say(r.ok, r.ok ? "Anahtar çalışıyor, hesap: " + (j.login || "?") : "Anahtar reddedildi (" + r.status + ")");
-  } catch (e) { say(false, "Anahtar sınanamadı: " + e.message); return; }
-
-  // 4) depo görünüyor mu
-  if (!GH.repo) { say(false, "Depo adı girilmemiş."); return; }
-  if (!/^[\w.-]+\/[\w.-]+$/.test(GH.repo)) { say(false, "Depo adı kullanici/depo biçiminde olmalı. Şu an: " + GH.repo); return; }
-  try {
-    const r = await fetch("https://api.github.com/repos/" + GH.repo, { headers: ghHead(), cache: "no-store" });
-    if (r.status === 404) {
-      say(false, "Depo bu anahtara görünmüyor. Anahtar ayarlarında Repository access bölümüne " + GH.repo.split("/")[1] + " deposunu ekle.");
-      return;
-    }
-    const j = await r.json();
-    say(r.ok, "Depo bulundu: " + GH.repo + (j.private ? " (private)" : " (public — private yapmanı öneririm)"));
-    if (j.permissions && !j.permissions.push) say(false, "Yazma yetkisi yok. Anahtarda Contents iznini Read and write yap.");
-  } catch (e) { say(false, "Depo sınanamadı: " + e.message); return; }
-
-  // 5) dosya okunabiliyor mu
-  try {
-    const r = await fetch(ghUrl(), { headers: ghHead(), cache: "no-store" });
-    if (r.status === 404) say(true, "Veri dosyası henüz yok, ilk eşitlemede oluşturulacak. Her şey hazır.");
-    else say(r.ok, r.ok ? "Veri dosyası okundu, her şey hazır." : "Dosya okunamadı (" + r.status + ")");
-  } catch (e) { say(false, "Dosya sınanamadı: " + e.message); }
-}
-
-function setSyncMsg(t) { const el = $("#syncMsg"); if (el) el.textContent = t; }
-
-function syncLabel() {
-  if (!GH.token || !GH.repo) return "Kurulu değil. Aşağıdaki iki alanı doldur.";
-  if (!GH.last) return "Kurulu. Henüz eşitlenmedi.";
-  const d = new Date(GH.last);
-  return "Son eşitleme: " + d.toLocaleString("tr-TR") + " · " + WORDS.length + " kelime, " + GRAMS.length + " gramer notu";
-}
-
-document.addEventListener("visibilitychange", () => { if (document.hidden) { clearTimeout(syncTimer); syncNow(true); } });
 
 /* ============================================================
    Ayarlar / arayüz bağlantıları
@@ -2240,19 +2267,32 @@ $("#allBtn").addEventListener("click", translateAll);
 
 
 /* eşitleme arayüzü */
-$("#ghRepo").value = GH.repo;
-$("#ghToken").value = GH.token ? "••••••••••••" : "";
+$("#fbKey").value = FB.key ? "••••••••••••" : "";
+$("#fbDb").value = FB.db;
+$("#fbMail").value = FB.email;
 setSyncMsg(syncLabel());
-$("#ghSave").addEventListener("click", async () => {
-  const repo = $("#ghRepo").value.trim().replace(/^https?:\/\/github\.com\//i, "").replace(/\.git$/, "").replace(/\/+$/, "");
-  const tok = $("#ghToken").value.replace(/[\s\u200B-\u200D\uFEFF]/g, "");
-  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) { toast("Depo adını kullanici/depo biçiminde yaz."); return; }
-  if (tok && !tok.startsWith("•")) { GH.token = tok; store.set("gh_token", tok); }
-  if (!GH.token) { toast("Erişim anahtarını gir."); return; }
-  GH.repo = repo; store.set("gh_repo", repo);
-  GH.sha = ""; store.set("gh_sha", "");
-  $("#ghToken").value = "••••••••••••";
-  await syncNow();
+
+$("#fbConnect").addEventListener("click", async () => {
+  const key = $("#fbKey").value.replace(/[\s\u200B-\u200D\uFEFF]/g, "");
+  const db = $("#fbDb").value.trim().replace(/\/+$/, "");
+  const mail = $("#fbMail").value.trim();
+  const pass = $("#fbPass").value;
+  if (key && !key.startsWith("\u2022")) fbSet("key", key);
+  if (db) fbSet("db", db);
+  if (!FB.key) { toast("Web API anahtarını gir."); return; }
+  if (!FB.db) { toast("Veritabanı adresini gir."); return; }
+  if (!mail || pass.length < 6) { toast("E-posta ve en az 6 karakterli parola gir."); return; }
+  $("#fbKey").value = "••••••••••••";
+  setSyncMsg("Bağlanılıyor…");
+  try {
+    await fbSignIn(mail, pass);
+    $("#fbPass").value = "";
+    toast("Bağlandı. Eşitleniyor…");
+    await syncNow();
+  } catch (e) {
+    setSyncMsg("Bağlanamadı: " + e.message);
+    toast("Bağlanamadı: " + e.message, 4500);
+  }
 });
 $("#ghSync").addEventListener("click", () => syncNow());
 $("#ghTestBtn").addEventListener("click", ghTest);
@@ -2294,7 +2334,7 @@ $("#textGo").addEventListener("click", () => {
 
 /* açılış */
 setFs(state.fs);
-if (GH.token && GH.repo) syncNow(true);
+if (FB.key && FB.db && FB.refresh) syncNow(true);
 if (state.key) loadModels(true);
 else setTimeout(() => toast("Başlamak için ayarlardan Gemini anahtarını gir.", 4000), 700);
 </script>
