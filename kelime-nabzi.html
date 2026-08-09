@@ -1112,6 +1112,13 @@ Görevlerin:
         return;
       }
 
+      const handshakeTimeout = setTimeout(()=>{
+        if(sessionState === "connecting"){
+          showHocaError("Bağlantı 10 saniyede kurulamadı. Olası sebepler: (1) API anahtarının Live API erişimi yok, (2) Ayarlar'daki model adı geçersiz/güncel değil, (3) ağın WebSocket bağlantısını engelliyor. Farklı bir ağ (wifi/mobil veri) veya güncel bir model adıyla tekrar dene.");
+          disconnectLive();
+        }
+      }, 10000);
+
       ws.onopen = ()=>{
         ws.send(JSON.stringify({
           setup:{
@@ -1134,6 +1141,7 @@ Görevlerin:
         try{ msg = JSON.parse(raw); }catch(e){ return; }
 
         if(msg.setupComplete){
+          clearTimeout(handshakeTimeout);
           sessionState = "connected";
           await startMic().catch(err=>{
             showHocaError("Mikrofon erişimi reddedildi ya da kullanılamıyor: "+err.message);
@@ -1174,8 +1182,16 @@ Görevlerin:
         showHocaError("Bağlantı hatası. API anahtarını ve model adını Ayarlar'dan kontrol et.");
       };
 
-      ws.onclose = ()=>{
-        if(isLive) disconnectLive();
+      ws.onclose = (evt)=>{
+        clearTimeout(handshakeTimeout);
+        if(sessionState === "connecting"){
+          const codeInfo = evt.code ? (" (kod: "+evt.code+(evt.reason?", "+evt.reason:"")+")") : "";
+          showHocaError("Sunucu bağlantıyı kabul etmeden kapattı"+codeInfo+". Genelde API anahtarı bu modele erişimli değil ya da model adı hatalı.");
+          resetMicUI();
+          sessionState = "idle";
+        }else if(isLive){
+          disconnectLive();
+        }
       };
     }
 
