@@ -1678,6 +1678,22 @@ function normSen(d) {
   return { en, tr, pairs, syn };
 }
 
+async function makeSynonyms(words) {
+  const list = words.map((w, i) => (i + 1) + ") " + w).join("\n");
+  const d = parseJson(await gemini(
+    `Aşağıdaki İngilizce sözcüklerin her biri için 3 eş veya yakın anlamlı İngilizce sözcük ver.
+Sadece sözcükleri ver, açıklama yazma.
+Anahtarları sözcüğün kendisi olan bir JSON nesnesi döndür.
+
+${list}`, SEN_SYS, { temp: 0.3 }));
+  const out = {};
+  Object.keys(d || {}).forEach(k => {
+    const v = d[k];
+    if (Array.isArray(v)) out[k.toLowerCase().trim()] = v.map(String).map(x => x.trim()).filter(Boolean).slice(0, 3);
+  });
+  return out;
+}
+
 async function makeSentence(word, tr, avoid) {
   const d = parseJson(await gemini(senPrompt(word, tr, avoid), SEN_SYS, { temp: 0.95 }));
   return normSen(d);
@@ -2032,33 +2048,56 @@ function examEntry(doc, x, y, k) {
 
 async function buildPdf() {
   if (!WORDS.length) { toast("Defter boş."); return; }
-  const missing = WORDS.filter(x => !x.ex || !(x.syn || []).length);
+  const needEx = WORDS.filter(x => !x.ex);
+  const needSyn = WORDS.filter(x => x.ex && !(x.syn || []).length && !x.synTried);
+
+  if (needEx.length || needSyn.length) {
+    const parts = [];
+    if (needEx.length) parts.push(needEx.length + " kelimenin örnek cümlesi");
+    if (needSyn.length) parts.push(needSyn.length + " kelimenin eş anlamlısı");
+    const go = confirm(parts.join(" ve ") + " eksik.\n\nTamam: eksikleri tamamla (biraz sürer).\nİptal: elimizdekiyle bas.");
+    if (go) {
+      if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
+      busyShow("Eksikler tamamlanıyor", "");
+
+      // cümlesi olmayanlar — VAR OLAN CÜMLELERE DOKUNULMAZ
+      for (let i = 0; i < needEx.length; i++) {
+        if (stopFlag) break;
+        busyUpd("Örnek cümleler · " + (i + 1) + " / " + needEx.length, (i / Math.max(1, needEx.length)) * 60);
+        try {
+          const r = await makeSentence(needEx[i].w, needEx[i].tr);
+          needEx[i].ex = r.en; needEx[i].exTr = r.tr; needEx[i].pairs = r.pairs;
+          if ((r.syn || []).length) needEx[i].syn = r.syn;
+        } catch (e) {}
+        needEx[i].synTried = 1;
+        saveWords();
+        await sleep(220);
+      }
+
+      // yalnız eş anlamlısı eksik olanlar — 15'erli toplu
+      const rest = WORDS.filter(x => x.ex && !(x.syn || []).length && !x.synTried);
+      for (let i = 0; i < rest.length; i += 15) {
+        if (stopFlag) break;
+        const grp = rest.slice(i, i + 15);
+        busyUpd("Eş anlamlılar · " + Math.min(i + 15, rest.length) + " / " + rest.length, 60 + (i / Math.max(1, rest.length)) * 40);
+        try {
+          const map = await makeSynonyms(grp.map(x => x.w));
+          grp.forEach(x => { const v = map[x.w.toLowerCase().trim()]; if (v && v.length) x.syn = v; });
+        } catch (e) {}
+        grp.forEach(x => { x.synTried = 1; });   // denendi, bir daha sorulmaz
+        saveWords();
+        await sleep(220);
+      }
+      syncSoon();
+    }
+  }
 
   busyShow("PDF hazırlanıyor", "Font yükleniyor…");
-  try {
-    await ensureFonts();
-  } catch (e) {
+  try { await ensureFonts(); }
+  catch (e) {
     busyHide();
     toast("Font dosyaları repoda yok. Kalam-Regular.ttf, Kalam-Bold.ttf ve Kalam-Light.ttf dosyalarını kesit.html'in yanına yükle.", 6000);
     return;
-  }
-
-  // eksik cümleleri üret
-  if (missing.length) {
-    if (!state.key) { busyHide(); toast("Cümle üretmek için Gemini anahtarı gerekli."); openSettings(); return; }
-    for (let i = 0; i < missing.length; i++) {
-      if (stopFlag) { busyHide(); toast("Durduruldu."); return; }
-      busyUpd("Örnek cümleler kuruluyor · " + (i + 1) + " / " + missing.length, (i / missing.length) * 100);
-      try {
-        const s = await makeSentence(missing[i].w, missing[i].tr);
-        missing[i].ex = s.en; missing[i].exTr = s.tr; missing[i].pairs = s.pairs;
-        if (!(missing[i].syn || []).length) missing[i].syn = s.syn || [];
-        saveWords();
-      } catch (e) {
-        missing[i].ex = missing[i].ex || "";
-      }
-      await sleep(250);
-    }
   }
 
   busyUpd("Sayfalar diziliyor…", 100);
