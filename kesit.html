@@ -197,6 +197,9 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .witem .del{color:var(--ink3);padding:4px 6px;font-size:21px;line-height:1;flex:none}
 .wdet{flex-basis:100%;margin-top:12px;padding-top:12px;border-top:1px solid var(--line2);display:none}
 .witem.open .wdet{display:block}
+.out .sen{font-family:"Source Serif 4",serif;font-size:16px;line-height:1.55;margin-bottom:8px}
+.out .sen.trs{color:var(--ink2);font-size:15px}
+.out .sen .c0,.out .sen .c1,.out .sen .c2,.out .sen .c3,.out .sen .c4{font-weight:600}
 .wdet .sen{font-family:"Source Serif 4",serif;font-size:15.5px;line-height:1.55;margin-bottom:8px}
 .wdet .sen.trs{color:var(--ink2)}
 .wdet .none{font-size:13px;color:var(--ink3)}
@@ -208,7 +211,11 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .wdet .sen .c0,.wdet .sen .c1,.wdet .sen .c2,.wdet .sen .c3,.wdet .sen .c4{font-weight:600}
 .gtop{display:inline-block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:600;
   color:var(--deep);background:var(--deep-soft);border-radius:7px;padding:4px 9px;margin-bottom:8px}
+.legend{display:flex;flex-wrap:wrap;gap:5px 14px;margin:10px 0 4px;font-size:12px;color:var(--ink2)}
+.legend .lg{display:inline-flex;align-items:center;gap:5px}
+.legend i{font-style:normal;font-size:11px;line-height:1}
 .gsen{font-family:"Source Serif 4",serif;font-size:16px;line-height:1.5;font-weight:600}
+.gsen .c0,.gsen .c1,.gsen .c2,.gsen .c3,.gsen .c4,.gtr .c0,.gtr .c1,.gtr .c2,.gtr .c3,.gtr .c4{font-weight:700}
 .gtr{font-size:14.5px;color:var(--ink2);margin-top:4px;line-height:1.5}
 .empty{text-align:center;color:var(--ink3);font-size:14px;line-height:1.65;padding:56px 20px}
 
@@ -669,7 +676,13 @@ PARÇA: "${text}"
 "skeleton": ana cümlenin iskeleti. Özne ve yüklemi sade bir İngilizce cümleyle göster, en fazla 8 kelime.
 "points": 2-4 maddelik dizi. Her madde cümledeki bir yapıyı açıklar. Her maddede metinden ilgili kısmı tırnak içinde göster.
 "tense": kullanılan zaman/kip ve neden seçildiği. Tek cümle.
-"trap": Türk okuyucunun bu cümlede yanlış anlayabileceği tek nokta. Tek cümle.`;
+"trap": Türk okuyucunun bu cümlede yanlış anlayabileceği tek nokta. Tek cümle.
+"spans": 3-5 nesne içeren dizi. Cümlenin dilbilgisel açıdan ÖNEMLİ parçalarını işaretler.
+  Her nesne {"en": ..., "tr": ..., "role": ...} biçiminde.
+  - "en": İngilizce cümlede AYNEN geçen parça, harfi harfine kopyala.
+  - "tr": Türkçe çeviride o parçaya karşılık gelen ve AYNEN geçen parça, harfi harfine kopyala.
+  - "role": parçanın işlevi. Kısa Türkçe etiket: ana özne, ana yüklem, ilgi cümleciği, edilgen yapı, zarf tümleci, nesne, bağlaç, participle, mastar.
+  - İlk nesne cümlenin ana yüklemi veya en belirleyici yapısı olsun.`;
   const d = parseJson(await gemini(prompt, sys));
   return {
     topic: String(d.topic || "genel").trim().toLowerCase(),
@@ -677,7 +690,10 @@ PARÇA: "${text}"
     skeleton: String(d.skeleton || "").trim(),
     points: Array.isArray(d.points) ? d.points.map(String).slice(0, 4) : [],
     tense: String(d.tense || "").trim(),
-    trap: String(d.trap || "").trim()
+    trap: String(d.trap || "").trim(),
+    spans: (Array.isArray(d.spans) ? d.spans : [])
+      .map(x => ({ en: String(x.en || "").trim(), tr: String(x.tr || "").trim(), role: String(x.role || "").trim() }))
+      .filter(x => x.en && x.tr).slice(0, 5)
   };
 }
 
@@ -1262,9 +1278,12 @@ async function runTab(tab) {
 
 function gramCardEl(sen, g) {
   const wrap = document.createElement("div");
+  const sp = g.spans || [];
   wrap.innerHTML =
     `<div class="gtop">${esc(g.topic)}</div>` +
-    (g.tr ? `<p style="font-size:15px;color:var(--ink2);margin:0 0 14px">${esc(g.tr)}</p>` : "") +
+    `<div class="sen">${runsToHtml(segment(sen, sp, "en"))}</div>` +
+    (g.tr ? `<div class="sen trs">${runsToHtml(segment(g.tr, sp, "tr"))}</div>` : "") +
+    legendHtml(sp) +
     (g.skeleton ? `<h4>İskelet</h4><p>${esc(g.skeleton)}</p>` : "") +
     (g.points.length ? `<h4>Yapı</h4><ul>${g.points.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "") +
     (g.tense ? `<h4>Zaman ve kip</h4><p>${esc(g.tense)}</p>` : "") +
@@ -1275,12 +1294,18 @@ function gramCardEl(sen, g) {
   btn.addEventListener("click", () => {
     if (hasGram(sen)) { removeGram(sen); setGramBtn(btn, false); toast("Gramer defterinden çıkarıldı."); }
     else {
-      GRAMS.unshift({ s: sen, tr: g.tr, topic: g.topic, skeleton: g.skeleton, points: g.points, tense: g.tense, trap: g.trap, src: state.title, t: Date.now() });
+      GRAMS.unshift({ s: sen, tr: g.tr, topic: g.topic, skeleton: g.skeleton, points: g.points, tense: g.tense, trap: g.trap, spans: g.spans, src: state.title, t: Date.now() });
       saveGrams(); setGramBtn(btn, true); toast("Gramer defterine eklendi.");
     }
   });
   wrap.appendChild(btn);
   return wrap;
+}
+
+function legendHtml(spans) {
+  if (!spans || !spans.length) return "";
+  return '<div class="legend">' + spans.map((x, i) =>
+    `<span class="lg"><i class="c${i % 5}">■</i>${esc(x.role || "")}</span>`).join("") + "</div>";
 }
 
 function setGramBtn(btn, on) {
@@ -1634,11 +1659,11 @@ function flowRuns(doc, runs, x, y, maxW, lineH, draw) {
   return { y: cy, lines };
 }
 
-function pdfHeader(doc, sub, page) {
+function pdfHeader(doc, sub, page, head) {
   doc.setFont(KALAM.light ? "KalamLight" : "Kalam", "normal");
   doc.setFontSize(9.5);
   doc.setTextColor(140, 140, 140);
-  doc.text("Kelime defteri · " + sub, M.l, 11);
+  doc.text((head || "Kelime defteri") + " · " + sub, M.l, 11);
   doc.text(String(page), PW - M.r, 11, { align: "right" });
   doc.setDrawColor(214, 210, 200);
   doc.setLineWidth(0.2);
@@ -1825,10 +1850,14 @@ function renderGrams() {
     <div class="witem" data-k="${esc(gkey(x.s))}">
       <div class="wtxt">
         <div class="gtop">${esc(x.topic || "genel")}</div>
-        <div class="gsen">${esc(x.s)}</div>
-        <div class="gtr">${esc(x.tr || "")}</div>
+        <div class="gsen">${runsToHtml(segment(x.s, x.spans || [], "en"))}</div>
+        <div class="gtr">${runsToHtml(segment(x.tr || "", x.spans || [], "tr"))}</div>
+        ${legendHtml(x.spans)}
       </div>
-      <div class="acts"><button class="del" aria-label="Sil">×</button></div>
+      <div class="acts">
+        ${(x.spans || []).length ? "" : '<button class="gen" aria-label="Yeniden çözümle"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>'}
+        <button class="del" aria-label="Sil">×</button>
+      </div>
       <div class="wdet">
         ${x.skeleton ? `<div class="none" style="color:var(--ink2)"><b>İskelet:</b> ${esc(x.skeleton)}</div>` : ""}
         ${(x.points || []).length ? `<ul style="margin:9px 0 0;padding-left:17px;font-size:14px;line-height:1.6;color:var(--ink2)">${x.points.map(q => `<li>${esc(q)}</li>`).join("")}</ul>` : ""}
@@ -1843,6 +1872,18 @@ function renderGrams() {
       GRAMS = GRAMS.filter(x => gkey(x.s) !== el.dataset.k); saveGrams(); renderGrams(); toast("Silindi.");
     });
     el.querySelector(".wtxt").addEventListener("click", () => el.classList.toggle("open"));
+    const g = el.querySelector(".gen");
+    if (g) g.addEventListener("click", async e => {
+      e.stopPropagation();
+      const rec = GRAMS.find(z => gkey(z.s) === el.dataset.k);
+      if (!rec) return;
+      g.classList.add("busy");
+      try {
+        const n = await grammarSel(rec.s, rec.src || "");
+        Object.assign(rec, n, { s: rec.s, src: rec.src, t: rec.t });
+        saveGrams(); renderGrams(); toast("Yeniden çözümlendi.");
+      } catch (err) { g.classList.remove("busy"); toast("Olmadı: " + err.message); }
+    });
   });
 }
 
@@ -1871,36 +1912,56 @@ async function buildGramPdf() {
 
   let page = 0, y = 0;
   const limit = PH - M.b;
-  const newPage = () => { if (page) doc.addPage(); page++; pdfHeader(doc, "gramer · " + stamp, page); y = M.t + 3; };
+  const newPage = () => { if (page) doc.addPage(); page++; pdfHeader(doc, gFilter || stamp, page, "Gramer defteri"); y = M.t + 3; };
 
   const height = x => {
+    const sp = x.spans || [];
     doc.setFontSize(11);
-    const a = flowRuns(doc, [{ text: x.s, c: -1 }], 0, 0, CW, LEAD, false).lines;
+    const a = flowRuns(doc, segment(x.s, sp, "en"), 0, 0, CW, LEAD, false).lines;
     doc.setFontSize(10);
-    const b = flowRuns(doc, [{ text: x.tr || "", c: -1 }], 0, 0, CW, LEAD - 0.4, false).lines;
+    const b = flowRuns(doc, segment(x.tr || "", sp, "tr"), 0, 0, CW, LEAD - 0.4, false).lines;
     const pts = (x.points || []).length;
-    return 5.5 + a * LEAD + 1.5 + b * (LEAD - 0.4) + 2 + pts * (LEAD - 0.3) + 7;
+    return 5.5 + a * LEAD + 1.5 + b * (LEAD - 0.4) + (sp.length ? 5.5 : 0) + 2 + pts * (LEAD - 0.3) + 7;
+  };
+
+  /* renk göstergesi: kare + işlev adı */
+  const legend = (spans, y) => {
+    let cx = M.l;
+    doc.setFontSize(8.5);
+    spans.forEach((sp, i) => {
+      const g = PAL[i % PAL.length];
+      const label = sp.role || "";
+      const w = doc.getTextWidth(label) + 8;
+      if (cx + w > M.l + CW) { cx = M.l; y += 4.4; }
+      doc.setFillColor(g[0], g[1], g[2]);
+      doc.rect(cx, y - 2, 2.2, 2.2, "F");
+      doc.setTextColor(110, 116, 134);
+      doc.text(label, cx + 3.4, y);
+      cx += w + 4;
+    });
+    return y;
   };
 
   newPage();
   list.forEach(x => {
+    const sp = x.spans || [];
     if (y + height(x) > limit) newPage();
+
     doc.setFont("Kalam", "normal");
     doc.setFontSize(9);
     doc.setTextColor(46, 58, 102);
     doc.text((x.topic || "genel").toUpperCase(), M.l, y);
     y += 5.5;
 
-    doc.setFont("Kalam", KALAM.bold ? "bold" : "normal");
     doc.setFontSize(11);
-    doc.setTextColor(20, 24, 26);
-    y = flowRuns(doc, [{ text: x.s, c: -1 }], M.l, y, CW, LEAD, true).y + LEAD + 1.5;
+    y = flowRuns(doc, segment(x.s, sp, "en"), M.l, y, CW, LEAD, true).y + LEAD + 1.5;
+
+    doc.setFontSize(10);
+    y = flowRuns(doc, segment(x.tr || "", sp, "tr"), M.l, y, CW, LEAD - 0.4, true).y + 2;
+
+    if (sp.length) { y = legend(sp, y + 3) + 2.5; }
 
     doc.setFont("Kalam", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(95, 103, 132);
-    y = flowRuns(doc, [{ text: x.tr || "", c: -1 }], M.l, y, CW, LEAD - 0.4, true).y + 2;
-
     doc.setFontSize(9.5);
     doc.setTextColor(70, 78, 100);
     (x.points || []).forEach(q => {
