@@ -200,6 +200,49 @@
   .tab-btn svg{ width:21px; height:21px; }
 
   ::-webkit-scrollbar{ width:0; height:0; }
+
+  /* ---------- Hoca (Live voice tutor) ---------- */
+  .hoca-status{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    font-size:12.5px; color:var(--text-faint); margin-bottom:18px;
+  }
+  .hoca-status .dot{ width:8px; height:8px; border-radius:50%; background:var(--text-faint); }
+  .hoca-status.connected .dot{ background:var(--tr); }
+  .hoca-status.listening .dot{ background:var(--accent); box-shadow:0 0 0 0 rgba(224,169,76,0.5); animation:pulseDot 1.3s infinite; }
+  @keyframes pulseDot{ 0%{box-shadow:0 0 0 0 rgba(224,169,76,0.45);} 70%{box-shadow:0 0 0 10px rgba(224,169,76,0);} 100%{box-shadow:0 0 0 0 rgba(224,169,76,0);} }
+
+  .mic-wrap{ display:flex; flex-direction:column; align-items:center; margin:18px 0 22px; }
+  .mic-btn{
+    width:96px; height:96px; border-radius:50%; border:none; cursor:pointer;
+    background:var(--bg-panel); border:1.5px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    transition:background .2s, border-color .2s, transform .1s;
+  }
+  .mic-btn:active{ transform:scale(0.96); }
+  .mic-btn.live{
+    background:var(--accent); border-color:var(--accent);
+    animation:micPulse 1.6s infinite;
+  }
+  @keyframes micPulse{
+    0%{ box-shadow:0 0 0 0 rgba(224,169,76,0.4); }
+    70%{ box-shadow:0 0 0 18px rgba(224,169,76,0); }
+    100%{ box-shadow:0 0 0 0 rgba(224,169,76,0); }
+  }
+  .mic-hint{ margin-top:12px; font-size:12.5px; color:var(--text-faint); text-align:center; }
+
+  .hoca-transcript{ max-height:38vh; overflow-y:auto; margin-bottom:14px; }
+  .chat-bubble{ display:flex; margin-bottom:10px; }
+  .chat-bubble.me{ justify-content:flex-end; }
+  .chat-bubble .bubble-inner{
+    max-width:82%; padding:9px 13px; border-radius:14px; font-size:14px; line-height:1.5;
+  }
+  .chat-bubble.me .bubble-inner{ background:var(--bg-panel-2); color:var(--text); border-bottom-right-radius:4px; }
+  .chat-bubble.hoca .bubble-inner{ background:rgba(224,169,76,0.12); color:var(--accent-soft); border-bottom-left-radius:4px; }
+
+  .hoca-empty{ text-align:center; padding:30px 20px 10px; color:var(--text-faint); font-size:13px; line-height:1.6; }
+  .checkbox-row{ display:flex; align-items:center; gap:10px; }
+  .checkbox-row input{ width:18px; height:18px; accent-color:var(--accent); }
+  .checkbox-row label{ font-size:13px; color:var(--text-dim); }
 </style>
 </head>
 <body>
@@ -241,6 +284,30 @@
         <p style="font-size:13px; color:var(--text-dim); margin:0 0 10px; line-height:1.5;">Devam etmeden önce Ayarlar sekmesinden ücretsiz Gemini API anahtarını gir.</p>
         <button class="btn btn-ghost" onclick="switchView('settings')">Ayarlar'a git</button>
       </div>
+    </section>
+
+    <!-- ================= HOCA (LIVE VOICE) VIEW ================= -->
+    <section class="view" id="view-hoca">
+      <h2 class="view-title">Hoca</h2>
+      <p class="view-sub">Mikrofona bas, İngilizce ya da Türkçe soru sor — gramer, soru tipi, ya da kelime listelerinden. Sesli cevap verecek.</p>
+
+      <div class="hoca-status" id="hoca-status">
+        <span class="dot"></span><span id="hoca-status-text">Bağlı değil</span>
+      </div>
+
+      <div class="mic-wrap">
+        <button class="mic-btn" id="mic-btn">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3z" stroke="#F4EFE6" stroke-width="1.7"/><path d="M19 11v1a7 7 0 01-14 0v-1M12 19v3" stroke="#F4EFE6" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </button>
+        <div class="mic-hint" id="mic-hint">Başlamak için mikrofona dokun</div>
+      </div>
+
+      <div id="hoca-transcript-wrap">
+        <div class="hoca-empty" id="hoca-empty">Konuşma burada görünecek.</div>
+        <div class="hoca-transcript" id="hoca-transcript" style="display:none;"></div>
+      </div>
+
+      <div id="hoca-error"></div>
     </section>
 
     <!-- ================= LISTEN VIEW ================= -->
@@ -320,6 +387,29 @@
       </div>
 
       <div class="panel">
+        <label class="field-label">Hoca (sesli sohbet) modeli</label>
+        <input type="text" id="live-model-input" placeholder="models/gemini-live-2.5-flash-native-audio">
+        <div style="height:12px"></div>
+        <label class="field-label">Hoca sesi</label>
+        <select id="live-voice-select">
+          <option value="Kore">Kore</option>
+          <option value="Puck">Puck</option>
+          <option value="Charon">Charon</option>
+          <option value="Fenrir">Fenrir</option>
+          <option value="Aoede">Aoede</option>
+          <option value="Leda">Leda</option>
+          <option value="Orus">Orus</option>
+          <option value="Zephyr">Zephyr</option>
+        </select>
+        <div style="height:12px"></div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="live-include-words" checked>
+          <label for="live-include-words">Kayıtlı kelime listelerimi hocaya bağlam olarak ver</label>
+        </div>
+        <div class="hint">Google bu model adını değiştirirse buradan güncelle.</div>
+      </div>
+
+      <div class="panel">
         <label class="field-label">İngilizce ses</label>
         <select id="en-voice-select"></select>
         <div style="height:12px"></div>
@@ -341,6 +431,10 @@
     <button class="tab-btn active" data-view="create">
       <svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       Oluştur
+    </button>
+    <button class="tab-btn" data-view="hoca">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3z" stroke="currentColor" stroke-width="1.6"/><path d="M19 11v1a7 7 0 01-14 0v-1M12 19v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Hoca
     </button>
     <button class="tab-btn" data-view="listen">
       <svg viewBox="0 0 24 24" fill="none"><path d="M4 12H8L10 5L14 19L16 9L17.5 12H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -368,6 +462,9 @@
   const LS_KEY_SETS = "kn_wordsets";
   const LS_KEY_ENVOICE = "kn_en_voice";
   const LS_KEY_TRVOICE = "kn_tr_voice";
+  const LS_KEY_LIVE_MODEL = "kn_live_model";
+  const LS_KEY_LIVE_VOICE = "kn_live_voice";
+  const LS_KEY_LIVE_INCLUDE_WORDS = "kn_live_include_words";
 
   function getSets(){ try{ return JSON.parse(localStorage.getItem(LS_KEY_SETS)) || []; }catch(e){ return []; } }
   function saveSets(sets){ localStorage.setItem(LS_KEY_SETS, JSON.stringify(sets)); }
@@ -413,6 +510,16 @@
     setTimeout(()=>box.innerHTML="", 2200);
     checkKeyPresence();
   });
+
+  const liveModelInput = document.getElementById("live-model-input");
+  const liveVoiceSelect = document.getElementById("live-voice-select");
+  const liveIncludeWords = document.getElementById("live-include-words");
+  liveModelInput.value = localStorage.getItem(LS_KEY_LIVE_MODEL) || "models/gemini-live-2.5-flash-native-audio";
+  liveVoiceSelect.value = localStorage.getItem(LS_KEY_LIVE_VOICE) || "Kore";
+  liveIncludeWords.checked = localStorage.getItem(LS_KEY_LIVE_INCLUDE_WORDS) !== "0";
+  liveModelInput.addEventListener("change", ()=>localStorage.setItem(LS_KEY_LIVE_MODEL, liveModelInput.value.trim()));
+  liveVoiceSelect.addEventListener("change", ()=>localStorage.setItem(LS_KEY_LIVE_VOICE, liveVoiceSelect.value));
+  liveIncludeWords.addEventListener("change", ()=>localStorage.setItem(LS_KEY_LIVE_INCLUDE_WORDS, liveIncludeWords.checked ? "1" : "0"));
 
   document.getElementById("clear-data-btn").addEventListener("click", ()=>{
     if(confirm("Tüm kayıtlı listeler ve diyaloglar silinsin mi? Bu işlem geri alınamaz.")){
@@ -825,6 +932,283 @@ Hedef kelimeler: ${wordList}`;
       el.appendChild(del);
     });
   }
+
+  /* ============ HOCA: LIVE VOICE TUTOR ============ */
+  (function(){
+    let ws = null;
+    let audioCtx = null;       // mic capture context (device native rate)
+    let micStream = null;
+    let micSource = null;
+    let micProcessor = null;
+    let playCtx = null;        // playback context (24kHz)
+    let nextPlayTime = 0;
+    let isLive = false;
+    let sessionState = "idle"; // idle | connecting | connected
+
+    const micBtn = document.getElementById("mic-btn");
+    const micHint = document.getElementById("mic-hint");
+    const statusBox = document.getElementById("hoca-status");
+    const statusText = document.getElementById("hoca-status-text");
+    const transcriptWrap = document.getElementById("hoca-transcript");
+    const transcriptEmpty = document.getElementById("hoca-empty");
+    const errorBox = document.getElementById("hoca-error");
+
+    function setStatus(state, label){
+      statusBox.className = "hoca-status" + (state ? " " + state : "");
+      statusText.textContent = label;
+    }
+
+    function showHocaError(msg){
+      errorBox.innerHTML = '<div class="error-box">'+escapeHtml(msg)+'</div>';
+    }
+    function clearHocaError(){ errorBox.innerHTML = ""; }
+
+    function appendBubble(who, text){
+      if(!text) return;
+      transcriptEmpty.style.display = "none";
+      transcriptWrap.style.display = "block";
+      const last = transcriptWrap.lastElementChild;
+      // merge consecutive same-speaker fragments (streaming transcription arrives in pieces)
+      if(last && last.dataset.who === who){
+        const inner = last.querySelector(".bubble-inner");
+        inner.textContent += text;
+      }else{
+        const row = document.createElement("div");
+        row.className = "chat-bubble " + (who==="me" ? "me" : "hoca");
+        row.dataset.who = who;
+        const inner = document.createElement("div");
+        inner.className = "bubble-inner";
+        inner.textContent = text;
+        row.appendChild(inner);
+        transcriptWrap.appendChild(row);
+      }
+      transcriptWrap.scrollTop = transcriptWrap.scrollHeight;
+    }
+    function breakBubble(){
+      // forces next transcription chunk to start a new bubble (called on turn boundaries)
+      const rows = transcriptWrap.querySelectorAll(".chat-bubble");
+      if(rows.length) rows[rows.length-1].dataset.who = "__done__";
+    }
+
+    function buildSystemPrompt(){
+      let words = [];
+      if(document.getElementById("live-include-words").checked){
+        const sets = getSets();
+        sets.forEach(s=>{ words = words.concat(s.words); });
+        words = [...new Set(words)].slice(0, 80);
+      }
+      let prompt = `Sen, YÖKDİL Sağlık sınavına hazırlanan bir öğrenciye sesli ders veren, sabırlı ve destekleyici bir İngilizce hocasısın. Öğrenci seninle sesli konuşuyor, kulaklıkla yürürken çalışıyor.
+
+Görevlerin:
+- Öğrenci gramer sorarsa (zamanlar, bağlaçlar, cümle yapıları vb.) kısa, net, örnekli açıkla.
+- YÖKDİL Sağlık soru tipleri hakkında sorulursa (cümle tamamlama, cloze test, çeviri, paragraf tamamlama, ilgisiz cümle, diyalog tamamlama, okuduğunu anlama) örneklerle anlat.
+- Öğrenci isterse akademik/tıbbi bağlamda örnek cümleler kur, sözlü küçük alıştırmalar yaptır, cevaplarını değerlendir ve nazikçe düzelt.
+- Cevapların SESLİ verileceği için kısa ve konuşma diline uygun olsun; uzun liste okuma, madde madde değil doğal konuşma gibi anlat.
+- Gerektiğinde Türkçe açıklama yap, ama İngilizce pratik yaptırmayı önceliklendir.
+- Öğrenciyi cesaretlendir, doğru cevapları takdir et, yanlışları yargılamadan düzelt.`;
+      if(words.length){
+        prompt += `\n\nÖğrencinin şu anda çalıştığı kelimeler (bunlardan soru sorabilir, cümle kurdurabilirsin): ${words.join(", ")}.`;
+      }
+      return prompt;
+    }
+
+    function floatTo16BitPCM(float32Array){
+      const out = new Int16Array(float32Array.length);
+      for(let i=0;i<float32Array.length;i++){
+        let s = Math.max(-1, Math.min(1, float32Array[i]));
+        out[i] = s < 0 ? s*0x8000 : s*0x7FFF;
+      }
+      return out;
+    }
+    function downsampleTo16k(buffer, inRate){
+      if(inRate === 16000) return buffer;
+      const ratio = inRate/16000;
+      const outLength = Math.round(buffer.length/ratio);
+      const result = new Float32Array(outLength);
+      for(let i=0;i<outLength;i++){
+        const idx = i*ratio;
+        const i0 = Math.floor(idx), i1 = Math.min(i0+1, buffer.length-1);
+        const frac = idx-i0;
+        result[i] = buffer[i0]*(1-frac) + buffer[i1]*frac;
+      }
+      return result;
+    }
+    function arrayBufferToBase64(buf){
+      let binary = "";
+      const bytes = new Uint8Array(buf);
+      const chunk = 0x8000;
+      for(let i=0;i<bytes.length;i+=chunk){
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk));
+      }
+      return btoa(binary);
+    }
+    function base64ToInt16(b64){
+      const binary = atob(b64);
+      const bytes = new Uint8Array(binary.length);
+      for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+      return new Int16Array(bytes.buffer);
+    }
+
+    function playPCMChunk(base64){
+      if(!playCtx){
+        playCtx = new (window.AudioContext||window.webkitAudioContext)({ sampleRate: 24000 });
+        nextPlayTime = playCtx.currentTime;
+      }
+      const int16 = base64ToInt16(base64);
+      const float32 = new Float32Array(int16.length);
+      for(let i=0;i<int16.length;i++) float32[i] = int16[i]/32768;
+      const buffer = playCtx.createBuffer(1, float32.length, playCtx.sampleRate);
+      buffer.getChannelData(0).set(float32);
+      const src = playCtx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(playCtx.destination);
+      const startAt = Math.max(playCtx.currentTime, nextPlayTime);
+      src.start(startAt);
+      nextPlayTime = startAt + buffer.duration;
+    }
+
+    async function startMic(){
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount:1, echoCancellation:true, noiseSuppression:true } });
+      audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      micSource = audioCtx.createMediaStreamSource(micStream);
+      micProcessor = audioCtx.createScriptProcessor(4096, 1, 1);
+      const muteGain = audioCtx.createGain();
+      muteGain.gain.value = 0;
+      micProcessor.connect(muteGain);
+      muteGain.connect(audioCtx.destination);
+      micSource.connect(micProcessor);
+      micProcessor.onaudioprocess = (e)=>{
+        if(!ws || ws.readyState !== 1) return;
+        const input = e.inputBuffer.getChannelData(0);
+        const down = downsampleTo16k(input, audioCtx.sampleRate);
+        const pcm16 = floatTo16BitPCM(down);
+        const b64 = arrayBufferToBase64(pcm16.buffer);
+        ws.send(JSON.stringify({ realtimeInput: { audio: { data: b64, mimeType: "audio/pcm;rate=16000" } } }));
+      };
+    }
+
+    function stopMic(){
+      if(micProcessor){ micProcessor.disconnect(); micProcessor.onaudioprocess = null; micProcessor = null; }
+      if(micSource){ micSource.disconnect(); micSource = null; }
+      if(audioCtx){ audioCtx.close(); audioCtx = null; }
+      if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream = null; }
+    }
+
+    async function connectLive(){
+      if(!getApiKey()){ switchView("settings"); return; }
+      clearHocaError();
+      sessionState = "connecting";
+      setStatus("", "Bağlanıyor…");
+      const apiKey = getApiKey();
+      const model = liveModelInput.value.trim() || "models/gemini-live-2.5-flash-native-audio";
+      const voice = liveVoiceSelect.value || "Kore";
+      const url = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key="+encodeURIComponent(apiKey);
+
+      try{
+        ws = new WebSocket(url);
+      }catch(e){
+        showHocaError("Bağlantı kurulamadı: "+e.message);
+        resetMicUI();
+        return;
+      }
+
+      ws.onopen = ()=>{
+        ws.send(JSON.stringify({
+          setup:{
+            model: model.startsWith("models/") ? model : "models/"+model,
+            generationConfig:{
+              responseModalities:["AUDIO"],
+              speechConfig:{ voiceConfig:{ prebuiltVoiceConfig:{ voiceName: voice } } }
+            },
+            systemInstruction:{ parts:[{ text: buildSystemPrompt() }] },
+            outputAudioTranscription:{},
+            inputAudioTranscription:{}
+          }
+        }));
+      };
+
+      ws.onmessage = async (evt)=>{
+        let raw = evt.data;
+        if(raw instanceof Blob) raw = await raw.text();
+        let msg;
+        try{ msg = JSON.parse(raw); }catch(e){ return; }
+
+        if(msg.setupComplete){
+          sessionState = "connected";
+          await startMic().catch(err=>{
+            showHocaError("Mikrofon erişimi reddedildi ya da kullanılamıyor: "+err.message);
+            disconnectLive();
+          });
+          if(sessionState==="connected"){
+            isLive = true;
+            micBtn.classList.add("live");
+            micHint.textContent = "Dinliyor — bitirmek için tekrar dokun";
+            setStatus("listening", "Bağlı — konuşabilirsin");
+          }
+          return;
+        }
+
+        if(msg.serverContent){
+          const sc = msg.serverContent;
+          if(sc.modelTurn && sc.modelTurn.parts){
+            sc.modelTurn.parts.forEach(p=>{
+              if(p.inlineData && p.inlineData.data) playPCMChunk(p.inlineData.data);
+            });
+          }
+          if(sc.inputTranscription && sc.inputTranscription.text){
+            appendBubble("me", sc.inputTranscription.text);
+          }
+          if(sc.outputTranscription && sc.outputTranscription.text){
+            appendBubble("hoca", sc.outputTranscription.text);
+          }
+          if(sc.turnComplete){ breakBubble(); }
+          if(sc.interrupted){ nextPlayTime = playCtx ? playCtx.currentTime : 0; }
+        }
+
+        if(msg.error){
+          showHocaError("Hata: " + (msg.error.message || JSON.stringify(msg.error)));
+        }
+      };
+
+      ws.onerror = ()=>{
+        showHocaError("Bağlantı hatası. API anahtarını ve model adını Ayarlar'dan kontrol et.");
+      };
+
+      ws.onclose = ()=>{
+        if(isLive) disconnectLive();
+      };
+    }
+
+    function disconnectLive(){
+      isLive = false;
+      sessionState = "idle";
+      stopMic();
+      if(ws){ try{ ws.close(); }catch(e){} ws = null; }
+      if(playCtx){ try{ playCtx.close(); }catch(e){} playCtx = null; }
+      resetMicUI();
+    }
+
+    function resetMicUI(){
+      micBtn.classList.remove("live");
+      micHint.textContent = "Başlamak için mikrofona dokun";
+      setStatus("", "Bağlı değil");
+    }
+
+    micBtn.addEventListener("click", ()=>{
+      if(isLive || sessionState==="connecting"){
+        disconnectLive();
+      }else{
+        connectLive();
+      }
+    });
+
+    // stop everything if user navigates away from the tab entirely
+    document.querySelectorAll(".tab-btn").forEach(b=>{
+      b.addEventListener("click", ()=>{
+        if(b.dataset.view !== "hoca" && isLive) disconnectLive();
+      });
+    });
+  })();
 
   /* ============ INIT ============ */
   checkKeyPresence();
