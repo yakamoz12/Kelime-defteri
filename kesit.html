@@ -297,6 +297,11 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   <h1 class="lede">Makaleyi aç, anlamadığın yeri <em>seç</em>, karşılığını gör.</h1>
   <p class="sub">PDF, bağlantı ya da yapıştırdığın metin. Çeviri Gemini üzerinden yapılır, anahtarın yalnızca bu telefonda saklanır.</p>
 
+  <button class="src hid" id="resumeCard" style="border-color:var(--acc)">
+    <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9"/><path d="M3 4v5h5"/></svg></span>
+    <span><h3 id="resumeTitle">Son belge</h3><p id="resumeMeta"></p></span>
+  </button>
+
   <div class="label">Kaynak seç</div>
 
   <button class="src" id="pickPdf">
@@ -337,6 +342,7 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   <div class="wbar" style="margin-bottom:16px">
     <button class="btn ghost" id="aiCleanBtn" style="flex:1;font-size:13.5px;padding:10px">Gemini ile temizle</button>
     <button class="btn ghost" id="rawBtn" style="flex:1;font-size:13.5px;padding:10px">Ham metni göster</button>
+    <button class="btn ghost" id="newSrcBtn" style="flex:0 0 auto;font-size:13.5px;padding:10px 14px">Yeni kaynak</button>
   </div>
   <div id="content"></div>
 </section>
@@ -539,6 +545,7 @@ const state = {
   blocks: [],
   raw: [],
   showRaw: false,
+  docY: 0,
   title: "",
   pdf: null,
   translatingAll: false,
@@ -1080,7 +1087,9 @@ function openDoc(title, blocks, meta) {
   state.blocks = kept;
   state.title = title;
   state.section = "Başlangıç";
+  state.docY = 0;
   renderDoc(kept);
+  saveDoc();
   show("reader");
   const dropped = blocks.length - kept.length;
   toast(meta + " · " + kept.filter(b => b.type === "p").length + " paragraf" + (dropped > 0 ? " · " + dropped + " parça atıldı" : ""));
@@ -1104,13 +1113,14 @@ function show(which) {
     $("#crumbMain").textContent = state.section || "Başlangıç";
   }
   state.screen = which;
-  window.scrollTo(0, 0);
+  if (which === "reader") window.scrollTo(0, state.docY || 0);
+  else window.scrollTo(0, 0);
 }
 
 $$(".tb").forEach(b => b.addEventListener("click", () => {
   const go = b.dataset.go;
   if (go === "set") { openSettings(); return; }
-  if (go === "home" && state.blocks.length && state.screen === "home") { show("reader"); return; }
+  if (go === "home") { show(state.blocks.length && state.screen !== "reader" ? "reader" : "home"); return; }
   if (go === "words") renderWords();
   if (go === "gram") renderGrams();
   show(go);
@@ -1132,8 +1142,46 @@ window.addEventListener("scroll", () => {
       state.section = cur;
       $("#crumbMain").textContent = cur;
     }
+    state.docY = window.scrollY;
+    saveDoc();
   }, 90);
 }, { passive: true });
+
+
+/* ---------- açık belgeyi sakla, uygulama kapansa da dursun ---------- */
+const DOC_LIMIT = 1200000;
+let docSaveT = null;
+function saveDoc() {
+  clearTimeout(docSaveT);
+  docSaveT = setTimeout(() => {
+    if (!state.raw.length) return;
+    try {
+      const j = JSON.stringify({ title: state.title, raw: state.raw, y: state.docY || 0, at: Date.now() });
+      if (j.length > DOC_LIMIT) { store.del("doc"); return; }
+      store.set("doc", j);
+    } catch (e) {}
+  }, 600);
+}
+
+function restoreDoc() {
+  let d = null;
+  try { d = JSON.parse(store.get("doc", "null")); } catch (e) { d = null; }
+  if (!d || !d.raw || !d.raw.length) return false;
+  state.raw = d.raw;
+  state.title = d.title || "Makale";
+  state.docY = d.y || 0;
+  state.showRaw = false;
+  state.blocks = cleanBlocks(d.raw);
+  renderDoc(state.blocks);
+  const card = $("#resumeCard");
+  if (card) {
+    card.classList.remove("hid");
+    $("#resumeTitle").textContent = d.title || "Makale";
+    $("#resumeMeta").textContent = state.blocks.filter(b => b.type === "p").length + " paragraf · " +
+      new Date(d.at || Date.now()).toLocaleDateString("tr-TR");
+  }
+  return true;
+}
 
 /* ---------- seçim ---------- */
 function selInfo() {
@@ -1422,7 +1470,7 @@ function senPrompt(word, tr, avoid) {
 
 Bu kelimeyi kullanan akademik bir örnek cümle kur.
 Kurallar:
-- Cümle 12-18 kelime olsun, tıp/sağlık bilimleri makalelerinin diliyle yazılsın.
+- Cümle 10-16 kelime olsun, tek satıra sığacak kadar derli toplu, tıp/sağlık bilimleri makalelerinin diliyle yazılsın.
 - Kelime cümlede doğal ve sık kullanılan bir kalıpla geçsin.
 - Cümle tek başına anlaşılır olsun, önceki bir cümleye gönderme yapmasın.
 ${avoid ? '- ŞU CÜMLEDEN TAMAMEN FARKLI olsun, başka bir konu ve başka bir yapı kullan: "' + avoid + '"' : ""}
@@ -1662,7 +1710,7 @@ function regFonts(doc, k) {
 const M = { l: 15, r: 15, t: 19, b: 14 };
 const PW = 210, PH = 297;
 const CW = PW - M.l - M.r;
-const LEAD = 5.3;
+const LEAD = 4.9;
 
 function runFont(doc, c) { doc.setFont("Kalam", (c === 0 && KALAM.bold) ? "bold" : "normal"); }
 
@@ -1698,33 +1746,33 @@ function pdfHeader(doc, sub, page, head) {
 
 function studyHeight(doc, x) {
   const p = x.pairs || [];
-  doc.setFontSize(11);
+  doc.setFontSize(10.2);
   const a = flowRuns(doc, segment(x.ex || "", p, "en"), 0, 0, CW, LEAD, false).lines;
   const b = flowRuns(doc, segment(x.exTr || "", p, "tr"), 0, 0, CW, LEAD, false).lines;
-  return 6.9 + a * LEAD + 1.8 + b * LEAD + 6.0;
+  return 6.3 + a * LEAD + 1.5 + b * LEAD + 5.0;
 }
 
 function studyEntry(doc, x, y) {
   const p = x.pairs || [];
   doc.setFont("Kalam", KALAM.bold ? "bold" : "normal");
-  doc.setFontSize(14);
+  doc.setFontSize(13);
   doc.setTextColor(20, 24, 26);
   doc.text(x.w, M.l, y);
   const wEnd = M.l + doc.getTextWidth(x.w);
   doc.setFont("Kalam", "normal");
-  doc.setFontSize(12.5);
-  doc.setTextColor(30, 91, 82);
+  doc.setFontSize(11.5);
+  doc.setTextColor(162, 22, 72);
   doc.text("  —  " + (x.tr || ""), wEnd, y);
-  y += 6.9;
+  y += 6.3;
 
-  doc.setFontSize(11);
-  y = flowRuns(doc, segment(x.ex || "", p, "en"), M.l, y, CW, LEAD, true).y + LEAD + 1.8;
-  y = flowRuns(doc, segment(x.exTr || "", p, "tr"), M.l, y, CW, LEAD, true).y + 3.8;
+  doc.setFontSize(10.2);
+  y = flowRuns(doc, segment(x.ex || "", p, "en"), M.l, y, CW, LEAD, true).y + LEAD + 1.5;
+  y = flowRuns(doc, segment(x.exTr || "", p, "tr"), M.l, y, CW, LEAD, true).y + 3.2;
 
   doc.setDrawColor(228, 224, 214);
   doc.setLineWidth(0.15);
   doc.line(M.l, y, PW - M.r, y);
-  return y + 5.4;
+  return y + 4.6;
 }
 
 function blankSentence(x) {
@@ -1733,15 +1781,15 @@ function blankSentence(x) {
 }
 
 function examHeight(doc, x) {
-  doc.setFontSize(11);
+  doc.setFontSize(10.2);
   const n = flowRuns(doc, [{ text: blankSentence(x), c: -1 }], 0, 0, CW, LEAD, false).lines;
-  return 6.9 + n * LEAD + 8.5;
+  return 6.3 + n * LEAD + 8.0;
 }
 
 function examEntry(doc, x, y) {
   doc.setFont("Kalam", KALAM.bold ? "bold" : "normal");
-  doc.setFontSize(13);
-  doc.setTextColor(30, 91, 82);
+  doc.setFontSize(12.5);
+  doc.setTextColor(162, 22, 72);
   const cue = x.tr || "—";
   doc.text(cue, M.l, y);
   const cueEnd = M.l + doc.getTextWidth(cue) + 6;
@@ -1750,10 +1798,10 @@ function examEntry(doc, x, y) {
   doc.setLineDashPattern([0.6, 1.1], 0);
   doc.line(cueEnd, y + 0.8, PW - M.r, y + 0.8);
   doc.setLineDashPattern([], 0);
-  y += 6.9;
+  y += 6.3;
 
   doc.setFont("Kalam", "normal");
-  doc.setFontSize(11);
+  doc.setFontSize(10.2);
   doc.setTextColor(60, 66, 70);
   y = flowRuns(doc, [{ text: blankSentence(x), c: -1 }], M.l, y, CW, LEAD, true).y + 5.5;
 
@@ -1803,35 +1851,33 @@ async function buildPdf() {
   regFonts(doc, KALAM);
 
   const stamp = new Date().toLocaleDateString("tr-TR");
-  const groups = [];
-  for (let i = 0; i < ready.length; i += 10) groups.push(ready.slice(i, i + 10));
+  const PER_PAGE = 8;
 
-  let page = 0, y = 0, sub = stamp;
+  let page = 0, y = 0, sub = stamp, onPage = 0;
   const limit = PH - M.b;
   const newPage = () => {
     if (page) doc.addPage();
     page++;
     pdfHeader(doc, sub, page);
     y = M.t + 3;
+    onPage = 0;
   };
 
-  // çalışma sayfaları
-  groups.forEach(grp => {
-    newPage();
-    grp.forEach(x => {
-      if (y + studyHeight(doc, x) > limit) newPage();
-      y = studyEntry(doc, x, y);
-    });
+  // çalışma sayfaları: sayfa dolmadan sonrakine geçmez
+  newPage();
+  ready.forEach(x => {
+    if (onPage >= PER_PAGE || y + studyHeight(doc, x) > limit) newPage();
+    y = studyEntry(doc, x, y);
+    onPage++;
   });
 
   // sınav sayfaları
   sub = "sınav · cevaplar çalışma sayfalarında";
-  groups.forEach(grp => {
-    newPage();
-    grp.forEach(x => {
-      if (y + examHeight(doc, x) > limit) newPage();
-      y = examEntry(doc, x, y);
-    });
+  newPage();
+  ready.forEach(x => {
+    if (onPage >= PER_PAGE || y + examHeight(doc, x) > limit) newPage();
+    y = examEntry(doc, x, y);
+    onPage++;
   });
 
   const name = "kelime-defteri-" + new Date().toISOString().slice(0, 10) + ".pdf";
@@ -1936,9 +1982,16 @@ async function buildGramPdf() {
   const stamp = new Date().toLocaleDateString("tr-TR");
   const list = gFilter ? GRAMS.filter(x => (x.topic || "genel") === gFilter) : GRAMS;
 
-  let page = 0, y = 0;
+  const PER_PAGE = 5;
+  let page = 0, y = 0, onPage = 0;
   const limit = PH - M.b;
-  const newPage = () => { if (page) doc.addPage(); page++; pdfHeader(doc, gFilter || stamp, page, "Gramer defteri"); y = M.t + 3; };
+  const newPage = () => {
+    if (page) doc.addPage();
+    page++;
+    pdfHeader(doc, gFilter || stamp, page, "Gramer defteri");
+    y = M.t + 3;
+    onPage = 0;
+  };
 
   const height = x => {
     const sp = x.spans || [];
@@ -1971,7 +2024,8 @@ async function buildGramPdf() {
   newPage();
   list.forEach(x => {
     const sp = x.spans || [];
-    if (y + height(x) > limit) newPage();
+    if (onPage >= PER_PAGE || y + height(x) > limit) newPage();
+    onPage++;
 
     doc.setFont("Kalam", "normal");
     doc.setFontSize(9);
@@ -2011,9 +2065,21 @@ $("#gpdfBtn").addEventListener("click", buildGramPdf);
 /* ============================================================
    Firebase eşitleme — asıl kopya bulutta, cihazlar ondan beslenir
    ============================================================ */
+/* ------------------------------------------------------------------
+   BURAYA KENDİ FIREBASE BİLGİLERİNİ YAZ — bir kere, sonra unut.
+   Tırnak içlerini doldur, dosyayı GitHub'a yükle. Her cihazda
+   sadece e-posta ve parola yazman yeterli olur.
+
+   Web API anahtarı gizli bir şey değildir; Firebase'de güvenlik
+   veritabanı kurallarıyla sağlanır, anahtarla değil. O yüzden
+   dosyaya gömülmesi sakıncasızdır. Parolanı ASLA buraya yazma.
+   ------------------------------------------------------------------ */
+const FB_KEY_GOMULU = "";
+const FB_DB_GOMULU  = "";
+
 const FB = {
-  key: store.get("fb_key", ""),
-  db: store.get("fb_db", ""),
+  key: store.get("fb_key", "") || FB_KEY_GOMULU,
+  db: store.get("fb_db", "") || FB_DB_GOMULU,
   email: store.get("fb_email", ""),
   uid: store.get("fb_uid", ""),
   refresh: store.get("fb_refresh", ""),
@@ -2268,6 +2334,7 @@ $("#allBtn").addEventListener("click", translateAll);
 
 /* eşitleme arayüzü */
 $("#fbKey").value = FB.key ? "••••••••••••" : "";
+if (FB_KEY_GOMULU && FB_DB_GOMULU) { $("#fbKey").parentElement.classList.add("hid"); $("#fbDb").parentElement.classList.add("hid"); }
 $("#fbDb").value = FB.db;
 $("#fbMail").value = FB.email;
 setSyncMsg(syncLabel());
@@ -2317,6 +2384,9 @@ $("#rawBtn").addEventListener("click", () => {
   toast(state.showRaw ? "Ham metin · " + blocks.length + " parça" : "Temizlenmiş · " + blocks.length + " parça");
 });
 
+$("#newSrcBtn").addEventListener("click", () => show("home"));
+$("#resumeCard").addEventListener("click", () => show("reader"));
+
 /* kaynak seçiciler */
 $("#pickPdf").addEventListener("click", () => $("#pdfInput").click());
 $("#pdfInput").addEventListener("change", e => { const f = e.target.files[0]; if (f) openPdf(f); e.target.value = ""; });
@@ -2334,6 +2404,7 @@ $("#textGo").addEventListener("click", () => {
 
 /* açılış */
 setFs(state.fs);
+restoreDoc();
 if (FB.key && FB.db && FB.refresh) syncNow(true);
 if (state.key) loadModels(true);
 else setTimeout(() => toast("Başlamak için ayarlardan Gemini anahtarını gir.", 4000), 700);
