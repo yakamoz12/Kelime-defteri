@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Kelime Nabzı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F2A2E;
+    --bg-panel:#143A40;
+    --bg-panel-2:#0C2326;
+    --line:#1F4B51;
+    --accent:#E0A94C;
+    --accent-soft:#F0C978;
+    --text:#F4EFE6;
+    --text-dim:#9FC0BD;
+    --text-faint:#5E8B87;
+    --en:#E0A94C;
+    --tr:#7FB8B0;
+    --danger:#E2725B;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex; justify-content:center;
+  }
+  .app{
+    width:100%; max-width:560px; min-height:100dvh;
+    display:flex; flex-direction:column;
+    background:
+      radial-gradient(1200px 400px at 50% -10%, rgba(224,169,76,0.10), transparent 60%),
+      var(--bg);
+  }
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    padding:22px 20px 14px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{
+    width:34px; height:34px; flex-shrink:0;
+  }
+  .brand h1{
+    font-family:'Fraunces', serif; font-weight:600; font-size:21px; margin:0; letter-spacing:0.2px;
+  }
+  .brand small{display:block; font-size:11px; color:var(--text-faint); letter-spacing:0.06em; text-transform:uppercase; margin-top:1px;}
+  .pulse-thread{ height:20px; width:64px; opacity:0.85; }
+
+  /* ---------- Views ---------- */
+  main{flex:1; overflow-y:auto; padding:0 20px 100px;}
+  .view{display:none; animation:fadeIn .25s ease;}
+  .view.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+  h2.view-title{
+    font-family:'Fraunces', serif; font-weight:600; font-size:24px; margin:6px 0 4px;
+  }
+  p.view-sub{ color:var(--text-dim); font-size:13.5px; line-height:1.55; margin:0 0 20px;}
+
+  /* ---------- Cards / panels ---------- */
+  .panel{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px; margin-bottom:16px;
+  }
+  label.field-label{
+    display:block; font-size:12px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase;
+    color:var(--accent-soft); margin-bottom:8px;
+  }
+  textarea, input[type=text], input[type=password], select{
+    width:100%; background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text);
+    border-radius:10px; padding:12px 13px; font-family:'IBM Plex Sans', sans-serif; font-size:14.5px;
+    resize:vertical; outline:none; transition:border-color .15s;
+  }
+  textarea:focus, input:focus, select:focus{ border-color:var(--accent); }
+  textarea::placeholder, input::placeholder{ color:var(--text-faint); }
+  .hint{font-size:12px; color:var(--text-faint); margin-top:7px; line-height:1.5;}
+
+  .btn{
+    appearance:none; border:none; cursor:pointer; border-radius:10px; padding:13px 18px;
+    font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:14.5px;
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    transition:transform .1s ease, opacity .15s ease;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn-primary{ background:var(--accent); color:#1B1206; width:100%; }
+  .btn-primary:disabled{ opacity:0.45; cursor:not-allowed; }
+  .btn-ghost{ background:transparent; color:var(--text-dim); border:1px solid var(--line); }
+  .btn-danger{ background:transparent; color:var(--danger); border:1px solid rgba(226,114,91,0.4); }
+  .btn-icon{ width:46px; height:46px; border-radius:50%; background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text); }
+  .btn-icon.large{ width:64px; height:64px; }
+  .btn-row{ display:flex; gap:10px; margin-top:12px; }
+
+  .word-chip{
+    display:inline-flex; align-items:center; gap:6px; background:var(--bg-panel-2);
+    border:1px solid var(--line); color:var(--text-dim); font-size:12.5px; padding:6px 11px;
+    border-radius:100px; margin:0 6px 6px 0; font-family:'IBM Plex Mono', monospace;
+  }
+  .word-chip button{ background:none; border:none; color:var(--text-faint); cursor:pointer; font-size:14px; line-height:1; padding:0;}
+
+  .error-box{
+    background:rgba(226,114,91,0.1); border:1px solid rgba(226,114,91,0.35); color:#F0B4A6;
+    border-radius:10px; padding:12px 14px; font-size:13px; margin-top:12px; line-height:1.5;
+  }
+  .status-box{
+    background:rgba(224,169,76,0.08); border:1px solid rgba(224,169,76,0.3); color:var(--accent-soft);
+    border-radius:10px; padding:12px 14px; font-size:13px; margin-top:12px; display:flex; align-items:center; gap:10px;
+  }
+
+  /* ---------- Spinner ---------- */
+  .spinner{
+    width:16px; height:16px; border-radius:50%; border:2px solid rgba(224,169,76,0.25);
+    border-top-color:var(--accent); animation:spin 0.8s linear infinite; flex-shrink:0;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ---------- Listen view ---------- */
+  .now-playing-head{ text-align:center; margin:4px 0 18px; }
+  .now-playing-head .topic{ font-family:'Fraunces', serif; font-size:19px; font-weight:600; margin:0 0 4px;}
+  .now-playing-head .meta{ font-size:12px; color:var(--text-faint); }
+
+  .ekg-wrap{
+    height:70px; margin:0 0 18px; display:flex; align-items:center; justify-content:center;
+  }
+  .ekg-wrap svg{ width:100%; height:100%; }
+  .ekg-line{
+    fill:none; stroke:var(--accent); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:600; stroke-dashoffset:600;
+  }
+  .ekg-line.playing{ animation:ekgDraw 2.2s linear infinite; }
+  @keyframes ekgDraw{ to{ stroke-dashoffset:0; } }
+
+  .transcript{
+    max-height:44vh; overflow-y:auto; padding:4px 2px; margin-bottom:16px;
+    -webkit-mask-image:linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+            mask-image:linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+  }
+  .line-row{
+    display:flex; gap:10px; padding:9px 10px; border-radius:10px; margin-bottom:4px; align-items:flex-start;
+    opacity:0.55; transition:opacity .2s, background .2s;
+  }
+  .line-row.current{ opacity:1; background:rgba(224,169,76,0.08); }
+  .line-row .speaker-dot{
+    width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0;
+  }
+  .line-row.spk-A .speaker-dot{ background:var(--en); }
+  .line-row.spk-B .speaker-dot{ background:var(--tr); }
+  .line-row .txt{ font-size:14.5px; line-height:1.5; }
+  .line-row.lang-tr .txt{ color:var(--tr); font-style:italic; font-size:13.5px; }
+  .line-row.lang-en .txt{ color:var(--text); }
+  .line-row .txt b{ color:var(--accent-soft); font-weight:600; }
+
+  .player-controls{
+    display:flex; align-items:center; justify-content:center; gap:18px; margin:14px 0 10px;
+  }
+  .speed-row{ display:flex; align-items:center; gap:10px; justify-content:center; margin-bottom:6px;}
+  .speed-row input[type=range]{ width:140px; accent-color:var(--accent); }
+  .speed-row span{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--text-dim); width:34px;}
+
+  /* ---------- Library ---------- */
+  .lib-item{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:15px 16px; margin-bottom:12px; cursor:pointer;
+  }
+  .lib-item-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .lib-item h3{ font-family:'Fraunces', serif; font-size:16.5px; margin:0 0 4px; font-weight:600;}
+  .lib-item .lib-meta{ font-size:11.5px; color:var(--text-faint); }
+  .badge{
+    font-size:10.5px; font-weight:600; padding:4px 9px; border-radius:100px; white-space:nowrap;
+    letter-spacing:0.02em;
+  }
+  .badge.due{ background:rgba(226,114,91,0.15); color:#F0A392; }
+  .badge.soon{ background:rgba(224,169,76,0.15); color:var(--accent-soft); }
+  .badge.later{ background:rgba(127,184,176,0.12); color:var(--tr); }
+  .lib-item .lib-words{ margin-top:10px; }
+  .empty-state{ text-align:center; padding:50px 20px; color:var(--text-faint); }
+  .empty-state svg{ opacity:0.35; margin-bottom:14px; }
+  .empty-state p{ font-size:13.5px; line-height:1.6; }
+
+  /* ---------- Tabbar ---------- */
+  .tabbar{
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:560px; display:flex;
+    background:rgba(15,42,46,0.92); backdrop-filter:blur(14px);
+    border-top:1px solid var(--line);
+    padding:9px 10px calc(9px + env(safe-area-inset-bottom));
+  }
+  .tab-btn{
+    flex:1; background:none; border:none; color:var(--text-faint); cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 4px;
+    font-family:'IBM Plex Sans', sans-serif; font-size:10.5px; font-weight:600;
+  }
+  .tab-btn.active{ color:var(--accent); }
+  .tab-btn svg{ width:21px; height:21px; }
+
+  ::-webkit-scrollbar{ width:0; height:0; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="17" r="16" stroke="#E0A94C" stroke-width="1.4" opacity="0.5"/>
+        <path d="M4 17H10L13 9L18 25L21 13L23 17H30" stroke="#E0A94C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <div>
+        <h1>Kelime Nabzı</h1>
+        <small>YÖKDİL &middot; Sesli Akademik Tekrar</small>
+      </div>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- ================= CREATE VIEW ================= -->
+    <section class="view active" id="view-create">
+      <h2 class="view-title">Yeni liste</h2>
+      <p class="view-sub">Akademik kelimeleri yapıştır. Gemini, kelimelerin geçtiği karışık (İngilizce + Türkçe açıklamalı) bir diyalog kaydı hazırlasın; yolda kulaklıkla dinle.</p>
+
+      <div class="panel">
+        <label class="field-label">Konu başlığı (opsiyonel)</label>
+        <input type="text" id="topic-input" placeholder="ör. Kardiyovasküler sistem">
+        <div style="height:14px"></div>
+        <label class="field-label">Kelimeler</label>
+        <textarea id="words-input" rows="4" placeholder="pathogenesis, chronic, alleviate, susceptible, diagnosis, remission..."></textarea>
+        <div class="hint">Virgülle veya alt alta ayır. 8–15 kelime idealdir — daha fazlası diyaloğu yapaylaştırır.</div>
+        <div id="create-error"></div>
+        <button class="btn btn-primary" id="generate-btn" style="margin-top:16px;">Diyalog Oluştur</button>
+      </div>
+
+      <div class="panel" id="no-key-panel" style="display:none;">
+        <label class="field-label" style="color:var(--danger);">API anahtarı eksik</label>
+        <p style="font-size:13px; color:var(--text-dim); margin:0 0 10px; line-height:1.5;">Devam etmeden önce Ayarlar sekmesinden ücretsiz Gemini API anahtarını gir.</p>
+        <button class="btn btn-ghost" onclick="switchView('settings')">Ayarlar'a git</button>
+      </div>
+    </section>
+
+    <!-- ================= LISTEN VIEW ================= -->
+    <section class="view" id="view-listen">
+      <div id="listen-empty" class="empty-state">
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none"><path d="M4 12H8L10 5L14 19L16 9L17.5 12H20" stroke="#5E8B87" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p>Henüz bir diyalog seçilmedi.<br>"Oluştur" sekmesinden yeni bir liste hazırla<br>ya da Kütüphane'den bir kayıt aç.</p>
+      </div>
+
+      <div id="listen-content" style="display:none;">
+        <div class="now-playing-head">
+          <p class="topic" id="np-topic">—</p>
+          <p class="meta" id="np-meta">—</p>
+        </div>
+
+        <div class="ekg-wrap">
+          <svg viewBox="0 0 300 60" preserveAspectRatio="none">
+            <path id="ekg-path" class="ekg-line" d="M0,30 L60,30 L75,10 L90,50 L105,30 L300,30" />
+          </svg>
+        </div>
+
+        <div class="transcript" id="transcript"></div>
+
+        <div class="speed-row">
+          <span>0.7x</span>
+          <input type="range" id="speed-slider" min="0.7" max="1.3" step="0.05" value="0.95">
+          <span>1.3x</span>
+        </div>
+
+        <div class="player-controls">
+          <button class="btn btn-icon" id="btn-prev" title="Önceki cümle">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M19 20L9 12L19 4V20Z" fill="#F4EFE6"/><rect x="5" y="4" width="2" height="16" fill="#F4EFE6"/></svg>
+          </button>
+          <button class="btn btn-icon large" id="btn-playpause" title="Oynat/Duraklat">
+            <svg id="icon-play" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 5L19 12L7 19V5Z" fill="#E0A94C"/></svg>
+            <svg id="icon-pause" width="24" height="24" viewBox="0 0 24 24" fill="none" style="display:none;"><rect x="6" y="5" width="4" height="14" fill="#E0A94C"/><rect x="14" y="5" width="4" height="14" fill="#E0A94C"/></svg>
+          </button>
+          <button class="btn btn-icon" id="btn-next" title="Sonraki cümle">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 4L15 12L5 20V4Z" fill="#F4EFE6"/><rect x="17" y="4" width="2" height="16" fill="#F4EFE6"/></svg>
+          </button>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btn-variation" style="flex:1;">↻ Yeni Varyasyon</button>
+          <button class="btn btn-ghost" id="btn-restart" style="flex:1;">⟲ Baştan Dinle</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= LIBRARY VIEW ================= -->
+    <section class="view" id="view-library">
+      <h2 class="view-title">Kütüphane</h2>
+      <p class="view-sub">Kaydettiğin kelime listeleri ve tekrar programı. Kırmızı rozet: bugün tekrar zamanı.</p>
+      <div id="library-list"></div>
+    </section>
+
+    <!-- ================= SETTINGS VIEW ================= -->
+    <section class="view" id="view-settings">
+      <h2 class="view-title">Ayarlar</h2>
+      <p class="view-sub">Anahtarın yalnızca bu telefonda, tarayıcının yerel deposunda saklanır — hiçbir sunucuya gönderilmez, doğrudan Google'ın Gemini API'sine gider.</p>
+
+      <div class="panel">
+        <label class="field-label">Gemini API Anahtarı</label>
+        <input type="password" id="api-key-input" placeholder="AIza...">
+        <div class="hint">Ücretsiz anahtar için: Google AI Studio → Get API Key.</div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="toggle-key-visibility" style="flex:1;">Göster</button>
+          <button class="btn btn-primary" id="save-key-btn" style="flex:1;">Kaydet</button>
+        </div>
+        <div id="key-status"></div>
+      </div>
+
+      <div class="panel">
+        <label class="field-label">Model</label>
+        <input type="text" id="model-input" placeholder="gemini-2.5-flash">
+        <div class="hint">Google model adlarını değiştirirse buradan güncelleyebilirsin.</div>
+      </div>
+
+      <div class="panel">
+        <label class="field-label">İngilizce ses</label>
+        <select id="en-voice-select"></select>
+        <div style="height:12px"></div>
+        <label class="field-label">Türkçe ses</label>
+        <select id="tr-voice-select"></select>
+        <div class="hint">Telefonunda kurulu sesler burada listelenir. Bazı cihazlarda tr-TR sesi sınırlı olabilir.</div>
+      </div>
+
+      <div class="panel">
+        <label class="field-label" style="color:var(--danger);">Verileri sıfırla</label>
+        <p style="font-size:13px; color:var(--text-dim); margin:0 0 12px;">Tüm kayıtlı listeleri ve diyalogları siler. API anahtarı etkilenmez.</p>
+        <button class="btn btn-danger" id="clear-data-btn">Tüm kayıtları sil</button>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="tabbar">
+    <button class="tab-btn active" data-view="create">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Oluştur
+    </button>
+    <button class="tab-btn" data-view="listen">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 12H8L10 5L14 19L16 9L17.5 12H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Dinle
+    </button>
+    <button class="tab-btn" data-view="library">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 19.5V6C4 4.9 4.9 4 6 4H18C19.1 4 20 4.9 20 6V19.5M4 19.5C4 18.4 4.9 17.5 6 17.5H18C19.1 17.5 20 18.4 20 19.5M4 19.5C4 20.6 4.9 21.5 6 21.5H18C19.1 21.5 20 20.6 20 19.5" stroke="currentColor" stroke-width="1.6"/></svg>
+      Kütüphane
+    </button>
+    <button class="tab-btn" data-view="settings">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.3"/></svg>
+      Ayarlar
+    </button>
+  </nav>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ STORAGE ============ */
+  const LS_KEY_API = "kn_api_key";
+  const LS_KEY_MODEL = "kn_model";
+  const LS_KEY_SETS = "kn_wordsets";
+  const LS_KEY_ENVOICE = "kn_en_voice";
+  const LS_KEY_TRVOICE = "kn_tr_voice";
+
+  function getSets(){ try{ return JSON.parse(localStorage.getItem(LS_KEY_SETS)) || []; }catch(e){ return []; } }
+  function saveSets(sets){ localStorage.setItem(LS_KEY_SETS, JSON.stringify(sets)); }
+  function getApiKey(){ return localStorage.getItem(LS_KEY_API) || ""; }
+  function getModel(){ return localStorage.getItem(LS_KEY_MODEL) || "gemini-2.5-flash"; }
+
+  /* ============ VIEW SWITCHING ============ */
+  function switchView(name){
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    document.getElementById("view-"+name).classList.add("active");
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active", b.dataset.view===name));
+    if(name==="library") renderLibrary();
+    if(name==="create") checkKeyPresence();
+    window.scrollTo(0,0);
+  }
+  window.switchView = switchView;
+  document.querySelectorAll(".tab-btn").forEach(b=>{
+    b.addEventListener("click", ()=>switchView(b.dataset.view));
+  });
+
+  function checkKeyPresence(){
+    document.getElementById("no-key-panel").style.display = getApiKey() ? "none" : "block";
+    document.getElementById("generate-btn").disabled = !getApiKey();
+  }
+
+  /* ============ SETTINGS ============ */
+  const apiKeyInput = document.getElementById("api-key-input");
+  const modelInput = document.getElementById("model-input");
+  apiKeyInput.value = getApiKey();
+  modelInput.value = getModel();
+
+  document.getElementById("toggle-key-visibility").addEventListener("click", ()=>{
+    const btn = document.getElementById("toggle-key-visibility");
+    if(apiKeyInput.type==="password"){ apiKeyInput.type="text"; btn.textContent="Gizle"; }
+    else{ apiKeyInput.type="password"; btn.textContent="Göster"; }
+  });
+
+  document.getElementById("save-key-btn").addEventListener("click", ()=>{
+    localStorage.setItem(LS_KEY_API, apiKeyInput.value.trim());
+    localStorage.setItem(LS_KEY_MODEL, modelInput.value.trim() || "gemini-2.5-flash");
+    const box = document.getElementById("key-status");
+    box.innerHTML = '<div class="status-box">Kaydedildi.</div>';
+    setTimeout(()=>box.innerHTML="", 2200);
+    checkKeyPresence();
+  });
+
+  document.getElementById("clear-data-btn").addEventListener("click", ()=>{
+    if(confirm("Tüm kayıtlı listeler ve diyaloglar silinsin mi? Bu işlem geri alınamaz.")){
+      localStorage.removeItem(LS_KEY_SETS);
+      renderLibrary();
+      alert("Kayıtlar silindi.");
+    }
+  });
+
+  /* ============ VOICES ============ */
+  let voices = [];
+  function loadVoices(){
+    voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    const enSel = document.getElementById("en-voice-select");
+    const trSel = document.getElementById("tr-voice-select");
+    const savedEn = localStorage.getItem(LS_KEY_ENVOICE);
+    const savedTr = localStorage.getItem(LS_KEY_TRVOICE);
+    enSel.innerHTML = ""; trSel.innerHTML = "";
+    const enVoices = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith("en"));
+    const trVoices = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith("tr"));
+    if(enVoices.length===0){ enSel.innerHTML = '<option value="">(cihazda İngilizce ses bulunamadı)</option>'; }
+    enVoices.forEach(v=>{
+      const o = document.createElement("option");
+      o.value=v.name; o.textContent=v.name+" — "+v.lang;
+      if(v.name===savedEn) o.selected=true;
+      enSel.appendChild(o);
+    });
+    if(trVoices.length===0){ trSel.innerHTML = '<option value="">(cihazda Türkçe ses bulunamadı — sistem sesi kullanılacak)</option>'; }
+    trVoices.forEach(v=>{
+      const o = document.createElement("option");
+      o.value=v.name; o.textContent=v.name+" — "+v.lang;
+      if(v.name===savedTr) o.selected=true;
+      trSel.appendChild(o);
+    });
+    enSel.onchange = ()=>localStorage.setItem(LS_KEY_ENVOICE, enSel.value);
+    trSel.onchange = ()=>localStorage.setItem(LS_KEY_TRVOICE, trSel.value);
+  }
+  if(window.speechSynthesis){
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  function pickVoice(lang){
+    const savedName = lang==="en" ? localStorage.getItem(LS_KEY_ENVOICE) : localStorage.getItem(LS_KEY_TRVOICE);
+    if(savedName){
+      const v = voices.find(v=>v.name===savedName);
+      if(v) return v;
+    }
+    const pool = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith(lang));
+    return pool[0] || null;
+  }
+
+  /* ============ GEMINI CALL ============ */
+  const schema = {
+    type: "OBJECT",
+    properties: {
+      topic: { type: "STRING" },
+      lines: {
+        type: "ARRAY",
+        items: {
+          type: "OBJECT",
+          properties: {
+            speaker: { type: "STRING", enum: ["A","B"] },
+            lang: { type: "STRING", enum: ["en","tr"] },
+            text: { type: "STRING" },
+            highlight: { type: "STRING" }
+          },
+          required: ["speaker","lang","text"]
+        }
+      }
+    },
+    required: ["topic","lines"]
+  };
+
+  async function generateDialogue(words, topicHint){
+    const apiKey = getApiKey();
+    const model = getModel();
+    const wordList = words.join(", ");
+    const prompt = `Sen YÖKDİL Sağlık sınavına hazırlanan bir tıp/sağlık bilimleri öğrencisi için sesli çalışma materyali hazırlayan bir dil eğitmenisin.
+
+Aşağıdaki akademik/tıbbi İngilizce kelimeleri kullanarak, iki öğrenci (A ve B) arasında doğal, akıcı bir İngilizce konuşma/diyalog yaz. Konu: ${topicHint || "genel akademik/sağlık bilimleri sohbeti, kelimelerin doğal geçtiği bir bağlam sen seç"}.
+
+KURALLAR:
+- Her hedef kelime diyalog boyunca EN AZ 2 kez, farklı cümlelerde ve farklı bağlamlarda geçmeli.
+- Diyalog satırları çoğunlukla İngilizce (lang:"en") olsun.
+- Bir kelime ilk kez kullanıldıktan hemen sonra, aynı ya da diğer konuşmacının ağzından KISA bir Türkçe açıklama/çeviri cümlesi ekle (lang:"tr") — sanki konuşurken durup kelimeyi Türkçeye çeviriyormuş gibi doğal olsun, ders anlatır gibi olmasın.
+- İngilizce cümlelerde hedef kelime geçtiğinde "highlight" alanına o kelimeyi (metindeki hali ile) yaz, geçmiyorsa boş bırak.
+- Toplam 16-26 satır olsun. Cümleler doğal, konuşma dili, akademik ama yapmacık olmayan tonda olsun.
+- Türkçe satırlar kısa ve öz olsun (tek cümle, çeviri dersi gibi uzatma).
+- JSON şemasına birebir uy, başka hiçbir metin ekleme.
+
+Hedef kelimeler: ${wordList}`;
+
+    const body = {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: schema,
+        temperature: 0.9
+      }
+    };
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const res = await fetch(url, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify(body)
+    });
+
+    if(!res.ok){
+      let msg = "İstek başarısız oldu (HTTP "+res.status+").";
+      try{
+        const errJson = await res.json();
+        if(errJson.error && errJson.error.message) msg = errJson.error.message;
+      }catch(e){}
+      throw new Error(msg);
+    }
+
+    const data = await res.json();
+    const textPart = data?.candidates?.[0]?.content?.parts?.find(p=>p.text)?.text;
+    if(!textPart) throw new Error("Model boş yanıt döndürdü. Tekrar dene.");
+    let parsed;
+    try{ parsed = JSON.parse(textPart); }
+    catch(e){ throw new Error("Yanıt ayrıştırılamadı. Modeli değiştirip tekrar dene."); }
+    if(!parsed.lines || !parsed.lines.length) throw new Error("Diyalog oluşturulamadı, tekrar dene.");
+    return parsed;
+  }
+
+  /* ============ CREATE FLOW ============ */
+  document.getElementById("generate-btn").addEventListener("click", async ()=>{
+    const errorBox = document.getElementById("create-error");
+    errorBox.innerHTML = "";
+    const rawWords = document.getElementById("words-input").value
+      .split(/[,;\n]/).map(w=>w.trim()).filter(Boolean);
+    const topic = document.getElementById("topic-input").value.trim();
+
+    if(!getApiKey()){ checkKeyPresence(); return; }
+    if(rawWords.length < 3){
+      errorBox.innerHTML = '<div class="error-box">En az 3 kelime gir.</div>';
+      return;
+    }
+
+    const btn = document.getElementById("generate-btn");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="border-top-color:#1B1206; border-color:rgba(27,18,6,0.25);"></span> Oluşturuluyor…';
+
+    try{
+      const result = await generateDialogue(rawWords, topic);
+      const wordSet = {
+        id: "ws_"+Date.now(),
+        name: topic || rawWords.slice(0,3).join(", ")+(rawWords.length>3?" +"+(rawWords.length-3):""),
+        words: rawWords,
+        createdAt: Date.now(),
+        timesReviewed: 0,
+        nextReviewAt: Date.now(),
+        dialogs: [{
+          id: "d_"+Date.now(),
+          topic: result.topic || topic || "Diyalog",
+          lines: result.lines,
+          createdAt: Date.now()
+        }]
+      };
+      const sets = getSets();
+      sets.unshift(wordSet);
+      saveSets(sets);
+      document.getElementById("words-input").value = "";
+      document.getElementById("topic-input").value = "";
+      openDialog(wordSet, wordSet.dialogs[0]);
+      switchView("listen");
+    }catch(e){
+      errorBox.innerHTML = '<div class="error-box">'+escapeHtml(e.message)+'</div>';
+    }finally{
+      btn.disabled = false;
+      btn.innerHTML = "Diyalog Oluştur";
+    }
+  });
+
+  /* ============ PLAYER STATE ============ */
+  let currentSet = null;
+  let currentDialog = null;
+  let queueIndex = 0;
+  let isPlaying = false;
+  let utteranceActive = false;
+
+  function openDialog(wordSet, dialog){
+    currentSet = wordSet;
+    currentDialog = dialog;
+    queueIndex = 0;
+    stopSpeaking();
+    document.getElementById("listen-empty").style.display = "none";
+    document.getElementById("listen-content").style.display = "block";
+    document.getElementById("np-topic").textContent = dialog.topic || wordSet.name;
+    document.getElementById("np-meta").textContent = wordSet.words.join(" · ");
+    renderTranscript();
+  }
+
+  function renderTranscript(){
+    const wrap = document.getElementById("transcript");
+    wrap.innerHTML = "";
+    currentDialog.lines.forEach((line, i)=>{
+      const row = document.createElement("div");
+      row.className = "line-row spk-"+line.speaker+" lang-"+line.lang+(i===queueIndex?" current":"");
+      row.dataset.idx = i;
+      const dot = document.createElement("div");
+      dot.className = "speaker-dot";
+      const txt = document.createElement("div");
+      txt.className = "txt";
+      txt.innerHTML = highlightText(line.text, line.highlight);
+      row.appendChild(dot); row.appendChild(txt);
+      row.addEventListener("click", ()=>{
+        stopSpeaking();
+        queueIndex = i;
+        renderTranscript();
+        if(isPlaying) speakCurrent();
+      });
+      wrap.appendChild(row);
+    });
+    const cur = wrap.querySelector(".current");
+    if(cur) cur.scrollIntoView({block:"center", behavior:"smooth"});
+  }
+
+  function highlightText(text, highlight){
+    const safe = escapeHtml(text);
+    if(!highlight) return safe;
+    const re = new RegExp("("+escapeRegExp(highlight)+")", "i");
+    return safe.replace(re, "<b>$1</b>");
+  }
+  function escapeHtml(s){ return s.replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+  function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+  function setPlayIcon(playing){
+    document.getElementById("icon-play").style.display = playing ? "none" : "block";
+    document.getElementById("icon-pause").style.display = playing ? "block" : "none";
+    const ekg = document.getElementById("ekg-path");
+    if(ekg) ekg.classList.toggle("playing", playing);
+  }
+
+  function speakCurrent(){
+    if(!currentDialog || queueIndex >= currentDialog.lines.length){
+      isPlaying = false; setPlayIcon(false);
+      markReviewed();
+      return;
+    }
+    const line = currentDialog.lines[queueIndex];
+    renderTranscript();
+    const utter = new SpeechSynthesisUtterance(line.text);
+    utter.lang = line.lang==="en" ? "en-US" : "tr-TR";
+    const v = pickVoice(line.lang);
+    if(v) utter.voice = v;
+    utter.rate = parseFloat(document.getElementById("speed-slider").value) * (line.speaker==="B" ? 0.98 : 1.0);
+    utter.pitch = line.speaker==="B" ? 1.08 : 0.96;
+    utteranceActive = true;
+    utter.onend = ()=>{
+      utteranceActive = false;
+      if(isPlaying){
+        queueIndex++;
+        speakCurrent();
+      }
+    };
+    utter.onerror = ()=>{
+      utteranceActive = false;
+      if(isPlaying){ queueIndex++; speakCurrent(); }
+    };
+    window.speechSynthesis.speak(utter);
+  }
+
+  function stopSpeaking(){
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
+    utteranceActive = false;
+  }
+
+  function markReviewed(){
+    const sets = getSets();
+    const idx = sets.findIndex(s=>s.id===currentSet.id);
+    if(idx===-1) return;
+    sets[idx].timesReviewed = (sets[idx].timesReviewed||0)+1;
+    const intervals = [1,3,7,16,30];
+    const step = Math.min(sets[idx].timesReviewed-1, intervals.length-1);
+    sets[idx].nextReviewAt = Date.now() + intervals[step]*24*60*60*1000;
+    saveSets(sets);
+    currentSet = sets[idx];
+  }
+
+  document.getElementById("btn-playpause").addEventListener("click", ()=>{
+    if(!currentDialog) return;
+    if(isPlaying){
+      isPlaying = false;
+      stopSpeaking();
+      setPlayIcon(false);
+    }else{
+      isPlaying = true;
+      setPlayIcon(true);
+      speakCurrent();
+    }
+  });
+
+  document.getElementById("btn-next").addEventListener("click", ()=>{
+    if(!currentDialog) return;
+    stopSpeaking();
+    queueIndex = Math.min(queueIndex+1, currentDialog.lines.length-1);
+    renderTranscript();
+    if(isPlaying) speakCurrent();
+  });
+  document.getElementById("btn-prev").addEventListener("click", ()=>{
+    if(!currentDialog) return;
+    stopSpeaking();
+    queueIndex = Math.max(queueIndex-1, 0);
+    renderTranscript();
+    if(isPlaying) speakCurrent();
+  });
+  document.getElementById("btn-restart").addEventListener("click", ()=>{
+    if(!currentDialog) return;
+    stopSpeaking();
+    queueIndex = 0;
+    renderTranscript();
+    if(isPlaying) speakCurrent();
+  });
+
+  document.getElementById("btn-variation").addEventListener("click", async ()=>{
+    if(!currentSet) return;
+    if(!getApiKey()){ switchView("settings"); return; }
+    const btn = document.getElementById("btn-variation");
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Yeni varyasyon…';
+    stopSpeaking(); isPlaying = false; setPlayIcon(false);
+    try{
+      const result = await generateDialogue(currentSet.words, currentSet.name+" (farklı bir bağlamda, önceki diyalogdan farklı bir senaryo kullan)");
+      const newDialog = {
+        id: "d_"+Date.now(),
+        topic: result.topic || currentSet.name,
+        lines: result.lines,
+        createdAt: Date.now()
+      };
+      const sets = getSets();
+      const idx = sets.findIndex(s=>s.id===currentSet.id);
+      if(idx!==-1){
+        sets[idx].dialogs.unshift(newDialog);
+        saveSets(sets);
+        currentSet = sets[idx];
+      }
+      openDialog(currentSet, newDialog);
+    }catch(e){
+      alert("Varyasyon oluşturulamadı: "+e.message);
+    }finally{
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
+
+  const speedSlider = document.getElementById("speed-slider");
+  speedSlider.addEventListener("input", ()=>{
+    document.querySelectorAll(".speed-row span")[0].textContent="0.7x";
+  });
+
+  /* ============ LIBRARY ============ */
+  function renderLibrary(){
+    const wrap = document.getElementById("library-list");
+    const sets = getSets();
+    if(sets.length===0){
+      wrap.innerHTML = `<div class="empty-state">
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none"><path d="M4 19.5V6C4 4.9 4.9 4 6 4H18C19.1 4 20 4.9 20 6V19.5" stroke="#5E8B87" stroke-width="1.6"/></svg>
+        <p>Henüz kaydedilmiş bir liste yok.<br>"Oluştur" sekmesinden ilk listeni hazırla.</p>
+      </div>`;
+      return;
+    }
+    wrap.innerHTML = "";
+    sets.forEach(set=>{
+      const daysLeft = Math.ceil((set.nextReviewAt - Date.now())/(24*60*60*1000));
+      let badgeClass = "later", badgeText = "";
+      if(daysLeft<=0){ badgeClass="due"; badgeText="Bugün tekrar"; }
+      else if(daysLeft<=2){ badgeClass="soon"; badgeText=daysLeft+" gün sonra"; }
+      else{ badgeClass="later"; badgeText=daysLeft+" gün sonra"; }
+
+      const item = document.createElement("div");
+      item.className = "lib-item";
+      item.innerHTML = `
+        <div class="lib-item-top">
+          <div>
+            <h3>${escapeHtml(set.name)}</h3>
+            <div class="lib-meta">${set.dialogs.length} varyasyon · ${set.timesReviewed} dinleme</div>
+          </div>
+          <span class="badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="lib-words">${set.words.map(w=>`<span class="word-chip">${escapeHtml(w)}</span>`).join("")}</div>
+      `;
+      item.addEventListener("click", ()=>{
+        openDialog(set, set.dialogs[0]);
+        switchView("listen");
+      });
+      wrap.appendChild(item);
+    });
+
+    // delete affordance via long-press-ish: add small delete button per item
+    wrap.querySelectorAll(".lib-item").forEach((el, i)=>{
+      const del = document.createElement("button");
+      del.textContent = "Sil";
+      del.className = "btn btn-danger";
+      del.style.marginTop = "10px";
+      del.style.width = "100%";
+      del.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        if(confirm("Bu liste silinsin mi?")){
+          const sets2 = getSets();
+          sets2.splice(i,1);
+          saveSets(sets2);
+          renderLibrary();
+        }
+      });
+      el.appendChild(del);
+    });
+  }
+
+  /* ============ INIT ============ */
+  checkKeyPresence();
+})();
+</script>
+</body>
+</html>
