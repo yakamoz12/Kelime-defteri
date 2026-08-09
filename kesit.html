@@ -417,7 +417,11 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
       <input class="inp" id="ghToken" type="password" placeholder="github_pat_…" autocapitalize="off" autocorrect="off" spellcheck="false">
       <button class="btn" id="ghSave">Bağla</button>
     </div>
-    <div class="field"><button class="btn ghost wide" id="ghSync">Şimdi eşitle</button></div>
+    <div class="field">
+      <button class="btn ghost" id="ghSync" style="flex:1">Şimdi eşitle</button>
+      <button class="btn ghost" id="ghTestBtn" style="flex:1">Bağlantıyı sına</button>
+    </div>
+    <div id="syncDiag" style="font-size:12.5px;line-height:1.5;margin-top:8px"></div>
     <div class="note" style="margin-top:10px">Kelime ve gramer defterin bu depodaki bir dosyada tutulur. Telefon, tablet ve bilgisayar aynı defteri görür. Depoyu <b>private</b> aç ve uygulamanın durduğu depodan farklı olsun.</div>
   </div>
 
@@ -2116,6 +2120,70 @@ async function syncNow(quiet) {
   syncing = false;
 }
 
+
+/* ---------- bağlantı sınaması: hangi adımda takıldığını söyler ---------- */
+async function ghTest() {
+  const box = $("#syncDiag");
+  const lines = [];
+  const say = (ok, msg) => {
+    lines.push((ok ? "✓ " : "✗ ") + msg);
+    box.innerHTML = lines.map(l => `<div style="margin:3px 0;color:${l[0] === "✓" ? "var(--ink2)" : "var(--warn)"}">${esc(l)}</div>`).join("");
+  };
+  box.innerHTML = '<div style="color:var(--ink3)"><span class="spin dark"></span> Sınanıyor…</div>';
+
+  // 1) sayfa nereden açılmış
+  if (location.protocol === "file:") {
+    say(false, "Sayfa dosyadan açılmış (file://). Tarayıcı bu durumda dış isteklere izin vermez. Uygulamayı github.io adresinden aç.");
+    return;
+  }
+  say(location.protocol === "https:", "Adres: " + location.protocol + "//" + location.host);
+
+  // 2) internet ve GitHub erişimi
+  try {
+    const r = await fetch("https://api.github.com/rate_limit", { cache: "no-store" });
+    say(r.ok, "GitHub sunucusuna ulaşıldı (" + r.status + ")");
+  } catch (e) {
+    say(false, "GitHub'a hiç ulaşılamıyor. İnternet bağlantısı, VPN veya içerik engelleyici olabilir. (" + e.message + ")");
+    return;
+  }
+
+  // 3) anahtar geçerli mi
+  if (!GH.token) { say(false, "Erişim anahtarı girilmemiş."); return; }
+  if (!/^[\x21-\x7E]+$/.test(GH.token)) {
+    say(false, "Anahtarda boşluk veya geçersiz karakter var. Kopyalarken fazladan boşluk gelmiş olabilir, yeniden yapıştır.");
+    return;
+  }
+  say(true, "Anahtar biçimi uygun (" + GH.token.length + " karakter, " + GH.token.slice(0, 8) + "…)");
+
+  try {
+    const r = await fetch("https://api.github.com/user", { headers: ghHead(), cache: "no-store" });
+    if (r.status === 401) { say(false, "Anahtar geçersiz veya süresi dolmuş. Yenisini üret."); return; }
+    const j = await r.json();
+    say(r.ok, r.ok ? "Anahtar çalışıyor, hesap: " + (j.login || "?") : "Anahtar reddedildi (" + r.status + ")");
+  } catch (e) { say(false, "Anahtar sınanamadı: " + e.message); return; }
+
+  // 4) depo görünüyor mu
+  if (!GH.repo) { say(false, "Depo adı girilmemiş."); return; }
+  if (!/^[\w.-]+\/[\w.-]+$/.test(GH.repo)) { say(false, "Depo adı kullanici/depo biçiminde olmalı. Şu an: " + GH.repo); return; }
+  try {
+    const r = await fetch("https://api.github.com/repos/" + GH.repo, { headers: ghHead(), cache: "no-store" });
+    if (r.status === 404) {
+      say(false, "Depo bu anahtara görünmüyor. Anahtar ayarlarında Repository access bölümüne " + GH.repo.split("/")[1] + " deposunu ekle.");
+      return;
+    }
+    const j = await r.json();
+    say(r.ok, "Depo bulundu: " + GH.repo + (j.private ? " (private)" : " (public — private yapmanı öneririm)"));
+    if (j.permissions && !j.permissions.push) say(false, "Yazma yetkisi yok. Anahtarda Contents iznini Read and write yap.");
+  } catch (e) { say(false, "Depo sınanamadı: " + e.message); return; }
+
+  // 5) dosya okunabiliyor mu
+  try {
+    const r = await fetch(ghUrl(), { headers: ghHead(), cache: "no-store" });
+    if (r.status === 404) say(true, "Veri dosyası henüz yok, ilk eşitlemede oluşturulacak. Her şey hazır.");
+    else say(r.ok, r.ok ? "Veri dosyası okundu, her şey hazır." : "Dosya okunamadı (" + r.status + ")");
+  } catch (e) { say(false, "Dosya sınanamadı: " + e.message); }
+}
+
 function setSyncMsg(t) { const el = $("#syncMsg"); if (el) el.textContent = t; }
 
 function syncLabel() {
@@ -2177,7 +2245,7 @@ $("#ghToken").value = GH.token ? "••••••••••••" : "";
 setSyncMsg(syncLabel());
 $("#ghSave").addEventListener("click", async () => {
   const repo = $("#ghRepo").value.trim().replace(/^https?:\/\/github\.com\//i, "").replace(/\.git$/, "").replace(/\/+$/, "");
-  const tok = $("#ghToken").value.trim();
+  const tok = $("#ghToken").value.replace(/[\s\u200B-\u200D\uFEFF]/g, "");
   if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) { toast("Depo adını kullanici/depo biçiminde yaz."); return; }
   if (tok && !tok.startsWith("•")) { GH.token = tok; store.set("gh_token", tok); }
   if (!GH.token) { toast("Erişim anahtarını gir."); return; }
@@ -2187,6 +2255,7 @@ $("#ghSave").addEventListener("click", async () => {
   await syncNow();
 });
 $("#ghSync").addEventListener("click", () => syncNow());
+$("#ghTestBtn").addEventListener("click", ghTest);
 
 /* filtre anahtarı ve temizleme düğmeleri */
 const filtTog = $("#filtTog");
