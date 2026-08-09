@@ -408,6 +408,20 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   </div>
 
   <div class="row">
+    <h4>Eşitleme</h4>
+    <p id="syncMsg" style="color:var(--acc-ink);font-weight:500">Kurulu değil.</p>
+    <div class="field" style="margin-top:10px">
+      <input class="inp" id="ghRepo" placeholder="kullanici/depo-adi" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <input class="inp" id="ghToken" type="password" placeholder="github_pat_…" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button class="btn" id="ghSave">Bağla</button>
+    </div>
+    <div class="field"><button class="btn ghost wide" id="ghSync">Şimdi eşitle</button></div>
+    <div class="note" style="margin-top:10px">Kelime ve gramer defterin bu depodaki bir dosyada tutulur. Telefon, tablet ve bilgisayar aynı defteri görür. Depoyu <b>private</b> aç ve uygulamanın durduğu depodan farklı olsun.</div>
+  </div>
+
+  <div class="row">
     <h4>Gemini API anahtarı</h4>
     <p>aistudio.google.com adresinden ücretsiz alınır. Yalnızca bu telefonun tarayıcı hafızasında durur, hiçbir yere gönderilmez.</p>
     <div class="field" style="margin-top:0">
@@ -1295,7 +1309,7 @@ function gramCardEl(sen, g) {
     if (hasGram(sen)) { removeGram(sen); setGramBtn(btn, false); toast("Gramer defterinden çıkarıldı."); }
     else {
       GRAMS.unshift({ s: sen, tr: g.tr, topic: g.topic, skeleton: g.skeleton, points: g.points, tense: g.tense, trap: g.trap, spans: g.spans, src: state.title, t: Date.now() });
-      saveGrams(); setGramBtn(btn, true); toast("Gramer defterine eklendi.");
+      saveGrams(); syncSoon(); setGramBtn(btn, true); toast("Gramer defterine eklendi.");
     }
   });
   wrap.appendChild(btn);
@@ -1462,8 +1476,8 @@ try { WORDS = JSON.parse(store.get("words", "[]")) || []; } catch (e) { WORDS = 
 function saveWords() { store.set("words", JSON.stringify(WORDS)); }
 const norm = w => String(w).toLowerCase().trim();
 function hasWord(w) { return WORDS.some(x => norm(x.w) === norm(w)); }
-function addWord(o) { if (!hasWord(o.w)) { WORDS.unshift(o); saveWords(); } }
-function removeWord(w) { WORDS = WORDS.filter(x => norm(x.w) !== norm(w)); saveWords(); }
+function addWord(o) { if (!hasWord(o.w)) { WORDS.unshift(o); saveWords(); syncSoon(); } }
+function removeWord(w) { WORDS = WORDS.filter(x => norm(x.w) !== norm(w)); saveWords(); tomb("w:" + norm(w)); syncSoon(); }
 
 function renderWords() {
   const q = norm($("#wSearch").value);
@@ -1525,8 +1539,8 @@ async function genFor(word, el) {
   el.querySelector(".wdet").innerHTML = '<div class="none"><span class="spin dark"></span> Cümle kuruluyor…</div>';
   try {
     const s = await makeSentence(rec.w, rec.tr, rec.ex);
-    rec.ex = s.en; rec.exTr = s.tr; rec.pairs = s.pairs;
-    saveWords();
+    rec.ex = s.en; rec.exTr = s.tr; rec.pairs = s.pairs; rec.t = Date.now();
+    saveWords(); syncSoon();
     el.querySelector(".wdet").innerHTML = detHtml(rec);
     el.querySelector(".again").addEventListener("click", e => { e.stopPropagation(); genFor(word, el); });
   } catch (e) {
@@ -1824,7 +1838,7 @@ try { GRAMS = JSON.parse(store.get("grams", "[]")) || []; } catch (e) { GRAMS = 
 function saveGrams() { store.set("grams", JSON.stringify(GRAMS)); }
 const gkey = t => String(t).toLowerCase().replace(/\s+/g, " ").trim().slice(0, 120);
 function hasGram(sen) { return GRAMS.some(x => gkey(x.s) === gkey(sen)); }
-function removeGram(sen) { GRAMS = GRAMS.filter(x => gkey(x.s) !== gkey(sen)); saveGrams(); }
+function removeGram(sen) { GRAMS = GRAMS.filter(x => gkey(x.s) !== gkey(sen)); saveGrams(); tomb("g:" + gkey(sen)); syncSoon(); }
 
 let gFilter = "";
 
@@ -1869,7 +1883,7 @@ function renderGrams() {
   box.querySelectorAll(".witem").forEach(el => {
     el.querySelector(".del").addEventListener("click", e => {
       e.stopPropagation();
-      GRAMS = GRAMS.filter(x => gkey(x.s) !== el.dataset.k); saveGrams(); renderGrams(); toast("Silindi.");
+      GRAMS = GRAMS.filter(x => gkey(x.s) !== el.dataset.k); saveGrams(); tomb("g:" + el.dataset.k); syncSoon(); renderGrams(); toast("Silindi.");
     });
     el.querySelector(".wtxt").addEventListener("click", () => el.classList.toggle("open"));
     const g = el.querySelector(".gen");
@@ -1983,6 +1997,137 @@ async function buildGramPdf() {
 $("#gpdfBtn").addEventListener("click", buildGramPdf);
 
 /* ============================================================
+   GitHub eşitleme — asıl kopya sunucuda, cihazlar ondan beslenir
+   ============================================================ */
+const GH = {
+  token: store.get("gh_token", ""),
+  repo: store.get("gh_repo", ""),
+  file: "kesit-veri.json",
+  sha: store.get("gh_sha", ""),
+  last: store.get("gh_last", "")
+};
+let TOMB = {};
+try { TOMB = JSON.parse(store.get("tomb", "{}")) || {}; } catch (e) { TOMB = {}; }
+function saveTomb() { store.set("tomb", JSON.stringify(TOMB)); }
+function tomb(key) { TOMB[key] = Date.now(); saveTomb(); }
+
+const b64enc = str => {
+  const b = new TextEncoder().encode(str);
+  let s = "";
+  for (let i = 0; i < b.length; i += 8192) s += String.fromCharCode.apply(null, b.subarray(i, i + 8192));
+  return btoa(s);
+};
+const b64dec = b64 => {
+  const bin = atob(b64.replace(/\s/g, ""));
+  const u = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(u);
+};
+
+function ghUrl() { return `https://api.github.com/repos/${GH.repo}/contents/${GH.file}`; }
+function ghHead() {
+  return { Authorization: "Bearer " + GH.token, Accept: "application/vnd.github+json", "Content-Type": "application/json" };
+}
+
+async function ghGet() {
+  const r = await fetch(ghUrl() + "?ref=HEAD&t=" + Date.now(), { headers: ghHead(), cache: "no-store" });
+  if (r.status === 404) return { data: null, sha: "" };
+  if (!r.ok) {
+    const d = await r.json().catch(() => ({}));
+    throw new Error(r.status === 401 ? "Anahtar geçersiz." :
+                    r.status === 403 ? "Bu depoya erişim yetkisi yok." :
+                    (d.message || "Sunucu hatası " + r.status));
+  }
+  const j = await r.json();
+  return { data: JSON.parse(b64dec(j.content)), sha: j.sha };
+}
+
+async function ghPut(payload, sha) {
+  const body = { message: "kesit " + new Date().toISOString(), content: b64enc(JSON.stringify(payload)) };
+  if (sha) body.sha = sha;
+  const r = await fetch(ghUrl(), { method: "PUT", headers: ghHead(), body: JSON.stringify(body) });
+  if (!r.ok) {
+    const d = await r.json().catch(() => ({}));
+    const e = new Error(d.message || "Yazılamadı " + r.status);
+    e.conflict = (r.status === 409 || r.status === 422);
+    throw e;
+  }
+  const j = await r.json();
+  return j.content.sha;
+}
+
+/* iki listeyi zaman damgasına göre birleştir, silinenleri diriltme */
+function mergeList(local, remote, keyOf) {
+  const map = {};
+  const put = x => {
+    const k = keyOf(x);
+    if (!k) return;
+    const cur = map[k];
+    if (!cur || (x.t || 0) > (cur.t || 0)) map[k] = x;
+  };
+  (remote || []).forEach(put);
+  (local || []).forEach(put);
+  return Object.keys(map)
+    .filter(k => !(TOMB[k] && TOMB[k] > (map[k].t || 0)))
+    .map(k => map[k])
+    .sort((a, b) => (b.t || 0) - (a.t || 0));
+}
+
+let syncTimer = null, syncing = false;
+function syncSoon() {
+  if (!GH.token || !GH.repo) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => syncNow(true), 4000);
+}
+
+async function syncNow(quiet) {
+  if (!GH.token || !GH.repo) { if (!quiet) toast("Önce ayarlardan eşitlemeyi kur."); return; }
+  if (syncing) return;
+  syncing = true;
+  setSyncMsg("Eşitleniyor…");
+  try {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const { data, sha } = await ghGet();
+      Object.assign(TOMB, (data && data.tomb) || {});
+      saveTomb();
+      WORDS = mergeList(WORDS, data && data.words, x => "w:" + norm(x.w));
+      GRAMS = mergeList(GRAMS, data && data.grams, x => "g:" + gkey(x.s));
+      saveWords(); saveGrams();
+      const payload = { v: 1, at: new Date().toISOString(), words: WORDS, grams: GRAMS, tomb: TOMB };
+      try {
+        GH.sha = await ghPut(payload, sha || GH.sha);
+        store.set("gh_sha", GH.sha);
+        break;
+      } catch (e) {
+        if (e.conflict && attempt === 0) continue;
+        throw e;
+      }
+    }
+    GH.last = new Date().toISOString();
+    store.set("gh_last", GH.last);
+    setSyncMsg("Son eşitleme: az önce · " + WORDS.length + " kelime, " + GRAMS.length + " gramer notu");
+    if (state.screen === "words") renderWords();
+    if (state.screen === "gram") renderGrams();
+    if (!quiet) toast("Eşitlendi.");
+  } catch (e) {
+    setSyncMsg("Eşitlenemedi: " + e.message);
+    if (!quiet) toast("Eşitlenemedi: " + e.message, 4000);
+  }
+  syncing = false;
+}
+
+function setSyncMsg(t) { const el = $("#syncMsg"); if (el) el.textContent = t; }
+
+function syncLabel() {
+  if (!GH.token || !GH.repo) return "Kurulu değil. Aşağıdaki iki alanı doldur.";
+  if (!GH.last) return "Kurulu. Henüz eşitlenmedi.";
+  const d = new Date(GH.last);
+  return "Son eşitleme: " + d.toLocaleString("tr-TR") + " · " + WORDS.length + " kelime, " + GRAMS.length + " gramer notu";
+}
+
+document.addEventListener("visibilitychange", () => { if (document.hidden) { clearTimeout(syncTimer); syncNow(true); } });
+
+/* ============================================================
    Ayarlar / arayüz bağlantıları
    ============================================================ */
 function openSettings() { $("#settings").classList.add("on"); $("#keyInp").value = state.key; }
@@ -2025,6 +2170,24 @@ $("#clearMarks").addEventListener("click", () => {
 $("#allBtn").addEventListener("click", translateAll);
 
 
+
+/* eşitleme arayüzü */
+$("#ghRepo").value = GH.repo;
+$("#ghToken").value = GH.token ? "••••••••••••" : "";
+setSyncMsg(syncLabel());
+$("#ghSave").addEventListener("click", async () => {
+  const repo = $("#ghRepo").value.trim().replace(/^https?:\/\/github\.com\//i, "").replace(/\.git$/, "").replace(/\/+$/, "");
+  const tok = $("#ghToken").value.trim();
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) { toast("Depo adını kullanici/depo biçiminde yaz."); return; }
+  if (tok && !tok.startsWith("•")) { GH.token = tok; store.set("gh_token", tok); }
+  if (!GH.token) { toast("Erişim anahtarını gir."); return; }
+  GH.repo = repo; store.set("gh_repo", repo);
+  GH.sha = ""; store.set("gh_sha", "");
+  $("#ghToken").value = "••••••••••••";
+  await syncNow();
+});
+$("#ghSync").addEventListener("click", () => syncNow());
+
 /* filtre anahtarı ve temizleme düğmeleri */
 const filtTog = $("#filtTog");
 filtTog.classList.toggle("on", state.filter);
@@ -2062,6 +2225,7 @@ $("#textGo").addEventListener("click", () => {
 
 /* açılış */
 setFs(state.fs);
+if (GH.token && GH.repo) syncNow(true);
 if (state.key) loadModels(true);
 else setTimeout(() => toast("Başlamak için ayarlardan Gemini anahtarını gir.", 4000), 700);
 </script>
