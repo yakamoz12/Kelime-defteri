@@ -180,6 +180,8 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .w-tr{font-family:"Source Serif 4",serif;font-size:31px;line-height:1.18;font-weight:600;letter-spacing:-.02em;margin-bottom:9px}
 .w-pos{display:inline-block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--acc-ink);
   background:var(--acc-soft);border-radius:7px;padding:4px 9px;margin-bottom:16px;font-weight:600}
+.w-syn{font-size:14px;color:var(--ink2);margin:-6px 0 15px;line-height:1.45}
+.w-syn b{display:block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);font-weight:600;margin-bottom:3px}
 .w-here{font-size:15px;line-height:1.55;padding-top:14px;border-top:1px solid var(--line2)}
 .w-here b{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:600;margin-bottom:5px}
 .w-more{margin-top:14px;border-top:1px solid var(--line2);padding-top:11px}
@@ -796,12 +798,14 @@ GEÇTİĞİ CÜMLE: "${(context || "").slice(0, 700)}"
 "tr": Türkçe karşılığı. En çok 3 karşılık, virgülle ayrılmış. SADECE karşılık yaz, cümle kurma, açıklama ekleme. Örnek: "artmak, yükselmek"
 "pos": sözcük türü. Tek kelime: isim, fiil, sıfat, zarf, edat, bağlaç.
 "here": bu cümlede tam olarak ne anlama geldiği. Tek kısa cümle, en fazla 15 kelime.
+"syn": İngilizce eş veya yakın anlamlı 3 sözcük. Sadece sözcükler, açıklama yok. Dizi olarak ver.
 "forms": aynı kökten türeyen veya sık birlikte kullanılan 3 ifade. Her biri "english = türkçe" biçiminde metin. Dizi olarak ver.`;
   const d = parseJson(await gemini(prompt, sys));
   return {
     tr: String(d.tr || "").trim(),
     pos: String(d.pos || "").trim().toLowerCase(),
     here: String(d.here || "").trim(),
+    syn: Array.isArray(d.syn) ? d.syn.map(String).map(x => x.trim()).filter(Boolean).slice(0, 4) : [],
     forms: Array.isArray(d.forms) ? d.forms.map(String).slice(0, 4) : []
   };
 }
@@ -1470,6 +1474,7 @@ function wordCardEl(word, d, context) {
     `<div class="w-en">${esc(word)}</div>` +
     `<div class="w-tr">${esc(d.tr || "—")}</div>` +
     (d.pos ? `<div class="w-pos">${esc(d.pos)}</div>` : "") +
+    ((d.syn || []).length ? `<div class="w-syn"><b>eş anlamlılar</b>${esc(d.syn.join(", "))}</div>` : "") +
     (d.here ? `<div class="w-here"><b>Bu cümlede</b>${esc(d.here)}</div>` : "") +
     (d.forms.length
       ? `<details class="w-more"><summary>İlişkili sözcükler</summary><ul>${d.forms.map(f => `<li>${esc(f)}</li>`).join("")}</ul></details>`
@@ -1654,6 +1659,7 @@ ${avoid ? '- ŞU CÜMLEDEN TAMAMEN FARKLI olsun, başka bir konu ve başka bir y
 Şu alanlara sahip JSON döndür:
 "en": kurduğun İngilizce cümle.
 "tr": bu cümlenin akıcı Türkçe çevirisi.
+"syn": bu kelimenin İngilizce eş veya yakın anlamlısı 3 sözcük. Sadece sözcükler, dizi olarak.
 "pairs": 3 ile 5 arası nesne içeren dizi. Her nesne {"en": ..., "tr": ...} biçiminde, cümlenin anahtar öğelerini eşleştirir.
   - İLK nesne mutlaka hedef kelime "${word}" ve onun bu cümledeki Türkçe karşılığı olsun.
   - Diğerleri cümlenin anlamını taşıyan sözcük veya sözcük öbekleri olsun.
@@ -1668,7 +1674,8 @@ function normSen(d) {
     .map(p => ({ en: String(p.en || "").trim(), tr: String(p.tr || "").trim() }))
     .filter(p => p.en && p.tr)
     .slice(0, 5);
-  return { en, tr, pairs };
+  const syn = (Array.isArray(d.syn) ? d.syn : []).map(String).map(x => x.trim()).filter(Boolean).slice(0, 4);
+  return { en, tr, pairs, syn };
 }
 
 async function makeSentence(word, tr, avoid) {
@@ -1759,9 +1766,10 @@ function renderWords() {
 }
 
 function detHtml(x) {
-  if (!x.ex) return '<div class="none">Henüz örnek cümle yok. Sağdaki yıldıza dokun.</div>';
+  const syn = (x.syn || []).length ? `<div class="w-syn" style="margin:0 0 10px"><b>eş anlamlılar</b>${esc(x.syn.join(", "))}</div>` : "";
+  if (!x.ex) return syn + '<div class="none">Henüz örnek cümle yok. Sağdaki yıldıza dokun.</div>';
   const p = x.pairs || [];
-  return `<div class="sen">${runsToHtml(segment(x.ex, p, "en"))}</div>
+  return syn + `<div class="sen">${runsToHtml(segment(x.ex, p, "en"))}</div>
           <div class="sen trs">${runsToHtml(segment(x.exTr || "", p, "tr"))}</div>
           <button class="again">Yeni cümle üret</button>`;
 }
@@ -1776,6 +1784,7 @@ async function genFor(word, el) {
   try {
     const s = await makeSentence(rec.w, rec.tr, rec.ex);
     rec.ex = s.en; rec.exTr = s.tr; rec.pairs = s.pairs; rec.t = Date.now();
+    if (!(rec.syn || []).length && (s.syn || []).length) rec.syn = s.syn;
     saveWords(); syncSoon();
     el.querySelector(".wdet").innerHTML = detHtml(rec);
     el.querySelector(".again").addEventListener("click", e => { e.stopPropagation(); genFor(word, el); });
@@ -1920,35 +1929,67 @@ function pdfHeader(doc, sub, page, head) {
   doc.line(M.l, 13.5, PW - M.r, 13.5);
 }
 
-function studyHeight(doc, x) {
+function synLine(x) { return (x.syn || []).length ? "eş anlamlılar: " + x.syn.join(", ") : ""; }
+
+function studyHeight(doc, x, k) {
+  k = k || 1;
   const p = x.pairs || [];
-  doc.setFontSize(10.2);
-  const a = flowRuns(doc, segment(x.ex || "", p, "en"), 0, 0, CW, LEAD, false).lines;
-  const b = flowRuns(doc, segment(x.exTr || "", p, "tr"), 0, 0, CW, LEAD, false).lines;
-  return 6.3 + a * LEAD + 1.5 + b * LEAD + 5.0;
+  const L = LEAD * k;
+  const sy = synLine(x);
+  doc.setFontSize(10.2 * k);
+  const a = flowRuns(doc, segment(x.ex || "", p, "en"), 0, 0, CW, L, false).lines;
+  const b = flowRuns(doc, segment(x.exTr || "", p, "tr"), 0, 0, CW, L, false).lines;
+  // çizim sırasındaki gerçek ilerlemeyle birebir aynı olmalı
+  let h = 15.6 * k + a * L + (b - 1) * L;
+  if (sy) {
+    doc.setFontSize(9 * k);
+    const sl = flowRuns(doc, [{ text: sy, c: -1 }], 0, 0, CW, L * 0.92, false).lines;
+    h += sl * L * 0.92 + 1.4 * k;
+  }
+  return h + 0.6;
 }
 
-function studyEntry(doc, x, y) {
+function studyEntry(doc, x, y, k) {
+  k = k || 1;
   const p = x.pairs || [];
+  const L = LEAD * k;
   doc.setFont("Kalam", KALAM.bold ? "bold" : "normal");
-  doc.setFontSize(13);
+  doc.setFontSize(13 * k);
   doc.setTextColor(20, 24, 26);
   doc.text(x.w, M.l, y);
   const wEnd = M.l + doc.getTextWidth(x.w);
   doc.setFont("Kalam", "normal");
-  doc.setFontSize(11.5);
+  doc.setFontSize(11.5 * k);
   doc.setTextColor(162, 22, 72);
   doc.text("  —  " + (x.tr || ""), wEnd, y);
-  y += 6.3;
+  y += 6.3 * k;
 
-  doc.setFontSize(10.2);
-  y = flowRuns(doc, segment(x.ex || "", p, "en"), M.l, y, CW, LEAD, true).y + LEAD + 1.5;
-  y = flowRuns(doc, segment(x.exTr || "", p, "tr"), M.l, y, CW, LEAD, true).y + 3.2;
+  const sy = synLine(x);
+  if (sy) {
+    doc.setFontSize(9 * k);
+    doc.setTextColor(130, 136, 156);
+    y = flowRuns(doc, [{ text: sy, c: -1 }], M.l, y, CW, L * 0.92, true).y + L * 0.92 + 1.4 * k;
+  }
+
+  doc.setFont("Kalam", "normal");
+  doc.setFontSize(10.2 * k);
+  y = flowRuns(doc, segment(x.ex || "", p, "en"), M.l, y, CW, L, true).y + L + 1.5 * k;
+  y = flowRuns(doc, segment(x.exTr || "", p, "tr"), M.l, y, CW, L, true).y + 3.2 * k;
 
   doc.setDrawColor(228, 224, 214);
   doc.setLineWidth(0.15);
   doc.line(M.l, y, PW - M.r, y);
-  return y + 4.6;
+  return y + 4.6 * k;
+}
+
+/* sayfaya sığan en büyük punto ölçeğini bul */
+function fitScale(doc, group, avail, hfn) {
+  for (let k = 1.55; k >= 0.86; k -= 0.03) {
+    let t = 0;
+    for (const x of group) t += hfn(doc, x, k);
+    if (t <= avail) return k;
+  }
+  return 0.86;
 }
 
 function blankSentence(x) {
@@ -1956,15 +1997,17 @@ function blankSentence(x) {
   return (x.ex || "").replace(new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"), "__________");
 }
 
-function examHeight(doc, x) {
-  doc.setFontSize(10.2);
-  const n = flowRuns(doc, [{ text: blankSentence(x), c: -1 }], 0, 0, CW, LEAD, false).lines;
-  return 6.3 + n * LEAD + 8.0;
+function examHeight(doc, x, k) {
+  k = k || 1;
+  doc.setFontSize(10.2 * k);
+  const n = flowRuns(doc, [{ text: blankSentence(x), c: -1 }], 0, 0, CW, LEAD * k, false).lines;
+  return 18.0 * k + (n - 1) * LEAD * k + 0.6;
 }
 
-function examEntry(doc, x, y) {
+function examEntry(doc, x, y, k) {
+  k = k || 1;
   doc.setFont("Kalam", KALAM.bold ? "bold" : "normal");
-  doc.setFontSize(12.5);
+  doc.setFontSize(12.5 * k);
   doc.setTextColor(162, 22, 72);
   const cue = x.tr || "—";
   doc.text(cue, M.l, y);
@@ -1974,22 +2017,22 @@ function examEntry(doc, x, y) {
   doc.setLineDashPattern([0.6, 1.1], 0);
   doc.line(cueEnd, y + 0.8, PW - M.r, y + 0.8);
   doc.setLineDashPattern([], 0);
-  y += 6.3;
+  y += 6.3 * k;
 
   doc.setFont("Kalam", "normal");
-  doc.setFontSize(10.2);
+  doc.setFontSize(10.2 * k);
   doc.setTextColor(60, 66, 70);
-  y = flowRuns(doc, [{ text: blankSentence(x), c: -1 }], M.l, y, CW, LEAD, true).y + 5.5;
+  y = flowRuns(doc, [{ text: blankSentence(x), c: -1 }], M.l, y, CW, LEAD * k, true).y + 5.5 * k;
 
   doc.setDrawColor(228, 224, 214);
   doc.setLineWidth(0.15);
   doc.line(M.l, y, PW - M.r, y);
-  return y + 6.2;
+  return y + 6.2 * k;
 }
 
 async function buildPdf() {
   if (!WORDS.length) { toast("Defter boş."); return; }
-  const missing = WORDS.filter(x => !x.ex);
+  const missing = WORDS.filter(x => !x.ex || !(x.syn || []).length);
 
   busyShow("PDF hazırlanıyor", "Font yükleniyor…");
   try {
@@ -2009,6 +2052,7 @@ async function buildPdf() {
       try {
         const s = await makeSentence(missing[i].w, missing[i].tr);
         missing[i].ex = s.en; missing[i].exTr = s.tr; missing[i].pairs = s.pairs;
+        if (!(missing[i].syn || []).length) missing[i].syn = s.syn || [];
         saveWords();
       } catch (e) {
         missing[i].ex = missing[i].ex || "";
@@ -2028,33 +2072,30 @@ async function buildPdf() {
 
   const stamp = new Date().toLocaleDateString("tr-TR");
   const PER_PAGE = 8;
+  let page = 0, sub = stamp;
+  const top = M.t + 3;
+  const avail = PH - M.b - top;
+  const newPage = () => { if (page) doc.addPage(); page++; pdfHeader(doc, sub, page); };
 
-  let page = 0, y = 0, sub = stamp, onPage = 0;
-  const limit = PH - M.b;
-  const newPage = () => {
-    if (page) doc.addPage();
-    page++;
-    pdfHeader(doc, sub, page);
-    y = M.t + 3;
-    onPage = 0;
+  const layout = (items, hfn, dfn) => {
+    let idx = 0;
+    while (idx < items.length) {
+      let group = items.slice(idx, idx + PER_PAGE);
+      let k = fitScale(doc, group, avail, hfn);
+      while (group.length > 1 && k <= 0.865) {          // sığmıyorsa son kelimeyi sonraki sayfaya at
+        group = group.slice(0, -1);
+        k = fitScale(doc, group, avail, hfn);
+      }
+      newPage();
+      let y = top;
+      group.forEach(x => { y = dfn(doc, x, y, k); });
+      idx += group.length;
+    }
   };
 
-  // çalışma sayfaları: sayfa dolmadan sonrakine geçmez
-  newPage();
-  ready.forEach(x => {
-    if (onPage >= PER_PAGE || y + studyHeight(doc, x) > limit) newPage();
-    y = studyEntry(doc, x, y);
-    onPage++;
-  });
-
-  // sınav sayfaları
+  layout(ready, studyHeight, studyEntry);
   sub = "sınav · cevaplar çalışma sayfalarında";
-  newPage();
-  ready.forEach(x => {
-    if (onPage >= PER_PAGE || y + examHeight(doc, x) > limit) newPage();
-    y = examEntry(doc, x, y);
-    onPage++;
-  });
+  layout(ready, examHeight, examEntry);
 
   const name = "kelime-defteri-" + new Date().toISOString().slice(0, 10) + ".pdf";
   doc.save(name);
