@@ -180,8 +180,6 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .w-tr{font-family:"Source Serif 4",serif;font-size:31px;line-height:1.18;font-weight:600;letter-spacing:-.02em;margin-bottom:9px}
 .w-pos{display:inline-block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--acc-ink);
   background:var(--acc-soft);border-radius:7px;padding:4px 9px;margin-bottom:16px;font-weight:600}
-.w-syn{font-size:14px;color:var(--ink2);margin:-6px 0 15px;line-height:1.45}
-.w-syn b{display:block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);font-weight:600;margin-bottom:3px}
 .w-here{font-size:15px;line-height:1.55;padding-top:14px;border-top:1px solid var(--line2)}
 .w-here b{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:600;margin-bottom:5px}
 .w-more{margin-top:14px;border-top:1px solid var(--line2);padding-top:11px}
@@ -798,14 +796,12 @@ GEÇTİĞİ CÜMLE: "${(context || "").slice(0, 700)}"
 "tr": Türkçe karşılığı. En çok 3 karşılık, virgülle ayrılmış. SADECE karşılık yaz, cümle kurma, açıklama ekleme. Örnek: "artmak, yükselmek"
 "pos": sözcük türü. Tek kelime: isim, fiil, sıfat, zarf, edat, bağlaç.
 "here": bu cümlede tam olarak ne anlama geldiği. Tek kısa cümle, en fazla 15 kelime.
-"syn": İngilizce eş veya yakın anlamlı 3 sözcük. Sadece sözcükler, açıklama yok. Dizi olarak ver.
 "forms": aynı kökten türeyen veya sık birlikte kullanılan 3 ifade. Her biri "english = türkçe" biçiminde metin. Dizi olarak ver.`;
   const d = parseJson(await gemini(prompt, sys));
   return {
     tr: String(d.tr || "").trim(),
     pos: String(d.pos || "").trim().toLowerCase(),
     here: String(d.here || "").trim(),
-    syn: Array.isArray(d.syn) ? d.syn.map(String).map(x => x.trim()).filter(Boolean).slice(0, 4) : [],
     forms: Array.isArray(d.forms) ? d.forms.map(String).slice(0, 4) : []
   };
 }
@@ -1474,7 +1470,6 @@ function wordCardEl(word, d, context) {
     `<div class="w-en">${esc(word)}</div>` +
     `<div class="w-tr">${esc(d.tr || "—")}</div>` +
     (d.pos ? `<div class="w-pos">${esc(d.pos)}</div>` : "") +
-    ((d.syn || []).length ? `<div class="w-syn"><b>eş anlamlılar</b>${esc(d.syn.join(", "))}</div>` : "") +
     (d.here ? `<div class="w-here"><b>Bu cümlede</b>${esc(d.here)}</div>` : "") +
     (d.forms.length
       ? `<details class="w-more"><summary>İlişkili sözcükler</summary><ul>${d.forms.map(f => `<li>${esc(f)}</li>`).join("")}</ul></details>`
@@ -1659,7 +1654,6 @@ ${avoid ? '- ŞU CÜMLEDEN TAMAMEN FARKLI olsun, başka bir konu ve başka bir y
 Şu alanlara sahip JSON döndür:
 "en": kurduğun İngilizce cümle.
 "tr": bu cümlenin akıcı Türkçe çevirisi.
-"syn": bu kelimenin İngilizce eş veya yakın anlamlısı 3 sözcük. Sadece sözcükler, dizi olarak.
 "pairs": 3 ile 5 arası nesne içeren dizi. Her nesne {"en": ..., "tr": ...} biçiminde, cümlenin anahtar öğelerini eşleştirir.
   - İLK nesne mutlaka hedef kelime "${word}" ve onun bu cümledeki Türkçe karşılığı olsun.
   - Diğerleri cümlenin anlamını taşıyan sözcük veya sözcük öbekleri olsun.
@@ -1674,25 +1668,9 @@ function normSen(d) {
     .map(p => ({ en: String(p.en || "").trim(), tr: String(p.tr || "").trim() }))
     .filter(p => p.en && p.tr)
     .slice(0, 5);
-  const syn = (Array.isArray(d.syn) ? d.syn : []).map(String).map(x => x.trim()).filter(Boolean).slice(0, 4);
-  return { en, tr, pairs, syn };
+  return { en, tr, pairs };
 }
 
-async function makeSynonyms(words) {
-  const list = words.map((w, i) => (i + 1) + ") " + w).join("\n");
-  const d = parseJson(await gemini(
-    `Aşağıdaki İngilizce sözcüklerin her biri için 3 eş veya yakın anlamlı İngilizce sözcük ver.
-Sadece sözcükleri ver, açıklama yazma.
-Anahtarları sözcüğün kendisi olan bir JSON nesnesi döndür.
-
-${list}`, SEN_SYS, { temp: 0.3 }));
-  const out = {};
-  Object.keys(d || {}).forEach(k => {
-    const v = d[k];
-    if (Array.isArray(v)) out[k.toLowerCase().trim()] = v.map(String).map(x => x.trim()).filter(Boolean).slice(0, 3);
-  });
-  return out;
-}
 
 async function makeSentence(word, tr, avoid) {
   const d = parseJson(await gemini(senPrompt(word, tr, avoid), SEN_SYS, { temp: 0.95 }));
@@ -1782,10 +1760,9 @@ function renderWords() {
 }
 
 function detHtml(x) {
-  const syn = (x.syn || []).length ? `<div class="w-syn" style="margin:0 0 10px"><b>eş anlamlılar</b>${esc(x.syn.join(", "))}</div>` : "";
-  if (!x.ex) return syn + '<div class="none">Henüz örnek cümle yok. Sağdaki yıldıza dokun.</div>';
+  if (!x.ex) return '<div class="none">Henüz örnek cümle yok. Sağdaki yıldıza dokun.</div>';
   const p = x.pairs || [];
-  return syn + `<div class="sen">${runsToHtml(segment(x.ex, p, "en"))}</div>
+  return `<div class="sen">${runsToHtml(segment(x.ex, p, "en"))}</div>
           <div class="sen trs">${runsToHtml(segment(x.exTr || "", p, "tr"))}</div>
           <button class="again">Yeni cümle üret</button>`;
 }
@@ -1800,7 +1777,6 @@ async function genFor(word, el) {
   try {
     const s = await makeSentence(rec.w, rec.tr, rec.ex);
     rec.ex = s.en; rec.exTr = s.tr; rec.pairs = s.pairs; rec.t = Date.now();
-    if (!(rec.syn || []).length && (s.syn || []).length) rec.syn = s.syn;
     saveWords(); syncSoon();
     el.querySelector(".wdet").innerHTML = detHtml(rec);
     el.querySelector(".again").addEventListener("click", e => { e.stopPropagation(); genFor(word, el); });
@@ -1945,23 +1921,15 @@ function pdfHeader(doc, sub, page, head) {
   doc.line(M.l, 13.5, PW - M.r, 13.5);
 }
 
-function synLine(x) { return (x.syn || []).length ? "eş anlamlılar: " + x.syn.join(", ") : ""; }
-
 function studyHeight(doc, x, k) {
   k = k || 1;
   const p = x.pairs || [];
   const L = LEAD * k;
-  const sy = synLine(x);
   doc.setFontSize(10.2 * k);
   const a = flowRuns(doc, segment(x.ex || "", p, "en"), 0, 0, CW, L, false).lines;
   const b = flowRuns(doc, segment(x.exTr || "", p, "tr"), 0, 0, CW, L, false).lines;
   // çizim sırasındaki gerçek ilerlemeyle birebir aynı olmalı
   let h = 15.6 * k + a * L + (b - 1) * L;
-  if (sy) {
-    doc.setFontSize(9 * k);
-    const sl = flowRuns(doc, [{ text: sy, c: -1 }], 0, 0, CW, L * 0.92, false).lines;
-    h += sl * L * 0.92 + 1.4 * k;
-  }
   return h + 0.6;
 }
 
@@ -1979,13 +1947,6 @@ function studyEntry(doc, x, y, k) {
   doc.setTextColor(162, 22, 72);
   doc.text("  —  " + (x.tr || ""), wEnd, y);
   y += 6.3 * k;
-
-  const sy = synLine(x);
-  if (sy) {
-    doc.setFontSize(9 * k);
-    doc.setTextColor(130, 136, 156);
-    y = flowRuns(doc, [{ text: sy, c: -1 }], M.l, y, CW, L * 0.92, true).y + L * 0.92 + 1.4 * k;
-  }
 
   doc.setFont("Kalam", "normal");
   doc.setFontSize(10.2 * k);
@@ -2049,42 +2010,20 @@ function examEntry(doc, x, y, k) {
 async function buildPdf() {
   if (!WORDS.length) { toast("Defter boş."); return; }
   const needEx = WORDS.filter(x => !x.ex);
-  const needSyn = WORDS.filter(x => x.ex && !(x.syn || []).length && !x.synTried);
 
-  if (needEx.length || needSyn.length) {
-    const parts = [];
-    if (needEx.length) parts.push(needEx.length + " kelimenin örnek cümlesi");
-    if (needSyn.length) parts.push(needSyn.length + " kelimenin eş anlamlısı");
-    const go = confirm(parts.join(" ve ") + " eksik.\n\nTamam: eksikleri tamamla (biraz sürer).\nİptal: elimizdekiyle bas.");
+  if (needEx.length) {
+    const go = confirm(needEx.length + " kelimenin örnek cümlesi eksik.\n\nTamam: eksikleri tamamla.\nİptal: elimizdekiyle bas.");
     if (go) {
       if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
-      busyShow("Eksikler tamamlanıyor", "");
-
-      // cümlesi olmayanlar — VAR OLAN CÜMLELERE DOKUNULMAZ
+      busyShow("Örnek cümleler kuruluyor", "");
       for (let i = 0; i < needEx.length; i++) {
         if (stopFlag) break;
-        busyUpd("Örnek cümleler · " + (i + 1) + " / " + needEx.length, (i / Math.max(1, needEx.length)) * 60);
+        busyUpd((i + 1) + " / " + needEx.length, (i / Math.max(1, needEx.length)) * 100);
         try {
           const r = await makeSentence(needEx[i].w, needEx[i].tr);
           needEx[i].ex = r.en; needEx[i].exTr = r.tr; needEx[i].pairs = r.pairs;
-          if ((r.syn || []).length) needEx[i].syn = r.syn;
+          needEx[i].t = Date.now();          // damgayı tazele ki eşitlemede ezilmesin
         } catch (e) {}
-        needEx[i].synTried = 1;
-        saveWords();
-        await sleep(220);
-      }
-
-      // yalnız eş anlamlısı eksik olanlar — 15'erli toplu
-      const rest = WORDS.filter(x => x.ex && !(x.syn || []).length && !x.synTried);
-      for (let i = 0; i < rest.length; i += 15) {
-        if (stopFlag) break;
-        const grp = rest.slice(i, i + 15);
-        busyUpd("Eş anlamlılar · " + Math.min(i + 15, rest.length) + " / " + rest.length, 60 + (i / Math.max(1, rest.length)) * 40);
-        try {
-          const map = await makeSynonyms(grp.map(x => x.w));
-          grp.forEach(x => { const v = map[x.w.toLowerCase().trim()]; if (v && v.length) x.syn = v; });
-        } catch (e) {}
-        grp.forEach(x => { x.synTried = 1; });   // denendi, bir daha sorulmaz
         saveWords();
         await sleep(220);
       }
@@ -2912,20 +2851,33 @@ async function ghTest() {
   say(true, "Her şey hazır.");
 }
 
+function richness(x) {
+  let n = 0;
+  if (x.ex) n += 4;
+  if (x.exTr) n += 2;
+  if ((x.pairs || []).length) n += 1;
+  if ((x.spans || []).length) n += 1;
+  if (x.here) n += 1;
+  return n;
+}
+
 function mergeList(local, remote, keyOf) {
   const map = {};
   const put = x => {
-    const k = keyOf(x);
-    if (!k) return;
-    const cur = map[k];
-    if (!cur || (x.t || 0) > (cur.t || 0)) map[k] = x;
+    const key = keyOf(x);
+    if (!key) return;
+    const cur = map[key];
+    if (!cur) { map[key] = x; return; }
+    const tx = x.t || 0, tc = cur.t || 0;
+    // yeni damga kazanır; damgalar eşitse içi dolu olan kazanır
+    if (tx > tc || (tx === tc && richness(x) > richness(cur))) map[key] = x;
   };
+  (local || []).forEach(put);      // önce yerel: berabere kalırsa yerel korunur
   (remote || []).forEach(put);
-  (local || []).forEach(put);
   return Object.keys(map)
-    .filter(k => !(TOMB[k] && TOMB[k] > (map[k].t || 0)))
-    .map(k => map[k])
-    .sort((a, b) => (b.t || 0) - (a.t || 0));
+    .filter(key => !(TOMB[key] && TOMB[key] > (map[key].t || 0)))
+    .map(key => map[key])
+    .sort((p, q) => (q.t || 0) - (p.t || 0));
 }
 
 /* ============================================================
