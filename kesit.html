@@ -177,6 +177,14 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 
 /* ---------- kelime kartı ---------- */
 .w-en{font-family:"Source Serif 4",serif;font-size:15px;color:var(--ink3);margin-bottom:3px}
+.famwrap{margin-top:4px}
+.fam{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line2)}
+.fam:first-child{border-top:none}
+.fpos{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--deep);
+  background:var(--deep-soft);border-radius:6px;padding:3px 6px;flex:none;margin-top:3px;min-width:46px;text-align:center}
+.ftx{flex:1;font-size:14.5px;line-height:1.4}
+.ftx b{font-family:"Source Serif 4",serif;font-size:15.5px;font-weight:600}
+.ftx i{display:block;font-style:normal;color:var(--ink2);font-size:13.5px;margin-top:1px}
 .w-oku{color:var(--ink3);font-style:italic}
 .w-tr{font-family:"Source Serif 4",serif;font-size:31px;line-height:1.18;font-weight:600;letter-spacing:-.02em;margin-bottom:9px}
 .w-pos{display:inline-block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--acc-ink);
@@ -460,6 +468,7 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   </div>
   <input class="inp" id="wSearch" placeholder="Ara…" style="margin-bottom:14px" autocapitalize="off">
   <div id="wList"></div>
+
 </section>
 <!-- ============ GRAMER DEFTERİ ============ -->
 <section class="screen max" id="gram">
@@ -798,14 +807,16 @@ GEÇTİĞİ CÜMLE: "${(context || "").slice(0, 700)}"
 "pos": sözcük türü. Tek kelime: isim, fiil, sıfat, zarf, edat, bağlaç.
 "oku": kelimenin okunuşu, TÜRKÇE harflerle. IPA veya İngilizce imla kullanma. Bir Türk okuduğunda doğru sese yaklaşsın. Örnek: enrolled -> inrould, thickness -> tiknıs, adherence -> ıdhiırıns.
 "here": bu cümlede tam olarak ne anlama geldiği. Tek kısa cümle, en fazla 15 kelime.
-"forms": aynı kökten türeyen veya sık birlikte kullanılan 3 ifade. Her biri "english = türkçe" biçiminde metin. Dizi olarak ver.`;
+"family": aynı kökten türeyen 3-4 sözcük. Her biri {"w": İngilizce sözcük, "pos": sözcük türü (fiil/isim/sıfat/zarf), "tr": Türkçe karşılığı} biçiminde nesne. Dizi olarak ver. Kelimenin kendisini de dahil et.`;
   const d = parseJson(await gemini(prompt, sys));
   return {
     tr: String(d.tr || "").trim(),
     pos: String(d.pos || "").trim().toLowerCase(),
     oku: String(d.oku || "").trim(),
     here: String(d.here || "").trim(),
-    forms: Array.isArray(d.forms) ? d.forms.map(String).slice(0, 4) : []
+    family: (Array.isArray(d.family) ? d.family : [])
+      .map(x => ({ w: String(x.w || "").trim(), pos: String(x.pos || "").trim(), tr: String(x.tr || "").trim() }))
+      .filter(x => x.w).slice(0, 4)
   };
 }
 
@@ -1474,8 +1485,8 @@ function wordCardEl(word, d, context) {
     `<div class="w-tr">${esc(d.tr || "—")}</div>` +
     (d.pos ? `<div class="w-pos">${esc(d.pos)}</div>` : "") +
     (d.here ? `<div class="w-here"><b>Bu cümlede</b>${esc(d.here)}</div>` : "") +
-    (d.forms.length
-      ? `<details class="w-more"><summary>İlişkili sözcükler</summary><ul>${d.forms.map(f => `<li>${esc(f)}</li>`).join("")}</ul></details>`
+    ((d.family || []).length
+      ? `<details class="w-more" open><summary>Kelime ailesi</summary>${famHtml(d.family)}</details>`
       : "");
 
   const btn = document.createElement("button");
@@ -1484,10 +1495,15 @@ function wordCardEl(word, d, context) {
   setSaveBtn(btn, saved);
   btn.addEventListener("click", () => {
     if (hasWord(word)) { removeWord(word); setSaveBtn(btn, false); toast("Defterden çıkarıldı."); }
-    else { addWord({ w: word, tr: d.tr, pos: d.pos, oku: d.oku, here: d.here, s: (context || "").slice(0, 220), src: state.title, t: Date.now() }); setSaveBtn(btn, true); toast("Deftere eklendi."); }
+    else { addWord({ w: word, tr: d.tr, pos: d.pos, oku: d.oku, here: d.here, family: d.family, box: 0, due: Date.now(), s: (context || "").slice(0, 220), src: state.title, t: Date.now() }); setSaveBtn(btn, true); toast("Deftere eklendi."); }
   });
   wrap.appendChild(btn);
   return wrap;
+}
+
+function famHtml(fam) {
+  return '<div class="famwrap">' + fam.map(x =>
+    `<div class="fam"><span class="fpos">${esc(x.pos || "")}</span><div class="ftx"><b>${esc(x.w)}</b><i>${esc(x.tr || "")}</i></div></div>`).join("") + "</div>";
 }
 
 function setSaveBtn(btn, on) {
@@ -1734,6 +1750,9 @@ function addWord(o) { if (!hasWord(o.w)) { WORDS.unshift(o); saveWords(); syncSo
 function removeWord(w) { WORDS = WORDS.filter(x => norm(x.w) !== norm(w)); saveWords(); tomb("w:" + norm(w)); syncSoon(); }
 
 function renderWords() {
+  const n = dueCount();
+  const sb = $("#studyBtn");
+  if (sb) sb.textContent = n ? "Kartlar · " + n : "Kartlar";
   const q = norm($("#wSearch").value);
   const list = q ? WORDS.filter(x => norm(x.w).includes(q) || norm(x.tr).includes(q)) : WORDS;
   const box = $("#wList");
@@ -1777,9 +1796,10 @@ function renderWords() {
 }
 
 function detHtml(x) {
-  if (!x.ex) return '<div class="none">Henüz örnek cümle yok. Sağdaki yıldıza dokun.</div>';
+  const fam = (x.family || []).length ? famHtml(x.family) : "";
+  if (!x.ex) return fam + '<div class="none">Henüz örnek cümle yok. Sağdaki yıldıza dokun.</div>';
   const p = x.pairs || [];
-  return `<div class="sen">${runsToHtml(segment(x.ex, p, "en"))}</div>
+  return fam + `<div class="sen">${runsToHtml(segment(x.ex, p, "en"))}</div>
           <div class="sen trs">${runsToHtml(segment(x.exTr || "", p, "tr"))}</div>
           <button class="again">Yeni cümle üret</button>`;
 }
@@ -1805,6 +1825,7 @@ async function genFor(word, el) {
 
 $("#wSearch").addEventListener("input", renderWords);
 
+
 /* ---------- yedekleme ---------- */
 $("#exportBtn").addEventListener("click", async () => {
   if (!WORDS.length) { toast("Defter boş."); return; }
@@ -1821,38 +1842,77 @@ $("#exportBtn").addEventListener("click", async () => {
   }
 });
 
-/* ---------- kartlarla çalışma ---------- */
+/* ---------- aralıklı tekrar (Leitner) ---------- */
+const GAPS = [0, 1, 3, 7, 16, 35];               // kutu -> kaç gün sonra
+const GAPTXT = ["bugün", "1 gün", "3 gün", "7 gün", "16 gün", "35 gün"];
+const DAY = 86400000;
+
+function dueCount() {
+  const now = Date.now();
+  return WORDS.filter(x => (x.due || 0) <= now).length;
+}
+
+function schedule(rec, quality) {
+  const box = rec.box || 0;
+  if (quality === 0) rec.box = 0;                       // bilemedin
+  else if (quality === 1) rec.box = Math.max(0, box);   // zorlandın: aralık uzamaz
+  else rec.box = Math.min(GAPS.length - 1, box + 1);    // kolaydı
+  rec.due = Date.now() + (rec.box === 0 ? 600000 : GAPS[rec.box] * DAY);
+  rec.seen = (rec.seen || 0) + 1;
+  rec.t = Date.now();
+  saveWords();
+  return GAPTXT[rec.box];
+}
+
 let deck = [], deckI = 0, flipped = false;
 
 $("#studyBtn").addEventListener("click", () => {
-  if (WORDS.length < 2) { toast("En az 2 kelime gerekli."); return; }
-  deck = WORDS.slice().sort(() => Math.random() - 0.5);
+  const now = Date.now();
+  deck = WORDS.filter(x => (x.due || 0) <= now);
+  if (!deck.length) {
+    if (!WORDS.length) { toast("Defter boş."); return; }
+    const next = Math.min(...WORDS.map(x => x.due || 0));
+    const gun = Math.max(1, Math.ceil((next - now) / DAY));
+    if (!confirm("Bugün tekrar edilecek kelime yok.\nSıradaki " + gun + " gün sonra.\n\nYine de karışık çalışmak ister misin?")) return;
+    deck = WORDS.slice().sort(() => Math.random() - 0.5).slice(0, 20);
+  } else {
+    deck.sort((a, b) => (a.due || 0) - (b.due || 0));
+  }
   deckI = 0; flipped = false;
   $("#flash").classList.add("on");
   drawCard();
 });
-$("#flashClose").addEventListener("click", () => $("#flash").classList.remove("on"));
+$("#flashClose").addEventListener("click", () => { $("#flash").classList.remove("on"); renderWords(); syncSoon(); });
 
 function drawCard() {
   const c = $("#fCard"), b = $("#fBtns");
   if (deckI >= deck.length) {
     $("#fCount").textContent = "";
-    c.innerHTML = '<div class="fe">Bitti</div><div class="hint">Tüm kartları gördün.</div>';
-    b.innerHTML = '<button class="btn wide" id="fAgain">Baştan başla</button>';
-    $("#fAgain").addEventListener("click", () => { deck.sort(() => Math.random() - 0.5); deckI = 0; flipped = false; drawCard(); });
+    c.innerHTML = '<div class="fe">Bitti</div><div class="hint">Bugünlük tekrar tamam.</div>';
+    b.innerHTML = '<button class="btn wide" id="fDone">Kapat</button>';
+    $("#fDone").addEventListener("click", () => { $("#flash").classList.remove("on"); renderWords(); syncSoon(); });
     return;
   }
   const x = deck[deckI];
-  $("#fCount").textContent = (deckI + 1) + " / " + deck.length;
+  $("#fCount").textContent = (deckI + 1) + " / " + deck.length + " · kutu " + ((x.box || 0) + 1);
   if (!flipped) {
-    c.innerHTML = `<div class="fe">${esc(x.w)}</div><div class="hint">Karta dokun, karşılığı görünsün</div>`;
+    c.innerHTML = `<div class="fe">${esc(x.w)}</div>${x.oku ? `<div class="hint" style="margin-top:6px">[${esc(x.oku)}]</div>` : ""}<div class="hint">Karta dokun, karşılığı görünsün</div>`;
     b.innerHTML = "";
   } else {
     c.innerHTML = `<div class="fe">${esc(x.w)}</div><div class="ft">${esc(x.tr || "—")}</div>` +
-      (x.s ? `<div class="fs">${esc(x.s.slice(0, 160))}</div>` : "");
-    b.innerHTML = '<button class="btn ghost" id="fNo">Tekrar sor</button><button class="btn" id="fYes">Biliyorum</button>';
-    $("#fNo").addEventListener("click", () => { deck.push(deck[deckI]); deckI++; flipped = false; drawCard(); });
-    $("#fYes").addEventListener("click", () => { deckI++; flipped = false; drawCard(); });
+      (x.ex ? `<div class="fs">${esc(x.ex)}</div>` : "");
+    b.innerHTML = '<button class="btn ghost" id="fNo">Bilemedim</button>' +
+                  '<button class="btn ghost" id="fMid">Zorlandım</button>' +
+                  '<button class="btn" id="fYes">Kolaydı</button>';
+    const go = q => {
+      const when = schedule(x, q);
+      toast(q === 0 ? "Bugün tekrar sorulacak." : "Sonraki tekrar: " + when, 1600);
+      if (q === 0) deck.push(x);
+      deckI++; flipped = false; drawCard();
+    };
+    $("#fNo").addEventListener("click", () => go(0));
+    $("#fMid").addEventListener("click", () => go(1));
+    $("#fYes").addEventListener("click", () => go(2));
   }
 }
 $("#fCard").addEventListener("click", () => { if (deckI < deck.length && !flipped) { flipped = true; drawCard(); } });
@@ -2158,6 +2218,7 @@ async function buildPdf() {
 }
 
 $("#pdfBtn").addEventListener("click", buildPdf);
+
 
 /* ============================================================
    Gramer defteri
