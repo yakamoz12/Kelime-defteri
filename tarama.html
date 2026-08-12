@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F1F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F111B" media="(prefers-color-scheme: dark)">
+<title>Tarama — psikiyatri ve psikoloji literatürü</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1F2F7;--card:#FFFFFF;--card2:#F7F8FB;
+  --ink:#1A1F35;--ink2:#5F6784;--ink3:#98A0B8;
+  --line:#E1E3EE;--line2:#EDEFF5;
+  --acc:#C2255C;--acc-ink:#A11648;--acc-soft:#FBE7EF;
+  --deep:#2E3A66;--deep-soft:#E8EBF5;
+  --ok:#1E7A45;--ok-soft:#1E7A4514;--warn:#B3341F;
+  --sh:0 1px 2px #1A1F350A,0 6px 22px #1A1F3510;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0F111B;--card:#181C2A;--card2:#1E2333;--ink:#E9EBF4;--ink2:#9AA2BD;--ink3:#6B7390;
+  --line:#282D40;--line2:#212639;--acc:#F1699C;--acc-ink:#F794B8;--acc-soft:#2C1626;
+  --deep:#A8B4E4;--deep-soft:#1C2138;--ok:#5FC98C;--ok-soft:#5FC98C1A;--warn:#E8785F;
+  --sh:0 1px 2px #0006,0 6px 22px #0008;}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);
+  font-family:Archivo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
+input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.hid{display:none !important}
+a{color:var(--acc-ink)}
+
+.bar{position:sticky;top:0;z-index:30;background:var(--bg);
+  background:color-mix(in srgb,var(--bg) 90%,transparent);
+  -webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px);
+  border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.bar-in{max-width:760px;margin:0 auto;padding:11px 16px}
+.brand{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink3);font-weight:700}
+.brand b{display:block;font-family:"Source Serif 4",serif;font-size:19px;letter-spacing:-.01em;
+  text-transform:none;color:var(--ink);font-weight:600;margin-top:1px}
+
+main{max-width:760px;margin:0 auto;padding:18px 16px calc(40px + env(safe-area-inset-bottom))}
+.label{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);font-weight:700;margin:22px 0 9px}
+.label:first-child{margin-top:4px}
+
+.field{display:flex;gap:8px}
+.inp{flex:1;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:13px;font-size:16px;outline:none}
+.inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
+select.inp{-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink3) 50%),linear-gradient(135deg,var(--ink3) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 20px,calc(100% - 11px) 20px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:34px}
+.btn{background:var(--acc);color:#fff;border-radius:12px;padding:13px 20px;font-size:15px;font-weight:600;white-space:nowrap}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn:disabled{opacity:.5}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font-size:13.5px;font-weight:500;padding:8px 13px;border-radius:999px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink2)}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.meta{font-size:13px;color:var(--ink2);margin:18px 0 12px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.meta b{color:var(--ink);font-weight:600}
+.q{font-size:12px;color:var(--ink3);background:var(--card2);border-radius:9px;padding:8px 10px;
+  margin-bottom:14px;line-height:1.5;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+
+.art{background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:var(--sh);
+  padding:15px;margin-bottom:10px}
+.art h3{font-family:"Source Serif 4",serif;font-size:17px;line-height:1.36;margin:0 0 7px;font-weight:600;letter-spacing:-.005em}
+.art .who{font-size:13px;color:var(--ink2);line-height:1.45}
+.art .jr{font-size:12.5px;color:var(--ink3);margin-top:4px}
+.art .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.tg{font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;border-radius:6px;padding:3px 7px}
+.tg.pt{background:var(--deep-soft);color:var(--deep)}
+.tg.free{background:var(--ok-soft);color:var(--ok)}
+.art .ab{font-family:"Source Serif 4",serif;font-size:15px;line-height:1.6;color:var(--ink2);
+  margin-top:11px;padding-top:11px;border-top:1px solid var(--line2);display:none}
+.art.open .ab{display:block}
+.art .acts{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+.mini{font-size:12.5px;font-weight:600;color:var(--acc-ink);border:1px solid var(--line);
+  border-radius:9px;padding:7px 11px;background:var(--card)}
+.mini.plain{color:var(--ink2)}
+
+.empty{text-align:center;color:var(--ink3);font-size:14px;line-height:1.65;padding:48px 20px}
+.spin{width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--acc);border-radius:99px;
+  display:inline-block;animation:sp .7s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);background:var(--ink);color:var(--bg);
+  padding:12px 18px;border-radius:13px;font-size:14px;z-index:60;opacity:0;pointer-events:none;transition:.22s;
+  max-width:88vw;text-align:center;line-height:1.4;font-weight:500}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.note{font-size:12.5px;color:var(--ink2);background:var(--card2);border-radius:11px;padding:12px;line-height:1.55;margin-top:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand">PubMed<b>Psikiyatri ve psikoloji taraması</b></div>
+  </div>
+</header>
+
+<main>
+  <div class="label">Konu</div>
+  <div class="chips" id="topics"></div>
+
+  <div class="label">Serbest arama</div>
+  <div class="field">
+    <input class="inp" id="free" placeholder="örn. burnout AND nurses" autocapitalize="off" autocorrect="off">
+  </div>
+  <div class="note" id="freeNote">Konu düğmeleriyle birlikte çalışır: seçtiğin konular <b>veya</b> ile, buraya yazdığın <b>ve</b> ile eklenir. Boş bırakırsan sadece konular aranır.</div>
+
+  <div class="label">Filtreler</div>
+  <div class="grid2">
+    <select class="inp" id="days">
+      <option value="1">Son 24 saat</option>
+      <option value="7" selected>Son 7 gün</option>
+      <option value="30">Son 30 gün</option>
+      <option value="90">Son 3 ay</option>
+      <option value="365">Son 1 yıl</option>
+      <option value="0">Tüm zamanlar</option>
+    </select>
+    <select class="inp" id="ptype">
+      <option value="">Tüm yayın türleri</option>
+      <option value='"randomized controlled trial"[pt]'>Randomize kontrollü çalışma</option>
+      <option value='"meta-analysis"[pt]'>Meta-analiz</option>
+      <option value='"systematic review"[pt]'>Sistematik derleme</option>
+      <option value='("meta-analysis"[pt] OR "systematic review"[pt])'>Meta-analiz + sistematik derleme</option>
+      <option value='"review"[pt]'>Derleme</option>
+      <option value='"clinical trial"[pt]'>Klinik çalışma</option>
+      <option value='"observational study"[pt]'>Gözlemsel çalışma</option>
+      <option value='"case reports"[pt]'>Olgu sunumu</option>
+      <option value='"guideline"[pt] OR "practice guideline"[pt]'>Kılavuz</option>
+    </select>
+  </div>
+  <div class="grid2" style="margin-top:8px">
+    <select class="inp" id="sort">
+      <option value="date">En yeniler önce</option>
+      <option value="relevance">En ilgili önce</option>
+    </select>
+    <select class="inp" id="extra">
+      <option value="">Ek süzgeç yok</option>
+      <option value='"free full text"[sb]'>Ücretsiz tam metin</option>
+      <option value='hasabstract'>Özeti olanlar</option>
+      <option value='"humans"[mh]'>İnsan çalışmaları</option>
+    </select>
+  </div>
+
+  <div class="field" style="margin-top:12px">
+    <button class="btn" id="go" style="flex:1;text-align:center">Ara</button>
+    <button class="btn ghost" id="clear">Temizle</button>
+  </div>
+
+  <div id="out"><div class="empty">Konu seç ya da bir şey yaz, sonra Ara'ya bas.</div></div>
+  <div class="field hid" id="moreWrap" style="margin-top:6px">
+    <button class="btn ghost" id="more" style="flex:1;text-align:center">Daha fazla göster</button>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+let toastT;
+function toast(m, ms = 2600) {
+  const t = $("#toast"); t.textContent = m; t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), ms);
+}
+
+/* ---------- hazır konular: PubMed sorgu parçaları ---------- */
+const TOPICS = [
+  ["Depresyon", '("depressive disorder"[mh] OR "depression"[mh] OR depression[tiab] OR depressive[tiab])'],
+  ["Anksiyete", '("anxiety disorders"[mh] OR "anxiety"[mh] OR anxiety[tiab] OR anxious[tiab])'],
+  ["TSSB", '("stress disorders, post-traumatic"[mh] OR PTSD[tiab] OR "post-traumatic stress"[tiab] OR posttraumatic[tiab])'],
+  ["Şizofreni", '("schizophrenia"[mh] OR "psychotic disorders"[mh] OR schizophrenia[tiab] OR psychosis[tiab])'],
+  ["Bipolar", '("bipolar disorder"[mh] OR bipolar[tiab] OR mania[tiab])'],
+  ["OKB", '("obsessive-compulsive disorder"[mh] OR "obsessive compulsive"[tiab] OR OCD[tiab])'],
+  ["Bağımlılık", '("substance-related disorders"[mh] OR "behavior, addictive"[mh] OR addiction[tiab] OR "substance use"[tiab])'],
+  ["İntihar", '("suicide"[mh] OR "suicidal ideation"[mh] OR suicid*[tiab] OR "self-harm"[tiab])'],
+  ["Uyku", '("sleep wake disorders"[mh] OR insomnia[tiab] OR "sleep quality"[tiab])'],
+  ["Yeme bozukluğu", '("feeding and eating disorders"[mh] OR anorexia[tiab] OR bulimia[tiab] OR "eating disorder"[tiab])'],
+  ["Demans", '("dementia"[mh] OR "alzheimer disease"[mh] OR dementia[tiab] OR "cognitive impairment"[tiab])'],
+  ["Yaşlı ruh sağlığı", '(("aged"[mh] OR elderly[tiab] OR "older adults"[tiab]) AND ("mental health"[mh] OR "mental disorders"[mh]))'],
+  ["Çocuk-ergen", '(("child"[mh] OR "adolescent"[mh]) AND ("mental disorders"[mh] OR "mental health"[mh]))'],
+  ["DEHB", '("attention deficit disorder with hyperactivity"[mh] OR ADHD[tiab])'],
+  ["Otizm", '("autism spectrum disorder"[mh] OR autism[tiab] OR autistic[tiab])'],
+  ["BDT", '("cognitive behavioral therapy"[mh] OR "cognitive behavioural therapy"[tiab] OR CBT[tiab])'],
+  ["EMDR", '("eye movement desensitization reprocessing"[mh] OR EMDR[tiab])'],
+  ["ACT", '("acceptance and commitment therapy"[tiab] OR "acceptance commitment"[tiab])'],
+  ["Mindfulness", '("mindfulness"[mh] OR mindfulness[tiab] OR "mindfulness-based"[tiab])'],
+  ["Psikofarmakoloji", '("psychotropic drugs"[mh] OR antidepressant*[tiab] OR antipsychotic*[tiab] OR "psychotropic"[tiab])'],
+  ["Tükenmişlik", '("burnout, psychological"[mh] OR "burnout, professional"[mh] OR burnout[tiab])'],
+  ["Damgalanma", '("social stigma"[mh] OR stigma[tiab] OR stigmatization[tiab])'],
+  ["Psikiyatri hemşireliği", '("psychiatric nursing"[mh] OR "mental health nursing"[tiab] OR "psychiatric nurs*"[tiab])'],
+  ["Bakım veren yükü", '("caregiver burden"[mh] OR "caregivers"[mh] OR "caregiver burden"[tiab])'],
+  ["Yaşam kalitesi", '("quality of life"[mh] OR "quality of life"[tiab] OR wellbeing[tiab])'],
+  ["Ölçek geliştirme", '("psychometrics"[mh] OR "validation study"[pt] OR "reliability and validity"[tiab] OR psychometric[tiab])']
+];
+
+const picked = new Set();
+$("#topics").innerHTML = TOPICS.map((t, i) => `<button class="chip" data-i="${i}">${esc(t[0])}</button>`).join("");
+$$("#topics .chip").forEach(c => c.addEventListener("click", () => {
+  const i = +c.dataset.i;
+  if (picked.has(i)) picked.delete(i); else picked.add(i);
+  c.classList.toggle("on", picked.has(i));
+}));
+
+/* ---------- sorgu kurulumu ---------- */
+function ymd(d) { return d.getFullYear() + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + String(d.getDate()).padStart(2, "0"); }
+
+function buildQuery() {
+  const parts = [];
+
+  // alan sınırı: psikiyatri/psikoloji
+  const FIELD = '("mental disorders"[mh] OR "psychiatry"[mh] OR "psychology"[mh] OR "mental health"[mh] ' +
+                'OR "behavioral symptoms"[mh] OR "psychotherapy"[mh] OR psychiatr*[tiab] OR psycholog*[tiab] OR "mental health"[tiab])';
+
+  const topics = [...picked].map(i => TOPICS[i][1]);
+  if (topics.length) parts.push(topics.length > 1 ? "(" + topics.join(" OR ") + ")" : topics[0]);
+  else parts.push(FIELD);                     // konu seçilmemişse tüm alan
+
+  const free = $("#free").value.trim();
+  if (free) parts.push("(" + free + ")");
+
+  const pt = $("#ptype").value;
+  if (pt) parts.push(pt);
+
+  const ex = $("#extra").value;
+  if (ex) parts.push(ex);
+
+  const days = +$("#days").value;
+  if (days) {
+    const to = new Date(), from = new Date(Date.now() - days * 86400000);
+    parts.push('("' + ymd(from) + '"[dp] : "' + ymd(to) + '"[dp])');
+  }
+  return parts.join(" AND ");
+}
+
+/* ---------- PubMed ---------- */
+const EU = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
+const TOOL = "&tool=kesit-tarama";
+const PAGE = 25;
+
+let webenv = null, qkey = null, total = 0, shown = 0, curQuery = "";
+
+async function jget(url) {
+  const r = await fetch(url, { cache: "no-store" });
+  if (!r.ok) throw new Error("PubMed yanıt vermedi (" + r.status + ")");
+  return await r.json();
+}
+
+async function search(reset) {
+  if (reset) {
+    curQuery = buildQuery();
+    shown = 0; webenv = null; qkey = null;
+    $("#out").innerHTML = '<div class="empty"><span class="spin"></span> Aranıyor…</div>';
+    $("#moreWrap").classList.add("hid");
+  }
+  try {
+    if (reset) {
+      const u = EU + "esearch.fcgi?db=pubmed&retmode=json&usehistory=y&retmax=0" +
+        "&sort=" + encodeURIComponent($("#sort").value) +
+        "&term=" + encodeURIComponent(curQuery) + TOOL;
+      const d = await jget(u);
+      const r = d.esearchresult || {};
+      if (r.ERROR) throw new Error("Sorgu hatalı: " + r.ERROR);
+      total = parseInt(r.count || "0", 10);
+      webenv = r.webenv; qkey = r.querykey;
+      if (!total) {
+        $("#out").innerHTML = '<div class="empty">Sonuç yok.<br>Tarih aralığını genişletmeyi ya da filtreleri gevşetmeyi dene.</div>';
+        return;
+      }
+      $("#out").innerHTML =
+        `<div class="meta"><b>${total.toLocaleString("tr-TR")}</b> makale bulundu` +
+        `<a href="https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(curQuery)}" target="_blank" rel="noopener">PubMed'de aç</a></div>` +
+        `<details class="q" style="cursor:pointer"><summary>Kullanılan sorgu</summary><div style="margin-top:8px">${esc(curQuery)}</div></details>` +
+        '<div id="list"></div>';
+    }
+
+    const su = EU + "esummary.fcgi?db=pubmed&retmode=json&version=2.0" +
+      "&WebEnv=" + encodeURIComponent(webenv) + "&query_key=" + encodeURIComponent(qkey) +
+      "&retstart=" + shown + "&retmax=" + PAGE + TOOL;
+    const s = await jget(su);
+    const res = s.result || {};
+    const ids = res.uids || [];
+    if (!ids.length) { $("#moreWrap").classList.add("hid"); return; }
+
+    $("#list").insertAdjacentHTML("beforeend", ids.map(id => card(res[id])).join(""));
+    bind();
+    shown += ids.length;
+    $("#moreWrap").classList.toggle("hid", shown >= total);
+    $("#more").textContent = "Daha fazla göster (" + shown + " / " + total.toLocaleString("tr-TR") + ")";
+  } catch (e) {
+    const msg = /Failed to fetch|NetworkError/i.test(e.message)
+      ? "PubMed'e ulaşılamadı. İnternet bağlantını kontrol et; sayfayı dosyadan değil github.io adresinden açtığından emin ol."
+      : e.message;
+    if (reset) $("#out").innerHTML = `<div class="empty" style="color:var(--warn)">${esc(msg)}</div>`;
+    else toast(msg, 4000);
+  }
+}
+
+function card(a) {
+  if (!a) return "";
+  const authors = (a.authors || []).map(x => x.name).filter(Boolean);
+  const who = authors.length
+    ? (authors.length > 3 ? authors.slice(0, 3).join(", ") + " ve ark." : authors.join(", "))
+    : "Yazar bilgisi yok";
+  const jr = [a.fulljournalname || a.source, a.pubdate, a.volume ? "cilt " + a.volume : ""].filter(Boolean).join(" · ");
+  const types = (a.pubtype || []).filter(t => /trial|meta|review|guideline|observational|case reports/i.test(t));
+  const doi = (a.articleids || []).find(x => x.idtype === "doi");
+  const free = /free|pmc/i.test((a.attributes || []).join(" "));
+  return `<div class="art" data-id="${esc(a.uid)}">
+    <h3>${esc(String(a.title || "").replace(/<\/?[^>]+>/g, ""))}</h3>
+    <div class="who">${esc(who)}</div>
+    <div class="jr">${esc(jr)}</div>
+    ${types.length || free ? `<div class="tags">${types.map(t => `<span class="tg pt">${esc(t)}</span>`).join("")}${free ? '<span class="tg free">ücretsiz</span>' : ""}</div>` : ""}
+    <div class="ab" data-ab=""></div>
+    <div class="acts">
+      <button class="mini abbtn">Özeti göster</button>
+      <a class="mini plain" href="https://pubmed.ncbi.nlm.nih.gov/${esc(a.uid)}/" target="_blank" rel="noopener">PubMed</a>
+      ${doi ? `<a class="mini plain" href="https://doi.org/${esc(doi.value)}" target="_blank" rel="noopener">DOI</a>` : ""}
+      <button class="mini plain copybtn">Künyeyi kopyala</button>
+    </div>
+  </div>`;
+}
+
+function bind() {
+  $$(".art").forEach(el => {
+    if (el.dataset.bound) return;
+    el.dataset.bound = "1";
+    const id = el.dataset.id;
+    el.querySelector(".abbtn").addEventListener("click", async e => {
+      const box = el.querySelector(".ab");
+      if (el.classList.contains("open")) { el.classList.remove("open"); e.target.textContent = "Özeti göster"; return; }
+      el.classList.add("open");
+      e.target.textContent = "Özeti gizle";
+      if (box.dataset.ab) return;
+      box.innerHTML = '<span class="spin"></span> Özet alınıyor…';
+      try {
+        const r = await fetch(EU + "efetch.fcgi?db=pubmed&retmode=xml&id=" + id + TOOL, { cache: "no-store" });
+        const xml = new DOMParser().parseFromString(await r.text(), "text/xml");
+        const parts = Array.from(xml.querySelectorAll("Abstract > AbstractText"));
+        if (!parts.length) { box.textContent = "Bu kayıtta özet yok."; box.dataset.ab = "1"; return; }
+        box.innerHTML = parts.map(n => {
+          const lab = n.getAttribute("Label");
+          const txt = (n.textContent || "").trim();
+          return lab ? `<b style="display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin:10px 0 3px">${esc(lab)}</b>${esc(txt)}`
+                     : esc(txt);
+        }).join("");
+        box.dataset.ab = "1";
+      } catch (err) { box.textContent = "Özet alınamadı."; }
+    });
+    el.querySelector(".copybtn").addEventListener("click", async () => {
+      const t = el.querySelector("h3").textContent;
+      const w = el.querySelector(".who").textContent;
+      const j = el.querySelector(".jr").textContent;
+      const txt = w + " " + t + " " + j + ". https://pubmed.ncbi.nlm.nih.gov/" + id + "/";
+      try { await navigator.clipboard.writeText(txt); toast("Künye kopyalandı."); }
+      catch (e) { toast("Kopyalanamadı."); }
+    });
+  });
+}
+
+$("#go").addEventListener("click", () => search(true));
+$("#more").addEventListener("click", () => search(false));
+$("#free").addEventListener("keydown", e => { if (e.key === "Enter") search(true); });
+$("#clear").addEventListener("click", () => {
+  picked.clear();
+  $$("#topics .chip").forEach(c => c.classList.remove("on"));
+  $("#free").value = "";
+  $("#ptype").value = ""; $("#extra").value = ""; $("#days").value = "7"; $("#sort").value = "date";
+  $("#out").innerHTML = '<div class="empty">Konu seç ya da bir şey yaz, sonra Ara\'ya bas.</div>';
+  $("#moreWrap").classList.add("hid");
+});
+</script>
+</body>
+</html>
