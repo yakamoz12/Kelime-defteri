@@ -1743,10 +1743,18 @@ function runsToHtml(runs) {
    ============================================================ */
 let WORDS = [];
 try { WORDS = JSON.parse(store.get("words", "[]")) || []; } catch (e) { WORDS = []; }
+// eski kayıtlarda ekleme anı yok: mevcut sırayı koruyacak biçimde bir kez ver
+(() => {
+  let need = WORDS.some(x => !x.add);
+  if (!need) return;
+  const base = Date.now();
+  WORDS.forEach((x, i) => { if (!x.add) x.add = x.t || (base - i * 1000); });
+  try { store.set("words", JSON.stringify(WORDS)); } catch (e) {}
+})();
 function saveWords() { store.set("words", JSON.stringify(WORDS)); }
 const norm = w => String(w).toLowerCase().trim();
 function hasWord(w) { return WORDS.some(x => norm(x.w) === norm(w)); }
-function addWord(o) { if (!hasWord(o.w)) { WORDS.unshift(o); saveWords(); syncSoon(); } }
+function addWord(o) { if (!hasWord(o.w)) { o.add = o.add || Date.now(); WORDS.unshift(o); saveWords(); syncSoon(); } }
 function removeWord(w) { WORDS = WORDS.filter(x => norm(x.w) !== norm(w)); saveWords(); tomb("w:" + norm(w)); syncSoon(); }
 
 function renderWords() {
@@ -1754,7 +1762,8 @@ function renderWords() {
   const sb = $("#studyBtn");
   if (sb) sb.textContent = n ? "Kartlar · " + n : "Kartlar";
   const q = norm($("#wSearch").value);
-  const list = q ? WORDS.filter(x => norm(x.w).includes(q) || norm(x.tr).includes(q)) : WORDS;
+  const sorted = WORDS.slice().sort((a, b) => (b.add || b.t || 0) - (a.add || a.t || 0));
+  const list = q ? sorted.filter(x => norm(x.w).includes(q) || norm(x.tr).includes(q)) : sorted;
   const box = $("#wList");
   if (!WORDS.length) {
     box.innerHTML = '<div class="empty">Defter boş.<br>Bir makale açıp kelimeye çift dokun, açılan kartta “Deftere ekle”ye bas.</div>';
@@ -2069,27 +2078,32 @@ function shuffled(n) {
 /* alıştırma kâğıdı: üstte eşleştirme, altta boşluk doldurma */
 function sheetLayout(doc, group, k, order, y0, draw, gap) {
   const L = LEAD * k;
-  const colW = CW * 0.47;
-  const rightX = M.l + CW - colW;
   let y = y0;
 
   for (let i = 0; i < group.length; i++) {
-    const en = (i + 1) + ".  " + group[i].w + (group[i].oku ? "  [" + group[i].oku + "]" : "");
-    const tr = LETTERS[i] + ")  " + (group[order[i]].tr || "");
+    const x = group[order[i]];
+    const num = (i + 1) + ".";
     doc.setFont("Kalam", "normal");
-    doc.setFontSize(11.5 * k);
-    const lL = flowRuns(doc, [{ text: en, c: -1 }], 0, 0, colW - 14, L, false).lines;
-    const lR = flowRuns(doc, [{ text: tr, c: -1 }], 0, 0, colW, L, false).lines;
+    doc.setFontSize(11 * k);
+
     if (draw) {
-      doc.setTextColor(20, 24, 26);
-      flowRuns(doc, [{ text: en, c: -1 }], M.l, y, colW - 14, L, true);
-      doc.setDrawColor(196, 192, 184);
-      doc.setLineWidth(0.3);
-      doc.rect(M.l + colW - 11, y - 4 * k, 9 * k, 5.6 * k);
+      // Türkçe ipucu
       doc.setTextColor(162, 22, 72);
-      flowRuns(doc, [{ text: tr, c: -1 }], rightX, y, colW, L, true);
+      doc.text(num, M.l, y);
+      doc.setFontSize(12 * k);
+      doc.text(x.tr || "—", M.l + 7 * k, y);
+      // yazma çizgisi
+      doc.setDrawColor(202, 198, 192);
+      doc.setLineWidth(0.35);
+      doc.line(M.l + 7 * k, y + 6.4 * k, M.l + CW * 0.66, y + 6.4 * k);
+      // ilk harf ve harf sayısı ipucu
+      doc.setFont("Kalam", "normal");
+      doc.setFontSize(9 * k);
+      doc.setTextColor(178, 182, 196);
+      const letters = (x.w || "").replace(/[^A-Za-z-]/g, "").length;
+      doc.text((x.w || "?")[0] + " · " + letters + " harf", M.l + CW * 0.69, y + 6.4 * k);
     }
-    y += Math.max(lL, lR) * L + 6.5 * k + (gap || 0);
+    y += 11 * k + (gap || 0);
   }
   return y;
 }
@@ -2156,7 +2170,7 @@ async function buildPdf() {
   busyUpd("Sayfalar diziliyor…", 100);
   await sleep(60);
 
-  const ready = WORDS.filter(x => x.ex);
+  const ready = WORDS.filter(x => x.ex).sort((a, b) => (a.add || a.t || 0) - (b.add || b.t || 0));
   if (!ready.length) { busyHide(); toast("Hiç cümle üretilemedi."); return; }
 
   const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
@@ -2200,9 +2214,9 @@ async function buildPdf() {
     // 2) hemen arkasına aynı kelimelerin alıştırma kâğıdı
     sub = "alıştırma · cevaplar önceki sayfada";
     const order = shuffled(group.length);
-    let ke = 1.45;                                   // punto tavanı: kelimeler satıra sığsın
+    let ke = 1.7;
     for (; ke >= 0.86; ke -= 0.04) if (sheetHeight(doc, group, ke, order) <= avail - 8) break;
-    y = newPage("Her kelimenin karşılığını sağdan bul, harfini kutuya yaz.");
+    y = newPage("Türkçesine bakarak İngilizcesini yaz. Sağdaki ipucu ilk harf ve harf sayısıdır.");
     // artan boşluğu satır aralarına eşit dağıt, sayfa dengeli dolsun
     const used = sheetHeight(doc, group, ke, order);
     const gap = Math.max(0, Math.min(14, (avail - 8 - used) / group.length));
@@ -3014,7 +3028,7 @@ function mergeList(local, remote, keyOf) {
   return Object.keys(map)
     .filter(key => !(TOMB[key] && TOMB[key] > (map[key].t || 0)))
     .map(key => map[key])
-    .sort((p, q) => (q.t || 0) - (p.t || 0));
+    .sort((p, q) => (q.add || q.t || 0) - (p.add || p.t || 0));   // ekleme sırası sabit kalsın
 }
 
 /* ============================================================
