@@ -2024,6 +2024,8 @@ function studyHeight(doc, x, k) {
   const b = flowRuns(doc, segment(x.exTr || "", p, "tr"), 0, 0, CW, L, false).lines;
   // çizim sırasındaki gerçek ilerlemeyle birebir aynı olmalı
   let h = 15.6 * k + a * L + (b - 1) * L;
+  const famN = (x.family || []).length;
+  if (famN) h += famN * (L * 0.86) + 2.2 * k;
   return h + 0.6;
 }
 
@@ -2048,6 +2050,27 @@ function studyEntry(doc, x, y, k) {
   doc.setTextColor(162, 22, 72);
   doc.text("  —  " + (x.tr || ""), wEnd, y);
   y += 6.3 * k;
+
+  // kelime ailesi
+  const fam = x.family || [];
+  if (fam.length) {
+    const FL = L * 0.86;
+    fam.forEach(f => {
+      doc.setFont("Kalam", "normal");
+      doc.setFontSize(8.4 * k);
+      doc.setTextColor(120, 128, 152);
+      const tag = (f.pos || "").toUpperCase();
+      doc.text(tag, M.l + 2, y);
+      doc.setFontSize(9.6 * k);
+      doc.setTextColor(46, 58, 102);
+      const tx = M.l + 20 * k;
+      doc.text(f.w || "", tx, y);
+      doc.setTextColor(140, 146, 164);
+      doc.text("  " + (f.tr || ""), tx + doc.getTextWidth(f.w || ""), y);
+      y += FL;
+    });
+    y += 2.2 * k;
+  }
 
   doc.setFont("Kalam", "normal");
   doc.setFontSize(10.2 * k);
@@ -2188,7 +2211,7 @@ async function buildPdf() {
   regFonts(doc, KALAM);
 
   const stamp = new Date().toLocaleDateString("tr-TR");
-  const PER_PAGE = 8;
+  const PER_PAGE = 5;
   let page = 0, sub = stamp;
   const top = M.t + 3;
   const avail = PH - M.b - top;
@@ -2225,12 +2248,12 @@ async function buildPdf() {
     // 2) hemen arkasına aynı kelimelerin alıştırma kâğıdı
     sub = "alıştırma · cevaplar önceki sayfada";
     const order = shuffled(group.length);
-    let ke = 1.7;
+    let ke = 1.9;
     for (; ke >= 0.86; ke -= 0.04) if (sheetHeight(doc, group, ke, order) <= avail - 8) break;
     y = newPage("Her kelimenin Türkçesini çizgiye yaz. Cevaplar önceki sayfada.");
     // artan boşluğu satır aralarına eşit dağıt, sayfa dengeli dolsun
     const used = sheetHeight(doc, group, ke, order);
-    const gap = Math.max(0, Math.min(14, (avail - 8 - used) / group.length));
+    const gap = Math.max(0, Math.min(24, (avail - 8 - used) / group.length));
     sheetLayout(doc, group, ke, order, y + 2, true, gap);
 
     idx += group.length;
