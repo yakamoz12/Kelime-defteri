@@ -803,13 +803,20 @@ SADECE geçerli JSON döndür. Markdown, kod bloğu işareti, açıklama, giriş
 GEÇTİĞİ CÜMLE: "${(context || "").slice(0, 700)}"
 
 Şu alanlara sahip bir JSON nesnesi döndür:
-"tr": Türkçe karşılığı. En çok 3 karşılık, virgülle ayrılmış. SADECE karşılık yaz, cümle kurma, açıklama ekleme. Örnek: "artmak, yükselmek"
+"base": kelimenin SÖZLÜK HALİ. Çekim eklerini at: -ed, -ing, -s, -es takılarını kaldırıp mastar/tekil biçimi ver.
+  Örnek: enrolled -> enroll, divided -> divide, studies -> study, findings -> finding, increasing -> increase.
+  ÖNEMLİ İSTİSNA: kelime çekimli haliyle AYRI bir sözcük olarak yerleşmişse olduğu gibi bırak.
+  Örnek: impaired (sıfat) -> impaired, emerging (sıfat) -> emerging, underlying (sıfat) -> underlying, advanced (sıfat) -> advanced.
+  Düzensiz fiillerde de mastarı ver: found -> find, shown -> show, taken -> take.
+"tr": SÖZLÜK HALİNİN Türkçe karşılığı. En çok 3 karşılık, virgülle ayrılmış. SADECE karşılık yaz, cümle kurma, açıklama ekleme.
+  Çekim ekini çeviriye yansıtma: "kaydedildi" değil "kaydetmek"; "ayrıldı" değil "ayırmak, bölmek".
 "pos": sözcük türü. Tek kelime: isim, fiil, sıfat, zarf, edat, bağlaç.
-"oku": kelimenin okunuşu, TÜRKÇE harflerle. IPA veya İngilizce imla kullanma. Bir Türk okuduğunda doğru sese yaklaşsın. Örnek: enrolled -> inrould, thickness -> tiknıs, adherence -> ıdhiırıns.
+"oku": SÖZLÜK HALİNİN okunuşu, TÜRKÇE harflerle. IPA veya İngilizce imla kullanma. Bir Türk okuduğunda doğru sese yaklaşsın. Örnek: enrolled -> inrould, thickness -> tiknıs, adherence -> ıdhiırıns.
 "here": bu cümlede tam olarak ne anlama geldiği. Tek kısa cümle, en fazla 15 kelime.
 "family": aynı kökten türeyen 3-4 sözcük. Her biri {"w": İngilizce sözcük, "pos": sözcük türü (fiil/isim/sıfat/zarf), "tr": Türkçe karşılığı} biçiminde nesne. Dizi olarak ver. Kelimenin kendisini de dahil et.`;
   const d = parseJson(await gemini(prompt, sys));
   return {
+    base: String(d.base || "").trim(),
     tr: String(d.tr || "").trim(),
     pos: String(d.pos || "").trim().toLowerCase(),
     oku: String(d.oku || "").trim(),
@@ -1481,7 +1488,7 @@ function isWordSel(t) { return t.trim().split(/\s+/).length <= 3; }
 function wordCardEl(word, d, context) {
   const wrap = document.createElement("div");
   wrap.innerHTML =
-    `<div class="w-en">${esc(word)}${d.oku ? ' <span class="w-oku">[' + esc(d.oku) + "]</span>" : ""}</div>` +
+    `<div class="w-en">${esc(d.base && d.base.toLowerCase() !== word.toLowerCase() ? d.base + "  ·  metinde: " + word : word)}${d.oku ? ' <span class="w-oku">[' + esc(d.oku) + "]</span>" : ""}</div>` +
     `<div class="w-tr">${esc(d.tr || "—")}</div>` +
     (d.pos ? `<div class="w-pos">${esc(d.pos)}</div>` : "") +
     (d.here ? `<div class="w-here"><b>Bu cümlede</b>${esc(d.here)}</div>` : "") +
@@ -1491,11 +1498,12 @@ function wordCardEl(word, d, context) {
 
   const btn = document.createElement("button");
   btn.className = "savebtn";
-  const saved = hasWord(word);
+  const key = d.base || word;
+  const saved = hasWord(key);
   setSaveBtn(btn, saved);
   btn.addEventListener("click", () => {
-    if (hasWord(word)) { removeWord(word); setSaveBtn(btn, false); toast("Defterden çıkarıldı."); }
-    else { addWord({ w: word, tr: d.tr, pos: d.pos, oku: d.oku, here: d.here, family: d.family, box: 0, due: Date.now(), s: (context || "").slice(0, 220), src: state.title, t: Date.now() }); setSaveBtn(btn, true); toast("Deftere eklendi."); }
+    if (hasWord(key)) { removeWord(key); setSaveBtn(btn, false); toast("Defterden çıkarıldı."); }
+    else { addWord({ w: key, form: (key.toLowerCase() !== word.toLowerCase() ? word : ""), tr: d.tr, pos: d.pos, oku: d.oku, here: d.here, family: d.family, box: 0, due: Date.now(), s: (context || "").slice(0, 220), src: state.title, t: Date.now() }); setSaveBtn(btn, true); toast("Deftere eklendi."); }
   });
   wrap.appendChild(btn);
   return wrap;
@@ -1666,7 +1674,7 @@ function senPrompt(word, tr, avoid) {
 Bu kelimeyi kullanan akademik bir örnek cümle kur.
 Kurallar:
 - Cümle 10-16 kelime olsun, tek satıra sığacak kadar derli toplu, tıp/sağlık bilimleri makalelerinin diliyle yazılsın.
-- Kelime cümlede doğal ve sık kullanılan bir kalıpla geçsin.
+- Kelime cümlede doğal ve sık kullanılan bir kalıpla geçsin. Cümlede çekimli hali (-ed, -ing, -s) geçebilir, bu normaldir.
 - Cümle tek başına anlaşılır olsun, önceki bir cümleye gönderme yapmasın.
 ${avoid ? '- ŞU CÜMLEDEN TAMAMEN FARKLI olsun, başka bir konu ve başka bir yapı kullan: "' + avoid + '"' : ""}
 
@@ -1675,7 +1683,7 @@ ${avoid ? '- ŞU CÜMLEDEN TAMAMEN FARKLI olsun, başka bir konu ve başka bir y
 "tr": bu cümlenin akıcı Türkçe çevirisi.
 "oku": hedef kelimenin okunuşu, TÜRKÇE harflerle. IPA kullanma. Örnek: enrolled -> inrould.
 "pairs": 3 ile 5 arası nesne içeren dizi. Her nesne {"en": ..., "tr": ...} biçiminde, cümlenin anahtar öğelerini eşleştirir.
-  - İLK nesne mutlaka hedef kelime "${word}" ve onun bu cümledeki Türkçe karşılığı olsun.
+  - İLK nesne mutlaka hedef kelime olsun. "en" değeri, kelimenin cümlede GEÇTİĞİ HALİ olmalı (çekimliyse çekimli hali), "tr" değeri de onun cümledeki Türkçe karşılığı.
   - Diğerleri cümlenin anlamını taşıyan sözcük veya sözcük öbekleri olsun.
   - "en" değeri İngilizce cümlede AYNEN geçen bir parça olmalı, harfi harfine kopyala.
   - "tr" değeri Türkçe cümlede AYNEN geçen bir parça olmalı, harfi harfine kopyala.`;
@@ -2077,31 +2085,34 @@ function shuffled(n) {
 
 /* alıştırma kâğıdı: üstte eşleştirme, altta boşluk doldurma */
 function sheetLayout(doc, group, k, order, y0, draw, gap) {
-  const L = LEAD * k;
   let y = y0;
-
   for (let i = 0; i < group.length; i++) {
     const x = group[order[i]];
-    const num = (i + 1) + ".";
-    doc.setFont("Kalam", "normal");
-    doc.setFontSize(11 * k);
-
     if (draw) {
-      // Türkçe ipucu
-      doc.setTextColor(162, 22, 72);
-      doc.text(num, M.l, y);
-      doc.setFontSize(12 * k);
-      doc.text(x.tr || "—", M.l + 7 * k, y);
-      // yazma çizgisi
+      doc.setFont("Kalam", "normal");
+      doc.setFontSize(11 * k);
+      doc.setTextColor(140, 146, 164);
+      doc.text((i + 1) + ".", M.l, y);
+
+      // İngilizce kelime
+      doc.setFont("Kalam", KALAM.bold ? "bold" : "normal");
+      doc.setFontSize(13 * k);
+      doc.setTextColor(20, 24, 26);
+      doc.text(x.w, M.l + 7 * k, y);
+
+      // okunuşu
+      if (x.oku) {
+        const wEnd = M.l + 7 * k + doc.getTextWidth(x.w);
+        doc.setFont("Kalam", "normal");
+        doc.setFontSize(9.4 * k);
+        doc.setTextColor(178, 182, 196);
+        doc.text("  [" + x.oku + "]", wEnd, y);
+      }
+
+      // Türkçesini yazacağın çizgi
       doc.setDrawColor(202, 198, 192);
       doc.setLineWidth(0.35);
-      doc.line(M.l + 7 * k, y + 6.4 * k, M.l + CW * 0.66, y + 6.4 * k);
-      // ilk harf ve harf sayısı ipucu
-      doc.setFont("Kalam", "normal");
-      doc.setFontSize(9 * k);
-      doc.setTextColor(178, 182, 196);
-      const letters = (x.w || "").replace(/[^A-Za-z-]/g, "").length;
-      doc.text((x.w || "?")[0] + " · " + letters + " harf", M.l + CW * 0.69, y + 6.4 * k);
+      doc.line(M.l + 7 * k, y + 6.4 * k, M.l + CW * 0.92, y + 6.4 * k);
     }
     y += 11 * k + (gap || 0);
   }
@@ -2216,7 +2227,7 @@ async function buildPdf() {
     const order = shuffled(group.length);
     let ke = 1.7;
     for (; ke >= 0.86; ke -= 0.04) if (sheetHeight(doc, group, ke, order) <= avail - 8) break;
-    y = newPage("Türkçesine bakarak İngilizcesini yaz. Sağdaki ipucu ilk harf ve harf sayısıdır.");
+    y = newPage("Her kelimenin Türkçesini çizgiye yaz. Cevaplar önceki sayfada.");
     // artan boşluğu satır aralarına eşit dağıt, sayfa dengeli dolsun
     const used = sheetHeight(doc, group, ke, order);
     const gap = Math.max(0, Math.min(14, (avail - 8 - used) / group.length));
