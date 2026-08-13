@@ -227,6 +227,26 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .qfeed p{margin:0 0 9px}
 .qfeed ul{margin:6px 0 9px;padding-left:18px}
 .qfeed li{margin-bottom:5px}
+.qtr{font-family:"Source Serif 4",serif;font-size:14.5px;color:var(--ink2);margin:8px 0 4px;line-height:1.5}
+.qtopic{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+  color:var(--deep);background:var(--deep-soft);border-radius:6px;padding:3px 8px;margin:6px 0 2px}
+.elm{margin:0 0 9px;font-size:14.5px;line-height:1.5}
+.elm b{color:var(--acc-ink)}
+.elm s{text-decoration:none;font-family:"Source Serif 4",serif;font-weight:600}
+.elm i{display:block;font-style:normal;color:var(--ink2);font-size:13.5px;margin-top:2px}
+.voc{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;padding:6px 0;border-top:1px solid var(--line2);font-size:14.5px}
+.voc b{font-family:"Source Serif 4",serif;font-size:15.5px;color:var(--deep)}
+.voc em{font-style:italic;color:var(--ink3);font-size:12.5px}
+.voc span{color:var(--ink2)}
+.frm{background:var(--card2);border-radius:10px;padding:10px 12px;margin:0 0 9px}
+.frm b{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ok);font-weight:700;margin-bottom:4px}
+.frm code{display:block;font-family:ui-monospace,Menlo,monospace;font-size:14px;color:var(--deep);font-weight:600}
+.frm i{display:block;font-style:normal;color:var(--ink2);font-size:13.5px;margin-top:4px}
+.err{margin:0 0 11px;font-size:14.5px;line-height:1.5}
+.err s{display:block;text-decoration:line-through;color:var(--warn)}
+.err b{display:block;color:var(--ok);font-weight:600;font-family:"Source Serif 4",serif;font-size:15px}
+.err i{display:block;font-style:normal;color:var(--ink2);font-size:13.5px;margin-top:2px}
+.lsbody .ex u{display:block;text-decoration:none;color:var(--ok);font-size:13.5px;margin-top:5px}
 .qwarn{font-size:12.5px;color:var(--warn);margin-top:10px;line-height:1.45}
 
 /* ---------- defterler ---------- */
@@ -246,6 +266,11 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .witem .gen{color:var(--acc);padding:6px;line-height:1}
 .witem .gen svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .witem .gen.busy{opacity:.4}
+.witem .flag{color:var(--ink3);font-size:19px;line-height:1;padding:4px 5px;flex:none}
+.witem .flag.on{color:#E0A21A}
+.flagbtn{margin-top:14px;font-size:13px;font-weight:600;color:var(--ink3);border:1px solid var(--line);
+  border-radius:999px;padding:8px 16px;background:var(--card)}
+.flagbtn.on{color:#B8860B;border-color:#E0A21A;background:#E0A21A18}
 .witem .del{color:var(--ink3);padding:4px 6px;font-size:21px;line-height:1;flex:none}
 .wdet{flex-basis:100%;margin-top:12px;padding-top:12px;border-top:1px solid var(--line2);display:none}
 .witem.open .wdet{display:block}
@@ -270,6 +295,32 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .gsen .c0,.gsen .c1,.gsen .c2,.gsen .c3,.gsen .c4,.gtr .c0,.gtr .c1,.gtr .c2,.gtr .c3,.gtr .c4{font-weight:700}
 .gtr{font-size:14.5px;color:var(--ink2);margin-top:4px;line-height:1.5}
 .empty{text-align:center;color:var(--ink3);font-size:14px;line-height:1.65;padding:56px 20px}
+
+/* ---------- gramer konuları ---------- */
+.kgrp{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);font-weight:700;margin:20px 0 9px}
+.kgrp:first-child{margin-top:2px}
+.kitem{background:var(--card);border:1px solid var(--line);border-radius:13px;box-shadow:var(--sh);
+  padding:13px 14px;margin-bottom:8px;display:flex;gap:11px;align-items:center;width:100%;text-align:left}
+.kitem .kn{font-family:"Source Serif 4",serif;font-size:15.5px;font-weight:600;flex:1}
+.kitem .kd{font-size:12.5px;color:var(--ink2);margin-top:2px;line-height:1.4}
+.kitem .kb{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--ok);
+  background:var(--ok-soft);border-radius:6px;padding:3px 7px;flex:none}
+.lsbody{padding:0 0 16px;font-size:16px;line-height:1.65}
+.lsbody h3{font-family:"Source Serif 4",serif;font-size:19px;margin:22px 0 8px;font-weight:600}
+.lsbody h4{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin:18px 0 6px;font-weight:700}
+.lsbody p{margin:0 0 11px}
+.lsbody ul{margin:6px 0 12px;padding-left:19px}
+.lsbody li{margin-bottom:6px}
+.lsbody b{font-weight:600}
+.lsbody .ex{font-family:"Source Serif 4",serif;background:var(--card2);border-left:2px solid var(--acc);
+  border-radius:0 10px 10px 0;padding:11px 13px;margin:10px 0;font-size:15.5px;line-height:1.55}
+.lsbody .ex i{display:block;color:var(--ink2);font-style:normal;font-size:14px;margin-top:4px}
+.lsask{position:sticky;bottom:0;background:var(--bg);padding:10px 0 calc(6px + env(safe-area-inset-bottom));
+  display:flex;gap:8px;border-top:1px solid var(--line)}
+.qa{border-radius:13px;padding:12px 14px;margin:12px 0;font-size:15px;line-height:1.6}
+.qa.me{background:var(--deep-soft);color:var(--ink)}
+.qa.me b{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--deep);margin-bottom:4px;font-weight:700}
+.qa.ai{background:var(--card);border:1px solid var(--line)}
 
 /* ---------- kartlar ---------- */
 #flash .fcard{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh);
@@ -429,6 +480,18 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
         <span><h3 id="qResumeTitle"></h3><p id="qResumeMeta"></p></span>
       </button>
     </div>
+    <div id="qArchWrap" class="hid">
+      <div class="label">Çözdüklerim</div>
+      <button class="src" id="qArchBtn">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h16v13a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M2 3h20v4H2zM10 11h4"/></svg></span>
+        <span><h3 id="qArchTitle"></h3><p>PDF çıkar ya da tekrar çöz</p></span>
+      </button>
+      <div class="field" style="margin-top:8px">
+        <button class="btn ghost" id="qArchPdf" style="flex:1">Çözümlü PDF</button>
+        <button class="btn ghost" id="qArchClear" style="flex:0 0 auto">Temizle</button>
+      </div>
+    </div>
+
     <div id="qWrongWrap" class="hid">
       <div class="label">Yanlışlarım</div>
       <button class="src" id="qWrongBtn">
@@ -462,9 +525,15 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 <section class="screen max" id="words">
   <h1 class="lede" style="font-size:22px;margin-bottom:14px">Kelime defteri</h1>
   <div class="wbar">
-    <button class="btn" id="pdfBtn">PDF çıkar</button>
+    <button class="btn" id="addBtn">Kelime ekle</button>
+    <button class="btn ghost" id="pdfBtn">PDF</button>
     <button class="btn ghost" id="studyBtn">Kartlar</button>
     <button class="btn ghost" id="exportBtn">Yedekle</button>
+  </div>
+  <div class="chips" id="wFilters">
+    <button class="chip on" data-f="all">Hepsi</button>
+    <button class="chip" data-f="hard">★ İşaretlediklerim</button>
+    <button class="chip" data-f="due">Bugün tekrar</button>
   </div>
   <input class="inp" id="wSearch" placeholder="Ara…" style="margin-bottom:14px" autocapitalize="off">
   <div id="wList"></div>
@@ -477,9 +546,36 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
     <button class="btn" id="gpdfBtn">PDF çıkar</button>
     <button class="btn ghost" id="gexportBtn">Yedekle</button>
   </div>
-  <div class="chips" id="gChips"></div>
-  <div id="gList"></div>
+  <div class="chips" id="gTabs">
+    <button class="chip on" data-v="notes">Notlarım</button>
+    <button class="chip" data-v="konu">Konular</button>
+  </div>
+  <div id="notesView">
+    <div class="chips" id="gChips"></div>
+    <div id="gList"></div>
+  </div>
+  <div id="konuView" class="hid">
+    <div id="konuList"></div>
+  </div>
 </section>
+
+<!-- ============ KONU DERSİ ============ -->
+<div class="modal" id="lesson">
+  <div class="mh">
+    <h2 id="lsTitle">Konu</h2>
+    <button class="iconbtn" id="lsPdf" aria-label="PDF">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+    </button>
+    <button class="iconbtn" id="lsClose" aria-label="Kapat">
+      <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div id="lsBody" class="lsbody"></div>
+  <div class="lsask">
+    <input class="inp" id="lsQ" placeholder="Bu konuda soru sor…" autocapitalize="sentences">
+    <button class="btn" id="lsSend">Sor</button>
+  </div>
+</div>
 </main>
 
 <!-- ============ KART ÇALIŞMASI ============ -->
@@ -1660,6 +1756,20 @@ async function translateAll() {
   $("#allBtn").classList.remove("on");
 }
 
+async function makeFamily(word, tr) {
+  const d = parseJson(await gemini(
+    `KELİME: "${word}"${tr ? ' (Türkçesi: "' + tr + '")' : ""}
+
+Bu kelimenin aynı kökten türeyen ailesini çıkar.
+Şu alana sahip JSON döndür:
+"family": 3-5 nesne içeren dizi. Her nesne {"w": İngilizce sözcük, "pos": sözcük türü (fiil/isim/sıfat/zarf), "tr": Türkçe karşılığı}.
+Kelimenin kendisini de dahil et. Sıralama: fiil, isim, sıfat, zarf.`,
+    `Sen İngilizce sözlük uzmanısın. SADECE geçerli JSON döndür, başka hiçbir şey yazma.`, { temp: 0.2 }));
+  return (Array.isArray(d.family) ? d.family : [])
+    .map(x => ({ w: String(x.w || "").trim(), pos: String(x.pos || "").trim(), tr: String(x.tr || "").trim() }))
+    .filter(x => x.w).slice(0, 5);
+}
+
 /* ============================================================
    Akademik örnek cümle + renk eşleştirme
    ============================================================ */
@@ -1770,14 +1880,24 @@ function renderWords() {
   const sb = $("#studyBtn");
   if (sb) sb.textContent = n ? "Kartlar · " + n : "Kartlar";
   const q = norm($("#wSearch").value);
-  const sorted = WORDS.slice().sort((a, b) => (b.add || b.t || 0) - (a.add || a.t || 0));
+  let sorted = WORDS.slice().sort((a, b) => (b.add || b.t || 0) - (a.add || a.t || 0));
+  if (wFilter === "hard") sorted = sorted.filter(x => x.hard);
+  else if (wFilter === "due") sorted = sorted.filter(x => (x.due || 0) <= Date.now());
+  const hardN = WORDS.filter(x => x.hard).length;
+  const fh = $('#wFilters .chip[data-f="hard"]');
+  if (fh) fh.textContent = hardN ? "★ İşaretlediklerim · " + hardN : "★ İşaretlediklerim";
   const list = q ? sorted.filter(x => norm(x.w).includes(q) || norm(x.tr).includes(q)) : sorted;
   const box = $("#wList");
   if (!WORDS.length) {
     box.innerHTML = '<div class="empty">Defter boş.<br>Bir makale açıp kelimeye çift dokun, açılan kartta “Deftere ekle”ye bas.</div>';
     return;
   }
-  if (!list.length) { box.innerHTML = '<div class="empty">Eşleşen kelime yok.</div>'; return; }
+  if (!list.length) {
+    box.innerHTML = '<div class="empty">' + (wFilter === "hard"
+      ? "Henüz işaretli kelime yok.<br>Kartlarla çalışırken zorlandığın kelimeye ★ bas."
+      : wFilter === "due" ? "Bugün tekrar edilecek kelime yok." : "Eşleşen kelime yok.") + "</div>";
+    return;
+  }
 
   box.innerHTML = list.map(x => `
     <div class="witem" data-w="${esc(x.w)}">
@@ -1787,8 +1907,12 @@ function renderWords() {
         ${x.here || x.src ? `<div class="wm">${esc(x.here || x.src || "")}</div>` : ""}
       </div>
       <div class="acts">
-        <button class="gen" aria-label="Cümle üret">
+        <button class="flag${x.hard ? " on" : ""}" aria-label="İşaretle">${x.hard ? "★" : "☆"}</button>
+        <button class="gen" data-k="sen" aria-label="Örnek cümle üret" title="Örnek cümle">
           <svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
+        </button>
+        <button class="gen" data-k="fam" aria-label="Kelime ailesi üret" title="Kelime ailesi">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.4"/><circle cx="5.5" cy="18" r="2.4"/><circle cx="18.5" cy="18" r="2.4"/><path d="M12 7.4v3.4M12 10.8H6.4a1 1 0 00-1 1v3.8M12 10.8h5.6a1 1 0 011 1v3.8"/></svg>
         </button>
         <button class="del" aria-label="Sil">×</button>
       </div>
@@ -1801,15 +1925,45 @@ function renderWords() {
       e.stopPropagation();
       removeWord(w); renderWords(); toast("Silindi.");
     });
-    el.querySelector(".gen").addEventListener("click", e => {
+    el.querySelector(".flag").addEventListener("click", e => {
+      e.stopPropagation();
+      const rec = WORDS.find(z => norm(z.w) === norm(w));
+      if (!rec) return;
+      rec.hard = !rec.hard; rec.t = Date.now(); saveWords(); syncSoon(); renderWords();
+      toast(rec.hard ? "İşaretlendi." : "İşaret kaldırıldı.", 1400);
+    });
+    el.querySelectorAll(".gen").forEach(g => g.addEventListener("click", e => {
       e.stopPropagation();
       el.classList.add("open");
-      genFor(w, el);
-    });
+      if (g.dataset.k === "fam") famFor(w, el, g);
+      else genFor(w, el, g);
+    }));
     el.querySelector(".wtxt").addEventListener("click", () => el.classList.toggle("open"));
     const again = el.querySelector(".again");
     if (again) again.addEventListener("click", e => { e.stopPropagation(); genFor(w, el); });
   });
+}
+
+async function famFor(word, el, btn) {
+  if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
+  const rec = WORDS.find(x => norm(x.w) === norm(word));
+  if (!rec) return;
+  btn.classList.add("busy");
+  const box = el.querySelector(".wdet");
+  const keep = box.innerHTML;
+  box.innerHTML = '<div class="none"><span class="spin dark"></span> Kelime ailesi çıkarılıyor…</div>';
+  try {
+    const fam = await makeFamily(rec.w, rec.tr);
+    if (fam.length) { rec.family = fam; rec.t = Date.now(); saveWords(); syncSoon(); }
+    box.innerHTML = detHtml(rec);
+    const ag = el.querySelector(".again");
+    if (ag) ag.addEventListener("click", e => { e.stopPropagation(); genFor(word, el); });
+    toast(fam.length ? "Kelime ailesi eklendi." : "Aile bulunamadı.");
+  } catch (e) {
+    box.innerHTML = keep;
+    toast("Olmadı: " + e.message);
+  }
+  btn.classList.remove("busy");
 }
 
 function detHtml(x) {
@@ -1833,7 +1987,8 @@ async function genFor(word, el) {
     rec.ex = s.en; rec.exTr = s.tr; rec.pairs = s.pairs; rec.t = Date.now();
     saveWords(); syncSoon();
     el.querySelector(".wdet").innerHTML = detHtml(rec);
-    el.querySelector(".again").addEventListener("click", e => { e.stopPropagation(); genFor(word, el); });
+    const ag = el.querySelector(".again");
+    if (ag) ag.addEventListener("click", e => { e.stopPropagation(); genFor(word, el); });
   } catch (e) {
     el.querySelector(".wdet").innerHTML = `<div class="none" style="color:var(--warn)">${esc(e.message)}</div>`;
   }
@@ -1841,6 +1996,45 @@ async function genFor(word, el) {
 }
 
 $("#wSearch").addEventListener("input", renderWords);
+$$("#wFilters .chip").forEach(c => c.addEventListener("click", () => {
+  $$("#wFilters .chip").forEach(x => x.classList.toggle("on", x === c));
+  wFilter = c.dataset.f;
+  renderWords();
+}));
+
+/* ---------- elle kelime ekleme ---------- */
+$("#addBtn").addEventListener("click", async () => {
+  const raw = prompt("Eklenecek İngilizce kelime:");
+  if (raw === null) return;
+  const w = raw.trim();
+  if (!w) return;
+  if (hasWord(w)) { toast("Bu kelime zaten defterde."); return; }
+
+  if (!state.key) {
+    const tr = prompt("Türkçe karşılığı:", "");
+    if (tr === null) return;
+    addWord({ w, tr: (tr || "").trim(), box: 0, due: Date.now(), t: Date.now(), add: Date.now() });
+    renderWords(); toast("Eklendi.");
+    return;
+  }
+  busyShow("Kelime aranıyor", w);
+  try {
+    const d = await lookupWord(w, "");
+    const key = d.base || w;
+    if (hasWord(key)) { busyHide(); toast("Bu kelime zaten defterde (" + key + ")."); return; }
+    addWord({ w: key, tr: d.tr, pos: d.pos, oku: d.oku, here: "", family: d.family,
+              box: 0, due: Date.now(), src: "Elle eklendi", t: Date.now(), add: Date.now() });
+    busyHide();
+    renderWords();
+    toast(key + " · " + d.tr);
+  } catch (e) {
+    busyHide();
+    const tr = prompt("Bulunamadı (" + e.message + ").\nTürkçe karşılığını kendin yaz:", "");
+    if (tr === null) return;
+    addWord({ w, tr: (tr || "").trim(), box: 0, due: Date.now(), t: Date.now(), add: Date.now() });
+    renderWords(); toast("Eklendi.");
+  }
+});
 
 
 /* ---------- yedekleme ---------- */
@@ -1885,6 +2079,15 @@ let deck = [], deckI = 0, flipped = false;
 
 $("#studyBtn").addEventListener("click", () => {
   const now = Date.now();
+  if (wFilter === "hard") {
+    deck = WORDS.filter(x => x.hard);
+    if (!deck.length) { toast("İşaretli kelime yok."); return; }
+    deck.sort(() => Math.random() - 0.5);
+    deckI = 0; flipped = false;
+    $("#flash").classList.add("on");
+    drawCard();
+    return;
+  }
   deck = WORDS.filter(x => (x.due || 0) <= now);
   if (!deck.length) {
     if (!WORDS.length) { toast("Defter boş."); return; }
@@ -1921,6 +2124,16 @@ function drawCard() {
     b.innerHTML = '<button class="btn ghost" id="fNo">Bilemedim</button>' +
                   '<button class="btn ghost" id="fMid">Zorlandım</button>' +
                   '<button class="btn" id="fYes">Kolaydı</button>';
+    c.insertAdjacentHTML("beforeend",
+      `<button class="flagbtn${x.hard ? " on" : ""}" id="fFlag">${x.hard ? "★ işaretli" : "☆ işaretle"}</button>`);
+    $("#fFlag").addEventListener("click", ev => {
+      ev.stopPropagation();
+      x.hard = !x.hard; x.t = Date.now(); saveWords(); syncSoon();
+      const el = $("#fFlag");
+      el.classList.toggle("on", !!x.hard);
+      el.textContent = x.hard ? "★ işaretli" : "☆ işaretle";
+      toast(x.hard ? "İşaretlendi, ayrı çalışabilirsin." : "İşaret kaldırıldı.", 1500);
+    });
     const go = q => {
       const when = schedule(x, q);
       toast(q === 0 ? "Bugün tekrar sorulacak." : "Sonraki tekrar: " + when, 1600);
@@ -1986,11 +2199,11 @@ const LEAD = 4.9;
 function runFont(doc, c) { doc.setFont("Kalam", (c === 0 && KALAM.bold) ? "bold" : "normal"); }
 
 /* renkli parçaları satır sararak akıt. draw=false ise sadece ölçer. */
-function flowRuns(doc, runs, x, y, maxW, lineH, draw) {
+function flowRuns(doc, runs, x, y, maxW, lineH, draw, keepColor) {
   let cx = x, cy = y, lines = 1;
   runs.forEach(run => {
     runFont(doc, run.c);
-    if (draw) { const g = run.c < 0 ? [26, 26, 26] : PAL[run.c]; doc.setTextColor(g[0], g[1], g[2]); }
+    if (draw && !keepColor) { const g = run.c < 0 ? [26, 26, 26] : PAL[run.c]; doc.setTextColor(g[0], g[1], g[2]); }
     const sp = doc.getTextWidth(" ");
     run.text.split(/(\s+)/).forEach(tok => {
       if (!tok) return;
@@ -2149,7 +2362,7 @@ function sheetHeight(doc, group, k, order, gap) {
 
 async function buildPdf() {
   if (!WORDS.length) { toast("Defter boş."); return; }
-  const needEx = WORDS.filter(x => !x.ex);
+  const needEx = (wFilter === "hard" ? WORDS.filter(x => x.hard) : WORDS).filter(x => !x.ex);
   const needOku = WORDS.filter(x => x.ex && !x.oku && !x.okuTried);
 
   if (needEx.length || needOku.length) {
@@ -2204,65 +2417,85 @@ async function buildPdf() {
   busyUpd("Sayfalar diziliyor…", 100);
   await sleep(60);
 
-  const ready = WORDS.filter(x => x.ex).sort((a, b) => (a.add || a.t || 0) - (b.add || b.t || 0));
+  let pool = WORDS;
+  if (wFilter === "hard") pool = WORDS.filter(x => x.hard);
+  const ready = pool.filter(x => x.ex).sort((a, b) => (a.add || a.t || 0) - (b.add || b.t || 0));
   if (!ready.length) { busyHide(); toast("Hiç cümle üretilemedi."); return; }
 
-  const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
-  regFonts(doc, KALAM);
-
+  const BATCH = 50;
+  const batches = [];
+  for (let b = 0; b < ready.length; b += BATCH) batches.push(ready.slice(b, b + BATCH));
   const stamp = new Date().toLocaleDateString("tr-TR");
-  const PER_PAGE = 5;
-  let page = 0, sub = stamp;
-  const top = M.t + 3;
-  const avail = PH - M.b - top;
-  const newPage = (note) => {
-    if (page) doc.addPage();
-    page++;
-    pdfHeader(doc, sub, page);
-    let y = top;
-    if (note) {
-      doc.setFont(KALAM.light ? "KalamLight" : "Kalam", "normal");
-      doc.setFontSize(9.5);
-      doc.setTextColor(150, 150, 150);
-      doc.text(note, M.l, y - 1);
-      y += 5;
+  const day = new Date().toISOString().slice(0, 10);
+  let totalPages = 0;
+
+  for (let bi = 0; bi < batches.length; bi++) {
+    const set = batches[bi];
+    const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+    regFonts(doc, KALAM);
+
+    const PER_PAGE = 5;
+    let page = 0;
+    let sub = batches.length > 1 ? stamp + " · bölüm " + (bi + 1) + "/" + batches.length : stamp;
+    const top = M.t + 3;
+    const avail = PH - M.b - top;
+    const newPage = (note) => {
+      if (page) doc.addPage();
+      page++;
+      pdfHeader(doc, sub, page);
+      let y = top;
+      if (note) {
+        doc.setFont(KALAM.light ? "KalamLight" : "Kalam", "normal");
+        doc.setFontSize(9.5);
+        doc.setTextColor(150, 150, 150);
+        doc.text(note, M.l, y - 1);
+        y += 5;
+      }
+      return y;
+    };
+
+    let idx = 0;
+    while (idx < set.length) {
+      let group = set.slice(idx, idx + PER_PAGE);
+      let k = fitScale(doc, group, avail, studyHeight);
+      while (group.length > 1 && k <= 0.865) {
+        group = group.slice(0, -1);
+        k = fitScale(doc, group, avail, studyHeight);
+      }
+
+      const keepSub = sub;
+      let y = newPage();
+      group.forEach(x => { y = studyEntry(doc, x, y, k); });
+
+      sub = keepSub.replace(stamp, "alıştırma") ;
+      const order = shuffled(group.length);
+      let ke = 1.9;
+      for (; ke >= 0.86; ke -= 0.04) if (sheetHeight(doc, group, ke, order) <= avail - 8) break;
+      y = newPage("Her kelimenin Türkçesini çizgiye yaz. Cevaplar önceki sayfada.");
+      const used = sheetHeight(doc, group, ke, order);
+      const gap = Math.max(0, Math.min(24, (avail - 8 - used) / group.length));
+      sheetLayout(doc, group, ke, order, y + 2, true, gap);
+      sub = keepSub;
+
+      idx += group.length;
     }
-    return y;
-  };
 
-  let idx = 0;
-  while (idx < ready.length) {
-    // sayfaya sığan grubu ve puntoyu bul
-    let group = ready.slice(idx, idx + PER_PAGE);
-    let k = fitScale(doc, group, avail, studyHeight);
-    while (group.length > 1 && k <= 0.865) {
-      group = group.slice(0, -1);
-      k = fitScale(doc, group, avail, studyHeight);
+    const from = bi * BATCH + 1, to = bi * BATCH + set.length;
+    const name = batches.length > 1
+      ? "kelime-" + String(from).padStart(3, "0") + "-" + String(to).padStart(3, "0") + "-" + day + ".pdf"
+      : "kelime-defteri-" + day + ".pdf";
+    doc.save(name);
+    totalPages += page;
+    if (bi < batches.length - 1) {
+      busyUpd("Dosya " + (bi + 1) + " / " + batches.length + " indirildi…", ((bi + 1) / batches.length) * 100);
+      await sleep(1200);          // tarayıcı arka arkaya inen dosyaları engellemesin
     }
-
-    // 1) çalışma sayfası
-    sub = stamp;
-    let y = newPage();
-    group.forEach(x => { y = studyEntry(doc, x, y, k); });
-
-    // 2) hemen arkasına aynı kelimelerin alıştırma kâğıdı
-    sub = "alıştırma · cevaplar önceki sayfada";
-    const order = shuffled(group.length);
-    let ke = 1.9;
-    for (; ke >= 0.86; ke -= 0.04) if (sheetHeight(doc, group, ke, order) <= avail - 8) break;
-    y = newPage("Her kelimenin Türkçesini çizgiye yaz. Cevaplar önceki sayfada.");
-    // artan boşluğu satır aralarına eşit dağıt, sayfa dengeli dolsun
-    const used = sheetHeight(doc, group, ke, order);
-    const gap = Math.max(0, Math.min(24, (avail - 8 - used) / group.length));
-    sheetLayout(doc, group, ke, order, y + 2, true, gap);
-
-    idx += group.length;
   }
 
-  const name = "kelime-defteri-" + new Date().toISOString().slice(0, 10) + ".pdf";
-  doc.save(name);
   busyHide();
-  toast(ready.length + " kelime · " + page + " sayfa hazır.", 4000);
+  toast(batches.length > 1
+    ? ready.length + " kelime · " + batches.length + " ayrı PDF indirildi (" + totalPages + " sayfa)."
+    : ready.length + " kelime · " + totalPages + " sayfa hazır.", 5000);
 }
 
 $("#pdfBtn").addEventListener("click", buildPdf);
@@ -2279,6 +2512,7 @@ function hasGram(sen) { return GRAMS.some(x => gkey(x.s) === gkey(sen)); }
 function removeGram(sen) { GRAMS = GRAMS.filter(x => gkey(x.s) !== gkey(sen)); saveGrams(); tomb("g:" + gkey(sen)); syncSoon(); }
 
 let gFilter = "";
+let wFilter = "all";
 
 function renderGrams() {
   const chips = $("#gChips"), box = $("#gList");
@@ -2451,6 +2685,23 @@ let QZ = { title: "", qs: [], i: 0, mode: "normal" };
 try { QZ = JSON.parse(store.get("quiz", "null")) || QZ; } catch (e) {}
 function saveQuiz() { try { store.set("quiz", JSON.stringify(QZ)); } catch (e) {} }
 
+let SOLVED = [];
+try { SOLVED = JSON.parse(store.get("solved", "[]")) || []; } catch (e) { SOLVED = []; }
+function saveSolved() { store.set("solved", JSON.stringify(SOLVED)); }
+function archive(q) {
+  const id = "q:" + (q.n || 0) + "|" + (q.stem || "").slice(0, 60);
+  const rec = {
+    id, n: q.n, stem: q.stem, options: q.options, passage: (q.passage || "").slice(0, 400),
+    answer: q.answer, pick: q.pick, fromKey: !!q.fromKey, why: q.why || null,
+    src: QZ.title || "", t: Date.now()
+  };
+  const i = SOLVED.findIndex(x => x.id === id);
+  if (i >= 0) SOLVED[i] = rec; else SOLVED.unshift(rec);
+  if (SOLVED.length > 500) SOLVED.length = 500;
+  saveSolved();
+  syncSoon();
+}
+
 let WRONG = [];
 try { WRONG = JSON.parse(store.get("wrong", "[]")) || []; } catch (e) { WRONG = []; }
 function saveWrong() { store.set("wrong", JSON.stringify(WRONG)); }
@@ -2596,6 +2847,7 @@ async function pick(k) {
     const id = (q.n || 0) + "|" + q.stem.slice(0, 60);
     if (!WRONG.some(x => x.id === id)) { WRONG.push({ id, q: JSON.parse(JSON.stringify(q)), at: Date.now() }); saveWrong(); }
   }
+  archive(q);
   saveQuiz();
 }
 
@@ -2630,14 +2882,20 @@ ${opts}
 DOĞRU CEVAP: ${q.answer}
 ÖĞRENCİNİN İŞARETLEDİĞİ: ${q.pick || "-"}
 
+Öğrenci konuyu HİÇ bilmiyor olabilir. Temelden, ayrıntılı anlat.
 Şu alanlara sahip JSON döndür:
-"soru": soru ne istiyor, tek cümlede.
-"anahtar": cümlede doğru cevabı ele veren ipucu nedir. Metindeki ilgili kısmı tırnak içinde göster.
-"cozum": doğru cevabın neden doğru olduğu. 2-3 cümle.
-"eleme": her yanlış şık için bir madde içeren dizi. Her madde "B) ... çünkü ..." biçiminde başlasın ve neden elendiğini açıklasın.
-"ders": bu sorudan çıkarılacak genel kural. Tek cümle, benzer sorularda işe yarasın.`, QSYS, { temp: 0.3 }));
+"ceviri": soru cümlesinin Türkçe çevirisi. Boşluk varsa "...." olarak bırak.
+"soru": soru aslında neyi ölçüyor? Hangi dilbilgisi konusu veya kelime bilgisi sınanıyor? 1-2 cümle.
+"konu": sınanan konunun adı. Kısa: örneğin "passive voice", "zıtlık bağlaçları", "kelime bilgisi".
+"temel": bu konunun temel kuralı. Öğrenci konuyu hiç bilmiyormuş gibi sıfırdan açıkla. 3-5 cümle.
+"anahtar": cümlede doğru cevabı ele veren ipucu. Metindeki ilgili kısmı tırnak içinde göster ve neden ipucu olduğunu söyle.
+"cozum": doğru cevabın neden doğru olduğu. 3-4 cümle, adım adım.
+"eleme": her yanlış şık için bir nesne içeren dizi. Her nesne {"harf": şık harfi, "metin": şıkkın kendisi, "neden": neden elendiği, 1-2 cümle}.
+"ders": bu sorudan çıkarılacak genel kural. Benzer sorularda işe yarayacak somut bir ipucu.
+"kelimeler": soru kökünde ve şıklarda geçen, orta seviye bir öğrencinin bilmeyebileceği İngilizce kelimeler. 3-8 nesne, her biri {"w": kelime, "oku": TÜRKÇE harflerle okunuşu, "tr": Türkçe karşılığı}.`, QSYS, { temp: 0.3 }));
     q.why = d;
     saveQuiz();
+    archive(q);
     showWhy(d);
   } catch (e) {
     $("#qFeed").innerHTML = '<div class="qfeed bad">' + esc(e.message) + "</div>";
@@ -2645,15 +2903,24 @@ DOĞRU CEVAP: ${q.answer}
 }
 
 function showWhy(d) {
-  const right = curQ().pick === curQ().answer;
+  const q = curQ();
+  const right = q.pick === q.answer;
+  const A = k => Array.isArray(d[k]) ? d[k] : [];
   $("#qFeed").innerHTML = `<div class="qfeed ${right ? "good" : "bad"}">
-    ${curQ().pick ? `<b>${right ? "Doğru." : "Yanlış. Doğrusu " + esc(curQ().answer || "?") + "."}</b>` : ""}
-    ${d.soru ? "<h4>Soru ne istiyor</h4><p>" + esc(d.soru) + "</p>" : ""}
+    ${q.pick ? `<b>${right ? "Doğru." : "Yanlış. Doğrusu " + esc(q.answer || "?") + "."}</b>` : ""}
+    ${d.ceviri ? `<div class="qtr">${esc(d.ceviri)}</div>` : ""}
+    ${d.konu ? `<div class="qtopic">${esc(d.konu)}</div>` : ""}
+    ${d.soru ? "<h4>Soru neyi ölçüyor</h4><p>" + esc(d.soru) + "</p>" : ""}
+    ${d.temel ? "<h4>Konunun temeli</h4><p>" + esc(d.temel) + "</p>" : ""}
     ${d.anahtar ? "<h4>Anahtar ipucu</h4><p>" + esc(d.anahtar) + "</p>" : ""}
     ${d.cozum ? "<h4>Neden bu cevap</h4><p>" + esc(d.cozum) + "</p>" : ""}
-    ${Array.isArray(d.eleme) && d.eleme.length ? "<h4>Diğer şıklar neden değil</h4><ul>" + d.eleme.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>" : ""}
+    ${A("eleme").length ? "<h4>Diğer şıklar neden değil</h4>" + A("eleme").map(x =>
+      typeof x === "string" ? `<div class="elm">${esc(x)}</div>`
+      : `<div class="elm"><b>${esc(x.harf || "")})</b> <s>${esc(x.metin || "")}</s><i>${esc(x.neden || "")}</i></div>`).join("") : ""}
     ${d.ders ? "<h4>Aklında kalsın</h4><p>" + esc(d.ders) + "</p>" : ""}
-    ${curQ().fromKey ? "" : '<div class="qwarn">Doğru cevap kitapçık anahtarından değil, model tarafından bulundu.</div>'}
+    ${A("kelimeler").length ? "<h4>Geçen kelimeler</h4>" + A("kelimeler").map(x =>
+      `<div class="voc"><b>${esc(x.w || "")}</b>${x.oku ? `<em>[${esc(x.oku)}]</em>` : ""}<span>${esc(x.tr || "")}</span></div>`).join("") : ""}
+    ${q.fromKey ? "" : '<div class="qwarn">Doğru cevap kitapçık anahtarından değil, model tarafından bulundu.</div>'}
   </div>`;
 }
 
@@ -2665,6 +2932,9 @@ function refreshQuizHome() {
     const done = QZ.qs.filter(q => q.pick).length;
     $("#qResumeMeta").textContent = done + " / " + QZ.qs.length + " çözüldü";
   } else r.classList.add("hid");
+  const ar = $("#qArchWrap");
+  if (SOLVED.length) { ar.classList.remove("hid"); $("#qArchTitle").textContent = SOLVED.length + " çözülmüş soru"; }
+  else ar.classList.add("hid");
   const w = $("#qWrongWrap");
   if (WRONG.length) { w.classList.remove("hid"); $("#qWrongTitle").textContent = WRONG.length + " yanlış soru"; }
   else w.classList.add("hid");
@@ -2702,6 +2972,119 @@ $("#qWrongBtn").addEventListener("click", () => {
   QZ = { title: "Yanlışlarım", qs: WRONG.map(x => Object.assign({}, x.q, { pick: null, why: null })), i: 0, mode: "wrong" };
   saveQuiz(); showQuiz();
 });
+$("#qArchBtn").addEventListener("click", () => {
+  if (!SOLVED.length) return;
+  QZ = { title: "Çözdüklerim", i: 0, mode: "arch",
+    qs: SOLVED.map(x => ({ n: x.n, stem: x.stem, options: x.options, passage: x.passage,
+                           answer: x.answer, fromKey: x.fromKey, pick: null, why: x.why })) };
+  saveQuiz(); showQuiz();
+});
+$("#qArchClear").addEventListener("click", () => {
+  if (!confirm("Çözülmüş soru arşivi silinsin mi?")) return;
+  SOLVED = []; saveSolved(); syncSoon(); refreshQuizHome(); toast("Arşiv temizlendi.");
+});
+
+async function solvedPdf() {
+  if (!SOLVED.length) { toast("Arşiv boş."); return; }
+  busyShow("PDF hazırlanıyor", "Font yükleniyor…");
+  try { await ensureFonts(); }
+  catch (e) { busyHide(); toast("Kalam font dosyaları repoda yok.", 5000); return; }
+
+  const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+  regFonts(doc, KALAM);
+  const stamp = new Date().toLocaleDateString("tr-TR");
+  let page = 0, y = 0;
+  const top = M.t + 3, limit = PH - M.b;
+  const newPage = () => { if (page) doc.addPage(); page++; pdfHeader(doc, stamp, page, "Çözülmüş sorular"); y = top; };
+
+  const put = (txt, o) => {
+    o = o || {};
+    if (!txt) return;
+    doc.setFont("Kalam", o.bold && KALAM.bold ? "bold" : "normal");
+    doc.setFontSize(o.size || 10.4);
+    const lead = o.lead || 5.2;
+    const x0 = M.l + (o.indent || 0);
+    const w = CW - (o.indent || 0);
+    const need = flowRuns(doc, [{ text: txt, c: -1 }], 0, 0, w, lead, false).lines * lead;
+    if (y + need + (o.before || 0) > limit) newPage();
+    y += o.before || 0;
+    const g = o.color || INK;
+    doc.setTextColor(g[0], g[1], g[2]);
+    y = flowRuns(doc, [{ text: txt, c: -1 }], x0, y, w, lead, true, true).y + lead + (o.after || 0);
+  };
+  const sub = t => put(t, { bold: true, size: 9.2, color: RED, lead: 4.6, before: 2.4, after: 0.6 });
+
+  newPage();
+  SOLVED.slice().reverse().forEach((q, i) => {
+    if (y > limit - 45) newPage();
+    const d = q.why || {};
+    const A = k => Array.isArray(d[k]) ? d[k] : [];
+
+    put((i + 1) + ".  " + (q.stem || ""), { bold: true, size: 11.6, lead: 5.9, color: INK, after: 1 });
+    if (d.ceviri) put(d.ceviri, { size: 9.8, color: GREY, indent: 4, lead: 5, after: 1.4 });
+
+    Object.keys(q.options || {}).sort().forEach(k => {
+      const right = k === q.answer;
+      const mine = k === q.pick && !right;
+      put(k + ")  " + q.options[k], { indent: 4, size: 10.2, lead: 5,
+        bold: right, color: right ? GREEN : (mine ? RED : INK) });
+    });
+
+    put("Doğru cevap: " + (q.answer || "?") + (q.fromKey ? "   · kitapçık anahtarı" : "   · model çözümü"),
+      { indent: 4, size: 10.2, color: GREEN, bold: true, before: 1.6, after: 0.6 });
+    if (q.pick && q.pick !== q.answer) put("Sen " + q.pick + " işaretlemiştin.", { indent: 4, size: 9.6, color: RED, lead: 4.8 });
+
+    if (d.konu) put("Konu: " + d.konu, { indent: 4, size: 9.8, color: BLUE, bold: true, before: 1.4 });
+    if (d.soru) { sub("SORU NEYİ ÖLÇÜYOR"); put(d.soru, { indent: 4, color: INK }); }
+    if (d.temel) { sub("KONUNUN TEMELİ"); put(d.temel, { indent: 4, color: INK }); }
+    if (d.anahtar) { sub("ANAHTAR İPUCU"); put(d.anahtar, { indent: 4, color: BLUE }); }
+    if (d.cozum) { sub("NEDEN BU CEVAP"); put(d.cozum, { indent: 4, color: INK }); }
+
+    if (A("eleme").length) {
+      sub("DİĞER ŞIKLAR NEDEN DEĞİL");
+      A("eleme").forEach(x => {
+        if (typeof x === "string") { put("· " + x, { indent: 5, size: 9.8, color: GREY, lead: 4.9 }); return; }
+        put((x.harf || "") + ")  " + (x.metin || ""), { indent: 5, size: 10, color: RED, bold: true, lead: 4.9 });
+        put(x.neden || "", { indent: 8, size: 9.6, color: GREY, lead: 4.8, after: 0.8 });
+      });
+    }
+    if (d.ders) { sub("AKLINDA KALSIN"); put(d.ders, { indent: 4, color: GREEN, bold: true }); }
+
+    if (A("kelimeler").length) {
+      sub("GEÇEN KELİMELER");
+      A("kelimeler").forEach(x => {
+        if (y + 5.6 > limit) newPage();
+        doc.setFont("Kalam", KALAM.bold ? "bold" : "normal");
+        doc.setFontSize(10.4);
+        doc.setTextColor(BLUE[0], BLUE[1], BLUE[2]);
+        doc.text(x.w || "", M.l + 5, y);
+        let cx = M.l + 5 + doc.getTextWidth(x.w || "");
+        if (x.oku) {
+          doc.setFont("Kalam", "normal"); doc.setFontSize(8.8);
+          doc.setTextColor(GREY[0], GREY[1], GREY[2]);
+          doc.text("  [" + x.oku + "]", cx, y);
+          cx += doc.getTextWidth("  [" + x.oku + "]");
+        }
+        doc.setFont("Kalam", "normal"); doc.setFontSize(9.8);
+        doc.setTextColor(INK[0], INK[1], INK[2]);
+        doc.text("  —  " + (x.tr || ""), cx, y);
+        y += 5.2;
+      });
+    }
+
+    y += 3;
+    doc.setDrawColor(228, 224, 214);
+    doc.setLineWidth(0.15);
+    doc.line(M.l, y, PW - M.r, y);
+    y += 5;
+  });
+
+  doc.save("cozulmus-sorular-" + new Date().toISOString().slice(0, 10) + ".pdf");
+  busyHide();
+  toast(SOLVED.length + " soru · " + page + " sayfa hazır.");
+}
+$("#qArchPdf").addEventListener("click", solvedPdf);
+
 $("#qNext").addEventListener("click", () => { if (QZ.i < QZ.qs.length - 1) { QZ.i++; saveQuiz(); drawQ(); } else { toast("Son soru."); endQuiz(); } });
 $("#qPrev").addEventListener("click", () => { if (QZ.i > 0) { QZ.i--; saveQuiz(); drawQ(); } });
 $("#qWhy").addEventListener("click", explainQ);
@@ -2963,8 +3346,9 @@ async function syncNow(quiet) {
     WORDS = mergeList(WORDS, remote && remote.words, x => "w:" + norm(x.w));
     GRAMS = mergeList(GRAMS, remote && remote.grams, x => "g:" + gkey(x.s));
     LIB = mergeList(LIB, remote && remote.lib, x => "l:" + x.id);
-    saveWords(); saveGrams(); saveLib();
-    await fbPush({ v: 1, at: new Date().toISOString(), words: WORDS, grams: GRAMS, lib: LIB, tomb: tombOut() });
+    SOLVED = mergeList(SOLVED, remote && remote.solved, x => x.id);
+    saveWords(); saveGrams(); saveLib(); saveSolved();
+    await fbPush({ v: 1, at: new Date().toISOString(), words: WORDS, grams: GRAMS, lib: LIB, solved: SOLVED, tomb: tombOut() });
     fbSet("last", new Date().toISOString());
     setSyncMsg(syncLabel());
     if (state.screen === "words") renderWords();
@@ -3064,6 +3448,326 @@ function mergeList(local, remote, keyOf) {
     .map(key => map[key])
     .sort((p, q) => (q.add || q.t || 0) - (p.add || p.t || 0));   // ekleme sırası sabit kalsın
 }
+
+
+/* ============================================================
+   Gramer konuları — ders, sohbet, PDF
+   ============================================================ */
+const KONULAR = [
+  ["Zamanlar", [
+    ["Present Simple", "Geniş zaman: alışkanlık, genel doğru, bilimsel gerçek"],
+    ["Present Continuous", "Şimdiki zaman: şu an süren, geçici durum"],
+    ["Present Perfect", "Geçmişte olup şimdiye etkisi süren"],
+    ["Present Perfect Continuous", "Geçmişte başlayıp hâlâ süren eylem"],
+    ["Past Simple", "Bitmiş geçmiş, zamanı belli"],
+    ["Past Continuous", "Geçmişte belli anda süren"],
+    ["Past Perfect", "Geçmişten daha önce olan"],
+    ["Past Perfect Continuous", "Geçmişte bir ana kadar süregelen"],
+    ["Future Simple (will)", "Gelecek: karar, tahmin, söz"],
+    ["Be going to", "Planlanmış gelecek, kanıta dayalı tahmin"],
+    ["Future Continuous / Perfect", "Gelecekte süren ve gelecekte tamamlanacak"]
+  ]],
+  ["Yardımcı ve kip", [
+    ["Modals: can, could, be able to", "Yetenek ve olasılık"],
+    ["Modals: may, might", "İhtimal ve izin"],
+    ["Modals: must, have to, need", "Zorunluluk ve çıkarım"],
+    ["Modals: should, ought to, had better", "Öneri ve tavsiye"],
+    ["Perfect modals", "must have, should have, could have"],
+    ["Passive Voice", "Edilgen yapı, bilimsel metinlerin dili"],
+    ["Causatives", "have/get something done, make, let"]
+  ]],
+  ["Cümlecikler", [
+    ["Relative Clauses", "who, which, that, whose, where"],
+    ["Reduced Relative Clauses", "Kısaltılmış ilgi cümlecikleri"],
+    ["Noun Clauses", "that, whether, what ile isim cümlecikleri"],
+    ["Adverbial Clauses: zaman", "when, while, as, since, until, before, after"],
+    ["Adverbial Clauses: sebep-sonuç", "because, since, as, so that, therefore"],
+    ["Adverbial Clauses: zıtlık", "although, though, whereas, while, despite"],
+    ["Conditionals (if clauses)", "Type 0, 1, 2, 3 ve karma koşul cümleleri"],
+    ["Wish / If only", "Pişmanlık ve dilek yapıları"]
+  ]],
+  ["Fiil yapıları", [
+    ["Gerunds (-ing)", "Fiilden isim, edat sonrası kullanım"],
+    ["Infinitives (to + V1)", "Amaç, sıfat sonrası, fiil sonrası"],
+    ["Gerund mu Infinitive mi", "Anlamı değiştiren fiiller"],
+    ["Participles", "-ing ve -ed sıfat yapıları"],
+    ["Phrasal Verbs", "Sık geçen deyimsel fiiller"]
+  ]],
+  ["Sözcük ve yapı", [
+    ["Articles: a, an, the", "Belirteçler ve sıfır artikel"],
+    ["Quantifiers", "much, many, few, little, some, any"],
+    ["Prepositions: yer", "in, on, at, between, among, beneath"],
+    ["Prepositions: zaman", "in, on, at, during, for, since, by, until"],
+    ["Prepositions: diğer", "of, with, by, through, despite, according to"],
+    ["Dependent Prepositions", "Fiil ve sıfatların aldığı sabit edatlar"],
+    ["Comparatives & Superlatives", "Karşılaştırma ve üstünlük"],
+    ["Conjunctions & Transitions", "however, moreover, thus, whereas"],
+    ["Inversion", "Devrik yapılar: hardly, no sooner, not only"],
+    ["Word Formation", "Önek, sonek ve sözcük türü değişimi"],
+    ["Subject-Verb Agreement", "Özne-yüklem uyumu"],
+    ["Reported Speech", "Dolaylı anlatım"]
+  ]]
+];
+
+let LS = { key: "", title: "", body: "", qa: [] };
+let LSDONE = {};
+try { LSDONE = JSON.parse(store.get("lsdone", "{}")) || {}; } catch (e) { LSDONE = {}; }
+
+function renderKonu() {
+  $("#konuList").innerHTML = KONULAR.map(([grp, items]) =>
+    `<div class="kgrp">${esc(grp)}</div>` + items.map(([n, d]) =>
+      `<button class="kitem" data-k="${esc(n)}" data-d="${esc(d)}">
+         <span style="flex:1"><span class="kn">${esc(n)}</span><span class="kd">${esc(d)}</span></span>
+         ${LSDONE[n] ? '<span class="kb">çalışıldı</span>' : ""}
+       </button>`).join("")).join("");
+  $$("#konuList .kitem").forEach(b => b.addEventListener("click", () => openLesson(b.dataset.k, b.dataset.d)));
+}
+
+const LSYS = `Sen YÖKDİL ve YDS sınavına hazırlanan Türk bir sağlık çalışanına İngilizce dilbilgisi öğreten bir uzmansın.
+Öğrencinin konuyu HİÇ bilmediğini varsay. Sıfırdan, temelden ve ayrıntılı anlat.
+Açıklamaları TÜRKÇE yaz. Örnek cümleleri tıp ve sağlık bilimleri alanından seç.
+SADECE geçerli JSON döndür. Markdown, kod bloğu işareti, açıklama YAZMA.`;
+
+async function openLesson(name, desc) {
+  if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
+  LS = { key: name, title: name, data: null, qa: [] };
+  $("#lsTitle").textContent = name;
+  $("#lsBody").innerHTML = '<p style="color:var(--ink3)"><span class="spin dark"></span> Ders hazırlanıyor, biraz sürebilir…</p>';
+  $("#lesson").classList.add("on");
+  try {
+    const d = parseJson(await gemini(
+      `KONU: ${name} (${desc})
+
+Bu konuyu sıfırdan, temelden ve AYRINTILI anlat. Öğrenci konuyu hiç bilmiyor.
+Şu alanlara sahip JSON döndür:
+
+"mantik": Konunun temel mantığı. Bu yapı NEDEN var, dil neden buna ihtiyaç duyuyor? Türkçedeki karşılığıyla kıyasla. 4-6 cümle, akıcı bir paragraf.
+"kurulus": 3-5 nesne içeren dizi. Her nesne {"ad": biçimin adı (Olumlu/Olumsuz/Soru/Kısaltma gibi), "formul": yapının formülü, "ornek": kısa İngilizce örnek}.
+"kullanim": 3-5 nesne içeren dizi. Her nesne {"baslik": kullanım durumu, "aciklama": ne zaman ve neden böyle kullanılır, 2-3 cümle}.
+"ornekler": 5 nesne içeren dizi. Her nesne {"en": tıp/sağlık alanından İngilizce cümle, "tr": Türkçe çevirisi, "not": bu cümlede yapının nasıl işlediğine dair tek cümlelik açıklama}.
+"sinav": 3-4 maddelik dizi. YÖKDİL'de bu konunun sorulma biçimleri ve soruyu tanıma ipuçları. Her madde somut olsun.
+"hatalar": 3-4 nesne içeren dizi. Her nesne {"yanlis": Türk öğrencilerin kurduğu yanlış cümle, "dogru": doğrusu, "neden": neden yanlış olduğu}.
+"kelimeler": Yukarıdaki örnek cümlelerde geçen, orta seviye bir öğrencinin bilmeyebileceği 5-8 İngilizce kelime. Her biri {"w": kelime, "oku": TÜRKÇE harflerle okunuşu, "tr": Türkçe karşılığı}.`,
+      LSYS, { temp: 0.4 }));
+    LS.data = d;
+    $("#lsBody").innerHTML = lessonHtml(d);
+    LSDONE[name] = Date.now();
+    store.set("lsdone", JSON.stringify(LSDONE));
+  } catch (e) {
+    $("#lsBody").innerHTML = `<p style="color:var(--warn)">${esc(e.message)}</p>`;
+  }
+}
+
+function lessonHtml(d) {
+  const A = k => Array.isArray(d[k]) ? d[k] : [];
+  return (d.mantik ? `<h3>Temel mantık</h3><p>${esc(d.mantik)}</p>` : "") +
+    (A("kurulus").length ? "<h3>Kuruluş</h3>" + A("kurulus").map(x =>
+      `<div class="frm"><b>${esc(x.ad || "")}</b><code>${esc(x.formul || "")}</code><i>${esc(x.ornek || "")}</i></div>`).join("") : "") +
+    (A("kullanim").length ? "<h3>Ne zaman kullanılır</h3>" + A("kullanim").map(x =>
+      `<h4>${esc(x.baslik || "")}</h4><p>${esc(x.aciklama || "")}</p>`).join("") : "") +
+    (A("ornekler").length ? "<h3>Örnekler</h3>" + A("ornekler").map(x =>
+      `<div class="ex">${esc(x.en || "")}<i>${esc(x.tr || "")}</i>${x.not ? `<u>${esc(x.not)}</u>` : ""}</div>`).join("") : "") +
+    (A("sinav").length ? "<h3>Sınavda nasıl çıkar</h3><ul>" + A("sinav").map(x => `<li>${esc(x)}</li>`).join("") + "</ul>" : "") +
+    (A("hatalar").length ? "<h3>Sık yapılan hatalar</h3>" + A("hatalar").map(x =>
+      `<div class="err"><s>${esc(x.yanlis || "")}</s><b>${esc(x.dogru || "")}</b><i>${esc(x.neden || "")}</i></div>`).join("") : "") +
+    (A("kelimeler").length ? "<h3>Geçen kelimeler</h3>" + A("kelimeler").map(x =>
+      `<div class="voc"><b>${esc(x.w || "")}</b>${x.oku ? `<em>[${esc(x.oku)}]</em>` : ""}<span>${esc(x.tr || "")}</span></div>`).join("") : "");
+}
+
+function answerHtml(d) {
+  const A = k => Array.isArray(d[k]) ? d[k] : [];
+  return `<p>${esc(d.cevap || "")}</p>` +
+    A("ornekler").map(x => `<div class="ex">${esc(x.en || "")}<i>${esc(x.tr || "")}</i></div>`).join("") +
+    A("kelimeler").map(x => `<div class="voc"><b>${esc(x.w || "")}</b>${x.oku ? `<em>[${esc(x.oku)}]</em>` : ""}<span>${esc(x.tr || "")}</span></div>`).join("");
+}
+
+async function lessonAsk() {
+  const q = $("#lsQ").value.trim();
+  if (!q) return;
+  if (!state.key) { toast("Gemini anahtarı gerekli."); return; }
+  $("#lsQ").value = "";
+  const body = $("#lsBody");
+  body.insertAdjacentHTML("beforeend", `<div class="qa me"><b>Sorum</b>${esc(q)}</div>`);
+  const slot = document.createElement("div");
+  slot.className = "qa ai";
+  slot.innerHTML = '<span class="spin dark"></span> Düşünüyor…';
+  body.appendChild(slot);
+  try { slot.scrollIntoView({ behavior: "smooth", block: "end" }); } catch (e) {}
+  try {
+    const hist = LS.qa.slice(-4).map(x => "S: " + x.q + "\nC: " + String(x.a).replace(/<[^>]+>/g, " ").slice(0, 400)).join("\n\n");
+    const html = await gemini(
+      `KONU: ${LS.title}
+${hist ? "ÖNCEKİ SORULAR:\n" + hist + "\n" : ""}
+ÖĞRENCİNİN SORUSU: ${q}
+
+Ayrıntılı ve anlaşılır cevapla. Gerekiyorsa örnek cümle ver.
+Şu alanlara sahip JSON döndür:
+"cevap": açıklaman. Akıcı paragraf, 3-6 cümle.
+"ornekler": varsa 1-3 nesne, her biri {"en": İngilizce cümle, "tr": Türkçe çevirisi}. Örnek gerekmiyorsa boş dizi.
+"kelimeler": cevabında geçen zor İngilizce kelimeler, her biri {"w":..., "oku":..., "tr":...}. Yoksa boş dizi.`,
+      LSYS, { temp: 0.4 });
+    const dd = parseJson(html);
+    slot.innerHTML = answerHtml(dd);
+    LS.qa.push({ q, a: dd });
+  } catch (e) {
+    slot.innerHTML = `<span style="color:var(--warn)">${esc(e.message)}</span>`;
+  }
+}
+
+$("#lsSend").addEventListener("click", lessonAsk);
+$("#lsQ").addEventListener("keydown", e => { if (e.key === "Enter") lessonAsk(); });
+$("#lsClose").addEventListener("click", () => { $("#lesson").classList.remove("on"); renderKonu(); });
+
+/* ---------- ders PDF: dört kalem rengiyle ---------- */
+const INK   = [26, 31, 53];      // siyah — normal metin
+const RED   = [178, 32, 62];     // kırmızı — başlık, uyarı, yanlış
+const BLUE  = [26, 82, 156];     // mavi — İngilizce cümle, formül
+const GREEN = [22, 110, 62];     // yeşil — doğru, kural
+const GREY  = [120, 128, 152];   // gri — çeviri, yan bilgi
+
+async function lessonPdf() {
+  if (!LS.data) { toast("Önce bir konu aç."); return; }
+  busyShow("PDF hazırlanıyor", "Font yükleniyor…");
+  try { await ensureFonts(); }
+  catch (e) { busyHide(); toast("Kalam font dosyaları repoda yok.", 5000); return; }
+
+  const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+  regFonts(doc, KALAM);
+  const stamp = new Date().toLocaleDateString("tr-TR");
+  let page = 0, y = 0;
+  const top = M.t + 3, limit = PH - M.b;
+  const newPage = () => { if (page) doc.addPage(); page++; pdfHeader(doc, LS.title + " · " + stamp, page, "Gramer dersi"); y = top; };
+
+  const put = (txt, o) => {
+    o = o || {};
+    if (!txt) return;
+    doc.setFont("Kalam", o.bold && KALAM.bold ? "bold" : "normal");
+    doc.setFontSize(o.size || 10.6);
+    const lead = o.lead || 5.4;
+    const x0 = M.l + (o.indent || 0);
+    const w = CW - (o.indent || 0) - (o.right || 0);
+    const need = flowRuns(doc, [{ text: txt, c: -1 }], 0, 0, w, lead, false).lines * lead;
+    if (y + need + (o.before || 0) > limit) newPage();
+    y += o.before || 0;
+    const g = o.color || INK;
+    doc.setTextColor(g[0], g[1], g[2]);
+    y = flowRuns(doc, [{ text: txt, c: -1 }], x0, y, w, lead, true, true).y + lead + (o.after || 0);
+  };
+  const head = t => {
+    if (y + 16 > limit) newPage();
+    y += 6;
+    doc.setDrawColor(RED[0], RED[1], RED[2]);
+    doc.setLineWidth(0.6);
+    doc.line(M.l, y - 3.6, M.l + 1.6, y - 3.6 + 0.1);
+    put(t, { bold: true, size: 13.5, color: RED, lead: 6.4, after: 1.6, indent: 4 });
+  };
+  const rule = () => { y += 1.5; doc.setDrawColor(228, 224, 214); doc.setLineWidth(0.15); doc.line(M.l, y, PW - M.r, y); y += 3.5; };
+
+  const d = LS.data;
+  const A = k => Array.isArray(d[k]) ? d[k] : [];
+  newPage();
+
+  if (d.mantik) { head("Temel mantık"); put(d.mantik, { color: INK }); }
+
+  if (A("kurulus").length) {
+    head("Kuruluş");
+    A("kurulus").forEach(x => {
+      put(x.ad || "", { bold: true, size: 10.4, color: GREEN, lead: 5, after: 0.4 });
+      put(x.formul || "", { size: 11, color: BLUE, bold: true, indent: 4, lead: 5.2 });
+      if (x.ornek) put(x.ornek, { size: 10, color: GREY, indent: 4, lead: 5, after: 2 });
+    });
+  }
+
+  if (A("kullanim").length) {
+    head("Ne zaman kullanılır");
+    A("kullanim").forEach(x => {
+      put(x.baslik || "", { bold: true, size: 10.6, color: GREEN, lead: 5.2, after: 0.6 });
+      put(x.aciklama || "", { color: INK, indent: 3, after: 2.4 });
+    });
+  }
+
+  if (A("ornekler").length) {
+    head("Örnekler");
+    A("ornekler").forEach((x, i) => {
+      put((i + 1) + ".  " + (x.en || ""), { color: BLUE, bold: true, size: 11, lead: 5.5 });
+      put(x.tr || "", { color: GREY, size: 10, indent: 6, lead: 5 });
+      if (x.not) put("» " + x.not, { color: GREEN, size: 9.6, indent: 6, lead: 4.9, after: 2.4 });
+      else y += 2.4;
+    });
+  }
+
+  if (A("sinav").length) {
+    head("Sınavda nasıl çıkar");
+    A("sinav").forEach(x => put("· " + x, { color: INK, indent: 3, lead: 5.2, after: 1.4 }));
+  }
+
+  if (A("hatalar").length) {
+    head("Sık yapılan hatalar");
+    A("hatalar").forEach(x => {
+      put("×  " + (x.yanlis || ""), { color: RED, size: 10.6, lead: 5.2 });
+      put("»  " + (x.dogru || ""), { color: GREEN, size: 10.6, bold: true, lead: 5.2 });
+      if (x.neden) put(x.neden, { color: GREY, size: 9.8, indent: 6, lead: 4.9, after: 2.6 });
+      else y += 2.6;
+    });
+  }
+
+  if (A("kelimeler").length) {
+    head("Geçen kelimeler");
+    A("kelimeler").forEach(x => {
+      if (y + 6 > limit) newPage();
+      doc.setFont("Kalam", KALAM.bold ? "bold" : "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(BLUE[0], BLUE[1], BLUE[2]);
+      doc.text(x.w || "", M.l + 3, y);
+      let cx = M.l + 3 + doc.getTextWidth(x.w || "");
+      if (x.oku) {
+        doc.setFont("Kalam", "normal");
+        doc.setFontSize(9.2);
+        doc.setTextColor(GREY[0], GREY[1], GREY[2]);
+        doc.text("  [" + x.oku + "]", cx, y);
+        cx += doc.getTextWidth("  [" + x.oku + "]");
+      }
+      doc.setFont("Kalam", "normal");
+      doc.setFontSize(10.4);
+      doc.setTextColor(INK[0], INK[1], INK[2]);
+      doc.text("  —  " + (x.tr || ""), cx, y);
+      y += 5.6;
+    });
+  }
+
+  // soru-cevaplar
+  if (LS.qa.length) {
+    rule();
+    head("Sorularım");
+    LS.qa.forEach(x => {
+      put("S:  " + x.q, { bold: true, color: RED, size: 10.8, lead: 5.3, after: 0.8 });
+      const a = x.a || {};
+      put(a.cevap || "", { color: INK, indent: 3, after: 1.4 });
+      (Array.isArray(a.ornekler) ? a.ornekler : []).forEach(e => {
+        put(e.en || "", { color: BLUE, bold: true, size: 10.4, indent: 5, lead: 5.1 });
+        put(e.tr || "", { color: GREY, size: 9.8, indent: 7, lead: 4.9 });
+      });
+      (Array.isArray(a.kelimeler) ? a.kelimeler : []).forEach(k =>
+        put(k.w + (k.oku ? " [" + k.oku + "]" : "") + " — " + k.tr, { color: GREEN, size: 9.6, indent: 5, lead: 4.9 }));
+      y += 3;
+    });
+  }
+
+  doc.save("gramer-" + LS.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".pdf");
+  busyHide();
+  toast(page + " sayfa hazır.");
+}
+$("#lsPdf").addEventListener("click", lessonPdf);
+
+$$("#gTabs .chip").forEach(c => c.addEventListener("click", () => {
+  $$("#gTabs .chip").forEach(x => x.classList.toggle("on", x === c));
+  const konu = c.dataset.v === "konu";
+  $("#konuView").classList.toggle("hid", !konu);
+  $("#notesView").classList.toggle("hid", konu);
+  $("#gpdfBtn").classList.toggle("hid", konu);
+  $("#gexportBtn").classList.toggle("hid", konu);
+  if (konu) renderKonu();
+}));
 
 /* ============================================================
    Ayarlar / arayüz bağlantıları
