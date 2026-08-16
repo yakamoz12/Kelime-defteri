@@ -569,12 +569,6 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
     <button class="btn ghost" id="studyBtn">Kartlar</button>
     <button class="btn ghost" id="exportBtn">Yedekle</button>
   </div>
-  <div class="hid" id="bulkBox">
-    <textarea class="inp" id="bulkTxt" placeholder="Kelimeleri virgülle ayır:&#10;&#10;adherence, prevalence, impaired, cohort, feasible"></textarea>
-    <div class="field"><button class="btn wide" id="bulkGo">Deftere ekle</button></div>
-    <div class="note">Her kelimenin sözlük hali, Türkçesi, okunuşu ve ailesi otomatik bulunur. 20'şerli gruplar halinde işlenir.</div>
-  </div>
-
   <div class="chips" id="wFilters">
     <button class="chip on" data-f="all">Hepsi</button>
     <button class="chip" data-f="hard">★ İşaretlediklerim</button>
@@ -2099,67 +2093,14 @@ $("#bulkBtn").addEventListener("click", () => {
 });
 $("#bulkCancel").addEventListener("click", () => { $("#bulkBox").classList.add("hid"); $("#bulkText").value = ""; });
 
-$("#bulkGo").addEventListener("click", async () => {
-  const raw = $("#bulkText").value;
-  const words = raw.split(/[,;\n\r\t]+/).map(x => x.trim()).filter(x => x && /[A-Za-z]/.test(x));
-  if (!words.length) { toast("Kelime girilmedi."); return; }
-
-  const uniq = [];
-  const seen = new Set();
-  words.forEach(w => { const k = norm(w); if (!seen.has(k)) { seen.add(k); uniq.push(w); } });
-
-  const fresh = uniq.filter(w => !hasWord(w));
-  const dupe = uniq.length - fresh.length;
-  if (!fresh.length) { toast(uniq.length + " kelimenin hepsi zaten defterde."); return; }
-
-  if (!state.key) {
-    fresh.forEach(w => addWord({ w, tr: "", box: 0, due: Date.now(), t: Date.now(), add: Date.now() }));
-    $("#bulkBox").classList.add("hid"); $("#bulkText").value = "";
-    renderWords();
-    toast(fresh.length + " kelime eklendi. Türkçelerini elle yazman gerekecek.", 4000);
-    return;
-  }
-
-  busyShow("Kelimeler ekleniyor", "");
-  let ok = 0, fail = [];
-  for (let i = 0; i < fresh.length; i++) {
-    if (stopFlag) break;
-    busyUpd(fresh[i] + "  ·  " + (i + 1) + " / " + fresh.length, (i / fresh.length) * 100);
-    try {
-      const d = await lookupWord(fresh[i], "");
-      const key = d.base || fresh[i];
-      if (!hasWord(key)) {
-        addWord({ w: key, form: (norm(key) !== norm(fresh[i]) ? fresh[i] : ""), tr: d.tr, pos: d.pos,
-                  oku: d.oku, family: d.family, box: 0, due: Date.now(),
-                  src: "Toplu ekleme", t: Date.now(), add: Date.now() });
-        ok++;
-      }
-    } catch (e) { fail.push(fresh[i]); }
-    await sleep(260);
-  }
-  busyHide();
-  syncSoon();
-  $("#bulkText").value = fail.length ? fail.join(", ") : "";
-  if (!fail.length) $("#bulkBox").classList.add("hid");
-  renderWords();
-  toast(ok + " kelime eklendi" + (dupe ? " · " + dupe + " zaten vardı" : "") +
-        (fail.length ? " · " + fail.length + " bulunamadı, kutuda kaldı" : ""), 5000);
-});
-
-
-$("#bulkBtn").addEventListener("click", () => {
-  $("#bulkBox").classList.toggle("hid");
-  if (!$("#bulkBox").classList.contains("hid")) $("#bulkTxt").focus();
-});
-
 async function lookupMany(words) {
   const list = words.map((w, i) => (i + 1) + ") " + w).join("\n");
   const d = parseJson(await gemini(
     `Aşağıdaki İngilizce kelimeleri sözlük gibi çöz.
-Anahtarları kelimenin KENDİSİ (sana verildiği hali) olan bir JSON nesnesi döndür.
+Anahtarları kelimenin SANA VERİLDİĞİ hali olan bir JSON nesnesi döndür.
 Her değer şu alanlara sahip olsun:
-"base": sözlük hali. Çekim eklerini at (-ed, -ing, -s). Ama kelime çekimli haliyle ayrı bir sözcükse (impaired, emerging, underlying gibi sıfatlar) olduğu gibi bırak. Düzensiz fiillerde mastarı ver.
-"tr": sözlük halinin Türkçe karşılığı. En çok 3 karşılık, virgülle ayrılmış. Çekim ekini yansıtma.
+"base": sözlük hali. Çekim eklerini at (-ed, -ing, -s, -es). Ama kelime çekimli haliyle ayrı bir sözcük olarak yerleşmişse (impaired, emerging, underlying gibi sıfatlar) olduğu gibi bırak. Düzensiz fiillerde mastarı ver: found -> find.
+"tr": sözlük halinin Türkçe karşılığı. En çok 3 karşılık, virgülle ayrılmış. SADECE karşılık yaz. Çekim ekini yansıtma: "kaydedildi" değil "kaydetmek".
 "pos": sözcük türü. Tek kelime: isim, fiil, sıfat, zarf, edat, bağlaç.
 "oku": sözlük halinin okunuşu, TÜRKÇE harflerle. IPA kullanma.
 
@@ -2179,12 +2120,13 @@ ${list}`,
 }
 
 $("#bulkGo").addEventListener("click", async () => {
-  const raw = $("#bulkTxt").value.trim();
+  const raw = $("#bulkText").value.trim();
   if (!raw) { toast("Önce kelimeleri yaz."); return; }
   if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
 
   const seen = new Set();
-  const words = raw.split(/[,;\n\r\t]+/).map(x => x.trim().replace(/^[^A-Za-z]+|[^A-Za-z-]+$/g, ""))
+  const words = raw.split(/[,;\n\r\t]+/)
+    .map(x => x.trim().replace(/^[^A-Za-z]+|[^A-Za-z-]+$/g, ""))
     .filter(x => x.length > 1)
     .filter(x => { const k = x.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
 
@@ -2192,7 +2134,8 @@ $("#bulkGo").addEventListener("click", async () => {
   if (!confirm(words.length + " kelime eklenecek.\n\n" + words.slice(0, 12).join(", ") + (words.length > 12 ? "…" : ""))) return;
 
   busyShow("Kelimeler ekleniyor", "");
-  let added = 0, skipped = 0, failed = 0;
+  let added = 0, skipped = 0;
+  const fail = [];
   for (let i = 0; i < words.length; i += 20) {
     if (stopFlag) break;
     const grp = words.slice(i, i + 20);
@@ -2200,7 +2143,8 @@ $("#bulkGo").addEventListener("click", async () => {
     try {
       const map = await lookupMany(grp);
       grp.forEach(w => {
-        const v = map[w.toLowerCase()] || { base: w, tr: "", pos: "", oku: "" };
+        const v = map[w.toLowerCase()];
+        if (!v) { fail.push(w); return; }
         const key = v.base || w;
         if (hasWord(key)) { skipped++; return; }
         const now = Date.now();
@@ -2208,15 +2152,17 @@ $("#bulkGo").addEventListener("click", async () => {
                   box: 0, due: now, src: "Toplu ekleme", t: now, add: now });
         added++;
       });
-    } catch (e) { failed += grp.length; }
+    } catch (e) { grp.forEach(w => fail.push(w)); }
     await sleep(250);
   }
   busyHide();
-  $("#bulkTxt").value = "";
-  $("#bulkBox").classList.add("hid");
+  $("#bulkText").value = fail.length ? fail.join(", ") : "";
+  if (!fail.length) $("#bulkBox").classList.add("hid");
   renderWords();
   syncSoon();
-  toast(added + " eklendi" + (skipped ? " · " + skipped + " zaten vardı" : "") + (failed ? " · " + failed + " olmadı" : ""), 4500);
+  toast(added + " eklendi" +
+    (skipped ? " · " + skipped + " zaten vardı" : "") +
+    (fail.length ? " · " + fail.length + " olmadı, kutuda kaldı" : ""), 4500);
 });
 
 /* ---------- elle kelime ekleme ---------- */
