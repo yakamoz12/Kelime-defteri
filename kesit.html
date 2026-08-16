@@ -315,12 +315,49 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .lsbody .ex{font-family:"Source Serif 4",serif;background:var(--card2);border-left:2px solid var(--acc);
   border-radius:0 10px 10px 0;padding:11px 13px;margin:10px 0;font-size:15.5px;line-height:1.55}
 .lsbody .ex i{display:block;color:var(--ink2);font-style:normal;font-size:14px;margin-top:4px}
+.sig{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-top:1px solid var(--line2);font-size:14.5px}
+.sig b{font-family:"Source Serif 4",serif;font-size:15px;color:var(--acc-ink);flex:none;min-width:96px}
+.sig i{font-style:normal;color:var(--ink2);font-size:13.5px;line-height:1.45}
+.cmp{background:var(--card2);border-radius:12px;padding:13px;margin:0 0 11px}
+.cmp b{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--deep);font-weight:700;margin-bottom:6px}
+.cmp p{margin:0 0 8px;font-size:14.5px;line-height:1.55;color:var(--ink)}
+.cmp .ex{margin:6px 0 0;border-left-color:var(--ok)}
+.cmp .ex.alt{border-left-color:var(--acc)}
+.prq{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px;margin:0 0 10px}
+.pst{font-family:"Source Serif 4",serif;font-size:15.5px;line-height:1.5;font-weight:600;margin-bottom:9px}
+.pop{display:block;width:100%;text-align:left;border:1.5px solid var(--line);border-radius:10px;
+  padding:9px 11px;margin-bottom:6px;font-size:14.5px;background:var(--card2)}
+.pop.ok{border-color:var(--ok);background:var(--ok-soft);font-weight:600}
+.pop.no{border-color:var(--acc);background:var(--acc-soft)}
+.pfb{font-size:13.5px;line-height:1.55;color:var(--ink2);margin-top:4px}
+.pfb b{display:block;margin-bottom:3px}
+.pfb b.g{color:var(--ok)}
+.pfb b.r{color:var(--acc-ink)}
 .lsask{position:sticky;bottom:0;background:var(--bg);padding:10px 0 calc(6px + env(safe-area-inset-bottom));
   display:flex;gap:8px;border-top:1px solid var(--line)}
 .qa{border-radius:13px;padding:12px 14px;margin:12px 0;font-size:15px;line-height:1.6}
 .qa.me{background:var(--deep-soft);color:var(--ink)}
 .qa.me b{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--deep);margin-bottom:4px;font-weight:700}
 .qa.ai{background:var(--card);border:1px solid var(--line)}
+
+/* ---------- sesli okuma ---------- */
+.plcount{font-size:13px;color:var(--ink2);text-align:center;margin-bottom:10px;font-weight:600}
+.plcard{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh);
+  min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:28px 20px}
+.plw{font-family:"Source Serif 4",serif;font-size:32px;font-weight:600;line-height:1.2}
+.ploku{font-size:14px;color:var(--ink3);font-style:italic;margin-top:6px}
+.pltr{font-size:22px;color:var(--acc-ink);font-weight:600;margin-top:16px;min-height:28px;opacity:.25;transition:opacity .2s}
+.pltr.on{opacity:1}
+.plw.hot{color:var(--acc)}
+.selbar{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));z-index:41;
+  display:flex;gap:8px;padding:10px 14px;background:var(--card);border-top:1px solid var(--line);
+  box-shadow:0 -4px 20px #0000001a}
+.selbar .btn{flex:1;text-align:center;font-size:14px;padding:11px 8px}
+.witem .chk{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);flex:none;
+  display:grid;place-items:center;font-size:14px;color:transparent;margin-top:2px}
+.witem.picked .chk{background:var(--acc);border-color:var(--acc);color:#fff}
+.witem.picked{border-color:var(--acc)}
 
 /* ---------- kartlar ---------- */
 #flash .fcard{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh);
@@ -525,15 +562,31 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 <section class="screen max" id="words">
   <h1 class="lede" style="font-size:22px;margin-bottom:14px">Kelime defteri</h1>
   <div class="wbar">
-    <button class="btn" id="addBtn">Kelime ekle</button>
+    <button class="btn" id="addBtn">+ Kelime</button>
+    <button class="btn ghost" id="bulkBtn">Toplu ekle</button>
+    <button class="btn ghost" id="speakBtn">Seslendir</button>
     <button class="btn ghost" id="pdfBtn">PDF</button>
     <button class="btn ghost" id="studyBtn">Kartlar</button>
     <button class="btn ghost" id="exportBtn">Yedekle</button>
   </div>
+  <div class="hid" id="bulkBox">
+    <textarea class="inp" id="bulkTxt" placeholder="Kelimeleri virgülle ayır:&#10;&#10;adherence, prevalence, impaired, cohort, feasible"></textarea>
+    <div class="field"><button class="btn wide" id="bulkGo">Deftere ekle</button></div>
+    <div class="note">Her kelimenin sözlük hali, Türkçesi, okunuşu ve ailesi otomatik bulunur. 20'şerli gruplar halinde işlenir.</div>
+  </div>
+
   <div class="chips" id="wFilters">
     <button class="chip on" data-f="all">Hepsi</button>
     <button class="chip" data-f="hard">★ İşaretlediklerim</button>
     <button class="chip" data-f="due">Bugün tekrar</button>
+  </div>
+  <div id="bulkBox" class="hid" style="margin-bottom:14px">
+    <textarea class="inp" id="bulkText" style="min-height:120px" placeholder="Kelimeleri virgülle ayır:&#10;exacerbate, adherence, prevalence, impaired"></textarea>
+    <div class="field">
+      <button class="btn" id="bulkGo" style="flex:1">Deftere ekle</button>
+      <button class="btn ghost" id="bulkCancel">Vazgeç</button>
+    </div>
+    <div class="note">Her kelime için sözlük hali, Türkçesi, okunuşu ve ailesi otomatik bulunur. Çok kelime girersen biraz sürer.</div>
   </div>
   <input class="inp" id="wSearch" placeholder="Ara…" style="margin-bottom:14px" autocapitalize="off">
   <div id="wList"></div>
@@ -563,6 +616,9 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 <div class="modal" id="lesson">
   <div class="mh">
     <h2 id="lsTitle">Konu</h2>
+    <button class="iconbtn" id="lsRedo" aria-label="Yeniden hazırla">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9"/><path d="M3 4v5h5"/></svg>
+    </button>
     <button class="iconbtn" id="lsPdf" aria-label="PDF">
       <svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
     </button>
@@ -577,6 +633,34 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   </div>
 </div>
 </main>
+
+<!-- ============ SESLİ OKUMA ============ -->
+<div class="modal" id="player">
+  <div class="mh">
+    <h2>Sesli tekrar</h2>
+    <button class="iconbtn" id="plClose" aria-label="Kapat">
+      <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="plcount" id="plCount"></div>
+  <div class="plcard">
+    <div class="plw" id="plW"></div>
+    <div class="ploku" id="plOku"></div>
+    <div class="pltr" id="plTr"></div>
+  </div>
+  <div class="field" style="margin-top:18px">
+    <button class="btn ghost" id="plPrev" style="flex:0 0 auto">‹</button>
+    <button class="btn" id="plPlay" style="flex:1">Duraklat</button>
+    <button class="btn ghost" id="plNext" style="flex:0 0 auto">›</button>
+  </div>
+  <div class="row" style="margin-top:20px">
+    <div class="sw"><span>Okuma hızı</span><input type="range" id="plRate" min="0.5" max="1.2" step="0.05" style="width:150px;accent-color:var(--acc)"></div>
+    <div class="sw" style="margin-top:14px"><span>Aralardaki bekleme</span><input type="range" id="plGap" min="0" max="2500" step="250" style="width:150px;accent-color:var(--acc)"></div>
+    <div class="sw" style="margin-top:16px"><span>Türkçesini de oku</span><div class="toggle on" id="plTrTog"></div></div>
+    <div class="sw" style="margin-top:16px"><span>Ekran açık kalsın</span><div class="toggle on" id="plWake"></div></div>
+  </div>
+  <div class="note" style="margin-top:18px">Liste bitince başa döner, sen durdurana kadar devam eder. Uygulamadan çıkarsan ses durur.</div>
+</div>
 
 <!-- ============ KART ÇALIŞMASI ============ -->
 <div class="modal" id="flash">
@@ -1900,7 +1984,8 @@ function renderWords() {
   }
 
   box.innerHTML = list.map(x => `
-    <div class="witem" data-w="${esc(x.w)}">
+    <div class="witem${selMode && SEL.has(x.w) ? " picked" : ""}" data-w="${esc(x.w)}">
+      ${selMode ? '<div class="chk">✓</div>' : ""}
       <div class="wtxt">
         <div class="we">${esc(x.w)}${x.oku ? ' <span class="w-oku" style="font-size:14px;font-weight:400">[' + esc(x.oku) + "]</span>" : ""}</div>
         <div class="wt">${esc(x.tr || "")}</div>
@@ -1938,10 +2023,14 @@ function renderWords() {
       if (g.dataset.k === "fam") famFor(w, el, g);
       else genFor(w, el, g);
     }));
-    el.querySelector(".wtxt").addEventListener("click", () => el.classList.toggle("open"));
+    el.querySelector(".wtxt").addEventListener("click", () => {
+      if (selMode) { if (SEL.has(w)) SEL.delete(w); else SEL.add(w); renderWords(); return; }
+      el.classList.toggle("open");
+    });
     const again = el.querySelector(".again");
     if (again) again.addEventListener("click", e => { e.stopPropagation(); genFor(w, el); });
   });
+  selBar();
 }
 
 async function famFor(word, el, btn) {
@@ -2001,6 +2090,134 @@ $$("#wFilters .chip").forEach(c => c.addEventListener("click", () => {
   wFilter = c.dataset.f;
   renderWords();
 }));
+
+/* ---------- toplu kelime ekleme ---------- */
+$("#bulkBtn").addEventListener("click", () => {
+  const b = $("#bulkBox");
+  b.classList.toggle("hid");
+  if (!b.classList.contains("hid")) $("#bulkText").focus();
+});
+$("#bulkCancel").addEventListener("click", () => { $("#bulkBox").classList.add("hid"); $("#bulkText").value = ""; });
+
+$("#bulkGo").addEventListener("click", async () => {
+  const raw = $("#bulkText").value;
+  const words = raw.split(/[,;\n\r\t]+/).map(x => x.trim()).filter(x => x && /[A-Za-z]/.test(x));
+  if (!words.length) { toast("Kelime girilmedi."); return; }
+
+  const uniq = [];
+  const seen = new Set();
+  words.forEach(w => { const k = norm(w); if (!seen.has(k)) { seen.add(k); uniq.push(w); } });
+
+  const fresh = uniq.filter(w => !hasWord(w));
+  const dupe = uniq.length - fresh.length;
+  if (!fresh.length) { toast(uniq.length + " kelimenin hepsi zaten defterde."); return; }
+
+  if (!state.key) {
+    fresh.forEach(w => addWord({ w, tr: "", box: 0, due: Date.now(), t: Date.now(), add: Date.now() }));
+    $("#bulkBox").classList.add("hid"); $("#bulkText").value = "";
+    renderWords();
+    toast(fresh.length + " kelime eklendi. Türkçelerini elle yazman gerekecek.", 4000);
+    return;
+  }
+
+  busyShow("Kelimeler ekleniyor", "");
+  let ok = 0, fail = [];
+  for (let i = 0; i < fresh.length; i++) {
+    if (stopFlag) break;
+    busyUpd(fresh[i] + "  ·  " + (i + 1) + " / " + fresh.length, (i / fresh.length) * 100);
+    try {
+      const d = await lookupWord(fresh[i], "");
+      const key = d.base || fresh[i];
+      if (!hasWord(key)) {
+        addWord({ w: key, form: (norm(key) !== norm(fresh[i]) ? fresh[i] : ""), tr: d.tr, pos: d.pos,
+                  oku: d.oku, family: d.family, box: 0, due: Date.now(),
+                  src: "Toplu ekleme", t: Date.now(), add: Date.now() });
+        ok++;
+      }
+    } catch (e) { fail.push(fresh[i]); }
+    await sleep(260);
+  }
+  busyHide();
+  syncSoon();
+  $("#bulkText").value = fail.length ? fail.join(", ") : "";
+  if (!fail.length) $("#bulkBox").classList.add("hid");
+  renderWords();
+  toast(ok + " kelime eklendi" + (dupe ? " · " + dupe + " zaten vardı" : "") +
+        (fail.length ? " · " + fail.length + " bulunamadı, kutuda kaldı" : ""), 5000);
+});
+
+
+$("#bulkBtn").addEventListener("click", () => {
+  $("#bulkBox").classList.toggle("hid");
+  if (!$("#bulkBox").classList.contains("hid")) $("#bulkTxt").focus();
+});
+
+async function lookupMany(words) {
+  const list = words.map((w, i) => (i + 1) + ") " + w).join("\n");
+  const d = parseJson(await gemini(
+    `Aşağıdaki İngilizce kelimeleri sözlük gibi çöz.
+Anahtarları kelimenin KENDİSİ (sana verildiği hali) olan bir JSON nesnesi döndür.
+Her değer şu alanlara sahip olsun:
+"base": sözlük hali. Çekim eklerini at (-ed, -ing, -s). Ama kelime çekimli haliyle ayrı bir sözcükse (impaired, emerging, underlying gibi sıfatlar) olduğu gibi bırak. Düzensiz fiillerde mastarı ver.
+"tr": sözlük halinin Türkçe karşılığı. En çok 3 karşılık, virgülle ayrılmış. Çekim ekini yansıtma.
+"pos": sözcük türü. Tek kelime: isim, fiil, sıfat, zarf, edat, bağlaç.
+"oku": sözlük halinin okunuşu, TÜRKÇE harflerle. IPA kullanma.
+
+${list}`,
+    `Sen tıp ve sağlık bilimleri sözlüğüsün. SADECE geçerli JSON döndür, başka hiçbir şey yazma.`, { temp: 0.1 }));
+  const out = {};
+  Object.keys(d || {}).forEach(k => {
+    const v = d[k] || {};
+    out[k.toLowerCase().trim()] = {
+      base: String(v.base || "").trim() || k,
+      tr: String(v.tr || "").trim(),
+      pos: String(v.pos || "").trim().toLowerCase(),
+      oku: String(v.oku || "").trim()
+    };
+  });
+  return out;
+}
+
+$("#bulkGo").addEventListener("click", async () => {
+  const raw = $("#bulkTxt").value.trim();
+  if (!raw) { toast("Önce kelimeleri yaz."); return; }
+  if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
+
+  const seen = new Set();
+  const words = raw.split(/[,;\n\r\t]+/).map(x => x.trim().replace(/^[^A-Za-z]+|[^A-Za-z-]+$/g, ""))
+    .filter(x => x.length > 1)
+    .filter(x => { const k = x.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+
+  if (!words.length) { toast("Geçerli kelime bulunamadı."); return; }
+  if (!confirm(words.length + " kelime eklenecek.\n\n" + words.slice(0, 12).join(", ") + (words.length > 12 ? "…" : ""))) return;
+
+  busyShow("Kelimeler ekleniyor", "");
+  let added = 0, skipped = 0, failed = 0;
+  for (let i = 0; i < words.length; i += 20) {
+    if (stopFlag) break;
+    const grp = words.slice(i, i + 20);
+    busyUpd((i + grp.length) + " / " + words.length, ((i + grp.length) / words.length) * 100);
+    try {
+      const map = await lookupMany(grp);
+      grp.forEach(w => {
+        const v = map[w.toLowerCase()] || { base: w, tr: "", pos: "", oku: "" };
+        const key = v.base || w;
+        if (hasWord(key)) { skipped++; return; }
+        const now = Date.now();
+        addWord({ w: key, form: (key.toLowerCase() !== w.toLowerCase() ? w : ""), tr: v.tr, pos: v.pos, oku: v.oku,
+                  box: 0, due: now, src: "Toplu ekleme", t: now, add: now });
+        added++;
+      });
+    } catch (e) { failed += grp.length; }
+    await sleep(250);
+  }
+  busyHide();
+  $("#bulkTxt").value = "";
+  $("#bulkBox").classList.add("hid");
+  renderWords();
+  syncSoon();
+  toast(added + " eklendi" + (skipped ? " · " + skipped + " zaten vardı" : "") + (failed ? " · " + failed + " olmadı" : ""), 4500);
+});
 
 /* ---------- elle kelime ekleme ---------- */
 $("#addBtn").addEventListener("click", async () => {
@@ -3450,6 +3667,152 @@ function mergeList(local, remote, keyOf) {
 }
 
 
+
+/* ============================================================
+   Sesli okuma — telefonun kendi ses motoru, internet gerekmez
+   ============================================================ */
+let selMode = false;
+const SEL = new Set();
+let PL = { list: [], i: 0, on: false, tr: true, rate: 0.85, gap: 900, wake: true, lock: null, tick: 0 };
+PL.rate = parseFloat(store.get("pl_rate", "0.85"));
+PL.gap = parseInt(store.get("pl_gap", "900"), 10);
+PL.tr = store.get("pl_tr", "1") === "1";
+PL.wake = store.get("pl_wake", "1") === "1";
+
+function voices() { try { return speechSynthesis.getVoices() || []; } catch (e) { return []; } }
+function pickVoice(pref) {
+  const v = voices();
+  return v.find(x => (x.lang || "").toLowerCase().startsWith(pref)) || null;
+}
+
+function say(text, lang, rate) {
+  return new Promise(resolve => {
+    if (!text || !window.speechSynthesis) { resolve(); return; }
+    let done = false;
+    const fin = () => { if (!done) { done = true; resolve(); } };
+    try {
+      const u = new SpeechSynthesisUtterance(String(text));
+      const v = pickVoice(lang);
+      if (v) u.voice = v;
+      u.lang = v ? v.lang : (lang === "tr" ? "tr-TR" : "en-US");
+      u.rate = rate;
+      u.onend = fin;
+      u.onerror = fin;
+      speechSynthesis.speak(u);
+      // güvenlik ağı: bazı tarayıcılar onend'i tetiklemez
+      setTimeout(fin, 1200 + String(text).length * 120);
+    } catch (e) { fin(); }
+  });
+}
+
+async function wakeOn() {
+  if (!PL.wake || !navigator.wakeLock) return;
+  try { PL.lock = await navigator.wakeLock.request("screen"); } catch (e) {}
+}
+function wakeOff() { try { if (PL.lock) { PL.lock.release(); PL.lock = null; } } catch (e) {} }
+
+function drawPl() {
+  const x = PL.list[PL.i];
+  if (!x) return;
+  $("#plCount").textContent = (PL.i + 1) + " / " + PL.list.length;
+  $("#plW").textContent = x.w;
+  $("#plOku").textContent = x.oku ? "[" + x.oku + "]" : "";
+  $("#plTr").textContent = x.tr || "";
+  $("#plTr").classList.remove("on");
+}
+
+async function plLoop() {
+  const myTick = ++PL.tick;
+  while (PL.on && PL.tick === myTick && PL.list.length) {
+    const x = PL.list[PL.i];
+    drawPl();
+    $("#plW").classList.add("hot");
+    await say(x.w, "en", PL.rate);
+    $("#plW").classList.remove("hot");
+    if (!PL.on || PL.tick !== myTick) break;
+    await sleep(Math.round(PL.gap * 0.6));
+    if (!PL.on || PL.tick !== myTick) break;
+    if (PL.tr && x.tr) {
+      $("#plTr").classList.add("on");
+      await say(x.tr, "tr", PL.rate);
+      if (!PL.on || PL.tick !== myTick) break;
+    }
+    await sleep(PL.gap);
+    if (!PL.on || PL.tick !== myTick) break;
+    PL.i = (PL.i + 1) % PL.list.length;      // sona gelince başa dön
+  }
+}
+
+function plStart(list) {
+  if (!window.speechSynthesis) { toast("Bu tarayıcı sesli okumayı desteklemiyor."); return; }
+  PL.list = list; PL.i = 0; PL.on = true;
+  $("#player").classList.add("on");
+  $("#plPlay").textContent = "Duraklat";
+  $("#plRate").value = PL.rate;
+  $("#plGap").value = PL.gap;
+  $("#plTrTog").classList.toggle("on", PL.tr);
+  $("#plWake").classList.toggle("on", PL.wake);
+  drawPl();
+  wakeOn();
+  plLoop();
+}
+
+function plStop() {
+  PL.on = false; PL.tick++;
+  try { speechSynthesis.cancel(); } catch (e) {}
+  wakeOff();
+}
+
+$("#plClose").addEventListener("click", () => { plStop(); $("#player").classList.remove("on"); });
+$("#plPlay").addEventListener("click", () => {
+  if (PL.on) { plStop(); $("#plPlay").textContent = "Devam et"; }
+  else { PL.on = true; $("#plPlay").textContent = "Duraklat"; wakeOn(); plLoop(); }
+});
+$("#plNext").addEventListener("click", () => { plStop(); PL.i = (PL.i + 1) % PL.list.length; PL.on = true; $("#plPlay").textContent = "Duraklat"; plLoop(); });
+$("#plPrev").addEventListener("click", () => { plStop(); PL.i = (PL.i - 1 + PL.list.length) % PL.list.length; PL.on = true; $("#plPlay").textContent = "Duraklat"; plLoop(); });
+$("#plRate").addEventListener("input", e => { PL.rate = parseFloat(e.target.value); store.set("pl_rate", String(PL.rate)); });
+$("#plGap").addEventListener("input", e => { PL.gap = parseInt(e.target.value, 10); store.set("pl_gap", String(PL.gap)); });
+$("#plTrTog").addEventListener("click", () => { PL.tr = !PL.tr; store.set("pl_tr", PL.tr ? "1" : "0"); $("#plTrTog").classList.toggle("on", PL.tr); });
+$("#plWake").addEventListener("click", () => {
+  PL.wake = !PL.wake; store.set("pl_wake", PL.wake ? "1" : "0");
+  $("#plWake").classList.toggle("on", PL.wake);
+  if (PL.wake) wakeOn(); else wakeOff();
+});
+document.addEventListener("visibilitychange", () => { if (document.hidden && PL.on) { plStop(); const b = $("#plPlay"); if (b) b.textContent = "Devam et"; } });
+
+/* ---------- seçim modu ---------- */
+function selBar() {
+  let bar = $("#selBar");
+  if (!selMode) { if (bar) bar.remove(); return; }
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.className = "selbar";
+    bar.id = "selBar";
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML = `<button class="btn ghost" id="selAll">Görünenleri seç</button>
+    <button class="btn ghost" id="selNone">Temizle</button>
+    <button class="btn" id="selPlay">Oku (${SEL.size})</button>`;
+  $("#selAll").addEventListener("click", () => {
+    $$("#wList .witem").forEach(el => SEL.add(el.dataset.w));
+    renderWords();
+  });
+  $("#selNone").addEventListener("click", () => { SEL.clear(); renderWords(); });
+  $("#selPlay").addEventListener("click", () => {
+    const list = WORDS.filter(x => SEL.has(x.w));
+    if (!list.length) { toast("Önce kelime seç."); return; }
+    plStart(list);
+  });
+}
+
+$("#speakBtn").addEventListener("click", () => {
+  selMode = !selMode;
+  $("#speakBtn").classList.toggle("on", selMode);
+  if (!selMode) SEL.clear();
+  renderWords();
+  if (selMode) toast("Okunacak kelimeleri seç, sonra Oku'ya bas.", 3000);
+});
+
 /* ============================================================
    Gramer konuları — ders, sohbet, PDF
    ============================================================ */
@@ -3509,7 +3872,35 @@ const KONULAR = [
   ]]
 ];
 
-let LS = { key: "", title: "", body: "", qa: [] };
+let LS = { key: "", title: "", data: null, qa: [] };
+
+/* ---------- ders önbelleği: bir kez üret, hep sakla ---------- */
+const lkey = n => "ls_" + String(n).toLowerCase().replace(/[^a-z0-9]+/g, "_");
+
+function lessonLocal(name) {
+  try { return JSON.parse(store.get(lkey(name), "null")); } catch (e) { return null; }
+}
+function lessonSaveLocal(name, d) {
+  try { store.set(lkey(name), JSON.stringify(d)); } catch (e) {}
+}
+async function lessonRemote(name) {
+  if (!FB.refresh) return null;
+  try {
+    const tok = await fbToken();
+    const r = await fetch(fbNode("lessons/" + lkey(name), tok), { cache: "no-store" });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) { return null; }
+}
+async function lessonPush(name, d) {
+  if (!FB.refresh) return;
+  try {
+    const tok = await fbToken();
+    await fetch(fbNode("lessons/" + lkey(name), tok), {
+      method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d)
+    });
+  } catch (e) {}
+}
 let LSDONE = {};
 try { LSDONE = JSON.parse(store.get("lsdone", "{}")) || {}; } catch (e) { LSDONE = {}; }
 
@@ -3518,7 +3909,7 @@ function renderKonu() {
     `<div class="kgrp">${esc(grp)}</div>` + items.map(([n, d]) =>
       `<button class="kitem" data-k="${esc(n)}" data-d="${esc(d)}">
          <span style="flex:1"><span class="kn">${esc(n)}</span><span class="kd">${esc(d)}</span></span>
-         ${LSDONE[n] ? '<span class="kb">çalışıldı</span>' : ""}
+         ${lessonLocal(n) ? '<span class="kb">hazır</span>' : (LSDONE[n] ? '<span class="kb">çalışıldı</span>' : "")}
        </button>`).join("")).join("");
   $$("#konuList .kitem").forEach(b => b.addEventListener("click", () => openLesson(b.dataset.k, b.dataset.d)));
 }
@@ -3532,8 +3923,34 @@ async function openLesson(name, desc) {
   if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
   LS = { key: name, title: name, data: null, qa: [] };
   $("#lsTitle").textContent = name;
-  $("#lsBody").innerHTML = '<p style="color:var(--ink3)"><span class="spin dark"></span> Ders hazırlanıyor, biraz sürebilir…</p>';
   $("#lesson").classList.add("on");
+
+  // 1) bu cihazda var mı
+  let cached = lessonLocal(name);
+  if (cached && cached.mantik) {
+    LS.data = cached;
+    $("#lsBody").innerHTML = lessonHtml(cached);
+    bindPractice();
+    return;
+  }
+
+  // 2) bulutta var mı
+  $("#lsBody").innerHTML = '<p style="color:var(--ink3)"><span class="spin dark"></span> Aranıyor…</p>';
+  cached = await lessonRemote(name);
+  if (cached && cached.mantik) {
+    LS.data = cached;
+    lessonSaveLocal(name, cached);
+    $("#lsBody").innerHTML = lessonHtml(cached);
+    bindPractice();
+    LSDONE[name] = Date.now();
+    store.set("lsdone", JSON.stringify(LSDONE));
+    renderKonu();
+    return;
+  }
+
+  // 3) yoksa üret
+  if (!state.key) { $("#lsBody").innerHTML = '<p style="color:var(--warn)">Bu konu henüz hazırlanmamış ve Gemini anahtarı yok.</p>'; return; }
+  $("#lsBody").innerHTML = '<p style="color:var(--ink3)"><span class="spin dark"></span> Ders hazırlanıyor, ilk seferde biraz sürer. Bir daha beklemeyeceksin.</p>';
   try {
     const d = parseJson(await gemini(
       `KONU: ${name} (${desc})
@@ -3547,10 +3964,16 @@ Bu konuyu sıfırdan, temelden ve AYRINTILI anlat. Öğrenci konuyu hiç bilmiyo
 "ornekler": 5 nesne içeren dizi. Her nesne {"en": tıp/sağlık alanından İngilizce cümle, "tr": Türkçe çevirisi, "not": bu cümlede yapının nasıl işlediğine dair tek cümlelik açıklama}.
 "sinav": 3-4 maddelik dizi. YÖKDİL'de bu konunun sorulma biçimleri ve soruyu tanıma ipuçları. Her madde somut olsun.
 "hatalar": 3-4 nesne içeren dizi. Her nesne {"yanlis": Türk öğrencilerin kurduğu yanlış cümle, "dogru": doğrusu, "neden": neden yanlış olduğu}.
+"sinyal": Bu konuyu ele veren tuzak/sinyal sözcükler. 4-8 nesne, her biri {"w": İngilizce sinyal sözcük veya kalıp, "not": bu sözcüğü görünce ne düşünmeli, tek cümle}.
+"karisan": Bu konuyla karıştırılan yapılar. 2-3 nesne, her biri {"ile": karıştırılan yapının adı, "fark": aradaki farkın ne olduğu 2-3 cümle, "ornek1": bu konuya ait örnek cümle, "ornek2": karıştırılan yapıya ait örnek cümle}.
+"sorular": 5 nesne içeren dizi. Konuyu ölçen çoktan seçmeli sorular. Her nesne {"soru": boşluklu cümle, boşluk ---- olsun, "secenekler": {"A":...,"B":...,"C":...,"D":...}, "dogru": doğru şıkkın harfi, "cozum": neden doğru olduğu, 1-2 cümle}. Sorular tıp/sağlık alanından olsun ve YÖKDİL zorluğunda.
 "kelimeler": Yukarıdaki örnek cümlelerde geçen, orta seviye bir öğrencinin bilmeyebileceği 5-8 İngilizce kelime. Her biri {"w": kelime, "oku": TÜRKÇE harflerle okunuşu, "tr": Türkçe karşılığı}.`,
       LSYS, { temp: 0.4 }));
     LS.data = d;
+    lessonSaveLocal(name, d);
+    lessonPush(name, d);
     $("#lsBody").innerHTML = lessonHtml(d);
+    bindPractice();
     LSDONE[name] = Date.now();
     store.set("lsdone", JSON.stringify(LSDONE));
   } catch (e) {
@@ -3570,8 +3993,40 @@ function lessonHtml(d) {
     (A("sinav").length ? "<h3>Sınavda nasıl çıkar</h3><ul>" + A("sinav").map(x => `<li>${esc(x)}</li>`).join("") + "</ul>" : "") +
     (A("hatalar").length ? "<h3>Sık yapılan hatalar</h3>" + A("hatalar").map(x =>
       `<div class="err"><s>${esc(x.yanlis || "")}</s><b>${esc(x.dogru || "")}</b><i>${esc(x.neden || "")}</i></div>`).join("") : "") +
+    (A("sinyal").length ? "<h3>Sinyal sözcükler</h3>" + A("sinyal").map(x =>
+      `<div class="sig"><b>${esc(x.w || "")}</b><i>${esc(x.not || "")}</i></div>`).join("") : "") +
+    (A("karisan").length ? "<h3>Karıştırılanlar</h3>" + A("karisan").map(x =>
+      `<div class="cmp"><b>${esc(LS.title)} &nbsp;·&nbsp; ${esc(x.ile || "")}</b><p>${esc(x.fark || "")}</p>` +
+      (x.ornek1 ? `<div class="ex">${esc(x.ornek1)}</div>` : "") +
+      (x.ornek2 ? `<div class="ex alt">${esc(x.ornek2)}</div>` : "") + "</div>").join("") : "") +
+    (A("sorular").length ? "<h3>Alıştırma</h3>" + A("sorular").map((x, i) =>
+      `<div class="prq" data-i="${i}">
+         <div class="pst">${i + 1}. ${esc(x.soru || "")}</div>
+         ${Object.keys(x.secenekler || {}).sort().map(k =>
+           `<button class="pop" data-k="${k}">${k}) ${esc(x.secenekler[k])}</button>`).join("")}
+         <div class="pfb"></div>
+       </div>`).join("") : "") +
     (A("kelimeler").length ? "<h3>Geçen kelimeler</h3>" + A("kelimeler").map(x =>
       `<div class="voc"><b>${esc(x.w || "")}</b>${x.oku ? `<em>[${esc(x.oku)}]</em>` : ""}<span>${esc(x.tr || "")}</span></div>`).join("") : "");
+}
+
+function bindPractice() {
+  const qs = (LS.data && Array.isArray(LS.data.sorular)) ? LS.data.sorular : [];
+  $$("#lsBody .prq").forEach(box => {
+    const q = qs[+box.dataset.i];
+    if (!q) return;
+    box.querySelectorAll(".pop").forEach(b => b.addEventListener("click", () => {
+      if (box.dataset.done) return;
+      box.dataset.done = "1";
+      const k = b.dataset.k;
+      box.querySelectorAll(".pop").forEach(o => {
+        if (o.dataset.k === q.dogru) o.classList.add("ok");
+        else if (o.dataset.k === k) o.classList.add("no");
+      });
+      box.querySelector(".pfb").innerHTML =
+        `<b class="${k === q.dogru ? "g" : "r"}">${k === q.dogru ? "Doğru." : "Yanlış. Doğrusu " + esc(q.dogru) + "."}</b>${esc(q.cozum || "")}`;
+    }));
+  });
 }
 
 function answerHtml(d) {
@@ -3711,6 +4166,24 @@ async function lessonPdf() {
     });
   }
 
+  if (A("sinyal").length) {
+    head("Sinyal sözcükler");
+    A("sinyal").forEach(x => {
+      put(x.w || "", { bold: true, size: 10.6, color: RED, lead: 5, after: 0.3 });
+      put(x.not || "", { size: 9.8, color: INK, indent: 5, lead: 4.9, after: 1.6 });
+    });
+  }
+
+  if (A("karisan").length) {
+    head("Karıştırılanlar");
+    A("karisan").forEach(x => {
+      put(LS.title + "   ·   " + (x.ile || ""), { bold: true, size: 10.6, color: BLUE, lead: 5.2, after: 0.6 });
+      put(x.fark || "", { color: INK, indent: 3, after: 1.2 });
+      if (x.ornek1) put(LS.title + ":  " + x.ornek1, { color: GREEN, size: 10, indent: 5, lead: 5 });
+      if (x.ornek2) put((x.ile || "diğeri") + ":  " + x.ornek2, { color: BLUE, size: 10, indent: 5, lead: 5, after: 2.2 });
+    });
+  }
+
   if (A("kelimeler").length) {
     head("Geçen kelimeler");
     A("kelimeler").forEach(x => {
@@ -3753,11 +4226,56 @@ async function lessonPdf() {
     });
   }
 
+  // ---- konuya özel çalışma sayfası ----
+  if (A("sorular").length) {
+    doc.addPage();
+    page++;
+    pdfHeader(doc, LS.title + " · alıştırma", page, "Çalışma sayfası");
+    y = top;
+    put("Boşluğa uygun seçeneği işaretle. Cevaplar sayfanın altında.", { size: 9.5, color: GREY, lead: 5, after: 4 });
+
+    A("sorular").forEach((x, i) => {
+      if (y > limit - 34) { doc.addPage(); page++; pdfHeader(doc, LS.title + " · alıştırma", page, "Çalışma sayfası"); y = top; }
+      put((i + 1) + ".  " + (x.soru || ""), { bold: true, size: 11, color: INK, lead: 5.6, after: 1 });
+      const o = x.secenekler || {};
+      Object.keys(o).sort().forEach(k => put(k + ")  " + o[k], { indent: 5, size: 10.2, color: INK, lead: 5 }));
+      y += 4;
+    });
+
+    // cevap anahtarı: sayfanın altında, küçük ve gri — sığmazsa yeni sayfa
+    doc.setFontSize(8.6);
+    let keyH = 11;
+    A("sorular").forEach(x => {
+      if (!x.cozum) return;
+      keyH += flowRuns(doc, [{ text: "1. " + x.cozum, c: -1 }], 0, 0, CW - 2, 4.2, false).lines * 4.2;
+    });
+    if (y + keyH > limit) { doc.addPage(); page++; pdfHeader(doc, LS.title + " · alıştırma", page, "Çalışma sayfası"); y = top; }
+    else y = Math.max(y + 6, limit - keyH);
+
+    doc.setDrawColor(214, 210, 200);
+    doc.setLineWidth(0.2);
+    doc.line(M.l, y, PW - M.r, y);
+    y += 5;
+    put("Cevaplar:  " + A("sorular").map((x, i) => (i + 1) + "-" + (x.dogru || "?")).join("   "),
+      { size: 9.2, color: GREEN, bold: true, lead: 4.8, after: 0.8 });
+    A("sorular").forEach((x, i) => {
+      if (!x.cozum) return;
+      put((i + 1) + ". " + x.cozum, { size: 8.6, color: GREY, lead: 4.2, indent: 2 });
+    });
+  }
+
   doc.save("gramer-" + LS.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".pdf");
   busyHide();
   toast(page + " sayfa hazır.");
 }
 $("#lsPdf").addEventListener("click", lessonPdf);
+$("#lsRedo").addEventListener("click", async () => {
+  if (!LS.key) return;
+  if (!confirm("Bu konu yeniden hazırlansın mı? Mevcut içerik değişecek.")) return;
+  store.del(lkey(LS.key));
+  const name = LS.key, desc = (KONULAR.flatMap(g => g[1]).find(x => x[0] === name) || ["", ""])[1];
+  await openLesson(name, desc);
+});
 
 $$("#gTabs .chip").forEach(c => c.addEventListener("click", () => {
   $$("#gTabs .chip").forEach(x => x.classList.toggle("on", x === c));
