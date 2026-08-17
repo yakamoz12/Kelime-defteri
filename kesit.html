@@ -1198,15 +1198,25 @@ async function cCheckAnalysis(){
     const lines = CU.tags.map(t => `- ${cTagInfo(t.type).label}: "${CU.tokens.slice(t.start,t.end+1).join(" ")}"`).join("\n");
     tagBlock = `\n\nThe student ALSO attempted to tag these spans themselves:\n${lines}\nJudge each as "dogru"/"kismen dogru"/"yanlis" in tag_feedback.`;
   }
-  const sys = "You are an exhaustive English grammar analyzer for a Turkish graduate student preparing for the YOKDIL Health Sciences exam. Write all Turkish text in correct Turkish. Respond with ONLY valid JSON, no markdown fences, no other text.";
-  const prompt = `Sentence to analyze fully:\n"${sentence}"${tagBlock}
+  const sys = "Sen bir gramer öğretmenisin, YÖKDİL'e hazırlanan bir öğrenciye TEK TEK cümle parçalıyorsun. Amacın etiket yapıştırmak değil, öğrencinin MANTIĞI kendi başına görebilmesini sağlamak. Kuralı ezberletme, o parçanın neden o şey olduğunu, cümledeki hangi ipucuna (kelime, işaretleyici, konum, virgül vb.) bakarak anladığını göster. Türkçen doğal ve öğretici olsun, sözlük tanımı gibi değil. Yalnızca geçerli JSON döndür, markdown çiti yok, başka metin yok.";
+  const prompt = `Analiz edilecek cümle:\n"${sentence}"${tagBlock}
 
-Produce a COMPLETE, exhaustive grammatical breakdown. Cover EVERY element: the main subject (with all modifiers), the main verb (exact tense AND voice), and EVERY subordinate structure — every relative clause, participle clause, subordinating conjunction clause, prepositional phrase, noun clause, appositive. Do not skip minor ones. For each: exact English text, precise Turkish grammatical label, short complete Turkish explanation of its function and connection.
+Şu ikisini üret:
 
-Also include an accurate Turkish translation, and up to 3 short "notes" about tricky points if any exist. Be information-dense, not chatty.
+1) "mantik_akisi": Cümleyi baştan sona bir öğretmen gibi SESLİ DÜŞÜNEREK anlat (4-6 cümle). "Önce ana özneyi buluyoruz... çünkü... sonra bakıyoruz X kelimesi neye bağlanıyor... bunu Y'den ayırt ediyoruz çünkü..." tarzında, gerçek bir akıl yürütme. Öğrenci bunu okuyunca aynı cümleyi kendi başına parçalayabilmeli.
 
-JSON shape exactly:
-{"translation":"...","elements":[{"type":"...","text":"...","detail":"..."}],"notes":["..."]${hasTags ? ',"tag_feedback":[{"label":"...","text":"...","verdict":"dogru|kismen dogru|yanlis","note":"..."}]' : ""}}`;
+2) "elements": Cümledeki HER yapıyı (ana özne, ana yüklem, her ilgi cümleciği, her ortaç öbeği, her bağlaç cümleciği, her edat öbeği, her isim cümleciği, her ek açıklama) tek tek listele. Her biri için:
+   - "text": tam İngilizce metin
+   - "type": kesin Türkçe gramer etiketi
+   - "detail": SADECE ne olduğunu söyleme — NEDEN o olduğunu, cümledeki hangi işaretten/kelimeden/konumdan anladığını, benzer görünen başka bir yapıyla nasıl karıştırılmayacağını anlat. Kanıt kelimeleri metinden göster.
+
+Kötü detail örneği (ETİKET yapıştırma, YAPMA): "İlgi cümleciği, hormonu tanımlıyor."
+İyi detail örneği (MANTIK anlatma, BUNU YAP): "'which' hemen önceki isme (hormone) bağlanıyor; araya virgül girdiği için bu tanımlayıcı değil ek bilgi veren bir ilgi cümleciği — yani hormonun HANGİ hormon olduğunu değil, o hormon HAKKINDA ekstra bir şey söylüyor. 'that' ile karıştırılmaz çünkü 'that' virgülden sonra kullanılamaz."
+
+Ayrıca "translation" (tam Türkçe çeviri) ve varsa en fazla 3 "notes" (kolay karıştırılan noktalar) ekle. Yoğun ama gerçek anlat, laf kalabalığı yapma.
+
+JSON şekli tam olarak:
+{"translation":"...","mantik_akisi":"...","elements":[{"type":"...","text":"...","detail":"..."}],"notes":["..."]${hasTags ? ',"tag_feedback":[{"label":"...","text":"...","verdict":"dogru|kismen dogru|yanlis","note":"..."}]' : ""}}`;
 
   try{
     const raw = await gemini(prompt, sys);
@@ -1230,6 +1240,7 @@ function cVerdict(v){
 function cRenderReport(data){
   let html = `<div class="crhead"><span>Tam Gramer Analizi</span><span>Gemini</span></div>`;
   if(data.translation) html += `<div class="ctrbox"><b>Türkçe Çeviri</b>${esc(data.translation)}</div>`;
+  if(data.mantik_akisi) html += `<div class="ctrbox" style="border-left-color:var(--deep);background:var(--deep-soft)"><b style="color:var(--deep)">Mantığı — Öğretmen Böyle Düşünür</b>${esc(data.mantik_akisi)}</div>`;
   if(data.elements && data.elements.length){
     html += `<div class="cetitle">Cümlenin Tam Yapısı (${data.elements.length} öğe)</div>`;
     data.elements.forEach((el,idx) => {
@@ -1265,7 +1276,7 @@ async function cSendChat(){
   const q = inp.value.trim();
   if(!q || !CU.lastAnalysis) return;
   cAddMsg("user", q); inp.value = "";
-  const sys = `A Turkish YOKDIL student is studying this English sentence:\n"${CU.tokens.join(" ")}"\n\nFull grammatical analysis already given (JSON):\n${CU.lastAnalysis}\n\nAnswer the student's questions about this specific sentence and analysis. Reply in Turkish, casual-but-precise study-partner tone, reasonably concise.`;
+  const sys = `Bir YÖKDİL öğrencisi şu İngilizce cümleyi çalışıyor:\n"${CU.tokens.join(" ")}"\n\nDaha önce verilen tam gramer analizi (JSON):\n${CU.lastAnalysis}\n\nÖğrencinin bu cümle ve analiz hakkındaki sorularını yanıtla. Türkçe, samimi ama net bir çalışma arkadaşı tonuyla cevap ver. Asla sadece etiket/sonuç söyleme — her cevapta mutlaka MANTIĞI anlat: cümledeki hangi ipucuna bakarak o sonuca vardığını göster, gerekirse cümleden kanıt kelimeleri alıntıla. Kısa ve öz ol ama asla dogmatik olma; öğrenci "neden" diye sorduğunda düz cevap değil akıl yürütme bekliyor.`;
   try{
     const answer = await gemini(q, sys, {history: CU.chatHist});
     CU.chatHist.push({role:"user", text:q});
