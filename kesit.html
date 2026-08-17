@@ -22,6 +22,8 @@
   --warn:#B3341F;
   --r:15px; --fs:17.5px;
   --sh:0 1px 2px #1A1F350A, 0 6px 22px #1A1F3510;
+  --tsubj:#2B6C66; --tverb:#A8452F; --trel:#6B4C7A; --tpart:#3E7C4A;
+  --tconj:#96631E; --tprep:#33546E; --tnoun:#95415A;
 }
 @media (prefers-color-scheme:dark){
   :root{
@@ -33,6 +35,8 @@
     --marker:#7A6410; --mark-bg:#6E5A0F;
     --warn:#E8785F;
     --sh:0 1px 2px #0006, 0 6px 22px #0008;
+    --tsubj:#4FA89D; --tverb:#E37860; --trel:#B58FCB; --tpart:#7FC48C;
+    --tconj:#E0B15E; --tprep:#7FA5C9; --tnoun:#E092A9;
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -416,6 +420,61 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   opacity:0;pointer-events:none;transition:.22s;max-width:88vw;text-align:center;line-height:1.4;font-weight:500}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+
+/* ---------- cümle analizi (gramer > cümle sekmesi) ---------- */
+.diffrow{display:flex;gap:4px;background:var(--card2);padding:3px;border-radius:11px;margin-bottom:14px}
+.diffrow button{flex:1;border-radius:8px;padding:8px 4px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+.diffrow button.on{background:var(--card);color:var(--ink);box-shadow:var(--sh)}
+.csent{font-family:"Source Serif 4",Georgia,serif;font-size:19px;line-height:1.85;padding:2px 0 14px}
+.csent.loading{color:var(--ink3);font-style:italic;font-size:15px}
+.wtok{cursor:pointer;padding:2px 1px;border-radius:4px}
+.wtok:active{background:var(--card2)}
+.wtok.pend{background:var(--acc-soft);box-shadow:0 0 0 1.5px var(--acc) inset;border-radius:4px}
+.wtok.tagged{cursor:default}
+.wsup{font-family:Archivo,sans-serif;font-size:10px;font-weight:700;vertical-align:super;margin-left:1px}
+.wt-subject{border-bottom:3px solid var(--tsubj)}
+.wt-verb{border-bottom:3px solid var(--tverb)}
+.wt-relative{border-bottom:3px solid var(--trel)}
+.wt-participle{border-bottom:3px solid var(--tpart)}
+.wt-conjunction{border-bottom:3px solid var(--tconj)}
+.wt-prep{border-bottom:3px solid var(--tprep)}
+.wt-noun{border-bottom:3px solid var(--tnoun)}
+.ctoolbar{display:none;border-top:1px dashed var(--line);padding-top:12px;margin-top:4px}
+.ctoolbar.on{display:block}
+.ctoolbar .lbl{font-size:12px;color:var(--ink2);margin-bottom:8px}
+.ctoolbar .lbl b{color:var(--ink);font-family:"Source Serif 4",serif;font-style:italic;font-weight:500}
+.ctaggrid{display:flex;flex-wrap:wrap;gap:6px}
+.ctagbtn{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:7px 11px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+.ctagdot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.ccancel{color:var(--ink3);font-size:12px;text-decoration:underline;margin-top:8px;padding:4px 0}
+.clegend{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.clrow{display:flex;align-items:flex-start;gap:8px;font-size:13px;background:var(--card2);border-radius:9px;padding:7px 10px}
+.clrow .n{font-family:Archivo,sans-serif;font-size:11px;font-weight:700;color:var(--ink3);min-width:14px}
+.clrow .t{font-weight:600;white-space:nowrap}
+.clrow .x{color:var(--ink3);font-size:15px;padding:0 2px}
+.optnote{font-size:11.5px;color:var(--ink3);font-style:italic;margin-top:10px}
+.creport{margin-top:16px;border-radius:var(--r);background:var(--card2);padding:15px;display:none}
+.creport.on{display:block}
+.crhead{font-family:Archivo,sans-serif;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-bottom:12px;display:flex;justify-content:space-between}
+.ctrbox{background:var(--card);border-left:3px solid var(--acc);border-radius:0 10px 10px 0;padding:10px 12px;margin-bottom:14px;font-size:14px}
+.ctrbox b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--acc-ink);margin-bottom:3px;font-family:Archivo,sans-serif}
+.cetitle{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);font-family:Archivo,sans-serif;margin:14px 0 8px}
+.cerow{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--line)}
+.cerow:last-of-type{border-bottom:none}
+.cenum{font-family:Archivo,sans-serif;font-size:11px;font-weight:700;color:var(--card);background:var(--ink);min-width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.cetype{font-weight:700;color:var(--acc-ink)}
+.cetext{color:var(--ink2);font-style:italic}
+.notesbox{margin-top:10px;background:var(--acc-soft);border-radius:9px;padding:10px 12px;font-size:13px}
+.notesbox b{color:var(--acc-ink);display:block;margin-bottom:4px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;font-family:Archivo,sans-serif}
+.notesbox ul{margin:0;padding-left:18px}
+.cchat{margin-top:16px;border-radius:var(--r);background:var(--card2);padding:15px;display:none}
+.cchat.on{display:block}
+.cchead{font-family:Archivo,sans-serif;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-bottom:12px}
+.cthread{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;max-height:400px;overflow-y:auto}
+.cmsg{max-width:85%;padding:9px 12px;border-radius:14px;font-size:13.5px;line-height:1.5}
+.cmsg.u{align-self:flex-end;background:var(--acc);color:#fff;border-bottom-right-radius:3px}
+.cmsg.b{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:3px}
+.cempty{font-size:12.5px;color:var(--ink3);font-style:italic;text-align:center;padding:10px 0}
 </style>
 </head>
 <body>
@@ -596,6 +655,7 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   <div class="chips" id="gTabs">
     <button class="chip on" data-v="notes">Notlarım</button>
     <button class="chip" data-v="konu">Konular</button>
+    <button class="chip" data-v="cumle">Cümle Analizi</button>
   </div>
   <div id="notesView">
     <div class="chips" id="gChips"></div>
@@ -603,6 +663,42 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   </div>
   <div id="konuView" class="hid">
     <div id="konuList"></div>
+  </div>
+  <div id="cumleView" class="hid">
+    <p class="sub" style="margin-bottom:16px">Analiz Et'e bas, cümlenin tüm gramer yapısını en ince ayrıntısına kadar gör, sonra altındaki sohbetten o analiz hakkında istediğini sor.</p>
+
+    <div class="diffrow" id="cDiff">
+      <button data-d="kolay">Kolay</button>
+      <button class="on" data-d="orta">Orta</button>
+      <button data-d="zor">Zor</button>
+    </div>
+
+    <div class="csent" id="cSentBox">Yükleniyor…</div>
+
+    <div class="ctoolbar" id="cToolbar">
+      <div class="lbl">Seçili bölge: <b id="cPendText"></b></div>
+      <div class="ctaggrid" id="cTagGrid"></div>
+      <button class="ccancel" id="cCancelSel">seçimi iptal et</button>
+    </div>
+
+    <div class="clegend" id="cLegend"></div>
+    <div class="optnote" id="cOptNote">İstersen önce yukarıdan birkaç parçayı kendin işaretle, istersen direkt aşağıdan analiz et — ikisi de olur.</div>
+
+    <div class="field" style="margin-top:16px">
+      <button class="btn ghost" id="cNewBtn" style="flex:1">↻ Yeni Cümle</button>
+      <button class="btn" id="cCheckBtn" style="flex:1">Analiz Et →</button>
+    </div>
+
+    <div class="creport" id="cReport"></div>
+
+    <div class="cchat" id="cChat">
+      <div class="cchead">Bu Analiz Hakkında Sohbet</div>
+      <div class="cthread" id="cThread"><div class="cempty">Analizle ilgili aklına takılan bir şey varsa buraya yaz.</div></div>
+      <div class="field" style="margin-top:0">
+        <input class="inp" id="cChatInp" placeholder="Örn: neden 'which' relative clause?">
+        <button class="btn" id="cChatSend">Sor</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -909,8 +1005,11 @@ async function gemini(parts, system, opts = {}) {
   const tries = opts.tries === undefined ? 2 : opts.tries;
   if (!state.key) throw new Error("Önce ayarlardan Gemini anahtarını gir.");
   const model = state.model || FALLBACK_MODELS[0];
+  const contents = [];
+  if (opts.history) opts.history.forEach(h => contents.push({ role: h.role, parts: [{ text: h.text }] }));
+  contents.push({ role: "user", parts: Array.isArray(parts) ? parts : [{ text: parts }] });
   const body = {
-    contents: [{ role: "user", parts: Array.isArray(parts) ? parts : [{ text: parts }] }],
+    contents,
     generationConfig: { temperature: opts.temp === undefined ? 0.2 : opts.temp }
   };
   if (system) body.systemInstruction = { parts: [{ text: system }] };
@@ -968,6 +1067,229 @@ function parseJson(raw) {
   const a = t.indexOf("{"), b = t.lastIndexOf("}");
   if (a >= 0 && b > a) t = t.slice(a, b + 1);
   return JSON.parse(t);
+}
+
+/* ============================================================
+   Cümle Analizi — Gramer > Cümle Analizi sekmesi
+   Aynı state.key / state.model / gemini() / parseJson() üzerinden çalışır.
+   ============================================================ */
+const CTAGS = [
+  { key:"subject",     label:"Ana Özne",         cls:"wt-subject",    var:"--tsubj" },
+  { key:"verb",        label:"Ana Yüklem",       cls:"wt-verb",       var:"--tverb" },
+  { key:"relative",    label:"İlgi Cümleciği",   cls:"wt-relative",   var:"--trel"  },
+  { key:"participle",  label:"Ortaç Öbeği",      cls:"wt-participle", var:"--tpart" },
+  { key:"conjunction", label:"Bağlaç Cümleciği", cls:"wt-conjunction",var:"--tconj" },
+  { key:"prep",        label:"Edat Öbeği",       cls:"wt-prep",       var:"--tprep" },
+  { key:"noun",        label:"İsim Cümleciği",   cls:"wt-noun",       var:"--tnoun" }
+];
+const CSEEDS = [
+  "Short bowel syndrome most often results from surgery that removes segments of the small intestine as treatment for conditions which severely damage the tissue.",
+  "Researchers who examined the data noticed a pattern that had been overlooked, suggesting that the original hypothesis, although widely accepted, required revision.",
+  "Because the immune system sometimes fails to distinguish between healthy and infected cells, patients diagnosed with autoimmune disorders often require treatments designed to suppress this response.",
+  "The vaccine, developed after years of trials conducted across several countries, is now believed to reduce transmission rates significantly among vulnerable populations.",
+  "While the exact cause remains unclear, scientists studying the disorder have found that patients whose symptoms appear before adolescence tend to experience more severe outcomes.",
+  "A hormone produced by the pancreas, which regulates blood sugar levels, is often insufficient in people suffering from a condition that damages insulin-producing cells."
+];
+const CDIFF = {
+  kolay: "Contains exactly ONE embedded structure (relative clause OR participle clause OR subordinate clause). 14-20 words.",
+  orta: "Contains exactly TWO different embedded structures (relative clause, participle clause, subordinating conjunction clause, prepositional phrase). 20-28 words.",
+  zor: "Contains THREE OR MORE embedded/nested structures, combined freely. 28-38 words."
+};
+const CU = { tokens: [], tags: [], selStart: null, selEnd: null, diff: "orta", lastAnalysis: null, chatHist: [], inited: false };
+
+function cTagInfo(k){ return CTAGS.find(t=>t.key===k) || CTAGS[0]; }
+function cTokenize(s){ return s.trim().split(/\s+/); }
+function cFindTag(i){ for(let j=0;j<CU.tags.length;j++){ const t=CU.tags[j]; if(i>=t.start&&i<=t.end) return {tag:t,index:j}; } return null; }
+
+function cRenderSentence(){
+  let html = "";
+  for(let i=0;i<CU.tokens.length;i++){
+    const found = cFindTag(i);
+    const isPend = CU.selStart!==null && i>=Math.min(CU.selStart,CU.selEnd) && i<=Math.max(CU.selStart,CU.selEnd);
+    let cls = "wtok";
+    if(found) cls += " tagged " + cTagInfo(found.tag.type).cls;
+    if(isPend) cls += " pend";
+    let sup = "";
+    if(found && found.tag.end===i) sup = `<span class="wsup" style="color:var(${cTagInfo(found.tag.type).var})">${found.index+1}</span>`;
+    html += `<span class="${cls}" data-i="${i}">${esc(CU.tokens[i])}</span>${sup} `;
+  }
+  const box = $("#cSentBox");
+  box.innerHTML = html; box.classList.remove("loading");
+  $$("#cSentBox .wtok").forEach(el => el.addEventListener("click", cOnTok));
+}
+function cOnTok(e){
+  const i = parseInt(e.currentTarget.dataset.i, 10);
+  if(cFindTag(i)) return;
+  if(CU.selStart===null){ CU.selStart=i; CU.selEnd=i; }
+  else if(CU.selStart===i && CU.selEnd===i){ CU.selStart=null; CU.selEnd=null; }
+  else CU.selEnd = i;
+  cRenderSentence(); cRenderToolbar();
+}
+function cRenderToolbar(){
+  const tb = $("#cToolbar");
+  if(CU.selStart===null){ tb.classList.remove("on"); return; }
+  const a=Math.min(CU.selStart,CU.selEnd), b=Math.max(CU.selStart,CU.selEnd);
+  $("#cPendText").textContent = '"' + CU.tokens.slice(a,b+1).join(" ") + '"';
+  tb.classList.add("on");
+}
+function cBuildTagGrid(){
+  $("#cTagGrid").innerHTML = CTAGS.map(t =>
+    `<button class="ctagbtn" data-k="${t.key}" style="color:var(${t.var})"><span class="ctagdot" style="background:var(${t.var})"></span>${t.label}</button>`
+  ).join("");
+  $$("#cTagGrid .ctagbtn").forEach(btn => btn.addEventListener("click", () => {
+    const a=Math.min(CU.selStart,CU.selEnd), b=Math.max(CU.selStart,CU.selEnd);
+    CU.tags.push({start:a,end:b,type:btn.dataset.k});
+    CU.selStart=null; CU.selEnd=null;
+    cRenderSentence(); cRenderToolbar(); cRenderLegend();
+  }));
+}
+function cRenderLegend(){
+  const el = $("#cLegend");
+  if(!CU.tags.length){ el.innerHTML=""; $("#cOptNote").style.display="block"; return; }
+  $("#cOptNote").style.display="none";
+  el.innerHTML = CU.tags.map((t,idx)=>{
+    const info = cTagInfo(t.type), text = CU.tokens.slice(t.start,t.end+1).join(" ");
+    return `<div class="clrow" style="border-left:3px solid var(${info.var})">
+      <span class="n">${idx+1}</span><span class="t" style="color:var(${info.var})">${info.label}</span>
+      <span style="flex:1;color:var(--ink2);font-style:italic">"${esc(text)}"</span>
+      <button class="x" data-idx="${idx}">×</button></div>`;
+  }).join("");
+  $$("#cLegend .x").forEach(b => b.addEventListener("click", () => {
+    CU.tags.splice(parseInt(b.dataset.idx,10),1);
+    cRenderSentence(); cRenderLegend();
+  }));
+}
+function cResetSentence(sentence){
+  CU.tokens = cTokenize(sentence); CU.tags=[]; CU.selStart=null; CU.selEnd=null;
+  CU.lastAnalysis = null; CU.chatHist = [];
+  $("#cReport").classList.remove("on");
+  $("#cChat").classList.remove("on");
+  $("#cThread").innerHTML = '<div class="cempty">Analizle ilgili aklına takılan bir şey varsa buraya yaz.</div>';
+  cRenderSentence(); cRenderToolbar(); cRenderLegend();
+}
+
+async function cGenerateSentence(){
+  const btn = $("#cNewBtn");
+  btn.disabled = true; const old = btn.textContent; btn.textContent = "Üretiliyor…";
+  const sys = "You generate single practice sentences for Turkish graduate students preparing for the YOKDIL Health Sciences English exam.";
+  const prompt = `Generate exactly ONE English sentence, health/medicine/biology topic, academic/journalistic register.
+Difficulty: ${CDIFF[CU.diff]}
+Return ONLY the sentence itself, no quotes, no preamble, no markdown.`;
+  try{
+    const text = await gemini(prompt, sys, {temp:0.9});
+    const sentence = text.replace(/^["']|["']$/g,"").trim();
+    if(sentence.length < 10) throw new Error("boş");
+    cResetSentence(sentence);
+  }catch(e){
+    cResetSentence(CSEEDS[Math.floor(Math.random()*CSEEDS.length)]);
+    toast("Yeni cümle üretilemedi, örnek gösteriliyor: " + e.message);
+  }finally{
+    btn.disabled=false; btn.textContent=old;
+  }
+}
+
+async function cCheckAnalysis(){
+  const btn = $("#cCheckBtn");
+  btn.disabled = true; const old = btn.textContent; btn.textContent = "Analiz ediliyor…";
+  const sentence = CU.tokens.join(" ");
+  const hasTags = CU.tags.length > 0;
+  let tagBlock = "";
+  if(hasTags){
+    const lines = CU.tags.map(t => `- ${cTagInfo(t.type).label}: "${CU.tokens.slice(t.start,t.end+1).join(" ")}"`).join("\n");
+    tagBlock = `\n\nThe student ALSO attempted to tag these spans themselves:\n${lines}\nJudge each as "dogru"/"kismen dogru"/"yanlis" in tag_feedback.`;
+  }
+  const sys = "You are an exhaustive English grammar analyzer for a Turkish graduate student preparing for the YOKDIL Health Sciences exam. Write all Turkish text in correct Turkish. Respond with ONLY valid JSON, no markdown fences, no other text.";
+  const prompt = `Sentence to analyze fully:\n"${sentence}"${tagBlock}
+
+Produce a COMPLETE, exhaustive grammatical breakdown. Cover EVERY element: the main subject (with all modifiers), the main verb (exact tense AND voice), and EVERY subordinate structure — every relative clause, participle clause, subordinating conjunction clause, prepositional phrase, noun clause, appositive. Do not skip minor ones. For each: exact English text, precise Turkish grammatical label, short complete Turkish explanation of its function and connection.
+
+Also include an accurate Turkish translation, and up to 3 short "notes" about tricky points if any exist. Be information-dense, not chatty.
+
+JSON shape exactly:
+{"translation":"...","elements":[{"type":"...","text":"...","detail":"..."}],"notes":["..."]${hasTags ? ',"tag_feedback":[{"label":"...","text":"...","verdict":"dogru|kismen dogru|yanlis","note":"..."}]' : ""}}`;
+
+  try{
+    const raw = await gemini(prompt, sys);
+    const data = parseJson(raw);
+    cRenderReport(data);
+    CU.lastAnalysis = JSON.stringify(data);
+    $("#cChat").classList.add("on");
+  }catch(e){
+    toast("Analiz alınamadı: " + e.message, 4000);
+  }finally{
+    btn.disabled=false; btn.textContent=old;
+  }
+}
+
+function cVerdict(v){
+  v = (v||"").toLowerCase();
+  if(v.indexOf("dogru")===0) return "✓";
+  if(v.indexOf("kismen")===0 || v.indexOf("kısmen")===0) return "~";
+  return "✕";
+}
+function cRenderReport(data){
+  let html = `<div class="crhead"><span>Tam Gramer Analizi</span><span>Gemini</span></div>`;
+  if(data.translation) html += `<div class="ctrbox"><b>Türkçe Çeviri</b>${esc(data.translation)}</div>`;
+  if(data.elements && data.elements.length){
+    html += `<div class="cetitle">Cümlenin Tam Yapısı (${data.elements.length} öğe)</div>`;
+    data.elements.forEach((el,idx) => {
+      html += `<div class="cerow"><div class="cenum">${idx+1}</div><div>
+        <span class="cetype">${esc(el.type||"")}</span> — <span class="cetext">"${esc(el.text||"")}"</span>
+        <div style="margin-top:2px">${esc(el.detail||"")}</div></div></div>`;
+    });
+  }
+  if(data.tag_feedback && data.tag_feedback.length){
+    html += `<div class="cetitle">Kendi Etiketlerinin Değerlendirmesi</div>`;
+    data.tag_feedback.forEach(f => {
+      html += `<div class="cerow"><div class="cenum" style="background:transparent;color:var(--ink)">${cVerdict(f.verdict)}</div><div>
+        <b>${esc(f.label||"")}</b> — <span class="cetext">"${esc(f.text||"")}"</span>
+        <div style="margin-top:2px">${esc(f.note||"")}</div></div></div>`;
+    });
+  }
+  if(data.notes && data.notes.length){
+    html += `<div class="notesbox"><b>Püf Noktaları</b><ul>${data.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul></div>`;
+  }
+  const rep = $("#cReport"); rep.innerHTML = html; rep.classList.add("on");
+}
+
+function cAddMsg(role, text){
+  const empty = $("#cThread .cempty"); if(empty) empty.remove();
+  const div = document.createElement("div");
+  div.className = "cmsg " + (role==="user"?"u":"b");
+  div.textContent = text;
+  $("#cThread").appendChild(div);
+  $("#cThread").scrollTop = $("#cThread").scrollHeight;
+}
+async function cSendChat(){
+  const inp = $("#cChatInp");
+  const q = inp.value.trim();
+  if(!q || !CU.lastAnalysis) return;
+  cAddMsg("user", q); inp.value = "";
+  const sys = `A Turkish YOKDIL student is studying this English sentence:\n"${CU.tokens.join(" ")}"\n\nFull grammatical analysis already given (JSON):\n${CU.lastAnalysis}\n\nAnswer the student's questions about this specific sentence and analysis. Reply in Turkish, casual-but-precise study-partner tone, reasonably concise.`;
+  try{
+    const answer = await gemini(q, sys, {history: CU.chatHist});
+    CU.chatHist.push({role:"user", text:q});
+    CU.chatHist.push({role:"model", text:answer});
+    cAddMsg("bot", answer);
+  }catch(e){
+    cAddMsg("bot", "Hata: " + e.message);
+  }
+}
+
+function cumleInit(){
+  if(CU.inited) return;
+  CU.inited = true;
+  cBuildTagGrid();
+  $("#cCancelSel").addEventListener("click", () => { CU.selStart=null; CU.selEnd=null; cRenderSentence(); cRenderToolbar(); });
+  $("#cNewBtn").addEventListener("click", cGenerateSentence);
+  $("#cCheckBtn").addEventListener("click", cCheckAnalysis);
+  $("#cChatSend").addEventListener("click", cSendChat);
+  $("#cChatInp").addEventListener("keydown", e => { if(e.key==="Enter"){ e.preventDefault(); cSendChat(); } });
+  $$("#cDiff button").forEach(b => b.addEventListener("click", () => {
+    $$("#cDiff button").forEach(x=>x.classList.toggle("on", x===b));
+    CU.diff = b.dataset.d;
+  }));
+  cResetSentence(CSEEDS[Math.floor(Math.random()*CSEEDS.length)]);
 }
 
 async function lookupWord(word, context) {
@@ -4225,12 +4547,15 @@ $("#lsRedo").addEventListener("click", async () => {
 
 $$("#gTabs .chip").forEach(c => c.addEventListener("click", () => {
   $$("#gTabs .chip").forEach(x => x.classList.toggle("on", x === c));
-  const konu = c.dataset.v === "konu";
+  const v = c.dataset.v;
+  const konu = v === "konu", cumle = v === "cumle";
   $("#konuView").classList.toggle("hid", !konu);
-  $("#notesView").classList.toggle("hid", konu);
-  $("#gpdfBtn").classList.toggle("hid", konu);
-  $("#gexportBtn").classList.toggle("hid", konu);
+  $("#notesView").classList.toggle("hid", konu || cumle);
+  $("#cumleView").classList.toggle("hid", !cumle);
+  $("#gpdfBtn").classList.toggle("hid", konu || cumle);
+  $("#gexportBtn").classList.toggle("hid", konu || cumle);
   if (konu) renderKonu();
+  if (cumle) cumleInit();
 }));
 
 /* ============================================================
