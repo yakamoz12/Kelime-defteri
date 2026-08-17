@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cümle Anatomisi Laboratuvarı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2EEE3; --paper-deep:#E8E0CB; --card:#FBF9F3;
+    --ink:#212B24; --ink-soft:#5B6459; --line:#D9CFB0; --line-strong:#C7BB94;
+    --teal:#2B6C66; --teal-bg:#DCEAE7;
+    --rust:#A8452F; --rust-bg:#F3E0DA;
+    --violet:#6B4C7A; --violet-bg:#E9E0EC;
+    --forest:#3E7C4A; --forest-bg:#DFEBE0;
+    --amber:#96631E; --amber-bg:#F0E3C8;
+    --slateblue:#33546E; --slateblue-bg:#DDE5EB;
+    --rose:#95415A; --rose-bg:#EFDCE2;
+    --ok:#2E7D4F; --warn:#96631E; --bad:#B23A2E;
+    --gemini:#1a6e5c; --claude:#A8452F;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{ background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans',system-ui,sans-serif;
+    line-height:1.5; -webkit-font-smoothing:antialiased; padding:18px 14px 60px; }
+  .wrap{max-width:720px;margin:0 auto;}
+
+  .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--rust); margin-bottom:6px; font-weight:500; }
+  h1{ font-family:'Spectral',Georgia,serif; font-weight:600; font-size:28px; line-height:1.15;
+    margin:0 0 8px; color:var(--ink); letter-spacing:-0.2px; }
+  .sub{ color:var(--ink-soft); font-size:14px; margin:0 0 4px; max-width:56ch; }
+
+  .settings{ margin-top:14px; border:1px solid var(--line); border-radius:var(--radius); background:var(--card); padding:12px 14px; }
+  .settings-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .settings-title{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft); }
+  .provider-badge{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; padding:3px 9px; border-radius:20px; font-weight:600; }
+  .provider-badge.gemini{ background:#DDEFE9; color:var(--gemini); }
+  .provider-badge.claude{ background:#F3E0DA; color:var(--claude); }
+  .settings-row{ display:flex; gap:8px; margin-bottom:6px; }
+  .settings-row input{ flex:1; border:1px solid var(--line-strong); border-radius:7px; padding:8px 10px;
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; background:var(--paper); color:var(--ink); min-width:0; }
+  .settings-row input:focus{ outline:2px solid var(--teal); outline-offset:1px; }
+  .model-input{ max-width:150px; flex:0 0 150px !important; }
+  .settings-btn{ border:none; background:var(--ink); color:var(--paper); border-radius:7px; padding:8px 14px;
+    font-size:12.5px; font-weight:600; cursor:pointer; flex-shrink:0; }
+  .settings-note{ font-size:11px; color:var(--ink-soft); font-style:italic; margin-top:4px; }
+  .settings-saved{ font-size:11px; color:var(--ok); margin-top:4px; display:none; }
+  .settings-saved.show{ display:block; }
+
+  .howto{ margin-top:10px; border:1px solid var(--line); border-radius:var(--radius); background:var(--card); overflow:hidden; }
+  .howto summary{ cursor:pointer; padding:10px 14px; font-size:13px; font-weight:600; color:var(--teal); list-style:none; display:flex; align-items:center; gap:6px; }
+  .howto summary::-webkit-details-marker{display:none;}
+  .howto summary:before{content:"▸"; font-size:11px; transition:transform .15s;}
+  .howto[open] summary:before{transform:rotate(90deg);}
+  .howto-body{padding:0 14px 14px; font-size:13px; color:var(--ink-soft);}
+  .howto-body ol{margin:6px 0 0; padding-left:18px;}
+  .howto-body li{margin-bottom:5px;}
+  .howto-body b{color:var(--ink);}
+
+  .stats{ display:flex; gap:14px; margin:16px 0 10px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); }
+  .stats b{color:var(--ink); font-weight:600;}
+
+  .panel{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-top:6px; position:relative; }
+  .panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+  .specimen-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft); }
+  .diff-group{ display:flex; gap:4px; background:var(--paper-deep); padding:3px; border-radius:8px; }
+  .diff-btn{ border:none; background:transparent; padding:5px 10px; border-radius:6px; font-family:'IBM Plex Sans'; font-size:11.5px; font-weight:600; color:var(--ink-soft); cursor:pointer; }
+  .diff-btn.active{ background:var(--card); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+
+  .sentence{ font-family:'Spectral',Georgia,serif; font-size:19px; line-height:1.85; padding:14px 4px; min-height:64px; }
+  .sentence.loading{ color:var(--ink-soft); font-style:italic; font-size:15px; }
+
+  .tok{ cursor:pointer; padding:2px 1px; border-radius:4px; transition:background .1s; }
+  .tok:hover{ background:var(--paper-deep); }
+  .tok.pend{ background:var(--amber-bg); box-shadow:0 0 0 1.5px var(--amber) inset; }
+  .tok.tagged{ cursor:default; padding:2px 2px; }
+  .tok.tagged:hover{ background:transparent; }
+  .tok-sup{ font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; vertical-align:super; margin-left:1px; }
+
+  .u-subject{ border-bottom:3px solid var(--teal); }
+  .u-verb{ border-bottom:3px solid var(--rust); }
+  .u-relative{ border-bottom:3px solid var(--violet); }
+  .u-participle{ border-bottom:3px solid var(--forest); }
+  .u-conjunction{ border-bottom:3px solid var(--amber); }
+  .u-prep{ border-bottom:3px solid var(--slateblue); }
+  .u-noun{ border-bottom:3px solid var(--rose); }
+
+  .toolbar{ margin-top:10px; padding-top:12px; border-top:1px dashed var(--line-strong); display:none; }
+  .toolbar.show{ display:block; }
+  .toolbar-label{ font-size:12px; color:var(--ink-soft); margin-bottom:8px; }
+  .toolbar-label b{ color:var(--ink); font-family:'Spectral'; font-style:italic; font-weight:500;}
+  .tag-grid{ display:flex; flex-wrap:wrap; gap:6px; }
+  .tag-btn{ border:1px solid var(--line-strong); background:var(--card); cursor:pointer; padding:7px 11px; border-radius:20px; font-family:'IBM Plex Sans'; font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:6px; }
+  .tag-dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+  .cancel-btn{ border:none; background:none; color:var(--ink-soft); font-size:12px; text-decoration:underline; cursor:pointer; margin-top:8px; padding:4px 0; }
+
+  .legend{ margin-top:14px; display:flex; flex-direction:column; gap:6px; }
+  .legend-row{ display:flex; align-items:flex-start; gap:8px; font-size:13px; background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:7px 10px; }
+  .legend-num{ font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; color:var(--ink-soft); min-width:14px; }
+  .legend-type{ font-weight:600; white-space:nowrap; }
+  .legend-text{ color:var(--ink-soft); font-style:italic; flex:1; }
+  .legend-x{ border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:15px; line-height:1; padding:0 2px; }
+  .legend-x:hover{ color:var(--rust); }
+  .optional-tag-note{ font-size:11.5px; color:var(--ink-soft); margin-top:10px; font-style:italic; }
+
+  .actions{ display:flex; gap:10px; margin-top:16px; }
+  .btn{ flex:1; border:none; border-radius:9px; padding:13px 16px; font-family:'IBM Plex Sans'; font-size:14.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; }
+  .btn-primary{ background:var(--ink); color:var(--paper); }
+  .btn-secondary{ background:var(--paper-deep); color:var(--ink); }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .spin{ width:14px; height:14px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:currentColor; animation:sp .7s linear infinite; }
+  .btn-secondary .spin{ border:2px solid rgba(33,43,36,.2); border-top-color:var(--ink); }
+  @keyframes sp{ to{ transform:rotate(360deg);} }
+
+  .report{ margin-top:16px; border:1px solid var(--line-strong); border-radius:14px; background:var(--card); padding:16px; display:none; }
+  .report.show{ display:block; animation:rise .25s ease; }
+  @keyframes rise{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  .report-head{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
+
+  .translation-box{ background:var(--paper); border-left:3px solid var(--teal); border-radius:0 8px 8px 0; padding:10px 12px; margin-bottom:14px; font-size:14px; }
+  .translation-box b{ display:block; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--teal); margin-bottom:3px; font-family:'IBM Plex Mono',monospace; }
+
+  .elements-title{ font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; margin:14px 0 8px; }
+  .elem-row{ display:flex; gap:9px; padding:9px 0; border-bottom:1px solid var(--line); }
+  .elem-row:last-of-type{ border-bottom:none; }
+  .elem-num{ font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; color:var(--card); background:var(--ink); min-width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+  .elem-body{ font-size:13.5px; }
+  .elem-type{ font-weight:700; color:var(--rust); }
+  .elem-text{ color:var(--ink-soft); font-style:italic; }
+  .elem-detail{ margin-top:2px; }
+
+  .verdict-row{ display:flex; gap:9px; padding:8px 0; border-bottom:1px solid var(--line); }
+  .verdict-row:last-of-type{ border-bottom:none; }
+  .verdict-icon{ font-size:14px; min-width:18px; margin-top:1px; }
+  .verdict-icon.ok{ color:var(--ok); }
+  .verdict-icon.warn{ color:var(--warn); }
+  .verdict-icon.bad{ color:var(--bad); }
+  .verdict-body{ font-size:13.5px; }
+  .verdict-label{ font-weight:700; }
+  .verdict-text{ color:var(--ink-soft); font-style:italic; }
+
+  .notes-box{ margin-top:10px; background:var(--amber-bg); border-radius:8px; padding:10px 12px; font-size:13px; }
+  .notes-box b{ color:var(--amber); display:block; margin-bottom:4px; font-size:12px; text-transform:uppercase; letter-spacing:.5px; font-family:'IBM Plex Mono',monospace; }
+  .notes-box ul{ margin:0; padding-left:18px; }
+  .notes-box li{ margin-bottom:3px; }
+
+  .err-box{ margin-top:12px; background:var(--rust-bg); color:var(--rust); border-radius:8px; padding:10px 12px; font-size:13px; display:none; }
+  .err-box.show{ display:block; }
+
+  .chat-panel{ margin-top:16px; border:1px solid var(--line-strong); border-radius:14px; background:var(--card); padding:16px; display:none; }
+  .chat-panel.show{ display:block; }
+  .chat-head{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft); margin-bottom:12px; }
+  .chat-thread{ display:flex; flex-direction:column; gap:10px; margin-bottom:12px; max-height:420px; overflow-y:auto; }
+  .msg{ max-width:85%; padding:9px 12px; border-radius:12px; font-size:13.5px; line-height:1.5; }
+  .msg-user{ align-self:flex-end; background:var(--ink); color:var(--paper); border-bottom-right-radius:3px; }
+  .msg-bot{ align-self:flex-start; background:var(--paper); border:1px solid var(--line); color:var(--ink); border-bottom-left-radius:3px; }
+  .msg-bot b{ color:var(--teal); }
+  .chat-empty{ font-size:12.5px; color:var(--ink-soft); font-style:italic; text-align:center; padding:10px 0; }
+  .chat-input-row{ display:flex; gap:8px; }
+  .chat-input{ flex:1; border:1px solid var(--line-strong); border-radius:9px; padding:10px 12px; font-family:'IBM Plex Sans'; font-size:14px; background:var(--paper); color:var(--ink); resize:none; }
+  .chat-input:focus{ outline:2px solid var(--teal); outline-offset:1px; }
+  .chat-send{ border:none; background:var(--teal); color:var(--card); border-radius:9px; padding:0 16px; font-weight:600; font-size:13.5px; cursor:pointer; flex-shrink:0; }
+  .chat-send:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .key{ margin-top:22px; padding-top:14px; border-top:1px solid var(--line); }
+  .key-title{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft); margin-bottom:10px; }
+  .key-grid{ display:grid; grid-template-columns:1fr 1fr; gap:7px 14px; }
+  .key-item{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-soft); }
+  .key-swatch{ width:16px; height:4px; border-radius:2px; flex-shrink:0; }
+
+  footer{ margin-top:26px; text-align:center; font-size:11.5px; color:var(--ink-soft); font-style:italic; }
+
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Cümle Anatomisi · YÖKDİL Sağlık Bilimleri</div>
+  <h1>Cümle Anatomisi Laboratuvarı</h1>
+  <p class="sub">Analiz Et'e bas, cümlenin tüm gramer yapısını en ince ayrıntısına kadar gör, sonra altındaki sohbetten o analiz hakkında istediğini sor.</p>
+
+  <div class="settings">
+    <div class="settings-head">
+      <span class="settings-title">AI Sağlayıcı</span>
+      <span class="provider-badge" id="providerBadge">Claude</span>
+    </div>
+    <div class="settings-row">
+      <input type="password" id="geminiKeyInput" placeholder="Gemini API key (opsiyonel) — AIzaSy...">
+    </div>
+    <div class="settings-row">
+      <input type="text" id="geminiModelInput" class="model-input" placeholder="model" value="gemini-3.5-flash">
+      <button class="settings-btn" id="saveSettingsBtn">Kaydet</button>
+    </div>
+    <div class="settings-note">Key girip kaydedersen tüm analizler Gemini ile yapılır; sadece bu cihazda/hesabında saklanır, kimseyle paylaşılmaz. Boş bırakırsan veya Gemini hata verirse otomatik Claude'a döner.</div>
+    <div class="settings-saved" id="settingsSaved">✓ Kaydedildi</div>
+  </div>
+
+  <details class="howto">
+    <summary>Nasıl kullanılır?</summary>
+    <div class="howto-body">
+      <ol>
+        <li><b>En hızlı yol:</b> Hiçbir şey işaretlemeden direkt <b>Analiz Et</b>'e bas — cümlenin tam ve ayrıntılı gramer dökümünü anında alırsın.</li>
+        <li><b>İstersen önce kendin dene:</b> Bir kelimeye dokun, sonra bitiş kelimesine dokun, çıkan menüden ne olduğunu işaretle. Analiz Et'e bastığında etiketlerin de ayrıca değerlendirilir.</li>
+        <li>Analiz çıktıktan sonra alttaki sohbet kutusundan o cümleyle ilgili istediğin soruyu sorabilirsin.</li>
+      </ol>
+    </div>
+  </details>
+
+  <div class="stats">
+    <span>İncelenen cümle: <b id="statSent">0</b></span>
+    <span>Yapılan analiz: <b id="statCheck">0</b></span>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="specimen-label">Örnek No. <span id="specimenNo">1</span></div>
+      <div class="diff-group" id="diffGroup">
+        <button class="diff-btn" data-d="kolay">Kolay</button>
+        <button class="diff-btn active" data-d="orta">Orta</button>
+        <button class="diff-btn" data-d="zor">Zor</button>
+      </div>
+    </div>
+
+    <div class="sentence" id="sentenceBox">Yükleniyor…</div>
+
+    <div class="toolbar" id="toolbar">
+      <div class="toolbar-label">Seçili bölge: <b id="pendText"></b></div>
+      <div class="tag-grid" id="tagGrid"></div>
+      <button class="cancel-btn" id="cancelSel">seçimi iptal et</button>
+    </div>
+
+    <div class="legend" id="legend"></div>
+    <div class="optional-tag-note" id="optNote">İstersen önce yukarıdan birkaç parçayı kendin işaretle, istersen direkt aşağıdan analiz et — ikisi de olur.</div>
+
+    <div class="actions">
+      <button class="btn btn-secondary" id="newBtn">↻ Yeni Cümle</button>
+      <button class="btn btn-primary" id="checkBtn">Analiz Et →</button>
+    </div>
+
+    <div class="err-box" id="errBox"></div>
+  </div>
+
+  <div class="report" id="report"></div>
+
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-head">Bu Analiz Hakkında Sohbet</div>
+    <div class="chat-thread" id="chatThread"><div class="chat-empty">Analizle ilgili aklına takılan bir şey varsa buraya yaz.</div></div>
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chatInput" rows="1" placeholder="Örn: neden 'which' relative clause ama diğeri participle?"></textarea>
+      <button class="chat-send" id="chatSend">Gönder</button>
+    </div>
+  </div>
+
+  <div class="key">
+    <div class="key-title">Etiket Anahtarı (opsiyonel işaretleme için)</div>
+    <div class="key-grid" id="keyGrid"></div>
+  </div>
+
+  <footer>Cümle ve analizler seçili AI sağlayıcı tarafından anlık üretilir — tekrar dokunduğunda farklı sonuç alabilirsin.</footer>
+</div>
+
+<script>
+(function(){
+
+  var TAG_TYPES = [
+    {key:'subject',     label:'Ana Özne',        color:'var(--teal)',      cls:'u-subject'},
+    {key:'verb',        label:'Ana Yüklem',      color:'var(--rust)',      cls:'u-verb'},
+    {key:'relative',    label:'İlgi Cümleciği',  color:'var(--violet)',    cls:'u-relative'},
+    {key:'participle',  label:'Ortaç Öbeği',     color:'var(--forest)',    cls:'u-participle'},
+    {key:'conjunction', label:'Bağlaç Cümleciği',color:'var(--amber)',     cls:'u-conjunction'},
+    {key:'prep',        label:'Edat Öbeği',      color:'var(--slateblue)', cls:'u-prep'},
+    {key:'noun',        label:'İsim Cümleciği',  color:'var(--rose)',      cls:'u-noun'}
+  ];
+
+  var SEEDS = [
+    "Short bowel syndrome most often results from surgery that removes segments of the small intestine as treatment for conditions which severely damage the tissue.",
+    "Researchers who examined the data noticed a pattern that had been overlooked, suggesting that the original hypothesis, although widely accepted, required revision.",
+    "Because the immune system sometimes fails to distinguish between healthy and infected cells, patients diagnosed with autoimmune disorders often require treatments designed to suppress this response.",
+    "The vaccine, developed after years of trials conducted across several countries, is now believed to reduce transmission rates significantly among vulnerable populations.",
+    "While the exact cause remains unclear, scientists studying the disorder have found that patients whose symptoms appear before adolescence tend to experience more severe outcomes.",
+    "A hormone produced by the pancreas, which regulates blood sugar levels, is often insufficient in people suffering from a condition that damages insulin-producing cells."
+  ];
+
+  var els = {
+    sentenceBox: document.getElementById('sentenceBox'),
+    toolbar: document.getElementById('toolbar'),
+    tagGrid: document.getElementById('tagGrid'),
+    pendText: document.getElementById('pendText'),
+    cancelSel: document.getElementById('cancelSel'),
+    legend: document.getElementById('legend'),
+    optNote: document.getElementById('optNote'),
+    newBtn: document.getElementById('newBtn'),
+    checkBtn: document.getElementById('checkBtn'),
+    report: document.getElementById('report'),
+    errBox: document.getElementById('errBox'),
+    statSent: document.getElementById('statSent'),
+    statCheck: document.getElementById('statCheck'),
+    specimenNo: document.getElementById('specimenNo'),
+    keyGrid: document.getElementById('keyGrid'),
+    diffGroup: document.getElementById('diffGroup'),
+    chatPanel: document.getElementById('chatPanel'),
+    chatThread: document.getElementById('chatThread'),
+    chatInput: document.getElementById('chatInput'),
+    chatSend: document.getElementById('chatSend'),
+    geminiKeyInput: document.getElementById('geminiKeyInput'),
+    geminiModelInput: document.getElementById('geminiModelInput'),
+    saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+    settingsSaved: document.getElementById('settingsSaved'),
+    providerBadge: document.getElementById('providerBadge')
+  };
+
+  var state = {
+    tokens: [], tags: [], selStart: null, selEnd: null,
+    difficulty: 'orta', loadingNew: false, loadingCheck: false, loadingChat: false,
+    stats: {sentences:0, checks:0},
+    lastAnalysisText: null, chatHistory: [],
+    geminiKey: '', geminiModel: 'gemini-3.5-flash',
+    lastProvider: 'claude'
+  };
+
+  function tagInfo(key){ for(var i=0;i<TAG_TYPES.length;i++){ if(TAG_TYPES[i].key===key) return TAG_TYPES[i]; } return TAG_TYPES[0]; }
+  function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ---------- settings ----------
+  function loadSettings(){
+    if(!window.storage){ return; }
+    window.storage.get('sentence_lab_settings', false).then(function(res){
+      if(res && res.value){
+        try{
+          var s = JSON.parse(res.value);
+          state.geminiKey = s.geminiKey || '';
+          state.geminiModel = s.geminiModel || 'gemini-3.5-flash';
+          els.geminiKeyInput.value = state.geminiKey;
+          els.geminiModelInput.value = state.geminiModel;
+          updateProviderBadge();
+        }catch(e){}
+      }
+    }).catch(function(){});
+  }
+  function saveSettings(){
+    state.geminiKey = els.geminiKeyInput.value.trim();
+    state.geminiModel = els.geminiModelInput.value.trim() || 'gemini-3.5-flash';
+    updateProviderBadge();
+    els.settingsSaved.classList.add('show');
+    setTimeout(function(){ els.settingsSaved.classList.remove('show'); }, 2200);
+    if(!window.storage) return;
+    window.storage.set('sentence_lab_settings', JSON.stringify({geminiKey:state.geminiKey, geminiModel:state.geminiModel}), false).catch(function(){});
+  }
+  function updateProviderBadge(){
+    if(state.geminiKey){
+      els.providerBadge.textContent = 'Gemini (' + state.geminiModel + ')';
+      els.providerBadge.className = 'provider-badge gemini';
+    } else {
+      els.providerBadge.textContent = 'Claude';
+      els.providerBadge.className = 'provider-badge claude';
+    }
+  }
+
+  function loadStats(){
+    if(!window.storage){ renderStats(); return; }
+    window.storage.get('sentence_lab_stats', false).then(function(res){
+      if(res && res.value){ try{ state.stats = JSON.parse(res.value); }catch(e){} }
+      renderStats();
+    }).catch(function(){ renderStats(); });
+  }
+  function saveStats(){
+    renderStats();
+    if(!window.storage) return;
+    window.storage.set('sentence_lab_stats', JSON.stringify(state.stats), false).catch(function(){});
+  }
+  function renderStats(){
+    els.statSent.textContent = state.stats.sentences;
+    els.statCheck.textContent = state.stats.checks;
+    els.specimenNo.textContent = state.stats.sentences + 1;
+  }
+
+  function tokenize(sentence){ return sentence.trim().split(/\s+/); }
+
+  function findTag(idx){
+    for(var i=0;i<state.tags.length;i++){
+      var t = state.tags[i];
+      if(idx>=t.start && idx<=t.end) return {tag:t, index:i};
+    }
+    return null;
+  }
+
+  function renderSentence(){
+    var html = '';
+    for(var i=0;i<state.tokens.length;i++){
+      var word = state.tokens[i];
+      var found = findTag(i);
+      var isPend = state.selStart!==null && i>=Math.min(state.selStart,state.selEnd) && i<=Math.max(state.selStart,state.selEnd);
+      var cls = 'tok';
+      if(found) cls += ' tagged ' + tagInfo(found.tag.type).cls;
+      if(isPend) cls += ' pend';
+      var sup = '';
+      if(found && found.tag.end===i){ sup = '<span class="tok-sup" style="color:'+tagInfo(found.tag.type).color+'">'+(found.index+1)+'</span>'; }
+      html += '<span class="'+cls+'" data-i="'+i+'">'+escapeHtml(word)+'</span>'+sup+' ';
+    }
+    els.sentenceBox.innerHTML = html;
+    els.sentenceBox.classList.remove('loading');
+    Array.prototype.forEach.call(els.sentenceBox.querySelectorAll('.tok'), function(el){ el.addEventListener('click', onTokClick); });
+  }
+
+  function onTokClick(e){
+    var i = parseInt(e.currentTarget.getAttribute('data-i'),10);
+    if(findTag(i)) return;
+    if(state.selStart===null){ state.selStart = i; state.selEnd = i; }
+    else if(state.selStart===i && state.selEnd===i){ state.selStart = null; state.selEnd = null; }
+    else{ state.selEnd = i; }
+    renderSentence(); renderToolbar();
+  }
+
+  function renderToolbar(){
+    if(state.selStart===null){ els.toolbar.classList.remove('show'); return; }
+    var a = Math.min(state.selStart, state.selEnd), b = Math.max(state.selStart, state.selEnd);
+    var text = state.tokens.slice(a,b+1).join(' ');
+    els.pendText.textContent = '"' + text + '"';
+    els.toolbar.classList.add('show');
+    els.toolbar.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function buildTagGrid(){
+    var html = '';
+    TAG_TYPES.forEach(function(t){
+      html += '<button class="tag-btn" data-k="'+t.key+'" style="color:'+t.color+'">'+
+              '<span class="tag-dot" style="background:'+t.color+'"></span>'+t.label+'</button>';
+    });
+    els.tagGrid.innerHTML = html;
+    Array.prototype.forEach.call(els.tagGrid.querySelectorAll('.tag-btn'), function(btn){
+      btn.addEventListener('click', function(){
+        var a = Math.min(state.selStart, state.selEnd), b = Math.max(state.selStart, state.selEnd);
+        state.tags.push({start:a, end:b, type:btn.getAttribute('data-k')});
+        state.selStart = null; state.selEnd = null;
+        renderSentence(); renderToolbar(); renderLegend();
+      });
+    });
+  }
+
+  function renderLegend(){
+    if(state.tags.length===0){ els.legend.innerHTML=''; els.optNote.style.display='block'; return; }
+    els.optNote.style.display='none';
+    var html = '';
+    state.tags.forEach(function(t, idx){
+      var info = tagInfo(t.type);
+      var text = state.tokens.slice(t.start, t.end+1).join(' ');
+      html += '<div class="legend-row" style="border-left:3px solid '+info.color+'">'+
+        '<span class="legend-num">'+(idx+1)+'</span>'+
+        '<span class="legend-type" style="color:'+info.color+'">'+info.label+'</span>'+
+        '<span class="legend-text">"'+escapeHtml(text)+'"</span>'+
+        '<button class="legend-x" data-idx="'+idx+'">×</button>'+
+      '</div>';
+    });
+    els.legend.innerHTML = html;
+    Array.prototype.forEach.call(els.legend.querySelectorAll('.legend-x'), function(btn){
+      btn.addEventListener('click', function(){
+        var idx = parseInt(btn.getAttribute('data-idx'),10);
+        state.tags.splice(idx,1);
+        renderSentence(); renderLegend();
+      });
+    });
+  }
+
+  function buildKey(){
+    var html = '';
+    TAG_TYPES.forEach(function(t){
+      html += '<div class="key-item"><span class="key-swatch" style="background:'+t.color+'"></span>'+t.label+'</div>';
+    });
+    els.keyGrid.innerHTML = html;
+  }
+
+  function resetForNewSentence(sentence){
+    state.tokens = tokenize(sentence);
+    state.tags = []; state.selStart = null; state.selEnd = null;
+    state.lastAnalysisText = null; state.chatHistory = [];
+    els.report.classList.remove('show');
+    els.chatPanel.classList.remove('show');
+    els.chatThread.innerHTML = '<div class="chat-empty">Analizle ilgili aklına takılan bir şey varsa buraya yaz.</div>';
+    els.errBox.classList.remove('show');
+    renderSentence(); renderToolbar(); renderLegend();
+  }
+
+  // ---------- AI transport layer ----------
+  // msgs: array of {role:'user'|'assistant', text:'...'}
+
+  function callClaude(msgs, maxTokens){
+    var messages = msgs.map(function(m){ return {role:m.role, content:m.text}; });
+    return fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens: maxTokens || 1000, messages: messages })
+    }).then(function(r){
+      if(!r.ok) throw new Error('Claude HTTP ' + r.status);
+      return r.json();
+    }).then(function(data){
+      var textParts = (data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;});
+      var text = textParts.join('\n').trim();
+      if(!text) throw new Error('Claude boş yanıt döndü');
+      return text;
+    });
+  }
+
+  function callGemini(msgs, maxTokens){
+    var contents = msgs.map(function(m){
+      return {role: m.role==='assistant' ? 'model' : 'user', parts:[{text:m.text}]};
+    });
+    var model = state.geminiModel || 'gemini-3.5-flash';
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent';
+    return fetch(url, {
+      method:'POST',
+      headers:{'Content-Type':'application/json', 'x-goog-api-key': state.geminiKey},
+      body: JSON.stringify({ contents: contents, generationConfig:{ maxOutputTokens: maxTokens || 1000 } })
+    }).then(function(r){
+      if(!r.ok) throw new Error('Gemini HTTP ' + r.status);
+      return r.json();
+    }).then(function(data){
+      var cand = data.candidates && data.candidates[0];
+      var parts = (cand && cand.content && cand.content.parts) || [];
+      var text = parts.map(function(p){return p.text||'';}).join('\n').trim();
+      if(!text) throw new Error('Gemini boş yanıt döndü');
+      return text;
+    });
+  }
+
+  function callAI(msgs, maxTokens){
+    if(state.geminiKey){
+      return callGemini(msgs, maxTokens).then(function(res){
+        state.lastProvider = 'Gemini';
+        return res;
+      }).catch(function(err){
+        state.lastProvider = 'Claude (Gemini başarısız oldu, yedeğe geçildi)';
+        return callClaude(msgs, maxTokens);
+      });
+    }
+    state.lastProvider = 'Claude';
+    return callClaude(msgs, maxTokens);
+  }
+
+  function stripFences(s){ return s.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim(); }
+
+  var DIFF_DESC = {
+    kolay: 'Contains exactly ONE embedded structure (either a relative clause OR a participle clause OR a subordinate clause). 14-20 words total. Simple, clear.',
+    orta: 'Contains exactly TWO different embedded structures from this list: relative clause, participle clause, subordinating conjunction clause, prepositional phrase. 20-28 words total.',
+    zor: 'Contains THREE OR MORE embedded/nested structures (combine relative clauses, participle clauses, subordinate clauses, noun clauses, prepositional phrases). 28-38 words total. Nesting is allowed.'
+  };
+
+  function showErr(msg){ els.errBox.textContent = msg; els.errBox.classList.add('show'); }
+
+  function generateSentence(){
+    if(state.loadingNew) return;
+    state.loadingNew = true;
+    els.newBtn.innerHTML = '<span class="spin"></span> Üretiliyor…';
+    els.newBtn.disabled = true;
+    els.errBox.classList.remove('show');
+
+    var prompt = 'Generate exactly ONE English sentence for a Turkish graduate student preparing for the YOKDIL Health Sciences English exam, to practice sentence parsing.\n\n' +
+      'Topic: health sciences, medicine, or biology, academic/journalistic register.\n' +
+      'Difficulty requirement: ' + DIFF_DESC[state.difficulty] + '\n\n' +
+      'Return ONLY the sentence itself. No quotation marks, no preamble, no explanation, no markdown. Just the raw sentence ending in a period.';
+
+    callAI([{role:'user', text: prompt}], 300).then(function(text){
+      var sentence = text.replace(/^["']|["']$/g,'').trim();
+      if(sentence.length < 10) throw new Error('empty');
+      resetForNewSentence(sentence);
+      state.stats.sentences += 1;
+      saveStats();
+    }).catch(function(){
+      var s = SEEDS[Math.floor(Math.random()*SEEDS.length)];
+      resetForNewSentence(s);
+      state.stats.sentences += 1;
+      saveStats();
+      showErr('Yeni cümle üretilemedi, hazır bir örnek gösteriliyor.');
+    }).finally(function(){
+      state.loadingNew = false;
+      els.newBtn.innerHTML = '↻ Yeni Cümle';
+      els.newBtn.disabled = false;
+    });
+  }
+
+  function checkAnalysis(){
+    if(state.loadingCheck) return;
+    state.loadingCheck = true;
+    els.checkBtn.innerHTML = '<span class="spin"></span> Analiz ediliyor…';
+    els.checkBtn.disabled = true;
+    els.errBox.classList.remove('show');
+
+    var sentence = state.tokens.join(' ');
+    var hasTags = state.tags.length > 0;
+    var tagBlock = '';
+    if(hasTags){
+      var tagLines = state.tags.map(function(t){
+        var info = tagInfo(t.type);
+        var text = state.tokens.slice(t.start, t.end+1).join(' ');
+        return '- ' + info.label + ': "' + text + '"';
+      }).join('\n');
+      tagBlock = '\n\nThe student ALSO attempted to tag these spans themselves before asking for full analysis:\n' + tagLines +
+        '\nBriefly judge each as "dogru"/"kismen dogru"/"yanlis" in the tag_feedback array.';
+    }
+
+    var prompt = 'You are an exhaustive English grammar analyzer for a Turkish graduate student preparing for the YOKDIL Health Sciences exam. Write all Turkish text in correct Turkish.\n\n' +
+      'Sentence to analyze fully:\n"' + sentence + '"' + tagBlock + '\n\n' +
+      'Produce a COMPLETE, exhaustive grammatical breakdown. Cover EVERY element: the main subject (with all its modifiers), the main verb (name its exact tense AND voice, active or passive), and EVERY single subordinate structure that exists in the sentence — every relative clause, every participle clause (reduced relative clause), every subordinating conjunction clause, every prepositional phrase, every noun clause, every appositive. Do not skip minor ones. For each element give: the exact English text, a precise Turkish grammatical label, and a short but complete Turkish explanation of its function and how it connects to the rest of the sentence.\n\n' +
+      'Also include: a natural, accurate Turkish translation of the full sentence, and up to 3 short "notes" about tricky points if any exist.\n\n' +
+      'Be information-dense, not chatty: short precise phrases, not long paragraphs. Cover everything but do not pad.\n\n' +
+      'Respond with ONLY valid JSON, no markdown fences, no other text, in EXACTLY this shape:\n' +
+      '{"translation":"...","elements":[{"type":"...","text":"...","detail":"..."}],"notes":["..."]' + (hasTags ? ',"tag_feedback":[{"label":"...","text":"...","verdict":"dogru|kismen dogru|yanlis","note":"..."}]' : '') + '}';
+
+    callAI([{role:'user', text: prompt}], 1000).then(function(text){
+      var clean = stripFences(text);
+      var data = JSON.parse(clean);
+      renderReport(data);
+      state.lastAnalysisText = clean;
+      state.stats.checks += 1;
+      saveStats();
+      els.chatPanel.classList.add('show');
+      els.chatPanel.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }).catch(function(err){
+      showErr('Analiz alınamadı (' + (err.message||'bilinmeyen hata') + '). Tekrar dener misin?');
+    }).finally(function(){
+      state.loadingCheck = false;
+      els.checkBtn.innerHTML = 'Analiz Et →';
+      els.checkBtn.disabled = false;
+    });
+  }
+
+  function verdictMeta(v){
+    v = (v||'').toLowerCase();
+    if(v.indexOf('dogru')===0 || v==='doğru') return {icon:'✓', cls:'ok'};
+    if(v.indexOf('kismen')===0 || v.indexOf('kısmen')===0) return {icon:'~', cls:'warn'};
+    return {icon:'✕', cls:'bad'};
+  }
+
+  function renderReport(data){
+    var html = '<div class="report-head"><span>Tam Gramer Analizi</span><span>' + escapeHtml(state.lastProvider) + ' · #' + state.stats.checks + '</span></div>';
+
+    if(data.translation){ html += '<div class="translation-box"><b>Türkçe Çeviri</b>' + escapeHtml(data.translation) + '</div>'; }
+
+    if(data.elements && data.elements.length){
+      html += '<div class="elements-title">Cümlenin Tam Yapısı (' + data.elements.length + ' öğe)</div>';
+      data.elements.forEach(function(el, idx){
+        html += '<div class="elem-row"><div class="elem-num">' + (idx+1) + '</div><div class="elem-body">' +
+            '<span class="elem-type">' + escapeHtml(el.type||'') + '</span> — ' +
+            '<span class="elem-text">"' + escapeHtml(el.text||'') + '"</span>' +
+            '<div class="elem-detail">' + escapeHtml(el.detail||'') + '</div>' +
+          '</div></div>';
+      });
+    }
+
+    if(data.tag_feedback && data.tag_feedback.length){
+      html += '<div class="elements-title">Kendi Etiketlerinin Değerlendirmesi</div>';
+      data.tag_feedback.forEach(function(f){
+        var vm = verdictMeta(f.verdict);
+        html += '<div class="verdict-row"><div class="verdict-icon ' + vm.cls + '">' + vm.icon + '</div><div class="verdict-body">' +
+            '<span class="verdict-label">' + escapeHtml(f.label||'') + '</span> — ' +
+            '<span class="verdict-text">"' + escapeHtml(f.text||'') + '"</span>' +
+            '<div>' + escapeHtml(f.note||'') + '</div>' +
+          '</div></div>';
+      });
+    }
+
+    if(data.notes && data.notes.length){
+      html += '<div class="notes-box"><b>Püf Noktaları</b><ul>';
+      data.notes.forEach(function(n){ html += '<li>' + escapeHtml(n) + '</li>'; });
+      html += '</ul></div>';
+    }
+
+    els.report.innerHTML = html;
+    els.report.classList.add('show');
+    els.report.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function addChatMsg(role, text, provider){
+    var empty = els.chatThread.querySelector('.chat-empty');
+    if(empty) empty.remove();
+    var div = document.createElement('div');
+    div.className = 'msg ' + (role==='user' ? 'msg-user' : 'msg-bot');
+    if(role!=='user') div.innerHTML = '<b>' + escapeHtml(provider||'AI') + ':</b><br>' + escapeHtml(text).replace(/\n/g,'<br>');
+    else div.textContent = text;
+    els.chatThread.appendChild(div);
+    els.chatThread.scrollTop = els.chatThread.scrollHeight;
+  }
+
+  function sendChat(){
+    var q = els.chatInput.value.trim();
+    if(!q || state.loadingChat || !state.lastAnalysisText) return;
+    state.loadingChat = true;
+    els.chatSend.disabled = true;
+    addChatMsg('user', q);
+    els.chatInput.value = '';
+
+    var baseContext = 'A Turkish YOKDIL student is studying this English sentence:\n"' + state.tokens.join(' ') + '"\n\n' +
+      'Here is the full grammatical analysis already given (JSON):\n' + state.lastAnalysisText + '\n\n' +
+      'Answer the student\'s questions about this specific sentence and analysis. Reply in Turkish, casual-but-precise study-partner tone, reasonably concise. Do not repeat the whole analysis unless asked; answer the specific question.';
+
+    var msgs = [{role:'user', text: baseContext}, {role:'assistant', text:'Anladım, bu cümle ve analizi hakkında sorularını yanıtlamaya hazırım.'}];
+    state.chatHistory.forEach(function(m){ msgs.push(m); });
+    msgs.push({role:'user', text:q});
+
+    callAI(msgs, 1000).then(function(answer){
+      state.chatHistory.push({role:'user', text:q});
+      state.chatHistory.push({role:'assistant', text:answer});
+      addChatMsg('bot', answer, state.lastProvider);
+    }).catch(function(err){
+      addChatMsg('bot', 'Bir hata oldu (' + (err.message||'bilinmeyen') + '). Tekrar dener misin?', 'Hata');
+    }).finally(function(){
+      state.loadingChat = false;
+      els.chatSend.disabled = false;
+    });
+  }
+
+  els.cancelSel.addEventListener('click', function(){
+    state.selStart = null; state.selEnd = null;
+    renderSentence(); renderToolbar();
+  });
+  els.newBtn.addEventListener('click', generateSentence);
+  els.checkBtn.addEventListener('click', checkAnalysis);
+  els.chatSend.addEventListener('click', sendChat);
+  els.chatInput.addEventListener('keydown', function(e){
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
+  });
+  els.saveSettingsBtn.addEventListener('click', saveSettings);
+  Array.prototype.forEach.call(els.diffGroup.querySelectorAll('.diff-btn'), function(btn){
+    btn.addEventListener('click', function(){
+      Array.prototype.forEach.call(els.diffGroup.querySelectorAll('.diff-btn'), function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      state.difficulty = btn.getAttribute('data-d');
+    });
+  });
+
+  buildTagGrid();
+  buildKey();
+  loadSettings();
+  loadStats();
+  resetForNewSentence(SEEDS[Math.floor(Math.random()*SEEDS.length)]);
+
+})();
+</script>
+</body>
+</html>
