@@ -431,7 +431,6 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .wtok:active{background:var(--card2)}
 .wtok.pend{background:var(--acc-soft);box-shadow:0 0 0 1.5px var(--acc) inset;border-radius:4px}
 .wtok.tagged{cursor:default}
-.wtok.auto{font-weight:600;padding:2px 3px}
 .wsup{font-family:Archivo,sans-serif;font-size:10px;font-weight:700;vertical-align:super;margin-left:1px}
 .wt-subject{border-bottom:3px solid var(--tsubj)}
 .wt-verb{border-bottom:3px solid var(--tverb)}
@@ -465,17 +464,20 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .cenum{font-family:Archivo,sans-serif;font-size:11px;font-weight:700;color:var(--card);background:var(--ink);min-width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 .cetype{font-weight:700;color:var(--acc-ink)}
 .cetext{color:var(--ink2);font-style:italic}
-.csteps{display:flex;flex-direction:column;gap:8px;margin:8px 0 14px}
-.cstep{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 12px;font-size:13.5px;line-height:1.55}
-.cstep b{display:block;color:var(--deep);margin-bottom:3px}
-.cstep .cue{display:inline-block;color:var(--acc-ink);background:var(--acc-soft);border-radius:6px;padding:2px 6px;margin:2px 0 5px;font-size:12px;font-weight:600}
-.cstep .check{display:block;color:var(--ink2);margin-top:5px;font-size:12.5px}
-.cactions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
-.cactions .btn{flex:1}
 .notesbox{margin-top:10px;background:var(--acc-soft);border-radius:9px;padding:10px 12px;font-size:13px}
 .notesbox b{color:var(--acc-ink);display:block;margin-bottom:4px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;font-family:Archivo,sans-serif}
 .notesbox ul{margin:0;padding-left:18px}
 .cchat{margin-top:16px;border-radius:var(--r);background:var(--card2);padding:15px;display:none}
+.cstep{margin-top:12px;padding:11px 13px;background:var(--card);border-radius:10px;border-left:3px solid var(--acc)}
+.cstephead{font-family:Archivo,sans-serif;font-weight:700;font-size:12.5px;color:var(--acc-ink);margin-bottom:5px}
+.cstepbody{font-size:13.5px;line-height:1.6;color:var(--ink)}
+.cwtable{margin-top:6px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.cwrow{display:flex;padding:7px 11px;border-bottom:1px solid var(--line);font-size:13px}
+.cwrow:last-child{border-bottom:none}
+.cwrow:nth-child(even){background:var(--card)}
+.cwen{flex:0 0 46%;font-weight:600;color:var(--acc-ink)}
+.cwtr{flex:1;color:var(--ink2)}
+.cwkalip{font-style:normal;font-size:9.5px;background:var(--acc-soft);color:var(--acc-ink);padding:1px 6px;border-radius:20px;margin-left:4px}
 .cchat.on{display:block}
 .cchead{font-family:Archivo,sans-serif;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-bottom:12px}
 .cthread{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;max-height:400px;overflow-y:auto}
@@ -483,15 +485,6 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .cmsg.u{align-self:flex-end;background:var(--acc);color:#fff;border-bottom-right-radius:3px}
 .cmsg.b{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:3px}
 .cempty{font-size:12.5px;color:var(--ink3);font-style:italic;text-align:center;padding:10px 0}
-.csaved{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
-.csavedhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.csavedhead h3{font-family:"Source Serif 4",serif;font-size:18px;margin:0;flex:1}
-.csavedhead .btn{font-size:12.5px;padding:9px 11px}
-.csaveditem{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 42px 12px 12px;margin-bottom:8px;box-shadow:var(--sh)}
-.csaveditem .csen{font-family:"Source Serif 4",Georgia,serif;font-size:15.5px;line-height:1.7;cursor:pointer}
-.csaveditem .cmeta{font-size:11px;color:var(--ink3);margin-top:5px}
-.csaveditem .del{position:absolute;right:8px;top:8px;width:30px;height:30px;border-radius:9px;color:var(--ink3);font-size:20px}
-.csaveditem .del:active{background:var(--line2);color:var(--warn)}
 </style>
 </head>
 <body>
@@ -682,7 +675,8 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
     <div id="konuList"></div>
   </div>
   <div id="cumleView" class="hid">
-    <p class="sub" style="margin-bottom:16px">Analiz Et'e bas, cümlenin tüm gramer yapısını en ince ayrıntısına kadar gör, sonra altındaki sohbetten o analiz hakkında istediğini sor.</p>
+    <p class="sub" style="margin-bottom:12px">Analiz Et'e bas, cümlenin tüm gramer yapısını en ince ayrıntısına kadar gör, sonra altındaki sohbetten o analiz hakkında istediğini sor.</p>
+    <button class="btn ghost wide" id="cPdfBtn" style="margin-bottom:16px">📄 Kaydedilenleri PDF Al (Kalam · her cümle ~2 sayfa)</button>
 
     <div class="diffrow" id="cDiff">
       <button data-d="kolay">Kolay</button>
@@ -715,14 +709,6 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
         <input class="inp" id="cChatInp" placeholder="Örn: neden 'which' relative clause?">
         <button class="btn" id="cChatSend">Sor</button>
       </div>
-    </div>
-
-    <div class="csaved" id="cSavedWrap">
-      <div class="csavedhead">
-        <h3>Kaydedilen analizler <span id="cSavedCount"></span></h3>
-        <button class="btn ghost" id="cSavedPdf">PDF çıkar</button>
-      </div>
-      <div id="cSavedList"></div>
     </div>
   </div>
 </section>
@@ -1120,82 +1106,23 @@ const CDIFF = {
   orta: "Contains exactly TWO different embedded structures (relative clause, participle clause, subordinating conjunction clause, prepositional phrase). 20-28 words.",
   zor: "Contains THREE OR MORE embedded/nested structures, combined freely. 28-38 words."
 };
-const CU = { tokens: [], tags: [], autoTags: [], selStart: null, selEnd: null, diff: "orta", lastAnalysis: null, lastData: null, chatHist: [], inited: false };
-
-let CANALYSES = [];
-try { CANALYSES = JSON.parse(store.get("sentence_analyses", "[]")) || []; } catch (e) { CANALYSES = []; }
-function saveCAnalyses(){ store.set("sentence_analyses", JSON.stringify(CANALYSES)); }
-const cAnalysisKey = s => String(s || "").toLowerCase().replace(/\s+/g," ").trim().slice(0,180);
-function hasCAnalysis(s){ return CANALYSES.some(x => cAnalysisKey(x.s) === cAnalysisKey(s)); }
+const CU = { tokens: [], tags: [], selStart: null, selEnd: null, diff: "orta", lastAnalysis: null, chatHist: [], inited: false };
 
 function cTagInfo(k){ return CTAGS.find(t=>t.key===k) || CTAGS[0]; }
 function cTokenize(s){ return s.trim().split(/\s+/); }
 function cFindTag(i){ for(let j=0;j<CU.tags.length;j++){ const t=CU.tags[j]; if(i>=t.start&&i<=t.end) return {tag:t,index:j}; } return null; }
-function cFindAuto(i){ for(let j=0;j<CU.autoTags.length;j++){ const t=CU.autoTags[j]; if(i>=t.start&&i<=t.end) return {tag:t,index:j}; } return null; }
-function cNormToken(s){ return String(s||"").toLowerCase().replace(/[“”"'’.,;:!?()[\]{}]/g,"").trim(); }
-function cTagsFromColorSpans(sentence, spans){
-  const tokens = cTokenize(sentence), out = [];
-  let cursor = 0;
-  (spans || []).forEach(sp => {
-    const type = String(sp.category || sp.type || "").toLowerCase();
-    if(!CTAGS.some(t => t.key === type)) return;
-    const needle = cTokenize(sp.text || "");
-    if(!needle.length) return;
-    let found = -1;
-    for(let i=cursor;i<=tokens.length-needle.length;i++){
-      let ok = true;
-      for(let j=0;j<needle.length;j++){
-        if(cNormToken(tokens[i+j]) !== cNormToken(needle[j])){ ok=false; break; }
-      }
-      if(ok){ found=i; break; }
-    }
-    if(found < 0){
-      for(let i=0;i<=tokens.length-needle.length;i++){
-        let ok = true;
-        for(let j=0;j<needle.length;j++) if(cNormToken(tokens[i+j]) !== cNormToken(needle[j])){ ok=false; break; }
-        if(ok){ found=i; break; }
-      }
-    }
-    if(found >= 0){
-      out.push({start:found,end:found+needle.length-1,type,text:tokens.slice(found,found+needle.length).join(" ")});
-      cursor = found + needle.length;
-    }
-  });
-  return out;
-}
-function cEffectiveColorSpans(data){
-  if(data && Array.isArray(data.color_spans) && data.color_spans.length) return data.color_spans;
-  return ((data && data.elements) || []).map(x => ({text:x.text,category:x.category}));
-}
-function cApplyColorSpans(data){
-  CU.autoTags = cTagsFromColorSpans(CU.tokens.join(" "), cEffectiveColorSpans(data));
-  cRenderSentence(); cRenderLegend();
-}
-function cSentenceColorHtml(sentence, spans){
-  const tokens = cTokenize(sentence), tags = cTagsFromColorSpans(sentence, spans);
-  return tokens.map((tok,i) => {
-    const tag = tags.find(t => i>=t.start && i<=t.end);
-    if(!tag) return esc(tok);
-    const info = cTagInfo(tag.type);
-    return `<span class="${info.cls}" style="color:var(${info.var});font-weight:600">${esc(tok)}</span>`;
-  }).join(" ");
-}
 
 function cRenderSentence(){
   let html = "";
   for(let i=0;i<CU.tokens.length;i++){
     const found = cFindTag(i);
-    const auto = cFindAuto(i);
-    const painted = found ? found.tag : (auto ? auto.tag : null);
     const isPend = CU.selStart!==null && i>=Math.min(CU.selStart,CU.selEnd) && i<=Math.max(CU.selStart,CU.selEnd);
     let cls = "wtok";
     if(found) cls += " tagged " + cTagInfo(found.tag.type).cls;
-    else if(auto) cls += " auto " + cTagInfo(auto.tag.type).cls;
     if(isPend) cls += " pend";
     let sup = "";
     if(found && found.tag.end===i) sup = `<span class="wsup" style="color:var(${cTagInfo(found.tag.type).var})">${found.index+1}</span>`;
-    const style = painted ? ` style="color:var(${cTagInfo(painted.type).var});background:color-mix(in srgb,var(${cTagInfo(painted.type).var}) 9%,transparent)"` : "";
-    html += `<span class="${cls}" data-i="${i}"${style}>${esc(CU.tokens[i])}</span>${sup} `;
+    html += `<span class="${cls}" data-i="${i}">${esc(CU.tokens[i])}</span>${sup} `;
   }
   const box = $("#cSentBox");
   box.innerHTML = html; box.classList.remove("loading");
@@ -1229,15 +1156,6 @@ function cBuildTagGrid(){
 }
 function cRenderLegend(){
   const el = $("#cLegend");
-  if(!CU.tags.length && CU.autoTags.length){
-    $("#cOptNote").style.display="none";
-    const seen = new Set();
-    el.innerHTML = CU.autoTags.filter(t => !seen.has(t.type) && seen.add(t.type)).map(t => {
-      const info=cTagInfo(t.type);
-      return `<div class="clrow" style="border-left:3px solid var(${info.var})"><span class="ctagdot" style="background:var(${info.var})"></span><span class="t" style="color:var(${info.var})">${info.label}</span><span style="flex:1;color:var(--ink3)">analiz rengi</span></div>`;
-    }).join("");
-    return;
-  }
   if(!CU.tags.length){ el.innerHTML=""; $("#cOptNote").style.display="block"; return; }
   $("#cOptNote").style.display="none";
   el.innerHTML = CU.tags.map((t,idx)=>{
@@ -1253,8 +1171,8 @@ function cRenderLegend(){
   }));
 }
 function cResetSentence(sentence){
-  CU.tokens = cTokenize(sentence); CU.tags=[]; CU.autoTags=[]; CU.selStart=null; CU.selEnd=null;
-  CU.lastAnalysis = null; CU.lastData = null; CU.chatHist = [];
+  CU.tokens = cTokenize(sentence); CU.tags=[]; CU.selStart=null; CU.selEnd=null;
+  CU.lastAnalysis = null; CU.chatHist = [];
   $("#cReport").classList.remove("on");
   $("#cChat").classList.remove("on");
   $("#cThread").innerHTML = '<div class="cempty">Analizle ilgili aklına takılan bir şey varsa buraya yaz.</div>';
@@ -1267,6 +1185,7 @@ async function cGenerateSentence(){
   const sys = "You generate single practice sentences for Turkish graduate students preparing for the YOKDIL Health Sciences English exam.";
   const prompt = `Generate exactly ONE English sentence, health/medicine/biology topic, academic/journalistic register.
 Difficulty: ${CDIFF[CU.diff]}
+Vocabulary requirement: use B2-C1 level vocabulary throughout. Avoid basic/elementary (A2-B1) words wherever a more precise or advanced synonym exists. This is for an advanced learner — the sentence should feel like real academic/journalistic prose, not simplified textbook English.
 Return ONLY the sentence itself, no quotes, no preamble, no markdown.`;
   try{
     const text = await gemini(prompt, sys, {temp:0.9});
@@ -1289,46 +1208,46 @@ async function cCheckAnalysis(){
   let tagBlock = "";
   if(hasTags){
     const lines = CU.tags.map(t => `- ${cTagInfo(t.type).label}: "${CU.tokens.slice(t.start,t.end+1).join(" ")}"`).join("\n");
-    tagBlock = `\n\nThe student ALSO attempted to tag these spans themselves:\n${lines}\nJudge each as "dogru"/"kismen dogru"/"yanlis" in tag_feedback.`;
+    tagBlock = `\n\nÖğrenci ayrıca kendi başına şu parçaları işaretlemeye çalıştı:\n${lines}\nHer birini "dogru"/"kismen dogru"/"yanlis" olarak tag_feedback içinde değerlendir.`;
   }
-  const sys = "Sen sabırlı ve çok iyi bir YÖKDİL gramer öğretmenisin. Öğrencinin terimleri bildiğini varsayma. Cümleyi, çözümü ilk kez gören bir öğrencinin takip edebileceği sırayla anlat: önce ana omurga, sonra eklenen yapılar, en son anlam. Her sonuçta cümleden somut ipucu göster ve bu ipucunun neden önemli olduğunu açıkla. Etiket yapıştırıp geçme; kısa, doğal ve öğretici Türkçe kullan. Yalnızca geçerli JSON döndür, markdown çiti ve ek metin kullanma.";
+
+  const sys = `Sen YÖKDİL'e hazırlanan bir sağlık bilimleri öğrencisine BİRE BİR ders veren, deneyimli bir İngilizce gramer hocasısın. Amacın SONUCU söylemek değil, o sonuca hangi TEST/YÖNTEMLE ulaşıldığını öğretmek — öğrenci senin yöntemini başka bir cümlede tek başına uygulayabilmeli. Hiçbir adımda çıplak etiket verme ("bu bir ilgi cümleciği" gibi bitirip geçme); her zaman "çünkü", "şu testi uyguluyoruz", "şuna bakarak anlıyoruz" ile devam et. Yalnızca cümleye GERÇEKTEN uyuyorsa teknik/tıbbi bilgi ekle; uymuyorsa boş bırak, zorlama. Kelime kelime çeviri tablosunda SADECE B2-C1 seviyesi kelime ve kalıplara yer ver — "the, a, is, was, in, on, and, of" gibi temel/A-B1 kelimeleri ASLA tabloya ekleme. Yalnızca geçerli JSON döndür, markdown çiti yok, başka metin yok.`;
+
+  const method = `YÖNTEM ÖRNEĞİ — Adım 1'i HER ZAMAN tam olarak bu yöntemle yaz (cümle değişir, yöntem değişmez):
+"Bağımlı yapı sinyallerini (that/which/who/whose/where, although/because/since/while/as/if/when, -ing/-ed biçimli fiiller) tek tek işaretle. Her sinyalden itibaren o cümlecik kapanana kadar (virgüle, ya da kendi tamlayıcısı bitip yeni bir bağlaç/ana cümle görününceye kadar) o bölgeyi köşeli parantezle kilitle. Kilitli bölgeleri zihinde SİL. Geriye kalan, parantez dışında duran ilk [özne + çekimli fiil] çifti ana cümledir. Test: kilitli bölgeleri çıkardığında geriye kalan hâlâ dilbilgisel olarak tam bir cümle mi? Evetse doğru kesmişsindir."
+Sonraki adımlarda da AYNI ruhu koru: her zaman "hangi teste/sinyale bakarak anladık" sorusuna cevap ver, sadece isim verme.
+
+TEKNİK NOT ÖRNEĞİ (sadece gerçekten uyuyorsa böyle bir şey ekle): "Short bowel syndrome, ince bağırsağın büyük kısmının cerrahi olarak alınması ya da doğuştan eksik olması sonucu besin emiliminin ciddi biçimde bozulduğu bir durumdur; hastalar sık sık IV yoluyla beslenmeye ihtiyaç duyar."
+
+ÇEVİRİ ADIMI ÖRNEĞİ: Çeviriyi tek seferde verme — RC'lerin İngilizce'de isimden SONRA, Türkçe'de isimden ÖNCE geldiğini (sıfat-fiile dönüşerek) göster, önce iç parçaları çevirip sonra birleştirdiğini adım adım anlat.
+
+KELİME KELİME ÖRNEĞİ (sadece B2/C1, kalıpları bozmadan): "results from" → "-den kaynaklanır" (kalıp fiil, ayrılmaz); "as" → "olarak" (dikkat: "gibi" değil); "segments of" → "-in bir bölümü" (kalıp). Temel kelimeleri (the, a, is, that/which zamiri gibi) tabloya EKLEME.`;
+
   const prompt = `Analiz edilecek cümle:\n"${sentence}"${tagBlock}
 
-Bu cümleyi öğrenciye tahtada çözer gibi anlat. Çıktıda şunlar olsun:
+${method}
 
-1) "iskelet": Sadece ana cümlenin çıplak omurgası; "özne + yüklem + zorunlu tamamlayıcı" biçiminde tek satır.
+Şimdi BU cümle için üret:
 
-2) "anlatim_basamaklari": Öğrencinin gözünü cümlede nereye çevireceğini sırayla gösteren 3-6 adım. Her adım:
-   - "baslik": "1. Önce ana fiili bul" gibi eylem odaklı başlık
-   - "ipucu": cümleden AYNEN alınmış kısa kanıt
-   - "aciklama": bu kanıtla hangi sonuca ve neden ulaştığımızı 2-3 kısa cümleyle anlat
-   - "kontrol": öğrencinin kendine soracağı kısa kontrol sorusu
+1) "teknik_not": Cümlede gerçekten teknik/tıbbi bir kavram varsa 2-3 cümlelik bir arka plan notu. Yoksa boş string "".
 
-3) "mantik_akisi": Adımları birbirine bağlayan, 3-5 cümlelik doğal öğretmen özeti. Terim geçiyorsa ilk kullanımda basitçe açıkla.
+2) "adimlar": Sıralı adımlar dizisi. İlk adım HER ZAMAN yukarıdaki yöntemle bağımlı/bağımsız ayrımını yapan adım olsun. Sonra: zaman+çatı adımı (hangi TEST ile aktif/pasif ve hangi zaman olduğuna karar verildiği), sonra cümledeki HER bağımlı yapı için ayrı bir adım (ne olduğu + hangi sinyalden/testten anlaşıldığı + benzer bir yapıyla neden karışmadığı + varsa RC'nin hangi isme bağlandığının nasıl çözüldüğü), son adım da çeviriyi parça parça kurma mantığı. Her adım {"baslik":"Adım N — kısa başlık","aciklama":"tam açıklama, yöntem/test vurgulu"}.
 
-4) "elements": Cümledeki HER önemli yapıyı (ana özne, ana yüklem, ilgi cümleciği, ortaç öbeği, bağlaç cümleciği, edat öbeği, isim cümleciği, ek açıklama) tek tek listele. Her biri için:
-   - "text": tam İngilizce metin
-   - "type": kesin Türkçe gramer etiketi
-   - "category": yalnızca subject, verb, relative, participle, conjunction, prep, noun değerlerinden en uygunu
-   - "detail": NEDEN o yapı olduğunu, hangi kelime/konum/virgülün kanıt verdiğini ve en olası karışıklığı 2-3 kısa cümleyle anlat.
+3) "translation": adımların sonunda ulaşılan tam, akıcı Türkçe çeviri.
 
-Kötü detail örneği (ETİKET yapıştırma, YAPMA): "İlgi cümleciği, hormonu tanımlıyor."
-İyi detail örneği (MANTIK anlatma, BUNU YAP): "'which' hemen önceki isme (hormone) bağlanıyor; araya virgül girdiği için bu tanımlayıcı değil ek bilgi veren bir ilgi cümleciği — yani hormonun HANGİ hormon olduğunu değil, o hormon HAKKINDA ekstra bir şey söylüyor. 'that' ile karıştırılmaz çünkü 'that' virgülden sonra kullanılamaz."
+4) "spans": En fazla 5 nesne, cümlenin en önemli/karmaşık yapılarını işaretler. Her biri {"en":İngilizce cümlede AYNEN geçen parça (harfi harfine),"tr":Türkçe çeviride AYNEN geçen karşılığı (harfi harfine),"role":kısa Türkçe etiket}. İlk nesne ana yüklem olsun.
 
-5) "color_spans": Analiz edilen İngilizce cümlenin renklenmesi için, cümleden AYNEN kopyalanmış ve birbiriyle çakışmayan parçalar. Her nesne {"text":"...","category":"..."}. Parçaları cümledeki sırayla ver; yalnızca yukarıdaki yedi category değerini kullan. Ana özne ve ana yüklem mutlaka olsun. Relative/participle/conjunction/prep/noun yapıları varsa kendi parçaları olarak ekle. Bir parçayı iki kez kapsama.
-
-Ayrıca "translation" (tam ve doğal Türkçe çeviri) ve en fazla 3 "notes" (öğrencinin kolay karıştıracağı noktalar) ekle. Anlatım yoğun ama kolay izlenir olsun; gereksiz akademik jargon kullanma.
+5) "kelime_kelime": Cümledeki B2-C1 seviyesi kelime ve kalıpların dizisi (temel kelimeleri ekleme). Her biri {"en":"...","tr":"...","kalip":true/false} — kalip=true ise bu bir deyim/kalıp, tek parça çevrilir (örn. "in spite of").
 
 JSON şekli tam olarak:
-{"translation":"...","iskelet":"...","anlatim_basamaklari":[{"baslik":"...","ipucu":"...","aciklama":"...","kontrol":"..."}],"mantik_akisi":"...","elements":[{"type":"...","text":"...","category":"subject|verb|relative|participle|conjunction|prep|noun","detail":"..."}],"color_spans":[{"text":"...","category":"subject|verb|relative|participle|conjunction|prep|noun"}],"notes":["..."]${hasTags ? ',"tag_feedback":[{"label":"...","text":"...","verdict":"dogru|kismen dogru|yanlis","note":"..."}]' : ""}}`;
+{"teknik_not":"...","adimlar":[{"baslik":"...","aciklama":"..."}],"translation":"...","spans":[{"en":"...","tr":"...","role":"..."}],"kelime_kelime":[{"en":"...","tr":"...","kalip":false}]${hasTags ? ',"tag_feedback":[{"label":"...","text":"...","verdict":"dogru|kismen dogru|yanlis","note":"..."}]' : ""}}`;
 
   try{
     const raw = await gemini(prompt, sys);
     const data = parseJson(raw);
-    CU.lastData = data;
+    cRenderReport(data, sentence);
     CU.lastAnalysis = JSON.stringify(data);
-    cApplyColorSpans(data);
-    cRenderReport(data);
+    CU.lastData = data;
     $("#cChat").classList.add("on");
   }catch(e){
     toast("Analiz alınamadı: " + e.message, 4000);
@@ -1343,27 +1262,34 @@ function cVerdict(v){
   if(v.indexOf("kismen")===0 || v.indexOf("kısmen")===0) return "~";
   return "✕";
 }
-function cRenderReport(data){
+
+function cRenderReport(data, sentence){
+  const spans = (data.spans || []).slice(0,5);
+  // cümleyi kendi tespit ettiği yapılara göre renklendir
+  $("#cSentBox").innerHTML = runsToHtml(segment(sentence, spans, "en"));
+
   let html = `<div class="crhead"><span>Tam Gramer Analizi</span><span>Gemini</span></div>`;
-  if(data.translation) html += `<div class="ctrbox"><b>Türkçe Çeviri</b>${esc(data.translation)}</div>`;
-  if(data.iskelet) html += `<div class="ctrbox"><b>Önce Cümlenin İskeleti</b>${esc(data.iskelet)}</div>`;
-  if(data.anlatim_basamaklari && data.anlatim_basamaklari.length){
-    html += `<div class="cetitle">Adım Adım Nasıl Çözeriz?</div><div class="csteps">`;
-    data.anlatim_basamaklari.forEach(st => {
-      html += `<div class="cstep"><b>${esc(st.baslik||"")}</b>${st.ipucu ? `<span class="cue">İpucu: ${esc(st.ipucu)}</span>` : ""}<div>${esc(st.aciklama||"")}</div>${st.kontrol ? `<span class="check">Kendine sor: ${esc(st.kontrol)}</span>` : ""}</div>`;
+
+  if(spans.length) html += legendHtml(spans);
+
+  if(data.translation) html += `<div class="ctrbox"><b>Türkçe Çeviri</b>${runsToHtml(segment(data.translation, spans, "tr"))}</div>`;
+
+  if(data.teknik_not) html += `<div class="notesbox"><b>🔬 Teknik Not</b>${esc(data.teknik_not)}</div>`;
+
+  if(data.adimlar && data.adimlar.length){
+    data.adimlar.forEach((a) => {
+      html += `<div class="cstep"><div class="cstephead">${esc(a.baslik||"")}</div><div class="cstepbody">${esc(a.aciklama||"")}</div></div>`;
+    });
+  }
+
+  if(data.kelime_kelime && data.kelime_kelime.length){
+    html += `<div class="cetitle">📖 Kelime Kelime (B2–C1)</div><div class="cwtable">`;
+    data.kelime_kelime.forEach(w => {
+      html += `<div class="cwrow"><span class="cwen">${esc(w.en||"")}${w.kalip?' <i class="cwkalip">kalıp</i>':""}</span><span class="cwtr">${esc(w.tr||"")}</span></div>`;
     });
     html += `</div>`;
   }
-  if(data.mantik_akisi) html += `<div class="ctrbox" style="border-left-color:var(--deep);background:var(--deep-soft)"><b style="color:var(--deep)">Mantığı — Öğretmen Böyle Düşünür</b>${esc(data.mantik_akisi)}</div>`;
-  if(data.elements && data.elements.length){
-    html += `<div class="cetitle">Cümlenin Tam Yapısı (${data.elements.length} öğe)</div>`;
-    data.elements.forEach((el,idx) => {
-      const info = cTagInfo(el.category);
-      html += `<div class="cerow" style="border-left:3px solid var(${info.var});padding-left:8px"><div class="cenum" style="background:var(${info.var})">${idx+1}</div><div>
-        <span class="cetype">${esc(el.type||"")}</span> — <span class="cetext">"${esc(el.text||"")}"</span>
-        <div style="margin-top:2px">${esc(el.detail||"")}</div></div></div>`;
-    });
-  }
+
   if(data.tag_feedback && data.tag_feedback.length){
     html += `<div class="cetitle">Kendi Etiketlerinin Değerlendirmesi</div>`;
     data.tag_feedback.forEach(f => {
@@ -1372,61 +1298,32 @@ function cRenderReport(data){
         <div style="margin-top:2px">${esc(f.note||"")}</div></div></div>`;
     });
   }
-  if(data.notes && data.notes.length){
-    html += `<div class="notesbox"><b>Püf Noktaları</b><ul>${data.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul></div>`;
-  }
-  html += `<div class="cactions"><button class="btn" id="cSaveAnalysisBtn">${hasCAnalysis(CU.tokens.join(" ")) ? "Kaydı Güncelle" : "Kaydet"}</button><button class="btn ghost" id="cReportPdfBtn"${CANALYSES.length ? "" : " disabled"}>Kayıtlılardan PDF</button></div>`;
+
+  html += `<button class="btn wide" id="cSaveBtn" style="margin-top:16px">＋ Deftere Ekle</button>`;
+
   const rep = $("#cReport"); rep.innerHTML = html; rep.classList.add("on");
-  $("#cSaveAnalysisBtn").addEventListener("click", cSaveCurrentAnalysis);
-  $("#cReportPdfBtn").addEventListener("click", buildSentencePdf);
+  $("#cSaveBtn").addEventListener("click", () => cSaveToNotebook(data, sentence));
+  if(hasGram(sentence)) setCSaveBtn(true);
 }
 
-function cSaveCurrentAnalysis(){
-  if(!CU.lastData){ toast("Önce cümleyi analiz et."); return; }
-  const sentence = CU.tokens.join(" "), key = cAnalysisKey(sentence), now = Date.now();
-  const i = CANALYSES.findIndex(x => cAnalysisKey(x.s) === key);
-  const old = i >= 0 ? CANALYSES[i] : null;
-  const rec = Object.assign({}, JSON.parse(JSON.stringify(CU.lastData)), {
-    s: sentence, diff: CU.diff, add: old ? (old.add || old.t || now) : now, t: now
+function setCSaveBtn(on){
+  const b = $("#cSaveBtn"); if(!b) return;
+  b.textContent = on ? "✓ Defterde" : "＋ Deftere Ekle";
+  b.classList.toggle("ghost", on);
+}
+
+function cSaveToNotebook(data, sentence){
+  if(hasGram(sentence)){ toast("Zaten defterde."); return; }
+  const points = (data.adimlar||[]).map(a => `${a.baslik}: ${a.aciklama}`);
+  if(data.teknik_not) points.unshift("🔬 " + data.teknik_not);
+  GRAMS.unshift({
+    s: sentence, tr: data.translation, topic: "cümle analizi",
+    skeleton: "", points, tense: "", trap: "",
+    spans: (data.spans||[]).slice(0,5),
+    kelime: data.kelime_kelime || [],
+    src: "Cümle Analizi Laboratuvarı", t: Date.now()
   });
-  if(i >= 0) CANALYSES[i] = rec; else CANALYSES.unshift(rec);
-  saveCAnalyses(); syncSoon(); renderSavedCAnalyses();
-  const btn = $("#cSaveAnalysisBtn"); if(btn) btn.textContent = "Kaydı Güncelle";
-  const pdf = $("#cReportPdfBtn"); if(pdf) pdf.disabled = false;
-  toast(i >= 0 ? "Analiz güncellendi ve eşitleme sırasına alındı." : "Analiz kaydedildi ve eşitleme sırasına alındı.", 3500);
-}
-
-function cRemoveAnalysis(sentence){
-  const key = cAnalysisKey(sentence);
-  CANALYSES = CANALYSES.filter(x => cAnalysisKey(x.s) !== key);
-  saveCAnalyses(); tomb("c:" + key); syncSoon(); renderSavedCAnalyses();
-  const btn = $("#cSaveAnalysisBtn"); if(btn && cAnalysisKey(CU.tokens.join(" ")) === key) btn.textContent = "Kaydet";
-  const pdf = $("#cReportPdfBtn"); if(pdf) pdf.disabled = !CANALYSES.length;
-  toast("Kayıtlı analiz silindi.");
-}
-
-function cOpenSavedAnalysis(key){
-  const rec = CANALYSES.find(x => cAnalysisKey(x.s) === key);
-  if(!rec) return;
-  cResetSentence(rec.s);
-  CU.diff = rec.diff || "orta";
-  $$("#cDiff button").forEach(b => b.classList.toggle("on", b.dataset.d === CU.diff));
-  CU.lastData = rec; CU.lastAnalysis = JSON.stringify(rec);
-  cApplyColorSpans(rec); cRenderReport(rec); $("#cChat").classList.add("on");
-  $("#cReport").scrollIntoView({behavior:"smooth",block:"start"});
-}
-
-function renderSavedCAnalyses(){
-  const count = $("#cSavedCount"), box = $("#cSavedList"), pdf = $("#cSavedPdf");
-  if(!count || !box) return;
-  count.textContent = CANALYSES.length ? "(" + CANALYSES.length + ")" : "";
-  if(pdf) pdf.disabled = !CANALYSES.length;
-  if(!CANALYSES.length){ box.innerHTML = '<div class="cempty">Henüz kayıt yok. Bir cümleyi analiz edip “Kaydet”e bas.</div>'; return; }
-  box.innerHTML = CANALYSES.map(x => `<div class="csaveditem" data-k="${esc(cAnalysisKey(x.s))}"><div class="csen">${cSentenceColorHtml(x.s,cEffectiveColorSpans(x))}</div><div class="cmeta">${esc((x.diff||"orta").toUpperCase())} · ${new Date(x.t||x.add||Date.now()).toLocaleDateString("tr-TR")}</div><button class="del" aria-label="Kaydı sil">×</button></div>`).join("");
-  $$("#cSavedList .csaveditem").forEach(el => {
-    el.querySelector(".csen").addEventListener("click", () => cOpenSavedAnalysis(el.dataset.k));
-    el.querySelector(".del").addEventListener("click", e => { e.stopPropagation(); cRemoveAnalysis((CANALYSES.find(x => cAnalysisKey(x.s) === el.dataset.k)||{}).s); });
-  });
+  saveGrams(); syncSoon(); setCSaveBtn(true); toast("Deftere eklendi.");
 }
 
 function cAddMsg(role, text){
@@ -1453,6 +1350,95 @@ async function cSendChat(){
   }
 }
 
+async function cBuildCumlePdf(){
+  const list = GRAMS.filter(x => x.topic === "cümle analizi");
+  if(!list.length){ toast("Henüz kaydedilmiş cümle analizi yok — önce Analiz Et → Deftere Ekle."); return; }
+  busyShow("PDF hazırlanıyor", "Font yükleniyor…");
+  let fonts;
+  try{ fonts = await ensureFonts(); }
+  catch(e){ busyHide(); toast("Kalam font indirilemedi: " + e.message, 5000); return; }
+
+  const doc = new window.jspdf.jsPDF({unit:"mm", format:"a4"});
+  regFonts(doc, fonts);
+  const stamp = new Date().toLocaleDateString("tr-TR");
+  const limit = PH - M.b;
+  let page = 0, y = 0;
+
+  const newPage = (title) => { if(page) doc.addPage(); page++; pdfHeader(doc, stamp, page, title); y = M.t + 4; };
+  const ensure = need => { if(y + need > limit) newPage("Cümle Analizi"); };
+
+  const heading = (text, size, color) => {
+    ensure(size*0.6 + 3);
+    doc.setFont("Kalam", fonts.bold ? "bold" : "normal");
+    doc.setFontSize(size);
+    const c = color || [140,140,140];
+    doc.setTextColor(c[0], c[1], c[2]);
+    doc.text(text, M.l, y);
+    y += size*0.55 + 1;
+  };
+  const paragraph = (runs, size, light) => {
+    doc.setFontSize(size);
+    doc.setFont(light && fonts.light ? "KalamLight" : "Kalam", "normal");
+    const need = flowRuns(doc, runs, 0,0, CW, LEAD, false).lines * LEAD + 3;
+    ensure(need);
+    const res = flowRuns(doc, runs, M.l, y, CW, LEAD, true);
+    y = res.y + LEAD + 2.5;
+  };
+
+  for(let i=0;i<list.length;i++){
+    if(stopFlag) break;
+    const x = list[i];
+    busyUpd(`${i+1}/${list.length} hazırlanıyor…`, (i/list.length)*100);
+    newPage(`Cümle Analizi · ${i+1}/${list.length}`);
+
+    heading("CÜMLE", 8.5);
+    paragraph(segment(x.s, x.spans||[], "en"), 13);
+
+    heading("TÜRKÇE ÇEVİRİ", 8.5);
+    paragraph(segment(x.tr||"", x.spans||[], "tr"), 11.5, true);
+
+    if((x.spans||[]).length){
+      doc.setFontSize(8.5); doc.setFont("Kalam","normal");
+      let lx = M.l; ensure(6);
+      x.spans.slice(0,5).forEach((s,idx)=>{
+        const c = PAL[idx % PAL.length];
+        doc.setTextColor(c[0],c[1],c[2]);
+        const t = "■ " + (s.role||"") + "   ";
+        const w = doc.getTextWidth(t);
+        if(lx + w > M.l+CW){ lx = M.l; y += 5; }
+        doc.text(t, lx, y); lx += w;
+      });
+      y += 8;
+    }
+
+    (x.points||[]).forEach(p => {
+      const sep = p.indexOf(": ");
+      const head = sep>0 ? p.slice(0,sep) : "";
+      const body = sep>0 ? p.slice(sep+2) : p;
+      if(head) heading(head, 10, PAL[0]);
+      paragraph([{text:body, c:-1}], 10);
+    });
+
+    const kw = x.kelime || [];
+    if(kw.length){
+      heading("KELİME KELİME (B2–C1)", 8.5);
+      kw.forEach(w=>{
+        ensure(LEAD+1);
+        doc.setFontSize(9.5);
+        doc.setFont("Kalam", fonts.bold?"bold":"normal"); doc.setTextColor(PAL[0][0],PAL[0][1],PAL[0][2]);
+        doc.text((w.en||"") + (w.kalip? "  (kalıp)":""), M.l, y);
+        doc.setFont("Kalam","normal"); doc.setTextColor(26,26,26);
+        doc.text(w.tr||"", M.l+68, y);
+        y += LEAD;
+      });
+    }
+  }
+
+  busyHide();
+  doc.save("cumle-analizi-" + stamp.replace(/\./g,"-") + ".pdf");
+  toast(list.length + " cümle PDF olarak indirildi.");
+}
+
 function cumleInit(){
   if(CU.inited) return;
   CU.inited = true;
@@ -1460,15 +1446,14 @@ function cumleInit(){
   $("#cCancelSel").addEventListener("click", () => { CU.selStart=null; CU.selEnd=null; cRenderSentence(); cRenderToolbar(); });
   $("#cNewBtn").addEventListener("click", cGenerateSentence);
   $("#cCheckBtn").addEventListener("click", cCheckAnalysis);
+  $("#cPdfBtn").addEventListener("click", cBuildCumlePdf);
   $("#cChatSend").addEventListener("click", cSendChat);
-  $("#cSavedPdf").addEventListener("click", buildSentencePdf);
   $("#cChatInp").addEventListener("keydown", e => { if(e.key==="Enter"){ e.preventDefault(); cSendChat(); } });
   $$("#cDiff button").forEach(b => b.addEventListener("click", () => {
     $$("#cDiff button").forEach(x=>x.classList.toggle("on", x===b));
     CU.diff = b.dataset.d;
   }));
   cResetSentence(CSEEDS[Math.floor(Math.random()*CSEEDS.length)]);
-  renderSavedCAnalyses();
 }
 
 async function lookupWord(word, context) {
@@ -2831,8 +2816,11 @@ function busyHide() { $("#busyv").classList.remove("on"); }
 $("#busyStop").addEventListener("click", () => { stopFlag = true; busyUpd("Durduruluyor…"); });
 
 async function fetchFont(file) {
-  const r = await fetch(file);
-  if (!r.ok) throw new Error(file + " bulunamadı");
+  // Göreli yol (kendi repo yanınızdaki dosya) yerine, herkese açık CORS'lu bir
+  // CDN'den mutlak adresle çekiyoruz — böylece nerede barındırılırsa barındırılsın çalışır.
+  const url = "https://raw.githubusercontent.com/google/fonts/main/ofl/kalam/" + file;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(file + " bulunamadı (" + r.status + ")");
   const bytes = new Uint8Array(await r.arrayBuffer());
   let bin = "";
   for (let i = 0; i < bytes.length; i += 8192) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
@@ -3339,127 +3327,6 @@ async function buildGramPdf() {
   toast(list.length + " not · " + page + " sayfa hazır.", 3500);
 }
 $("#gpdfBtn").addEventListener("click", buildGramPdf);
-
-
-/* ============================================================
-   Kaydedilmiş cümle analizleri PDF — her cümle tam bir A4 sayfa
-   ============================================================ */
-const C_PDF_COLORS = {
-  subject:[43,108,102], verb:[168,69,47], relative:[107,76,122],
-  participle:[62,124,74], conjunction:[150,99,30], prep:[51,84,110], noun:[149,65,90]
-};
-
-function cPdfSetFont(doc, bold){ doc.setFont("Kalam", bold && KALAM.bold ? "bold" : "normal"); }
-function cPdfWrapped(doc, text, x, y, w, size, lead, draw, color, bold){
-  text = String(text || "").trim();
-  if(!text) return y;
-  cPdfSetFont(doc, bold); doc.setFontSize(size);
-  const lines = doc.splitTextToSize(text, w);
-  if(draw){ doc.setTextColor.apply(doc, color || [40,44,58]); doc.text(lines, x, y); }
-  return y + Math.max(1,lines.length) * lead;
-}
-function cPdfColorFlow(doc, sentence, spans, x, y, w, size, lead, draw){
-  const tokens = cTokenize(sentence), tags = cTagsFromColorSpans(sentence, spans);
-  let cx=x, cy=y;
-  cPdfSetFont(doc, true); doc.setFontSize(size);
-  tokens.forEach((tok,i) => {
-    const tag = tags.find(t => i>=t.start && i<=t.end);
-    const color = tag ? C_PDF_COLORS[tag.type] : [30,34,46];
-    const prefix = cx>x ? " " : "", tw = doc.getTextWidth(prefix + tok);
-    if(cx + tw > x+w && cx>x){ cx=x; cy+=lead; }
-    const out = (cx>x ? " " : "") + tok;
-    if(draw){ doc.setTextColor.apply(doc,color); doc.text(out,cx,cy); }
-    cx += doc.getTextWidth(out);
-  });
-  return cy + lead;
-}
-function cPdfLegend(doc, rec, x, y, w, size, draw){
-  const tags = cTagsFromColorSpans(rec.s, cEffectiveColorSpans(rec)), types=[];
-  tags.forEach(t => { if(!types.includes(t.type)) types.push(t.type); });
-  let cx=x, cy=y;
-  cPdfSetFont(doc,false); doc.setFontSize(size);
-  types.forEach(type => {
-    const info=cTagInfo(type), label=info.label, color=C_PDF_COLORS[type], itemW=doc.getTextWidth(label)+9;
-    if(cx+itemW>x+w && cx>x){ cx=x; cy+=4.4; }
-    if(draw){ doc.setFillColor.apply(doc,color); doc.circle(cx+1.4,cy-1.2,1.2,"F"); doc.setTextColor(100,106,124); doc.text(label,cx+4,cy); }
-    cx+=itemW;
-  });
-  return types.length ? cy+5 : y;
-}
-function cPdfSection(doc, label, y, k, draw){
-  cPdfSetFont(doc,true); doc.setFontSize(9.2*k);
-  if(draw){ doc.setTextColor(46,58,102); doc.text(String(label).toUpperCase(),M.l,y); }
-  return y+4.3*k;
-}
-function cSentencePdfPage(doc, rec, page, total, draw, k){
-  let y=M.t+2;
-  if(draw) pdfHeader(doc, page+" / "+total, page, "Cümle analizi");
-
-  y=cPdfSection(doc,"Analiz edilen cümle",y,k,draw);
-  y=cPdfColorFlow(doc,rec.s,cEffectiveColorSpans(rec),M.l,y,CW,14*k,6.4*k,draw)+1.5*k;
-  y=cPdfLegend(doc,rec,M.l,y,CW,7.8*k,draw)+1.5*k;
-
-  if(rec.translation){
-    y=cPdfSection(doc,"Türkçe anlamı",y,k,draw);
-    y=cPdfWrapped(doc,rec.translation,M.l,y,CW,10.2*k,4.8*k,draw,[60,66,84],false)+1.5*k;
-  }
-  if(rec.iskelet){
-    y=cPdfSection(doc,"Cümlenin iskeleti",y,k,draw);
-    y=cPdfWrapped(doc,rec.iskelet,M.l,y,CW,10.2*k,4.8*k,draw,[162,22,72],true)+1.5*k;
-  }
-
-  const steps=rec.anlatim_basamaklari||[];
-  if(steps.length){
-    y=cPdfSection(doc,"Adım adım nasıl çözeriz?",y,k,draw);
-    steps.forEach((st,i) => {
-      y=cPdfWrapped(doc,(st.baslik||((i+1)+". adım")),M.l,y,CW,9.6*k,4.5*k,draw,[46,58,102],true);
-      if(st.ipucu) y=cPdfWrapped(doc,"İpucu: "+st.ipucu,M.l+3*k,y,CW-3*k,8.6*k,4.1*k,draw,[162,22,72],true);
-      y=cPdfWrapped(doc,st.aciklama,M.l+3*k,y,CW-3*k,9*k,4.25*k,draw,[50,54,68],false);
-      if(st.kontrol) y=cPdfWrapped(doc,"Kendine sor: "+st.kontrol,M.l+3*k,y,CW-3*k,8.3*k,3.9*k,draw,[105,110,126],false);
-      y+=1.4*k;
-    });
-  }else if(rec.mantik_akisi){
-    y=cPdfSection(doc,"Öğretmenin düşünme yolu",y,k,draw);
-    y=cPdfWrapped(doc,rec.mantik_akisi,M.l,y,CW,9.2*k,4.35*k,draw,[50,54,68],false)+1.5*k;
-  }
-
-  const elements=rec.elements||[];
-  if(elements.length){
-    y=cPdfSection(doc,"Cümlenin parçaları ve nedenleri",y,k,draw);
-    elements.forEach((el,i) => {
-      const color=C_PDF_COLORS[el.category]||[46,58,102];
-      y=cPdfWrapped(doc,(i+1)+". "+(el.type||"")+" — “"+(el.text||"")+"”",M.l,y,CW,8.8*k,4.15*k,draw,color,true);
-      y=cPdfWrapped(doc,el.detail,M.l+3*k,y,CW-3*k,8.25*k,3.9*k,draw,[62,67,82],false)+1.1*k;
-    });
-  }
-
-  const notes=rec.notes||[];
-  if(notes.length){
-    y=cPdfSection(doc,"Püf noktaları",y,k,draw);
-    notes.forEach(n => { y=cPdfWrapped(doc,"• "+n,M.l+2*k,y,CW-2*k,8.3*k,3.95*k,draw,[162,22,72],false); });
-  }
-  return y;
-}
-
-async function buildSentencePdf(){
-  if(!CANALYSES.length){ toast("Önce en az bir analizi kaydet."); return; }
-  if(!window.jspdf){ toast("PDF motoru yüklenemedi. İnternet bağlantını kontrol et."); return; }
-  busyShow("Cümle analizleri PDF", "Kalam fontu yükleniyor…");
-  try{ await ensureFonts(); }
-  catch(e){ busyHide(); toast("Kalam font dosyaları HTML dosyasının yanında bulunamadı.",5000); return; }
-  const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"}); regFonts(doc,KALAM);
-  const list=CANALYSES.slice().sort((a,b)=>(b.add||b.t||0)-(a.add||a.t||0));
-  const limit=PH-M.b;
-  list.forEach((rec,i) => {
-    if(i) doc.addPage();
-    busyUpd("Cümle "+(i+1)+" / "+list.length,((i+1)/list.length)*100);
-    let k=1;
-    while(k>0.48 && cSentencePdfPage(doc,rec,i+1,list.length,false,k)>limit) k-=0.04;
-    cSentencePdfPage(doc,rec,i+1,list.length,true,Math.max(0.48,k));
-  });
-  doc.save("cumle-analizleri-"+new Date().toISOString().slice(0,10)+".pdf");
-  busyHide(); toast(list.length+" cümle · "+list.length+" sayfa hazır.",4000);
-}
 
 
 
@@ -4130,17 +3997,16 @@ async function syncNow(quiet) {
     tombIn(remote && remote.tomb);
     WORDS = mergeList(WORDS, remote && remote.words, x => "w:" + norm(x.w));
     GRAMS = mergeList(GRAMS, remote && remote.grams, x => "g:" + gkey(x.s));
-    CANALYSES = mergeList(CANALYSES, remote && remote.sentence_analyses, x => "c:" + cAnalysisKey(x.s));
     LIB = mergeList(LIB, remote && remote.lib, x => "l:" + x.id);
     SOLVED = mergeList(SOLVED, remote && remote.solved, x => x.id);
-    saveWords(); saveGrams(); saveCAnalyses(); saveLib(); saveSolved();
-    await fbPush({ v: 2, at: new Date().toISOString(), words: WORDS, grams: GRAMS, sentence_analyses: CANALYSES, lib: LIB, solved: SOLVED, tomb: tombOut() });
+    saveWords(); saveGrams(); saveLib(); saveSolved();
+    await fbPush({ v: 1, at: new Date().toISOString(), words: WORDS, grams: GRAMS, lib: LIB, solved: SOLVED, tomb: tombOut() });
     fbSet("last", new Date().toISOString());
     setSyncMsg(syncLabel());
     if (state.screen === "words") renderWords();
-    if (state.screen === "gram") { renderGrams(); renderSavedCAnalyses(); }
+    if (state.screen === "gram") renderGrams();
     renderLib();
-    if (!quiet) toast("Eşitlendi · " + WORDS.length + " kelime, " + GRAMS.length + " not, " + CANALYSES.length + " cümle analizi");
+    if (!quiet) toast("Eşitlendi · " + WORDS.length + " kelime, " + GRAMS.length + " not");
   } catch (e) {
     setSyncMsg("Eşitlenemedi: " + e.message);
     if (!quiet) toast("Eşitlenemedi: " + e.message, 4500);
@@ -4154,7 +4020,7 @@ function syncLabel() {
   if (!FB.key || !FB.db) return "Kurulu değil. Aşağıdaki alanları doldur.";
   if (!FB.refresh) return "Firebase tanımlı. Şimdi e-posta ve parolayla bağlan.";
   const d = FB.last ? new Date(FB.last).toLocaleString("tr-TR") : "henüz yok";
-  return FB.email + " · son eşitleme: " + d + " · " + WORDS.length + " kelime, " + GRAMS.length + " not, " + CANALYSES.length + " cümle analizi";
+  return FB.email + " · son eşitleme: " + d + " · " + WORDS.length + " kelime, " + GRAMS.length + " not";
 }
 
 document.addEventListener("visibilitychange", () => { if (document.hidden) { clearTimeout(syncTimer); syncNow(true); } });
@@ -4200,7 +4066,7 @@ async function ghTest() {
 
   try {
     const d = await fbPull();
-    say(true, d ? "Veri okundu: " + ((d.words || []).length) + " kelime, " + ((d.grams || []).length) + " not, " + ((d.sentence_analyses || []).length) + " cümle analizi" : "Veri dosyası henüz boş, ilk eşitlemede oluşacak.");
+    say(true, d ? "Veri okundu: " + ((d.words || []).length) + " kelime, " + ((d.grams || []).length) + " not" : "Veri dosyası henüz boş, ilk eşitlemede oluşacak.");
   } catch (e) { say(false, "Veritabanı okunamadı: " + e.message + "  — Realtime Database kurallarını kontrol et."); return; }
 
   say(true, "Her şey hazır.");
@@ -4213,11 +4079,6 @@ function richness(x) {
   if ((x.pairs || []).length) n += 1;
   if ((x.spans || []).length) n += 1;
   if (x.here) n += 1;
-  if (x.translation) n += 2;
-  if (x.iskelet) n += 1;
-  if ((x.anlatim_basamaklari || []).length) n += 4;
-  if ((x.elements || []).length) n += 3;
-  if ((x.color_spans || []).length) n += 2;
   return n;
 }
 
