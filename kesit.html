@@ -1362,76 +1362,119 @@ async function cBuildCumlePdf(){
   regFonts(doc, fonts);
   const stamp = new Date().toLocaleDateString("tr-TR");
   const limit = PH - M.b;
+  const pageArea = limit - (M.t + 4);
+  const budget = 2 * pageArea - 6; // 2 sayfalık alan, küçük güvenlik payıyla
   let page = 0, y = 0;
+
+  // Taban puntolar (scale=1 referansı). Her girdi için içeriğe göre
+  // bu değerler tek bir "scale" ile büyütülüp/küçültülüp tam 2 sayfaya oturtulur.
+  const BASE = { label:8.5, sentence:13, trans:11.5, stepHead:10, stepBody:10, gloss:9.5 };
 
   const newPage = (title) => { if(page) doc.addPage(); page++; pdfHeader(doc, stamp, page, title); y = M.t + 4; };
   const ensure = need => { if(y + need > limit) newPage("Cümle Analizi"); };
 
-  const heading = (text, size, color) => {
-    ensure(size*0.6 + 3);
-    doc.setFont("Kalam", fonts.bold ? "bold" : "normal");
-    doc.setFontSize(size);
-    const c = color || [140,140,140];
-    doc.setTextColor(c[0], c[1], c[2]);
-    doc.text(text, M.l, y);
-    y += size*0.55 + 1;
-  };
-  const paragraph = (runs, size, light) => {
-    doc.setFontSize(size);
-    doc.setFont(light && fonts.light ? "KalamLight" : "Kalam", "normal");
-    const need = flowRuns(doc, runs, 0,0, CW, LEAD, false).lines * LEAD + 3;
-    ensure(need);
-    const res = flowRuns(doc, runs, M.l, y, CW, LEAD, true);
-    y = res.y + LEAD + 2.5;
-  };
+  // ---- ölçüm geçişi: verilen scale'de bu girdi kaç mm tutar? (çizmeden hesaplar) ----
+  function estimateHeight(x, scale){
+    const L = LEAD * scale;
+    let h = 0;
+    h += BASE.label*scale*0.55 + 1;
+    doc.setFontSize(BASE.sentence*scale);
+    h += flowRuns(doc, segment(x.s, x.spans||[], "en"), 0,0,CW,L,false).lines*L + 3 + L + 2.5;
+    h += BASE.label*scale*0.55 + 1;
+    doc.setFontSize(BASE.trans*scale);
+    h += flowRuns(doc, segment(x.tr||"", x.spans||[], "tr"), 0,0,CW,L,false).lines*L + 3 + L + 2.5;
+    if((x.spans||[]).length) h += 9*scale;
+    (x.points||[]).forEach(p=>{
+      const sep=p.indexOf(": "); const head=sep>0?p.slice(0,sep):""; const body=sep>0?p.slice(sep+2):p;
+      if(head) h += BASE.stepHead*scale*0.55 + 1;
+      doc.setFontSize(BASE.stepBody*scale);
+      h += flowRuns(doc, [{text:body,c:-1}],0,0,CW,L,false).lines*L + 3 + L + 2.5;
+    });
+    const kw = x.kelime||[];
+    if(kw.length){ h += BASE.label*scale*0.55 + 1; h += kw.length * L; }
+    return h;
+  }
 
-  for(let i=0;i<list.length;i++){
-    if(stopFlag) break;
-    const x = list[i];
-    busyUpd(`${i+1}/${list.length} hazırlanıyor…`, (i/list.length)*100);
-    newPage(`Cümle Analizi · ${i+1}/${list.length}`);
+  // ---- çizim geçişi: verilen scale'de gerçekten sayfaya bas ----
+  function drawEntry(x, scale){
+    const L = LEAD * scale;
+    const S = k => BASE[k]*scale;
 
-    heading("CÜMLE", 8.5);
-    paragraph(segment(x.s, x.spans||[], "en"), 13);
+    const heading = (text, size, color) => {
+      ensure(size*0.6 + 3);
+      doc.setFont("Kalam", fonts.bold ? "bold" : "normal");
+      doc.setFontSize(size);
+      const c = color || [140,140,140];
+      doc.setTextColor(c[0], c[1], c[2]);
+      doc.text(text, M.l, y);
+      y += size*0.55 + 1;
+    };
+    const paragraph = (runs, size, light) => {
+      doc.setFontSize(size);
+      doc.setFont(light && fonts.light ? "KalamLight" : "Kalam", "normal");
+      const need = flowRuns(doc, runs, 0,0, CW, L, false).lines * L + 3;
+      ensure(need);
+      const res = flowRuns(doc, runs, M.l, y, CW, L, true);
+      y = res.y + L + 2.5;
+    };
 
-    heading("TÜRKÇE ÇEVİRİ", 8.5);
-    paragraph(segment(x.tr||"", x.spans||[], "tr"), 11.5, true);
+    heading("CÜMLE", S("label"));
+    paragraph(segment(x.s, x.spans||[], "en"), S("sentence"));
+
+    heading("TÜRKÇE ÇEVİRİ", S("label"));
+    paragraph(segment(x.tr||"", x.spans||[], "tr"), S("trans"), true);
 
     if((x.spans||[]).length){
-      doc.setFontSize(8.5); doc.setFont("Kalam","normal");
-      let lx = M.l; ensure(6);
+      doc.setFontSize(S("label")); doc.setFont("Kalam","normal");
+      let lx = M.l; ensure(6*scale);
       x.spans.slice(0,5).forEach((s,idx)=>{
         const c = PAL[idx % PAL.length];
         doc.setTextColor(c[0],c[1],c[2]);
         const t = "■ " + (s.role||"") + "   ";
         const w = doc.getTextWidth(t);
-        if(lx + w > M.l+CW){ lx = M.l; y += 5; }
+        if(lx + w > M.l+CW){ lx = M.l; y += 5*scale; }
         doc.text(t, lx, y); lx += w;
       });
-      y += 8;
+      y += 8*scale;
     }
 
     (x.points||[]).forEach(p => {
       const sep = p.indexOf(": ");
       const head = sep>0 ? p.slice(0,sep) : "";
       const body = sep>0 ? p.slice(sep+2) : p;
-      if(head) heading(head, 10, PAL[0]);
-      paragraph([{text:body, c:-1}], 10);
+      if(head) heading(head, S("stepHead"), PAL[0]);
+      paragraph([{text:body, c:-1}], S("stepBody"));
     });
 
     const kw = x.kelime || [];
     if(kw.length){
-      heading("KELİME KELİME (B2–C1)", 8.5);
+      heading("KELİME KELİME (B2–C1)", S("label"));
       kw.forEach(w=>{
-        ensure(LEAD+1);
-        doc.setFontSize(9.5);
+        ensure(L+1);
+        doc.setFontSize(S("gloss"));
         doc.setFont("Kalam", fonts.bold?"bold":"normal"); doc.setTextColor(PAL[0][0],PAL[0][1],PAL[0][2]);
         doc.text((w.en||"") + (w.kalip? "  (kalıp)":""), M.l, y);
         doc.setFont("Kalam","normal"); doc.setTextColor(26,26,26);
-        doc.text(w.tr||"", M.l+68, y);
-        y += LEAD;
+        doc.text(w.tr||"", M.l + 60*scale, y);
+        y += L;
       });
     }
+  }
+
+  for(let i=0;i<list.length;i++){
+    if(stopFlag) break;
+    const x = list[i];
+    busyUpd(`${i+1}/${list.length} hazırlanıyor…`, (i/list.length)*100);
+
+    // içeriğe göre en okunaklı puntoyu bul: 2 sayfaya en yakın oturan scale
+    // (kısa cümlede büyüt, uzun cümlede küçült — ikisi de olabilir)
+    const est1 = estimateHeight(x, 1.0);
+    let scale = Math.max(0.9, Math.min(2.2, budget / est1));
+    const est2 = estimateHeight(x, scale);
+    if(est2 > budget) scale = Math.max(0.9, scale * (budget / est2));
+
+    newPage(`Cümle Analizi · ${i+1}/${list.length}`);
+    drawEntry(x, scale);
   }
 
   busyHide();
