@@ -2554,6 +2554,29 @@ ${words.join("\n")}`, SEN_SYS, { temp: 0.2 }));
   return out;
 }
 
+/* Bir seferde birden çok kelimenin eş anlamlısını çıkarır (PDF öncesi toplu tamamlama için) */
+async function makeRadialSynBatch(items) {
+  const list = items.map((x, i) => (i + 1) + ") " + x.w + (x.tr ? " (" + x.tr + ")" : "")).join("\n");
+  const d = parseJson(await gemini(
+    `Aşağıdaki İngilizce kelimelerin her biri için GERÇEK eş anlamlılarını çıkar (kök akrabaları değil, anlamca yakın FARKLI kelimeler/kalıplar).
+
+${list}
+
+Şu şekilde bir JSON nesnesi döndür — anahtar kelimenin KENDİSİ (küçük harf), değer TAM OLARAK 5 nesne içeren dizi {"w": İngilizce eş anlamlı, "tr": Türkçe karşılığı}:
+{"mitigate": [{"w":"alleviate","tr":"hafifletmek"}, ...5 tane], "exacerbate": [...]}
+
+Her kelime türü için (bağlaç, edat, fiil, isim, sıfat) uygun eş anlamlıları bul. 5'ten az gerçek eş anlamlı varsa en yakın anlamlı ifadeleri ekleyerek 5'e tamamla. HER kelime için tam 5 madde olsun.`,
+    `Sen İngilizce sözlük uzmanısın. SADECE geçerli JSON döndür, başka hiçbir şey yazma.`, { temp: 0.3 }));
+  const out = {};
+  Object.keys(d || {}).forEach(k => {
+    const arr = (Array.isArray(d[k]) ? d[k] : [])
+      .map(x => ({ w: String(x.w || "").trim(), tr: String(x.tr || "").trim() }))
+      .filter(x => x.w).slice(0, 5);
+    if (arr.length) out[k.toLowerCase().trim()] = arr;
+  });
+  return out;
+}
+
 /* metni renkli parçalara böl: [{text, c}] — c: -1 renksiz, 0..4 palet */
 function segment(text, pairs, key) {
   const marks = [];
@@ -3203,15 +3226,17 @@ async function buildPdf() {
     if (go) {
       if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
       busyShow("Eksikler tamamlanıyor", "");
-      for (let i = 0; i < needSyn.length; i++) {
+      const GRP = 15;
+      for (let i = 0; i < needSyn.length; i += GRP) {
         if (stopFlag) break;
-        busyUpd("Eş anlamlılar · " + (i + 1) + " / " + needSyn.length, (i / Math.max(1, needSyn.length)) * 100);
+        const grp = needSyn.slice(i, i + GRP);
+        busyUpd("Eş anlamlılar · " + Math.min(i + GRP, needSyn.length) + " / " + needSyn.length, (i / Math.max(1, needSyn.length)) * 100);
         try {
-          const syn = await makeRadialSyn(needSyn[i].w, needSyn[i].tr);
-          if (syn.length) { needSyn[i].syn = syn; needSyn[i].t = Date.now(); }
+          const map = await makeRadialSynBatch(grp);
+          grp.forEach(x => { const v = map[x.w.toLowerCase().trim()]; if (v) { x.syn = v; x.t = Date.now(); } });
         } catch (e) {}
         saveWords();
-        await sleep(220);
+        await sleep(300);
       }
       syncSoon();
     }
@@ -3236,43 +3261,67 @@ async function buildPdf() {
   const stamp = new Date().toLocaleDateString("tr-TR");
   const day = new Date().toISOString().slice(0, 10);
   let totalPages = 0;
+  let drawn = 0, skipped = 0;
 
-  for (let bi = 0; bi < batches.length; bi++) {
-    const set = batches[bi];
-    const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
-    regFonts(doc, KALAM);
-    const sub = batches.length > 1 ? stamp + " · bölüm " + (bi + 1) + "/" + batches.length : stamp;
-    const top = M.t + 8;
-    const cardW = PW - M.l - M.r;
-    let page = 0;
+  try {
+    busyUpd("Kartlar çiziliyor · 0 / " + ready.length, 0);
+    await sleep(20);
 
-    for (let i = 0; i < set.length; i++) {
-      const slot = i % PER_PAGE;
-      if (slot === 0) { if (page) doc.addPage(); page++; pdfHeader(doc, sub, page); }
-      const y = top + slot * 78;
-      radialCardPdf(doc, set[i], M.l, y, cardW);
-      if (slot < PER_PAGE - 1 && i < set.length - 1) {
-        doc.setDrawColor(237, 239, 245); doc.setLineWidth(0.3);
-        doc.line(M.l, y + 71, PW - M.r, y + 71);
+    for (let bi = 0; bi < batches.length; bi++) {
+      const set = batches[bi];
+      const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+      regFonts(doc, KALAM);
+      const sub = batches.length > 1 ? stamp + " · bölüm " + (bi + 1) + "/" + batches.length : stamp;
+      const top = M.t + 8;
+      const cardW = PW - M.l - M.r;
+      let page = 0;
+
+      for (let i = 0; i < set.length; i++) {
+        const slot = i % PER_PAGE;
+        if (slot === 0) { if (page) doc.addPage(); page++; pdfHeader(doc, sub, page); }
+        const y = top + slot * 78;
+        try {
+          radialCardPdf(doc, set[i], M.l, y, cardW);
+        } catch (e) {
+          skipped++;
+          console.error("Kart çizilemedi:", set[i] && set[i].w, e);
+          doc.setTextColor(180, 60, 60); doc.setFont("Kalam", "normal"); doc.setFontSize(9);
+          doc.text("(" + (set[i] && set[i].w || "?") + " çizilemedi)", M.l, y + 10);
+        }
+        drawn++;
+        if (drawn % 10 === 0 || drawn === ready.length) {
+          busyUpd("Kartlar çiziliyor · " + drawn + " / " + ready.length, (drawn / ready.length) * 100);
+          await sleep(0);
+        }
+        if (slot < PER_PAGE - 1 && i < set.length - 1) {
+          doc.setDrawColor(237, 239, 245); doc.setLineWidth(0.3);
+          doc.line(M.l, y + 71, PW - M.r, y + 71);
+        }
+      }
+
+      const from = bi * BATCH + 1, to = bi * BATCH + set.length;
+      const name = batches.length > 1
+        ? "kelime-" + String(from).padStart(3, "0") + "-" + String(to).padStart(3, "0") + "-" + day + ".pdf"
+        : "kelime-defteri-" + day + ".pdf";
+      doc.save(name);
+      totalPages += page;
+      if (bi < batches.length - 1) {
+        busyUpd("Dosya " + (bi + 1) + " / " + batches.length + " indirildi…", ((bi + 1) / batches.length) * 100);
+        await sleep(1200);
       }
     }
-
-    const from = bi * BATCH + 1, to = bi * BATCH + set.length;
-    const name = batches.length > 1
-      ? "kelime-" + String(from).padStart(3, "0") + "-" + String(to).padStart(3, "0") + "-" + day + ".pdf"
-      : "kelime-defteri-" + day + ".pdf";
-    doc.save(name);
-    totalPages += page;
-    if (bi < batches.length - 1) {
-      busyUpd("Dosya " + (bi + 1) + " / " + batches.length + " indirildi…", ((bi + 1) / batches.length) * 100);
-      await sleep(1200);
-    }
+  } catch (e) {
+    busyHide();
+    toast("PDF hazırlanırken hata oluştu: " + e.message, 6000);
+    console.error(e);
+    return;
   }
 
   busyHide();
-  toast(batches.length > 1
+  toast((batches.length > 1
     ? ready.length + " kelime · " + batches.length + " ayrı PDF indirildi (" + totalPages + " sayfa)."
-    : ready.length + " kelime · " + totalPages + " sayfa hazır (sayfa başına 3 kelime).", 5000);
+    : ready.length + " kelime · " + totalPages + " sayfa hazır (sayfa başına 3 kelime).")
+    + (skipped ? " " + skipped + " kart atlandı (bozuk veri)." : ""), 5000);
 }
 
 $("#pdfBtn").addEventListener("click", buildPdf);
