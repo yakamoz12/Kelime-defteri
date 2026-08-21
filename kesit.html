@@ -182,6 +182,32 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 /* ---------- kelime kartı ---------- */
 .w-en{font-family:"Source Serif 4",serif;font-size:15px;color:var(--ink3);margin-bottom:3px}
 .famwrap{margin-top:4px}
+/* ---- Işınsal eş anlamlı kartı (Defter'in tek gösterim biçimi) ---- */
+.rad-b1-bg{color:#A11648;background:#FBE7EF}
+.rad-b2-bg{color:#1F5FA8;background:#E8EEFB}
+.rad-b3-bg{color:#1E7A45;background:#E5F3EA}
+.rad-b4-bg{color:#6B3FA0;background:#F0E7F7}
+.rad-b5-bg{color:#A3660F;background:#FBEEDC}
+.rad-wrap{display:flex;align-items:stretch;gap:0;margin-top:6px}
+.rad-core{flex:0 0 84px;width:84px;height:84px;border-radius:50%;
+  background:linear-gradient(155deg,var(--deep),#1C2547);color:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  margin-top:4px;box-shadow:0 6px 16px -6px #2E3A6655;flex-shrink:0;position:relative;z-index:2}
+.rad-core .en{font-family:"Source Serif 4",serif;font-weight:600;font-style:italic;font-size:9.5px;opacity:.72;margin-bottom:2px}
+.rad-core .tr{font-family:"Source Serif 4",serif;font-weight:700;font-size:12.5px;line-height:1.15;padding:0 6px}
+.rad-spine{flex:0 0 26px;position:relative;margin-left:-11px}
+.rad-spine svg{position:absolute;top:0;left:0;width:100%;height:100%}
+.rad-branches{flex:1;display:flex;flex-direction:column;gap:7px;padding-top:2px;min-width:0}
+.rad-branch{display:flex;align-items:center;gap:8px}
+.rad-num{flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:#fff;
+  border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;color:var(--ink2);flex-shrink:0;position:relative;z-index:2;
+  box-shadow:0 2px 5px #1A1F3512}
+.rad-card{flex:1;border-radius:12px;padding:6px 11px;min-width:0;display:flex;
+  align-items:baseline;justify-content:space-between;gap:8px}
+.rad-word{font-family:"Source Serif 4",serif;font-weight:700;font-size:13.5px}
+.rad-tr{font-size:11px;font-weight:500;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rad-empty{font-size:13px;color:var(--ink3);padding:6px 0}
 .fam{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line2)}
 .fam:first-child{border-top:none}
 .fpos{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--deep);
@@ -471,6 +497,14 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .cstep{margin-top:12px;padding:11px 13px;background:var(--card);border-radius:10px;border-left:3px solid var(--acc)}
 .cstephead{font-family:Archivo,sans-serif;font-weight:700;font-size:12.5px;color:var(--acc-ink);margin-bottom:5px}
 .cstepbody{font-size:13.5px;line-height:1.6;color:var(--ink)}
+.cstepbody .mdp{margin:0 0 8px}
+.cstepbody .mdp:last-child{margin-bottom:0}
+.cstepbody .mdlist{margin:0 0 8px;padding-left:19px}
+.cstepbody .mdlist:last-child{margin-bottom:0}
+.cstepbody .mdlist li{margin-bottom:5px}
+.cstepbody b{color:var(--acc-ink)}
+.notesbox .mdp{margin:0 0 6px}
+.notesbox b{color:var(--acc-ink)}
 .cwtable{margin-top:6px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
 .cwrow{display:flex;padding:7px 11px;border-bottom:1px solid var(--line);font-size:13px}
 .cwrow:last-child{border-bottom:none}
@@ -682,6 +716,11 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
       <button data-d="kolay">Kolay</button>
       <button class="on" data-d="orta">Orta</button>
       <button data-d="zor">Zor</button>
+    </div>
+
+    <div class="field" style="margin:2px 0 10px">
+      <input class="inp" id="cManualInput" placeholder="Kendi cümleni yapıştır (opsiyonel)…">
+      <button class="btn ghost" id="cManualBtn">Kullan</button>
     </div>
 
     <div class="csent" id="cSentBox">Yükleniyor…</div>
@@ -1109,6 +1148,38 @@ const CDIFF = {
 const CU = { tokens: [], tags: [], selStart: null, selEnd: null, diff: "orta", lastAnalysis: null, chatHist: [], inited: false };
 
 function cTagInfo(k){ return CTAGS.find(t=>t.key===k) || CTAGS[0]; }
+
+/* Adım açıklamalarında **kalın** ve "- " madde listesi + boş satırla paragraf desteği.
+   Önce HTML-kaçışı yapılır (güvenlik), sonra ** işaretleri <b>'ye çevrilir. */
+function mdBold(escapedText){ return escapedText.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+function mdLite(raw){
+  if(!raw) return "";
+  const blocks = String(raw).split(/\n\s*\n/);
+  return blocks.map(block => {
+    const lines = block.split("\n").map(l=>l.trim()).filter(Boolean);
+    if(!lines.length) return "";
+    let html = "", i = 0;
+    while(i < lines.length){
+      if(lines[i].startsWith("- ")){
+        const items = [];
+        while(i < lines.length && lines[i].startsWith("- ")){ items.push(lines[i].slice(2)); i++; }
+        html += '<ul class="mdlist">' + items.map(l=>`<li>${mdBold(esc(l))}</li>`).join("") + "</ul>";
+      } else {
+        const paras = [];
+        while(i < lines.length && !lines[i].startsWith("- ")){ paras.push(lines[i]); i++; }
+        html += `<p class="mdp">${paras.map(l=>mdBold(esc(l))).join("<br>")}</p>`;
+      }
+    }
+    return html;
+  }).join("");
+}
+/* PDF için: markdown işaretlerini düz, okunabilir metne indirger (** kalkar, "- " madde "• " olur) */
+function mdPlain(raw){
+  if(!raw) return "";
+  return String(raw)
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .split("\n").map(l => { l = l.trim(); return l.startsWith("- ") ? "• " + l.slice(2) : l; }).join("\n");
+}
 function cTokenize(s){ return s.trim().split(/\s+/); }
 function cFindTag(i){ for(let j=0;j<CU.tags.length;j++){ const t=CU.tags[j]; if(i>=t.start&&i<=t.end) return {tag:t,index:j}; } return null; }
 
@@ -1211,17 +1282,33 @@ async function cCheckAnalysis(){
     tagBlock = `\n\nÖğrenci ayrıca kendi başına şu parçaları işaretlemeye çalıştı:\n${lines}\nHer birini "dogru"/"kismen dogru"/"yanlis" olarak tag_feedback içinde değerlendir.`;
   }
 
-  const sys = `Sen YÖKDİL'e hazırlanan bir sağlık bilimleri öğrencisine BİRE BİR ders veren, deneyimli bir İngilizce gramer hocasısın. Amacın SONUCU söylemek değil, o sonuca hangi TEST/YÖNTEMLE ulaşıldığını öğretmek — öğrenci senin yöntemini başka bir cümlede tek başına uygulayabilmeli. Hiçbir adımda çıplak etiket verme ("bu bir ilgi cümleciği" gibi bitirip geçme); her zaman "çünkü", "şu testi uyguluyoruz", "şuna bakarak anlıyoruz" ile devam et. Yalnızca cümleye GERÇEKTEN uyuyorsa teknik/tıbbi bilgi ekle; uymuyorsa boş bırak, zorlama. Kelime kelime çeviri tablosunda SADECE B2-C1 seviyesi kelime ve kalıplara yer ver — "the, a, is, was, in, on, and, of" gibi temel/A-B1 kelimeleri ASLA tabloya ekleme. Yalnızca geçerli JSON döndür, markdown çiti yok, başka metin yok.`;
+  const sys = `Sen YÖKDİL'e hazırlanan bir sağlık bilimleri öğrencisine BİRE BİR ders veren, deneyimli bir İngilizce gramer hocasısın. Amacın SONUCU söylemek değil, o sonuca hangi TEST/YÖNTEMLE ulaşıldığını öğretmek — öğrenci senin yöntemini başka bir cümlede tek başına uygulayabilmeli. Hiçbir adımda çıplak etiket verme; her zaman "çünkü", "şu testi uyguluyoruz", "şuna bakarak anlıyoruz" ile devam et. Yalnızca cümleye GERÇEKTEN uyuyorsa teknik/tıbbi bilgi ekle. Kelime kelime çeviri tablosunda SADECE B2-C1 seviyesi kelime ve kalıplara yer ver.
 
-  const method = `YÖNTEM ÖRNEĞİ — Adım 1'i HER ZAMAN tam olarak bu yöntemle yaz (cümle değişir, yöntem değişmez):
-"Bağımlı yapı sinyallerini (that/which/who/whose/where, although/because/since/while/as/if/when, -ing/-ed biçimli fiiller) tek tek işaretle. Her sinyalden itibaren o cümlecik kapanana kadar (virgüle, ya da kendi tamlayıcısı bitip yeni bir bağlaç/ana cümle görününceye kadar) o bölgeyi köşeli parantezle kilitle. Kilitli bölgeleri zihinde SİL. Geriye kalan, parantez dışında duran ilk [özne + çekimli fiil] çifti ana cümledir. Test: kilitli bölgeleri çıkardığında geriye kalan hâlâ dilbilgisel olarak tam bir cümle mi? Evetse doğru kesmişsindir."
-Sonraki adımlarda da AYNI ruhu koru: her zaman "hangi teste/sinyale bakarak anladık" sorusuna cevap ver, sadece isim verme.
+BİÇİMLENDİRME KURALLARI — "aciklama" alanlarının HEPSİNDE (sadece Adım 1'de değil, TÜM adımlarda) uygula:
+- Bir adımda birden fazla öğe/sinyal/fiil varsa (ör. üç ayrı yüklem, iki ayrı bağlaç türü) bunları "- " ile başlayan madde listesi yap, her maddeyi \\n ile ayır.
+- Sinyal kelimeyi, gramer terimini ve test sonucunu **iki yıldız** ile kalınlaştır (ör. **that**, **Present Perfect**, **AKTİF**).
+- "Test:" ile başlayan doğrulama cümlesini maddelerden SONRA, boş satırla ayrılmış AYRI bir paragraf olarak yaz (\\n\\n ile ayır).
+- Bir şeyin ne OLMADIĞINI da açıklıyorsan ("X değil çünkü...") bunu da ayrı bir paragraf yap.
+- Asla tek bir dev paragraf yazma — en az 2, gerekiyorsa 3-4 görsel blok (madde listesi + test paragrafı + gerekçe paragrafı) olsun.
+Yalnızca geçerli JSON döndür, markdown çiti yok, başka metin yok. (JSON string değerlerinin İÇİNDE \\n ve ** kullanmak serbest, bunlar biçimlendirme için gerekli.)`;
 
-TEKNİK NOT ÖRNEĞİ (sadece gerçekten uyuyorsa böyle bir şey ekle): "Short bowel syndrome, ince bağırsağın büyük kısmının cerrahi olarak alınması ya da doğuştan eksik olması sonucu besin emiliminin ciddi biçimde bozulduğu bir durumdur; hastalar sık sık IV yoluyla beslenmeye ihtiyaç duyar."
+  const method = `ÖRNEK — bir adımın aciklama alanı TAM OLARAK bu görsel yapıda olmalı (konu/cümle değişir, YAPI değişmez):
 
-ÇEVİRİ ADIMI ÖRNEĞİ: Çeviriyi tek seferde verme — RC'lerin İngilizce'de isimden SONRA, Türkçe'de isimden ÖNCE geldiğini (sıfat-fiile dönüşerek) göster, önce iç parçaları çevirip sonra birleştirdiğini adım adım anlat.
+"Bu cümlede üç farklı yüklem var, her birini ayrı ayrı test ediyoruz:
+- **emphasize** (ana yüklem) → \\"be + V3\\" yapısı yok, demek ki **AKTİF**. Zaman eki yok — bu da **Present Simple** demek, genel bilimsel kanaati bildiriyor.
+- **have demonstrated** (zarf cümleciğinde) → \\"have + V3\\" **Present Perfect**'i işaret ediyor; \\"been\\" yok, demek ki **AKTİF**.
+- **could compromise** (isim cümleciğinde) → \\"could + V1\\" **AKTİF modal** yapı, gelecekteki olası sonucu ifade ediyor.
 
-KELİME KELİME ÖRNEĞİ (sadece B2/C1, kalıpları bozmadan): "results from" → "-den kaynaklanır" (kalıp fiil, ayrılmaz); "as" → "olarak" (dikkat: "gibi" değil); "segments of" → "-in bir bölümü" (kalıp). Temel kelimeleri (the, a, is, that/which zamiri gibi) tabloya EKLEME.`;
+Test: Her yüklemi tek tek \\"be + V3 var mı?\\" sorusundan geçirdiğimizde üçü de bu testten aktif olarak geçiyor mu? Evet — hiçbirinde \\"been\\" yok, demek ki üçü de doğru sınıflandı."
+
+Adım 1 için AYNI yapıda, bağımlı/bağımsız ayrımı yöntemiyle yaz: sinyalleri madde madde listele, sonra köşeli parantezle kilitleme adımını AYRI paragrafta göster, sonra "Test:" paragrafını AYRI ver.
+RC/NC ayrımı gibi karşılaştırma gerektiren adımlarda da aynı şekilde: önce her seçeneği madde madde göster, sonra ayrı paragrafta test/gerekçe.
+
+TEKNİK NOT ÖRNEĞİ (sadece gerçekten uyuyorsa ekle, aynı **kalın** kuralı burada da geçerli): "**Short bowel syndrome**, ince bağırsağın büyük kısmının cerrahi olarak alınması sonucu besin emiliminin ciddi biçimde bozulduğu bir durumdur; hastalar sık sık IV yoluyla beslenmeye ihtiyaç duyar."
+
+ÇEVİRİ ADIMI ÖRNEĞİ: Çeviriyi tek seferde verme — parçaları madde madde göster (Zıtlık zarfı / İç sıfat cümlesi / Özne+nesne / Ana yüklem gibi), sondan başa doğru nasıl kenetlendiğini anlat.
+
+KELİME KELİME ÖRNEĞİ (sadece B2/C1, kalıpları bozmadan): "results from" → "-den kaynaklanır" (kalıp fiil); "as" → "olarak" (dikkat: "gibi" değil). Temel kelimeleri (the, a, is gibi) tabloya EKLEME.`;
 
   const prompt = `Analiz edilecek cümle:\n"${sentence}"${tagBlock}
 
@@ -1274,11 +1361,11 @@ function cRenderReport(data, sentence){
 
   if(data.translation) html += `<div class="ctrbox"><b>Türkçe Çeviri</b>${runsToHtml(segment(data.translation, spans, "tr"))}</div>`;
 
-  if(data.teknik_not) html += `<div class="notesbox"><b>🔬 Teknik Not</b>${esc(data.teknik_not)}</div>`;
+  if(data.teknik_not) html += `<div class="notesbox"><b>🔬 Teknik Not</b>${mdLite(data.teknik_not)}</div>`;
 
   if(data.adimlar && data.adimlar.length){
     data.adimlar.forEach((a) => {
-      html += `<div class="cstep"><div class="cstephead">${esc(a.baslik||"")}</div><div class="cstepbody">${esc(a.aciklama||"")}</div></div>`;
+      html += `<div class="cstep"><div class="cstephead">${esc(a.baslik||"")}</div><div class="cstepbody">${mdLite(a.aciklama||"")}</div></div>`;
     });
   }
 
@@ -1388,7 +1475,9 @@ async function cBuildCumlePdf(){
       const sep=p.indexOf(": "); const head=sep>0?p.slice(0,sep):""; const body=sep>0?p.slice(sep+2):p;
       if(head) h += BASE.stepHead*scale*0.55 + 1;
       doc.setFontSize(BASE.stepBody*scale);
-      h += flowRuns(doc, [{text:body,c:-1}],0,0,CW,L,false).lines*L + 3 + L + 2.5;
+      mdPlain(body).split("\n").filter(Boolean).forEach(line=>{
+        h += flowRuns(doc, [{text:line,c:-1}],0,0,CW,L,false).lines*L + 3 + L + 2.5;
+      });
     });
     const kw = x.kelime||[];
     if(kw.length){ h += BASE.label*scale*0.55 + 1; h += kw.length * L; }
@@ -1443,7 +1532,9 @@ async function cBuildCumlePdf(){
       const head = sep>0 ? p.slice(0,sep) : "";
       const body = sep>0 ? p.slice(sep+2) : p;
       if(head) heading(head, S("stepHead"), PAL[0]);
-      paragraph([{text:body, c:-1}], S("stepBody"));
+      mdPlain(body).split("\n").filter(Boolean).forEach(line=>{
+        paragraph([{text:line, c:-1}], S("stepBody"));
+      });
     });
 
     const kw = x.kelime || [];
@@ -1490,6 +1581,14 @@ function cumleInit(){
   $("#cNewBtn").addEventListener("click", cGenerateSentence);
   $("#cCheckBtn").addEventListener("click", cCheckAnalysis);
   $("#cPdfBtn").addEventListener("click", cBuildCumlePdf);
+  const useManual = () => {
+    const v = $("#cManualInput").value.trim();
+    if(v.length < 5){ toast("Önce bir cümle yaz."); return; }
+    cResetSentence(v);
+    $("#cManualInput").value = "";
+  };
+  $("#cManualBtn").addEventListener("click", useManual);
+  $("#cManualInput").addEventListener("keydown", e => { if(e.key==="Enter"){ e.preventDefault(); useManual(); } });
   $("#cChatSend").addEventListener("click", cSendChat);
   $("#cChatInp").addEventListener("keydown", e => { if(e.key==="Enter"){ e.preventDefault(); cSendChat(); } });
   $$("#cDiff button").forEach(b => b.addEventListener("click", () => {
@@ -2212,9 +2311,34 @@ function wordCardEl(word, d, context) {
   return wrap;
 }
 
+/* Sadece okuma-anı kelime popup'ı için (Defter artık ışınsal kartı kullanıyor) */
 function famHtml(fam) {
   return '<div class="famwrap">' + fam.map(x =>
     `<div class="fam"><span class="fpos">${esc(x.pos || "")}</span><div class="ftx"><b>${esc(x.w)}</b><i>${esc(x.tr || "")}</i></div></div>`).join("") + "</div>";
+}
+
+function radialHtml(x) {
+  const syn = x.syn || [];
+  if (!syn.length) return '<div class="rad-empty">Henüz eş anlamlı yok. Sağdaki simgeye dokun.</div>';
+  const rowH = 33, gap = 7, spineH = syn.length * rowH + (syn.length - 1) * gap;
+  const bez = `M 26 0 C 4 ${spineH*0.22}, 4 ${spineH*0.42}, 15 ${spineH*0.5} C 22 ${spineH*0.56}, 22 ${spineH*0.62}, 13 ${spineH*0.72} C 4 ${spineH*0.82}, 4 ${spineH*0.9}, 26 ${spineH}`;
+  const dotY = syn.map((_, i) => (i + 0.5) * (spineH / syn.length));
+  const dots = syn.map((_, i) => `<circle cx="${i % 2 ? 10 : 20}" cy="${dotY[i]}" r="3" class="rad-b${(i % 5) + 1}-bg" fill="currentColor"/>`).join("");
+  const branches = syn.map((s, i) => `
+    <div class="rad-branch">
+      <div class="rad-num">${String(i + 1).padStart(2, "0")}</div>
+      <div class="rad-card rad-b${(i % 5) + 1}-bg"><span class="rad-word">${esc(s.w)}</span><span class="rad-tr">${esc(s.tr || "")}</span></div>
+    </div>`).join("");
+  return `<div class="rad-wrap">
+    <div class="rad-core"><div class="en">${esc(x.w)}</div><div class="tr">${esc(x.tr || "")}</div></div>
+    <div class="rad-spine" style="height:${spineH}px">
+      <svg viewBox="0 0 26 ${spineH}" preserveAspectRatio="none">
+        <path d="${bez}" fill="none" stroke="var(--line)" stroke-width="2"/>
+        ${dots}
+      </svg>
+    </div>
+    <div class="rad-branches">${branches}</div>
+  </div>`;
 }
 
 function setSaveBtn(btn, on) {
@@ -2363,17 +2487,17 @@ async function translateAll() {
   $("#allBtn").classList.remove("on");
 }
 
-async function makeFamily(word, tr) {
+async function makeRadialSyn(word, tr) {
   const d = parseJson(await gemini(
     `KELİME: "${word}"${tr ? ' (Türkçesi: "' + tr + '")' : ""}
 
-Bu kelimenin aynı kökten türeyen ailesini çıkar.
+Bu kelimenin GERÇEK eş anlamlılarını çıkar (kök akrabaları değil, anlamca yakın FARKLI kelimeler/kalıplar).
 Şu alana sahip JSON döndür:
-"family": 3-5 nesne içeren dizi. Her nesne {"w": İngilizce sözcük, "pos": sözcük türü (fiil/isim/sıfat/zarf), "tr": Türkçe karşılığı}.
-Kelimenin kendisini de dahil et. Sıralama: fiil, isim, sıfat, zarf.`,
-    `Sen İngilizce sözlük uzmanısın. SADECE geçerli JSON döndür, başka hiçbir şey yazma.`, { temp: 0.2 }));
-  return (Array.isArray(d.family) ? d.family : [])
-    .map(x => ({ w: String(x.w || "").trim(), pos: String(x.pos || "").trim(), tr: String(x.tr || "").trim() }))
+"syn": TAM OLARAK 5 nesne içeren dizi. Her nesne {"w": İngilizce eş anlamlı sözcük/kalıp, "tr": Türkçe karşılığı, tek kelime veya çok kısa kalıp}.
+Kelime türü ne olursa olsun (bağlaç, edat, fiil, isim, sıfat) uygun eş anlamlıları bul. 5'ten az gerçek eş anlamlı varsa, en yakın anlamlı ifadeleri de ekleyerek tam 5'e tamamla.`,
+    `Sen İngilizce sözlük uzmanısın. SADECE geçerli JSON döndür, başka hiçbir şey yazma.`, { temp: 0.3 }));
+  return (Array.isArray(d.syn) ? d.syn : [])
+    .map(x => ({ w: String(x.w || "").trim(), tr: String(x.tr || "").trim() }))
     .filter(x => x.w).slice(0, 5);
 }
 
@@ -2428,11 +2552,6 @@ ${words.join("\n")}`, SEN_SYS, { temp: 0.2 }));
   const out = {};
   Object.keys(d || {}).forEach(k => { const v = String(d[k] || "").trim(); if (v) out[k.toLowerCase().trim()] = v; });
   return out;
-}
-
-async function makeSentence(word, tr, avoid) {
-  const d = parseJson(await gemini(senPrompt(word, tr, avoid), SEN_SYS, { temp: 0.95 }));
-  return normSen(d);
 }
 
 /* metni renkli parçalara böl: [{text, c}] — c: -1 renksiz, 0..4 palet */
@@ -2516,15 +2635,12 @@ function renderWords() {
       </div>
       <div class="acts">
         <button class="flag${x.hard ? " on" : ""}" aria-label="İşaretle">${x.hard ? "★" : "☆"}</button>
-        <button class="gen" data-k="sen" aria-label="Örnek cümle üret" title="Örnek cümle">
-          <svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
-        </button>
-        <button class="gen" data-k="fam" aria-label="Kelime ailesi üret" title="Kelime ailesi">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.4"/><circle cx="5.5" cy="18" r="2.4"/><circle cx="18.5" cy="18" r="2.4"/><path d="M12 7.4v3.4M12 10.8H6.4a1 1 0 00-1 1v3.8M12 10.8h5.6a1 1 0 011 1v3.8"/></svg>
+        <button class="gen" data-k="rad" aria-label="Eş anlamlı üret" title="Eş anlamlı">
+          <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.6"/><circle cx="19" cy="5" r="2.2"/><circle cx="19" cy="12" r="2.2"/><circle cx="19" cy="19" r="2.2"/><path d="M7.3 11H16.8M7.3 12.3L17 6M7.3 12.9L17 18.5"/></svg>
         </button>
         <button class="del" aria-label="Sil">×</button>
       </div>
-      <div class="wdet">${detHtml(x)}</div>
+      <div class="wdet">${radialHtml(x)}</div>
     </div>`).join("");
 
   box.querySelectorAll(".witem").forEach(el => {
@@ -2543,66 +2659,32 @@ function renderWords() {
     el.querySelectorAll(".gen").forEach(g => g.addEventListener("click", e => {
       e.stopPropagation();
       el.classList.add("open");
-      if (g.dataset.k === "fam") famFor(w, el, g);
-      else genFor(w, el, g);
+      radialFor(w, el, g);
     }));
     el.querySelector(".wtxt").addEventListener("click", () => {
       if (selMode) { if (SEL.has(w)) SEL.delete(w); else SEL.add(w); renderWords(); return; }
       el.classList.toggle("open");
     });
-    const again = el.querySelector(".again");
-    if (again) again.addEventListener("click", e => { e.stopPropagation(); genFor(w, el); });
   });
   selBar();
 }
 
-async function famFor(word, el, btn) {
+async function radialFor(word, el, btn) {
   if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
   const rec = WORDS.find(x => norm(x.w) === norm(word));
   if (!rec) return;
   btn.classList.add("busy");
   const box = el.querySelector(".wdet");
   const keep = box.innerHTML;
-  box.innerHTML = '<div class="none"><span class="spin dark"></span> Kelime ailesi çıkarılıyor…</div>';
+  box.innerHTML = '<div class="none"><span class="spin dark"></span> Eş anlamlılar çıkarılıyor…</div>';
   try {
-    const fam = await makeFamily(rec.w, rec.tr);
-    if (fam.length) { rec.family = fam; rec.t = Date.now(); saveWords(); syncSoon(); }
-    box.innerHTML = detHtml(rec);
-    const ag = el.querySelector(".again");
-    if (ag) ag.addEventListener("click", e => { e.stopPropagation(); genFor(word, el); });
-    toast(fam.length ? "Kelime ailesi eklendi." : "Aile bulunamadı.");
+    const syn = await makeRadialSyn(rec.w, rec.tr);
+    rec.syn = syn; rec.t = Date.now(); saveWords(); syncSoon();
+    box.innerHTML = radialHtml(rec);
+    toast(syn.length ? "Eş anlamlılar eklendi." : "Eş anlamlı bulunamadı.");
   } catch (e) {
     box.innerHTML = keep;
     toast("Olmadı: " + e.message);
-  }
-  btn.classList.remove("busy");
-}
-
-function detHtml(x) {
-  const fam = (x.family || []).length ? famHtml(x.family) : "";
-  if (!x.ex) return fam + '<div class="none">Henüz örnek cümle yok. Sağdaki yıldıza dokun.</div>';
-  const p = x.pairs || [];
-  return fam + `<div class="sen">${runsToHtml(segment(x.ex, p, "en"))}</div>
-          <div class="sen trs">${runsToHtml(segment(x.exTr || "", p, "tr"))}</div>
-          <button class="again">Yeni cümle üret</button>`;
-}
-
-async function genFor(word, el) {
-  if (!state.key) { toast("Önce ayarlardan Gemini anahtarını gir."); openSettings(); return; }
-  const rec = WORDS.find(x => norm(x.w) === norm(word));
-  if (!rec) return;
-  const btn = el.querySelector(".gen");
-  btn.classList.add("busy");
-  el.querySelector(".wdet").innerHTML = '<div class="none"><span class="spin dark"></span> Cümle kuruluyor…</div>';
-  try {
-    const s = await makeSentence(rec.w, rec.tr, rec.ex);
-    rec.ex = s.en; rec.exTr = s.tr; rec.pairs = s.pairs; rec.t = Date.now();
-    saveWords(); syncSoon();
-    el.querySelector(".wdet").innerHTML = detHtml(rec);
-    const ag = el.querySelector(".again");
-    if (ag) ag.addEventListener("click", e => { e.stopPropagation(); genFor(word, el); });
-  } catch (e) {
-    el.querySelector(".wdet").innerHTML = `<div class="none" style="color:var(--warn)">${esc(e.message)}</div>`;
   }
   btn.classList.remove("busy");
 }
@@ -3055,45 +3137,79 @@ function sheetHeight(doc, group, k, order, gap) {
 }
 
 
+function radialCardPdf(doc, x, x0, y0, w) {
+  // sabit boyutlu ışınsal kart: merkez daire + eğri omurga + 5 dal — jsPDF vektörleriyle
+  const BR = [
+    { ink:[161,22,72],  bg:[251,231,239] },
+    { ink:[31,95,168],  bg:[232,238,251] },
+    { ink:[30,122,69],  bg:[229,243,234] },
+    { ink:[107,63,160], bg:[240,231,247] },
+    { ink:[163,102,15], bg:[251,238,220] }
+  ];
+  const coreR = 17, coreX = x0 + coreR, coreY = y0 + 32.5;
+
+  doc.setFillColor(46,58,102);
+  doc.circle(coreX, coreY, coreR, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('Kalam','normal'); doc.setFontSize(8.5);
+  doc.text(x.w, coreX, coreY - 4.5, {align:'center'});
+  doc.setFont('Kalam','bold'); doc.setFontSize(11.5);
+  const trLines = doc.splitTextToSize(x.tr || "", coreR*1.6);
+  trLines.slice(0,2).forEach((l,i)=> doc.text(l, coreX, coreY + 2 + i*6, {align:'center'}));
+
+  function bez(t){
+    const p0={x:6,y:0}, p1={x:-8,y:22}, p2={x:-8,y:43}, p3={x:6,y:65};
+    const mt=1-t;
+    return { x: mt*mt*mt*p0.x+3*mt*mt*t*p1.x+3*mt*t*t*p2.x+t*t*t*p3.x,
+             y: mt*mt*mt*p0.y+3*mt*mt*t*p1.y+3*mt*t*t*p2.y+t*t*t*p3.y };
+  }
+  const spineX = coreX + coreR + 10;
+  doc.setDrawColor(215,218,232); doc.setLineWidth(0.4);
+  let prev = {x:spineX+bez(0).x, y:y0+bez(0).y};
+  for(let i=1;i<=30;i++){ const t=i/30; const p={x:spineX+bez(t).x, y:y0+bez(t).y}; doc.line(prev.x,prev.y,p.x,p.y); prev=p; }
+
+  const syn = (x.syn||[]).slice(0,5);
+  const numX = spineX + 15, cardX = numX + 8, cardW = (x0+w) - cardX;
+  syn.forEach((s,i)=>{
+    const yy = y0 + 6 + i*13.5;
+    const c = BR[i%5];
+    const dt = i/4, dp = bez(dt);
+    doc.setFillColor(c.ink[0],c.ink[1],c.ink[2]);
+    doc.circle(spineX+dp.x, y0+dp.y, 1, 'F');
+
+    doc.setFillColor(255,255,255); doc.setDrawColor(225,227,238);
+    doc.circle(numX, yy, 4.3, 'FD');
+    doc.setTextColor(95,103,132); doc.setFont('Kalam','bold'); doc.setFontSize(7);
+    doc.text(String(i+1).padStart(2,'0'), numX, yy+1.1, {align:'center'});
+
+    doc.setFillColor(c.bg[0],c.bg[1],c.bg[2]);
+    doc.roundedRect(cardX, yy-4.8, cardW, 9.6, 3.5, 3.5, 'F');
+    doc.setTextColor(c.ink[0],c.ink[1],c.ink[2]);
+    doc.setFont('Kalam','bold'); doc.setFontSize(11);
+    doc.text(s.w, cardX+5, yy+1.4);
+    doc.setFont('Kalam','normal'); doc.setFontSize(9);
+    doc.text(s.tr||"", cardX+cardW-5, yy+1.1, {align:'right'});
+  });
+  return y0 + 68; // sabit kart yüksekliği + alt boşluk
+}
+
 async function buildPdf() {
   if (!WORDS.length) { toast("Defter boş."); return; }
-  const needEx = (wFilter === "hard" ? WORDS.filter(x => x.hard) : WORDS).filter(x => !x.ex);
-  const needOku = WORDS.filter(x => x.ex && !x.oku && !x.okuTried);
+  let pool = wFilter === "hard" ? WORDS.filter(x => x.hard) : WORDS;
+  const needSyn = pool.filter(x => !(x.syn && x.syn.length));
 
-  if (needEx.length || needOku.length) {
-    const parts = [];
-    if (needEx.length) parts.push(needEx.length + " kelimenin örnek cümlesi");
-    if (needOku.length) parts.push(needOku.length + " kelimenin okunuşu");
-    const go = confirm(parts.join(" ve ") + " eksik.\n\nTamam: eksikleri tamamla.\nİptal: elimizdekiyle bas.");
+  if (needSyn.length) {
+    const go = confirm(needSyn.length + " kelimenin eş anlamlısı eksik.\n\nTamam: eksikleri tamamla.\nİptal: elimizdekiyle bas.");
     if (go) {
       if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
       busyShow("Eksikler tamamlanıyor", "");
-
-      for (let i = 0; i < needEx.length; i++) {
+      for (let i = 0; i < needSyn.length; i++) {
         if (stopFlag) break;
-        busyUpd("Örnek cümleler · " + (i + 1) + " / " + needEx.length, (i / Math.max(1, needEx.length)) * 60);
+        busyUpd("Eş anlamlılar · " + (i + 1) + " / " + needSyn.length, (i / Math.max(1, needSyn.length)) * 100);
         try {
-          const r = await makeSentence(needEx[i].w, needEx[i].tr);
-          needEx[i].ex = r.en; needEx[i].exTr = r.tr; needEx[i].pairs = r.pairs;
-          if (r.oku) needEx[i].oku = r.oku;
-          needEx[i].t = Date.now();
+          const syn = await makeRadialSyn(needSyn[i].w, needSyn[i].tr);
+          if (syn.length) { needSyn[i].syn = syn; needSyn[i].t = Date.now(); }
         } catch (e) {}
-        needEx[i].okuTried = 1;
-        saveWords();
-        await sleep(220);
-      }
-
-      // okunuşu eksik olanlar — 20'şerli toplu, bir kez denenir
-      const rest = WORDS.filter(x => x.ex && !x.oku && !x.okuTried);
-      for (let i = 0; i < rest.length; i += 20) {
-        if (stopFlag) break;
-        const grp = rest.slice(i, i + 20);
-        busyUpd("Okunuşlar · " + Math.min(i + 20, rest.length) + " / " + rest.length, 60 + (i / Math.max(1, rest.length)) * 40);
-        try {
-          const map = await makeReadings(grp.map(x => x.w));
-          grp.forEach(x => { const v = map[x.w.toLowerCase().trim()]; if (v) { x.oku = v; x.t = Date.now(); } });
-        } catch (e) {}
-        grp.forEach(x => { x.okuTried = 1; });
         saveWords();
         await sleep(220);
       }
@@ -3105,19 +3221,16 @@ async function buildPdf() {
   try { await ensureFonts(); }
   catch (e) {
     busyHide();
-    toast("Font dosyaları repoda yok. Kalam-Regular.ttf, Kalam-Bold.ttf ve Kalam-Light.ttf dosyalarını kesit.html'in yanına yükle.", 6000);
+    toast("Kalam font indirilemedi: " + e.message, 5000);
     return;
   }
 
-  busyUpd("Sayfalar diziliyor…", 100);
-  await sleep(60);
+  const ready = pool.filter(x => x.syn && x.syn.length)
+    .sort((a, b) => (a.add || a.t || 0) - (b.add || b.t || 0));
+  if (!ready.length) { busyHide(); toast("Hiç eş anlamlı üretilemedi."); return; }
 
-  let pool = WORDS;
-  if (wFilter === "hard") pool = WORDS.filter(x => x.hard);
-  const ready = pool.filter(x => x.ex).sort((a, b) => (a.add || a.t || 0) - (b.add || b.t || 0));
-  if (!ready.length) { busyHide(); toast("Hiç cümle üretilemedi."); return; }
-
-  const BATCH = 50;
+  const PER_PAGE = 3;
+  const BATCH = 90; // 30 sayfa/dosya civarı
   const batches = [];
   for (let b = 0; b < ready.length; b += BATCH) batches.push(ready.slice(b, b + BATCH));
   const stamp = new Date().toLocaleDateString("tr-TR");
@@ -3128,51 +3241,20 @@ async function buildPdf() {
     const set = batches[bi];
     const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
     regFonts(doc, KALAM);
-
-    const PER_PAGE = 5;
+    const sub = batches.length > 1 ? stamp + " · bölüm " + (bi + 1) + "/" + batches.length : stamp;
+    const top = M.t + 8;
+    const cardW = PW - M.l - M.r;
     let page = 0;
-    let sub = batches.length > 1 ? stamp + " · bölüm " + (bi + 1) + "/" + batches.length : stamp;
-    const top = M.t + 3;
-    const avail = PH - M.b - top;
-    const newPage = (note) => {
-      if (page) doc.addPage();
-      page++;
-      pdfHeader(doc, sub, page);
-      let y = top;
-      if (note) {
-        doc.setFont(KALAM.light ? "KalamLight" : "Kalam", "normal");
-        doc.setFontSize(9.5);
-        doc.setTextColor(150, 150, 150);
-        doc.text(note, M.l, y - 1);
-        y += 5;
+
+    for (let i = 0; i < set.length; i++) {
+      const slot = i % PER_PAGE;
+      if (slot === 0) { if (page) doc.addPage(); page++; pdfHeader(doc, sub, page); }
+      const y = top + slot * 78;
+      radialCardPdf(doc, set[i], M.l, y, cardW);
+      if (slot < PER_PAGE - 1 && i < set.length - 1) {
+        doc.setDrawColor(237, 239, 245); doc.setLineWidth(0.3);
+        doc.line(M.l, y + 71, PW - M.r, y + 71);
       }
-      return y;
-    };
-
-    let idx = 0;
-    while (idx < set.length) {
-      let group = set.slice(idx, idx + PER_PAGE);
-      let k = fitScale(doc, group, avail, studyHeight);
-      while (group.length > 1 && k <= 0.865) {
-        group = group.slice(0, -1);
-        k = fitScale(doc, group, avail, studyHeight);
-      }
-
-      const keepSub = sub;
-      let y = newPage();
-      group.forEach(x => { y = studyEntry(doc, x, y, k); });
-
-      sub = keepSub.replace(stamp, "alıştırma") ;
-      const order = shuffled(group.length);
-      let ke = 1.9;
-      for (; ke >= 0.86; ke -= 0.04) if (sheetHeight(doc, group, ke, order) <= avail - 8) break;
-      y = newPage("Her kelimenin Türkçesini çizgiye yaz. Cevaplar önceki sayfada.");
-      const used = sheetHeight(doc, group, ke, order);
-      const gap = Math.max(0, Math.min(24, (avail - 8 - used) / group.length));
-      sheetLayout(doc, group, ke, order, y + 2, true, gap);
-      sub = keepSub;
-
-      idx += group.length;
     }
 
     const from = bi * BATCH + 1, to = bi * BATCH + set.length;
@@ -3183,14 +3265,14 @@ async function buildPdf() {
     totalPages += page;
     if (bi < batches.length - 1) {
       busyUpd("Dosya " + (bi + 1) + " / " + batches.length + " indirildi…", ((bi + 1) / batches.length) * 100);
-      await sleep(1200);          // tarayıcı arka arkaya inen dosyaları engellemesin
+      await sleep(1200);
     }
   }
 
   busyHide();
   toast(batches.length > 1
     ? ready.length + " kelime · " + batches.length + " ayrı PDF indirildi (" + totalPages + " sayfa)."
-    : ready.length + " kelime · " + totalPages + " sayfa hazır.", 5000);
+    : ready.length + " kelime · " + totalPages + " sayfa hazır (sayfa başına 3 kelime).", 5000);
 }
 
 $("#pdfBtn").addEventListener("click", buildPdf);
