@@ -677,6 +677,7 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
     <button class="chip" data-f="hard">★ İşaretlediklerim</button>
     <button class="chip" data-f="due">Bugün tekrar</button>
   </div>
+  <div class="chips" id="wGroups" style="margin-bottom:14px"></div>
   <div id="bulkBox" class="hid" style="margin-bottom:14px">
     <textarea class="inp" id="bulkText" style="min-height:120px" placeholder="Kelimeleri virgülle ayır:&#10;exacerbate, adherence, prevalence, impaired"></textarea>
     <div class="field">
@@ -691,8 +692,24 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 </section>
 <!-- ============ GRAMER DEFTERİ ============ -->
 <section class="screen max" id="gram">
-  <h1 class="lede" style="font-size:23px;margin-bottom:14px">Cümle Analizi</h1>
-  <div id="cumleView">
+  <h1 class="lede" style="font-size:23px;margin-bottom:14px">Gramer defteri</h1>
+  <div class="wbar">
+    <button class="btn" id="gpdfBtn">PDF çıkar</button>
+    <button class="btn ghost" id="gexportBtn">Yedekle</button>
+  </div>
+  <div class="chips" id="gTabs">
+    <button class="chip on" data-v="notes">Notlarım</button>
+    <button class="chip" data-v="konu">Konular</button>
+    <button class="chip" data-v="cumle">Cümle Analizi</button>
+  </div>
+  <div id="notesView">
+    <div class="chips" id="gChips"></div>
+    <div id="gList"></div>
+  </div>
+  <div id="konuView" class="hid">
+    <div id="konuList"></div>
+  </div>
+  <div id="cumleView" class="hid">
     <p class="sub" style="margin-bottom:12px">Analiz Et'e bas, cümlenin tüm gramer yapısını en ince ayrıntısına kadar gör, sonra altındaki sohbetten o analiz hakkında istediğini sor.</p>
     <button class="btn ghost wide" id="cPdfBtn" style="margin-bottom:16px">📄 Kaydedilenleri PDF Al (Kalam · her cümle ~2 sayfa)</button>
 
@@ -1322,7 +1339,7 @@ ${method}
 
 3) "translation": adımların sonunda ulaşılan tam, akıcı Türkçe çeviri.
 
-4) "spans": En fazla 5 nesne, cümlenin en önemli/karmaşık yapılarını işaretler. Her biri {"en":İngilizce cümlede AYNEN geçen parça (harfi harfine),"tr":Türkçe çeviride AYNEN geçen karşılığı (harfi harfine),"role":kısa Türkçe etiket}. İlk nesne ana yüklem olsun.
+4) "spans": En fazla 5 nesne, cümlenin en önemli/karmaşık yapılarını işaretler. Her biri {"en":İngilizce cümlede AYNEN geçen parça (harfi harfine),"tr":Türkçe çeviride AYNEN ve KESİNTİSİZ geçen karşılığı (harfi harfine),"role":kısa Türkçe etiket}. İlk nesne ana yüklem olsun. ÖNEMLİ: Türkçe'de kelime sırası değiştiği için bazı İngilizce öbeklerin Türkçe çeviride tek parça, kesintisiz bir karşılığı OLMAYABİLİR (parçalanmış/yeniden sıralanmış olabilir) — böyle durumlarda "..." veya parçalı bir şey UYDURMA, "tr" alanını boş string "" bırak. Kesintisiz gerçek bir karşılık bulamıyorsan boş bırakmak, yanlış/kısmi bir şey yazmaktan iyidir.
 
 5) "kelime_kelime": Cümledeki B2-C1 seviyesi kelime ve kalıpların dizisi (temel kelimeleri ekleme). Her biri {"en":"...","tr":"...","kalip":true/false} — kalip=true ise bu bir deyim/kalıp, tek parça çevrilir (örn. "in spite of").
 
@@ -2621,10 +2638,47 @@ try { WORDS = JSON.parse(store.get("words", "[]")) || []; } catch (e) { WORDS = 
 function saveWords() { store.set("words", JSON.stringify(WORDS)); }
 const norm = w => String(w).toLowerCase().trim();
 function hasWord(w) { return WORDS.some(x => norm(x.w) === norm(w)); }
-function addWord(o) { if (!hasWord(o.w)) { o.add = o.add || Date.now(); WORDS.unshift(o); saveWords(); syncSoon(); } }
+function addWord(o) { if (!hasWord(o.w)) { o.add = o.add || Date.now(); if (!o.group && wGroup !== "all") o.group = wGroup; WORDS.unshift(o); saveWords(); syncSoon(); } }
 function removeWord(w) { WORDS = WORDS.filter(x => norm(x.w) !== norm(w)); saveWords(); tomb("w:" + norm(w)); syncSoon(); }
 
+function renderGroupChips(){
+  const box = $("#wGroups");
+  if(!box) return;
+  let html = `<button class="chip${wGroup==="all"?" on":""}" data-g="all">Tümü · ${WORDS.length}</button>`;
+  GROUPS.forEach(g => {
+    const n = WORDS.filter(x => (x.group||"")===g).length;
+    html += `<button class="chip${wGroup===g?" on":""}" data-g="${esc(g)}">${esc(g)} · ${n}</button>`;
+  });
+  html += `<button class="chip" id="wGroupAdd">+ Yeni Defter</button>`;
+  box.innerHTML = html;
+  $$('#wGroups .chip[data-g]').forEach(c => c.addEventListener("click", () => {
+    const g = c.dataset.g;
+    if(g === wGroup && g !== "all"){
+      if(confirm(`"${g}" defterini kaldırmak istiyor musun?\n\nİçindeki kelimeler SİLİNMEZ, sadece bu defter etiketleri kalkar.`)){
+        GROUPS = GROUPS.filter(x=>x!==g); saveGroups();
+        WORDS.forEach(x => { if((x.group||"")===g) x.group=""; });
+        saveWords(); syncSoon();
+        wGroup = "all";
+        renderWords();
+      }
+      return;
+    }
+    wGroup = g;
+    renderWords();
+  }));
+  $("#wGroupAdd").addEventListener("click", () => {
+    const name = (prompt("Yeni defter adı:") || "").trim();
+    if(!name) return;
+    if(GROUPS.includes(name)){ wGroup=name; renderWords(); return; }
+    GROUPS.push(name); saveGroups();
+    wGroup = name;
+    renderWords();
+    toast(`"${name}" defteri oluşturuldu. Şimdi eklediğin kelimeler otomatik buraya gidecek.`, 3800);
+  });
+}
+
 function renderWords() {
+  renderGroupChips();
   const n = dueCount();
   const sb = $("#studyBtn");
   if (sb) sb.textContent = n ? "Kartlar · " + n : "Kartlar";
@@ -2632,6 +2686,7 @@ function renderWords() {
   let sorted = WORDS.slice().sort((a, b) => (b.add || b.t || 0) - (a.add || a.t || 0));
   if (wFilter === "hard") sorted = sorted.filter(x => x.hard);
   else if (wFilter === "due") sorted = sorted.filter(x => (x.due || 0) <= Date.now());
+  if (wGroup !== "all") sorted = sorted.filter(x => (x.group || "") === wGroup);
   const hardN = WORDS.filter(x => x.hard).length;
   const fh = $('#wFilters .chip[data-f="hard"]');
   if (fh) fh.textContent = hardN ? "★ İşaretlediklerim · " + hardN : "★ İşaretlediklerim";
@@ -2642,7 +2697,9 @@ function renderWords() {
     return;
   }
   if (!list.length) {
-    box.innerHTML = '<div class="empty">' + (wFilter === "hard"
+    box.innerHTML = '<div class="empty">' + (wGroup !== "all"
+      ? `"${esc(wGroup)}" defterinde henüz kelime yok.<br>Yeni eklediğin kelimeler otomatik buraya gidecek, ya da aşağıdan mevcut kelimeleri taşı.`
+      : wFilter === "hard"
       ? "Henüz işaretli kelime yok.<br>Kartlarla çalışırken zorlandığın kelimeye ★ bas."
       : wFilter === "due" ? "Bugün tekrar edilecek kelime yok." : "Eşleşen kelime yok.") + "</div>";
     return;
@@ -3219,6 +3276,8 @@ function radialCardPdf(doc, x, x0, y0, w) {
 async function buildPdf() {
   if (!WORDS.length) { toast("Defter boş."); return; }
   let pool = wFilter === "hard" ? WORDS.filter(x => x.hard) : WORDS;
+  if (wGroup !== "all") pool = pool.filter(x => (x.group || "") === wGroup);
+  if (!pool.length) { toast(wGroup !== "all" ? `"${wGroup}" defterinde kelime yok.` : "Bu filtrede kelime yok."); return; }
   const needSyn = pool.filter(x => !(x.syn && x.syn.length));
 
   if (needSyn.length) {
@@ -3300,9 +3359,10 @@ async function buildPdf() {
       }
 
       const from = bi * BATCH + 1, to = bi * BATCH + set.length;
+      const slug = (wGroup !== "all" ? wGroup : "kelime-defteri").replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-+|-+$/g, "");
       const name = batches.length > 1
-        ? "kelime-" + String(from).padStart(3, "0") + "-" + String(to).padStart(3, "0") + "-" + day + ".pdf"
-        : "kelime-defteri-" + day + ".pdf";
+        ? slug + "-" + String(from).padStart(3, "0") + "-" + String(to).padStart(3, "0") + "-" + day + ".pdf"
+        : slug + "-" + day + ".pdf";
       doc.save(name);
       totalPages += page;
       if (bi < batches.length - 1) {
@@ -3318,7 +3378,8 @@ async function buildPdf() {
   }
 
   busyHide();
-  toast((batches.length > 1
+  const gtag = wGroup !== "all" ? `"${wGroup}" defteri · ` : "";
+  toast(gtag + (batches.length > 1
     ? ready.length + " kelime · " + batches.length + " ayrı PDF indirildi (" + totalPages + " sayfa)."
     : ready.length + " kelime · " + totalPages + " sayfa hazır (sayfa başına 3 kelime).")
     + (skipped ? " " + skipped + " kart atlandı (bozuk veri)." : ""), 5000);
@@ -3339,6 +3400,9 @@ function removeGram(sen) { GRAMS = GRAMS.filter(x => gkey(x.s) !== gkey(sen)); s
 
 let gFilter = "";
 let wFilter = "all";
+let GROUPS = JSON.parse(store.get("word_groups", "[]"));
+let wGroup = "all";
+function saveGroups(){ store.set("word_groups", JSON.stringify(GROUPS)); }
 
 function renderGrams() {
   const chips = $("#gChips"), box = $("#gList");
@@ -4402,12 +4466,26 @@ function selBar() {
   }
   bar.innerHTML = `<button class="btn ghost" id="selAll">Görünenleri seç</button>
     <button class="btn ghost" id="selNone">Temizle</button>
+    <button class="btn ghost" id="selMove">Deftere taşı</button>
     <button class="btn" id="selPlay">Oku (${SEL.size})</button>`;
   $("#selAll").addEventListener("click", () => {
     $$("#wList .witem").forEach(el => SEL.add(el.dataset.w));
     renderWords();
   });
   $("#selNone").addEventListener("click", () => { SEL.clear(); renderWords(); });
+  $("#selMove").addEventListener("click", () => {
+    if (!SEL.size) { toast("Önce kelime seç."); return; }
+    const list = GROUPS.length ? "Mevcut defterler: " + GROUPS.join(", ") + "\n\n" : "";
+    const name = (prompt(list + SEL.size + " kelimeyi hangi deftere taşıyalım? (Yeni isim yazarsan oluşturulur, boş bırakırsan defterden çıkarılır)") ?? null);
+    if (name === null) return;
+    const clean = name.trim();
+    if (clean && !GROUPS.includes(clean)) { GROUPS.push(clean); saveGroups(); }
+    WORDS.forEach(x => { if (SEL.has(x.w)) x.group = clean; });
+    saveWords(); syncSoon();
+    toast(clean ? SEL.size + " kelime \"" + clean + "\" defterine taşındı." : SEL.size + " kelime defterden çıkarıldı.");
+    SEL.clear(); selMode = false; $("#speakBtn").classList.remove("on");
+    renderWords();
+  });
   $("#selPlay").addEventListener("click", () => {
     const list = WORDS.filter(x => SEL.has(x.w));
     if (!list.length) { toast("Önce kelime seç."); return; }
@@ -4420,7 +4498,7 @@ $("#speakBtn").addEventListener("click", () => {
   $("#speakBtn").classList.toggle("on", selMode);
   if (!selMode) SEL.clear();
   renderWords();
-  if (selMode) toast("Okunacak kelimeleri seç, sonra Oku'ya bas.", 3000);
+  if (selMode) toast("Kelimeleri seç — sonra oku ya da bir deftere taşı.", 3200);
 });
 
 /* ============================================================
@@ -4888,7 +4966,18 @@ $("#lsRedo").addEventListener("click", async () => {
   await openLesson(name, desc);
 });
 
-cumleInit();
+$$("#gTabs .chip").forEach(c => c.addEventListener("click", () => {
+  $$("#gTabs .chip").forEach(x => x.classList.toggle("on", x === c));
+  const v = c.dataset.v;
+  const konu = v === "konu", cumle = v === "cumle";
+  $("#konuView").classList.toggle("hid", !konu);
+  $("#notesView").classList.toggle("hid", konu || cumle);
+  $("#cumleView").classList.toggle("hid", !cumle);
+  $("#gpdfBtn").classList.toggle("hid", konu || cumle);
+  $("#gexportBtn").classList.toggle("hid", konu || cumle);
+  if (konu) renderKonu();
+  if (cumle) cumleInit();
+}));
 
 /* ============================================================
    Ayarlar / arayüz bağlantıları
