@@ -691,24 +691,8 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 </section>
 <!-- ============ GRAMER DEFTERİ ============ -->
 <section class="screen max" id="gram">
-  <h1 class="lede" style="font-size:23px;margin-bottom:14px">Gramer defteri</h1>
-  <div class="wbar">
-    <button class="btn" id="gpdfBtn">PDF çıkar</button>
-    <button class="btn ghost" id="gexportBtn">Yedekle</button>
-  </div>
-  <div class="chips" id="gTabs">
-    <button class="chip on" data-v="notes">Notlarım</button>
-    <button class="chip" data-v="konu">Konular</button>
-    <button class="chip" data-v="cumle">Cümle Analizi</button>
-  </div>
-  <div id="notesView">
-    <div class="chips" id="gChips"></div>
-    <div id="gList"></div>
-  </div>
-  <div id="konuView" class="hid">
-    <div id="konuList"></div>
-  </div>
-  <div id="cumleView" class="hid">
+  <h1 class="lede" style="font-size:23px;margin-bottom:14px">Cümle Analizi</h1>
+  <div id="cumleView">
     <p class="sub" style="margin-bottom:12px">Analiz Et'e bas, cümlenin tüm gramer yapısını en ince ayrıntısına kadar gör, sonra altındaki sohbetten o analiz hakkında istediğini sor.</p>
     <button class="btn ghost wide" id="cPdfBtn" style="margin-bottom:16px">📄 Kaydedilenleri PDF Al (Kalam · her cümle ~2 sayfa)</button>
 
@@ -1174,6 +1158,22 @@ function mdLite(raw){
   }).join("");
 }
 /* PDF için: markdown işaretlerini düz, okunabilir metne indirger (** kalkar, "- " madde "• " olur) */
+/* PDF çizimi için: satırlara ayırır (madde -> •) ama **kalın** işaretlerini KORUR */
+function mdLinesKeepBold(raw){
+  if(!raw) return [];
+  return String(raw).split("\n").map(l=>{
+    l = l.trim();
+    return l.startsWith("- ") ? "• " + l.slice(2) : l;
+  }).filter(Boolean);
+}
+/* Bir satırı **kalın** işaretlerine göre flowRuns'ın anladığı {text,c} parçalarına böler.
+   c:0 -> runFont zaten bunu kalın+PAL[0] vurgu rengiyle çiziyor (ekrandaki <b> ile aynı ruh). */
+function mdToRuns(line){
+  const parts = String(line).split(/\*\*(.+?)\*\*/g);
+  const runs = [];
+  parts.forEach((part, i) => { if (part) runs.push({ text: part, c: (i % 2 === 1) ? 0 : -1 }); });
+  return runs.length ? runs : [{ text: "", c: -1 }];
+}
 function mdPlain(raw){
   if(!raw) return "";
   return String(raw)
@@ -1475,8 +1475,8 @@ async function cBuildCumlePdf(){
       const sep=p.indexOf(": "); const head=sep>0?p.slice(0,sep):""; const body=sep>0?p.slice(sep+2):p;
       if(head) h += BASE.stepHead*scale*0.55 + 1;
       doc.setFontSize(BASE.stepBody*scale);
-      mdPlain(body).split("\n").filter(Boolean).forEach(line=>{
-        h += flowRuns(doc, [{text:line,c:-1}],0,0,CW,L,false).lines*L + 3 + L + 2.5;
+      mdLinesKeepBold(body).forEach(line=>{
+        h += flowRuns(doc, mdToRuns(line),0,0,CW,L,false).lines*L + 3 + L + 2.5;
       });
     });
     const kw = x.kelime||[];
@@ -1532,8 +1532,8 @@ async function cBuildCumlePdf(){
       const head = sep>0 ? p.slice(0,sep) : "";
       const body = sep>0 ? p.slice(sep+2) : p;
       if(head) heading(head, S("stepHead"), PAL[0]);
-      mdPlain(body).split("\n").filter(Boolean).forEach(line=>{
-        paragraph([{text:line, c:-1}], S("stepBody"));
+      mdLinesKeepBold(body).forEach(line=>{
+        paragraph(mdToRuns(line), S("stepBody"));
       });
     });
 
@@ -3342,6 +3342,7 @@ let wFilter = "all";
 
 function renderGrams() {
   const chips = $("#gChips"), box = $("#gList");
+  if (!chips || !box) return; // Notlarım görünümü kaldırıldı
   if (!GRAMS.length) {
     chips.innerHTML = "";
     box.innerHTML = '<div class="empty">Gramer defteri boş.<br>Bir makalede cümle seç, “Cümle yapısı” sekmesine geç, alttaki düğmeyle kaydet.</div>';
@@ -4514,6 +4515,7 @@ let LSDONE = {};
 try { LSDONE = JSON.parse(store.get("lsdone", "{}")) || {}; } catch (e) { LSDONE = {}; }
 
 function renderKonu() {
+  if (!$("#konuList")) return; // Konular görünümü kaldırıldı
   $("#konuList").innerHTML = KONULAR.map(([grp, items]) =>
     `<div class="kgrp">${esc(grp)}</div>` + items.map(([n, d]) =>
       `<button class="kitem" data-k="${esc(n)}" data-d="${esc(d)}">
@@ -4886,18 +4888,7 @@ $("#lsRedo").addEventListener("click", async () => {
   await openLesson(name, desc);
 });
 
-$$("#gTabs .chip").forEach(c => c.addEventListener("click", () => {
-  $$("#gTabs .chip").forEach(x => x.classList.toggle("on", x === c));
-  const v = c.dataset.v;
-  const konu = v === "konu", cumle = v === "cumle";
-  $("#konuView").classList.toggle("hid", !konu);
-  $("#notesView").classList.toggle("hid", konu || cumle);
-  $("#cumleView").classList.toggle("hid", !cumle);
-  $("#gpdfBtn").classList.toggle("hid", konu || cumle);
-  $("#gexportBtn").classList.toggle("hid", konu || cumle);
-  if (konu) renderKonu();
-  if (cumle) cumleInit();
-}));
+cumleInit();
 
 /* ============================================================
    Ayarlar / arayüz bağlantıları
