@@ -260,6 +260,14 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .qtr{font-family:"Source Serif 4",serif;font-size:14.5px;color:var(--ink2);margin:8px 0 4px;line-height:1.5}
 .qtopic{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
   color:var(--deep);background:var(--deep-soft);border-radius:6px;padding:3px 8px;margin:6px 0 2px}
+.qcat{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:13px;box-shadow:var(--sh);
+  padding:13px 15px;margin-bottom:8px}
+.qcat:active{border-color:var(--acc)}
+.qcat.all{border-color:var(--deep);background:var(--deep-soft)}
+.qc-name{font-weight:600;font-size:15.5px;flex:none}
+.qc-n{color:var(--ink3);font-size:12.5px;flex:1;text-align:right;font-variant-numeric:tabular-nums}
+.qc-go{color:var(--ink3);font-size:18px;flex:none}
 .qstats{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:15px}
 .qs-total{font-size:15px;margin-bottom:12px}
 .qs-total b{font-size:19px}
@@ -629,7 +637,11 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 <section class="screen max" id="quiz">
   <div id="qStart">
     <h1 class="lede" style="font-size:23px;margin-bottom:6px">Soru çöz</h1>
-    <p class="sub">Soru kitapçığı yükle ya da tek bir soruyu yapıştır. Şıkları işaretle, takıldığında çözümü anlattır.</p>
+    <p class="sub">Soruları yükle — her soru otomatik kategorisine ayrılır. Çalışmak istediğin kategoriye dokun, çöz.</p>
+    <div id="qCatsWrap" class="hid">
+      <div class="label">Kategoriler</div>
+      <div id="qCats"></div>
+    </div>
     <button class="src" id="qPdf">
       <span class="ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
       <span><h3>PDF yükle</h3><p>Deneme, çıkmış sorular, çalışma kitabı. Sorular tek tek ayıklanır.</p></span>
@@ -642,13 +654,6 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
     <div class="hid" id="qPasteBox">
       <textarea class="inp" id="qText" placeholder="Soruyu şıklarıyla birlikte yapıştır…"></textarea>
       <div class="field"><button class="btn wide" id="qTextGo">Soruları çıkar</button></div>
-    </div>
-    <div id="qResume" class="hid">
-      <div class="label">Kaldığın deneme</div>
-      <button class="src" id="qResumeBtn">
-        <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9"/><path d="M3 4v5h5"/></svg></span>
-        <span><h3 id="qResumeTitle"></h3><p id="qResumeMeta"></p></span>
-      </button>
     </div>
     <div id="qArchWrap" class="hid">
       <div class="label">Çözdüklerim</div>
@@ -3691,9 +3696,120 @@ $("#gpdfBtn").addEventListener("click", buildGramPdf);
 /* ============================================================
    Soru çözme
    ============================================================ */
-let QZ = { title: "", qs: [], i: 0, mode: "normal" };
-try { QZ = JSON.parse(store.get("quiz", "null")) || QZ; } catch (e) {}
-function saveQuiz() { try { store.set("quiz", JSON.stringify(QZ)); } catch (e) {} }
+/* ============================================================
+   Soru bankası — deneme kavramı yok. Her soru eklenirken otomatik
+   kategorisine ayrılır, bankada durur ve Firebase ile eşitlenir.
+   Kategoriye dokun → o kategorinin çözülmemişlerini çöz.
+   ============================================================ */
+const QCATS = ["Kelime", "Tense", "Bağlaç", "Edat", "Relative Clause", "Gramer",
+               "Cloze", "Cümle Tamamlama", "Çeviri", "Paragraf", "Anlam Bütünlüğü",
+               "Okuma", "Diyalog", "Yakın Anlam"];
+let QBANK = [];
+try { QBANK = JSON.parse(store.get("qbank", "[]")) || []; } catch (e) { QBANK = []; }
+function saveBank() { store.set("qbank", JSON.stringify(QBANK)); }
+const qbId = stem => "qb:" + String(stem || "").toLowerCase().replace(/\s+/g, " ").trim().slice(0, 80);
+
+/* eski "deneme" kaydından bankaya bir kerelik geçiş */
+try {
+  const old = JSON.parse(store.get("quiz", "null"));
+  if (old && Array.isArray(old.qs) && old.qs.length) {
+    old.qs.forEach(q => {
+      const id = qbId(q.stem);
+      if (!q.stem || QBANK.some(x => x.id === id)) return;
+      q.id = id;
+      q.cat = q.cat || heuristicCat(q);
+      q.at = q.at || Date.now();
+      q.t = Date.now();
+      QBANK.push(q);
+    });
+    saveBank();
+  }
+  store.del("quiz");
+} catch (e) {}
+
+/* ücretsiz yerel kategori tahmini — AI erişilemezse bile soru kategorisiz kalmaz */
+function heuristicCat(q) {
+  const stem = (q.stem || "").toLowerCase();
+  const opts = Object.keys(q.options || {}).sort().map(k => String(q.options[k] || "").trim());
+  if (q.passage) return "Okuma";
+  if (/anlamca en yak|en yakın anlam|closest in meaning/.test(stem)) return "Yakın Anlam";
+  if (/türkçe|ingilizce.*çevir|en iyi ifade eden|çevirisi/.test(stem)) return "Çeviri";
+  if (/anlam bütünlüğünü bozan|akışını bozan/.test(stem)) return "Anlam Bütünlüğü";
+  if (/karşılıklı konuşma|diyalog|boş bırakılan yere.*konuşma/.test(stem)) return "Diyalog";
+  if (/parçada boş bırakılan|paragrafta boş/.test(stem)) return "Paragraf";
+  // aynı fiilin çekimleri mi? "takes / took / has been taking / will take / had taken" → Tense
+  if (opts.length >= 4 && /----/.test(stem) && opts.every(o => o.split(/\s+/).length <= 4)) {
+    const stop = new Set(["the", "and", "not", "was", "were", "has", "have", "had", "been", "being", "will", "would", "are", "can", "could", "may", "might", "must", "shall", "should"]);
+    const counts = {};
+    opts.forEach(o => {
+      const roots = new Set(o.toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/)
+        .filter(w => w.length >= 3 && !stop.has(w)).map(w => w.slice(0, 3)));
+      roots.forEach(r => { counts[r] = (counts[r] || 0) + 1; });
+    });
+    const maxShared = Math.max(0, ...Object.values(counts).map(Number));
+    if (maxShared >= opts.length - 1) return "Tense";
+  }
+  const single = opts.length >= 4 && opts.every(o => o && o.split(/\s+/).length <= 2);
+  if (single) {
+    const low = opts.map(o => o.toLowerCase().replace(/[^a-z\s]/g, "").trim());
+    const CONJ = ["although", "though", "because", "since", "unless", "whereas", "while", "however", "therefore", "moreover", "despite", "in spite of", "even though", "as long as", "so that", "but", "yet", "thus", "hence", "otherwise", "furthermore", "nevertheless"];
+    const PREP = ["in", "on", "at", "of", "for", "with", "by", "from", "to", "into", "onto", "over", "under", "about", "against", "between", "among", "during", "through", "upon", "within", "without", "off", "out"];
+    const REL = ["which", "that", "who", "whom", "whose", "where", "when", "what", "why", "how"];
+    const hit = list => low.filter(o => list.includes(o)).length;
+    if (hit(REL) >= 3) return "Relative Clause";
+    if (hit(CONJ) >= 3) return "Bağlaç";
+    if (hit(PREP) >= 3) return "Edat";
+    // aynı fiilin çekimleri mi? ortak kök arayışı
+    const stems4 = low.map(o => o.split(/\s+/).pop().slice(0, 4));
+    if (new Set(stems4).size <= 2 && /----/.test(stem)) return "Tense";
+    if (low.some(o => /(had|has|have|was|were|will|would|been|being)\b/.test(o))) return "Tense";
+    return "Kelime";
+  }
+  if (/----/.test(stem) && opts.every(o => o.split(/\s+/).length >= 3)) return "Cümle Tamamlama";
+  return "Gramer";
+}
+
+/* AI kategorileme: 25 soruluk paketler halinde tek çağrı — arka planda çalışır */
+async function categorizeAI(list) {
+  if (!state.key || !list.length) return;
+  const B = 25;
+  for (let i = 0; i < list.length; i += B) {
+    const grp = list.slice(i, i + B);
+    const items = grp.map((q, j) => (j + 1) + ") " + q.stem.slice(0, 200) + " || ŞIKLAR: " +
+      Object.keys(q.options).sort().map(k => q.options[k]).join(" / ").slice(0, 220)).join("\n");
+    try {
+      const raw = await gemini(`Aşağıdaki YÖKDİL sorularının her birini ŞU listeden tek bir kategoriye ata:
+${QCATS.join(" | ")}
+
+Kategori seçme kuralları: şıklar aynı fiilin zamanları ise Tense; bağlaç/geçiş ifadeleri ise Bağlaç; edatlar ise Edat; which/who/that gibi ilgi zamirleri ise Relative Clause; farklı anlamda kelimeler ise Kelime; uzun cümle parçaları ise Cümle Tamamlama; çeviri isteniyorsa Çeviri.
+
+SADECE şu biçimde JSON dizisi döndür: [{"i":1,"k":"Tense"},{"i":2,"k":"Kelime"}]
+
+SORULAR:
+${items}`, QSYS, { temp: 0 });
+      let t = raw.replace(/```json|```/g, "").trim();
+      const a = t.indexOf("["), b = t.lastIndexOf("]");
+      if (a >= 0 && b > a) t = t.slice(a, b + 1);
+      const arr = JSON.parse(t);
+      (Array.isArray(arr) ? arr : []).forEach(r => {
+        const q = grp[parseInt(r.i, 10) - 1];
+        const cat = QCATS.find(c => c.toLowerCase() === String(r.k || "").toLowerCase().trim());
+        if (q && cat && q.cat !== cat) { q.cat = cat; q.t = Date.now(); }
+      });
+      saveBank(); syncSoon();
+      refreshQuizHome();
+    } catch (e) { /* bu paket yerel tahminle kalır */ }
+  }
+}
+
+let QZ = { title: "", qs: [], i: 0, mode: "normal" }; // yalnızca bellekte — bankadaki sorulara bakan oturum
+function saveQuiz() {
+  if (QZ.mode === "bank") {
+    const q = QZ.qs[QZ.i];
+    if (q) q.t = Date.now();
+    saveBank(); syncSoon();
+  }
+}
 
 let SOLVED = [];
 try { SOLVED = JSON.parse(store.get("solved", "[]")) || []; } catch (e) { SOLVED = []; }
@@ -3829,7 +3945,7 @@ ${chunks[i]}`;
   return all;
 }
 
-async function startQuiz(text, title, tryLocal) {
+async function addQuestions(text, tryLocal) {
   let qs = [];
   let viaLocal = false;
   if (tryLocal) {
@@ -3845,10 +3961,47 @@ async function startQuiz(text, title, tryLocal) {
   if (!qs.length) { toast("Soru bulunamadı. Metni kontrol et."); return; }
   const key = parseKey(text);
   if (key) qs.forEach(q => { if (key[q.n]) { q.answer = key[q.n]; q.fromKey = true; } });
-  QZ = { title: title || "Sorular", qs, i: 0, mode: "normal" };
-  saveQuiz();
-  toast(qs.length + " soru bulundu" + (viaLocal ? " (cihazda ayrıştırıldı, kota harcanmadı)" : "")
-    + (key ? " · cevap anahtarı okundu" : " · anahtar yok, cevaplar modelce bulunacak"), 4000);
+
+  // bankaya ekle: kopyaları atla, yerel kategoriyi hemen ver
+  const fresh = [];
+  let dup = 0;
+  qs.forEach(q => {
+    const id = qbId(q.stem);
+    if (QBANK.some(x => x.id === id)) { dup++; return; }
+    q.id = id;
+    q.cat = heuristicCat(q);
+    q.at = Date.now();
+    q.t = Date.now();
+    QBANK.unshift(q);
+    fresh.push(q);
+  });
+  if (QBANK.length > 1200) {
+    QBANK = QBANK.filter((x, i) => i < 1200 || !x.pick); // taşarsa en eski çözülmüşler düşer
+    QBANK.length = Math.min(QBANK.length, 1200);
+  }
+  saveBank(); syncSoon();
+  refreshQuizHome();
+  toast(fresh.length + " soru eklendi ve kategorilere ayrıldı"
+    + (dup ? " · " + dup + " kopya atlandı" : "")
+    + (viaLocal ? " · kota harcanmadı" : "")
+    + (key ? " · cevap anahtarı okundu" : ""), 4500);
+  // AI arka planda kategorileri netleştirsin (varsa)
+  if (fresh.length && state.key) categorizeAI(fresh);
+}
+
+/* kategoriye dokun → o kategorinin çözülmemişleri (bitince tümü) */
+function solveCat(cat) {
+  const all = cat === "*" ? QBANK.slice() : QBANK.filter(q => (q.cat || "Gramer") === cat);
+  if (!all.length) return;
+  let qs = all.filter(q => !q.pick);
+  const label = cat === "*" ? "Tümü" : cat;
+  if (!qs.length) {
+    if (!confirm('"' + label + '" kategorisinde çözülmemiş soru kalmadı 🎉\n\nHepsini baştan çözmek ister misin?')) return;
+    all.forEach(q => { q.pick = null; q.why = q.why || null; });
+    saveBank();
+    qs = all;
+  }
+  QZ = { title: label, qs, i: 0, mode: "bank" };
   showQuiz();
 }
 
@@ -3868,7 +4021,8 @@ function curQ() { return QZ.qs[QZ.i]; }
 function drawQ() {
   const q = curQ();
   if (!q) { endQuiz(); return; }
-  $("#qCount").textContent = (QZ.i + 1) + " / " + QZ.qs.length + (QZ.mode === "wrong" ? " · yanlışlarım" : "");
+  $("#qCount").textContent = (QZ.i + 1) + " / " + QZ.qs.length
+    + (QZ.mode === "wrong" ? " · yanlışlarım" : QZ.title ? " · " + QZ.title : "");
   $("#qBar").style.width = ((QZ.i + 1) / QZ.qs.length * 100) + "%";
   const pas = $("#qPassage");
   pas.classList.toggle("hid", !q.passage);
@@ -4009,13 +4163,7 @@ function showWhy(d) {
 }
 
 function refreshQuizHome() {
-  const r = $("#qResume");
-  if (QZ.qs && QZ.qs.length) {
-    r.classList.remove("hid");
-    $("#qResumeTitle").textContent = QZ.title || "Sorular";
-    const done = QZ.qs.filter(q => q.pick).length;
-    $("#qResumeMeta").textContent = done + " / " + QZ.qs.length + " çözüldü";
-  } else r.classList.add("hid");
+  renderQuizCats();
   const ar = $("#qArchWrap");
   if (SOLVED.length) { ar.classList.remove("hid"); $("#qArchTitle").textContent = SOLVED.length + " çözülmüş soru"; }
   else ar.classList.add("hid");
@@ -4023,6 +4171,45 @@ function refreshQuizHome() {
   if (WRONG.length) { w.classList.remove("hid"); $("#qWrongTitle").textContent = WRONG.length + " yanlış soru"; }
   else w.classList.add("hid");
   renderQuizStats();
+}
+
+/* kategori kartları: dokun → çöz */
+function renderQuizCats() {
+  const wrap = $("#qCatsWrap");
+  if (!wrap) return;
+  if (!QBANK.length) { wrap.classList.add("hid"); return; }
+  const by = {};
+  QBANK.forEach(q => {
+    const c = q.cat || "Gramer";
+    by[c] = by[c] || { t: 0, d: 0 };
+    by[c].t++; if (q.pick) by[c].d++;
+  });
+  const totalD = QBANK.filter(q => q.pick).length;
+  let html = `<button class="qcat all" data-c="*">
+    <span class="qc-name">Tümü</span>
+    <span class="qc-n">${QBANK.length - totalD} çözülmedi · ${totalD} çözüldü</span>
+    <span class="qc-go">›</span></button>`;
+  QCATS.forEach(c => {
+    const v = by[c];
+    if (!v) return;
+    const left = v.t - v.d;
+    html += `<button class="qcat" data-c="${esc(c)}">
+      <span class="qc-name">${esc(c)}</span>
+      <span class="qc-n">${left ? left + " çözülmedi" : "✓ bitti"} · ${v.t} soru</span>
+      <span class="qc-go">›</span></button>`;
+  });
+  // listede olmayan (eski/serbest) kategoriler de görünsün
+  Object.keys(by).filter(c => !QCATS.includes(c)).forEach(c => {
+    const v = by[c]; const left = v.t - v.d;
+    html += `<button class="qcat" data-c="${esc(c)}">
+      <span class="qc-name">${esc(c)}</span>
+      <span class="qc-n">${left ? left + " çözülmedi" : "✓ bitti"} · ${v.t} soru</span>
+      <span class="qc-go">›</span></button>`;
+  });
+  $("#qCats").innerHTML = html;
+  $("#qCats").querySelectorAll(".qcat").forEach(b =>
+    b.addEventListener("click", () => solveCat(b.dataset.c)));
+  wrap.classList.remove("hid");
 }
 
 /* konu bazlı başarı — çözüm anlatımındaki "konu" alanından beslenir */
@@ -4070,16 +4257,17 @@ $("#qFile").addEventListener("change", async e => {
       text += itemsToParagraphs((await page.getTextContent()).items, vp.width).join("\n") + "\n";
     }
     if (text.trim().length < 200) { busyHide(); toast("Bu PDF'ten metin çıkmadı, taranmış olabilir."); return; }
-    await startQuiz(text, f.name.replace(/\.pdf$/i, ""));
+    await addQuestions(text, false);
   } catch (e) { busyHide(); toast("Okunamadı: " + e.message); }
 });
 $("#qPaste").addEventListener("click", () => { $("#qPasteBox").classList.toggle("hid"); $("#qText").focus(); });
 $("#qTextGo").addEventListener("click", () => {
   const t = $("#qText").value.trim();
   if (t.length < 20) { toast("Soruyu yapıştır."); return; }
-  startQuiz(t, "Yapıştırılan soru", true);
+  $("#qText").value = "";
+  $("#qPasteBox").classList.add("hid");
+  addQuestions(t, true);
 });
-$("#qResumeBtn").addEventListener("click", () => { QZ.mode = "normal"; showQuiz(); });
 $("#qWrongBtn").addEventListener("click", () => {
   if (!WRONG.length) return;
   QZ = { title: "Yanlışlarım", qs: WRONG.map(x => Object.assign({}, x.q, { pick: null, why: null })), i: 0, mode: "wrong" };
@@ -4225,10 +4413,15 @@ $("#qWhy").addEventListener("click", explainQ);
 $("#qQuit").addEventListener("click", endQuiz);
 $("#qBad").addEventListener("click", () => {
   if (!QZ.qs.length) return;
+  const q = QZ.qs[QZ.i];
   QZ.qs.splice(QZ.i, 1);
+  if (QZ.mode === "bank" && q && q.id) {
+    QBANK = QBANK.filter(x => x.id !== q.id);
+    saveBank(); tomb(q.id); syncSoon();
+  }
   if (QZ.i >= QZ.qs.length) QZ.i = Math.max(0, QZ.qs.length - 1);
   saveQuiz();
-  toast("Soru atıldı.");
+  toast("Soru bankadan atıldı.");
   QZ.qs.length ? drawQ() : endQuiz();
 });
 
@@ -4482,13 +4675,15 @@ async function syncNow(quiet) {
     LIB = mergeList(LIB, remote && remote.lib, x => "l:" + x.id);
     SOLVED = mergeList(SOLVED, remote && remote.solved, x => x.id);
     WRONG = mergeList(WRONG, remote && remote.wrong, x => "wr:" + x.id);
+    QBANK = mergeList(QBANK, remote && remote.qbank, x => x.id);
     const gLocal = GROUPS.map(g => ({ k: "grp:" + g, g, t: GROUPT[g] || 0 }));
     const gMerged = mergeList(gLocal, remote && remote.groups, x => x.k).filter(x => x.g);
     GROUPS = gMerged.map(x => x.g);
     GROUPT = {}; gMerged.forEach(x => { GROUPT[x.g] = x.t || 0; });
-    saveWords(); saveGrams(); saveLib(); saveSolved(); saveWrong(); saveGroups();
+    saveWords(); saveGrams(); saveLib(); saveSolved(); saveWrong(); saveGroups(); saveBank();
     await fbPush({ v: 1, at: new Date().toISOString(), words: WORDS, grams: GRAMS, lib: LIB, solved: SOLVED,
-                   wrong: WRONG, groups: gMerged, tomb: tombOut() });
+                   wrong: WRONG, groups: gMerged, qbank: QBANK, tomb: tombOut() });
+    if (state.screen === "quiz" && $("#qRun").classList.contains("hid")) refreshQuizHome();
     fbSet("last", new Date().toISOString());
     setSyncMsg(syncLabel());
     if (state.screen === "words") renderWords();
