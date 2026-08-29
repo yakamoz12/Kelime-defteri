@@ -3707,14 +3707,15 @@ const QCATS = ["Kelime", "Tense", "Bağlaç", "Edat", "Relative Clause", "Gramer
 let QBANK = [];
 try { QBANK = JSON.parse(store.get("qbank", "[]")) || []; } catch (e) { QBANK = []; }
 function saveBank() { store.set("qbank", JSON.stringify(QBANK)); }
-const qbId = stem => "qb:" + String(stem || "").toLowerCase().replace(/\s+/g, " ").trim().slice(0, 80);
+const qbId = q => "qb:" + (String(q.stem || "") + "|" + String(q.passage || "").slice(0, 60))
+  .toLowerCase().replace(/\s+/g, " ").trim().slice(0, 120);
 
 /* eski "deneme" kaydından bankaya bir kerelik geçiş */
 try {
   const old = JSON.parse(store.get("quiz", "null"));
   if (old && Array.isArray(old.qs) && old.qs.length) {
     old.qs.forEach(q => {
-      const id = qbId(q.stem);
+      const id = qbId(q);
       if (!q.stem || QBANK.some(x => x.id === id)) return;
       q.id = id;
       q.cat = q.cat || heuristicCat(q);
@@ -3731,7 +3732,11 @@ try {
 function heuristicCat(q) {
   const stem = (q.stem || "").toLowerCase();
   const opts = Object.keys(q.options || {}).sort().map(k => String(q.options[k] || "").trim());
-  if (q.passage) return "Okuma";
+  if (q.passage) {
+    // parçadaki numaralı boşluk → Cloze; parça hakkında gerçek soru → Okuma
+    if (/numaralı boşluğ|\(\d+\)\s*----|^\s*----\s*$/.test(q.stem || "")) return "Cloze";
+    return "Okuma";
+  }
   if (/anlamca en yak|en yakın anlam|closest in meaning/.test(stem)) return "Yakın Anlam";
   if (/türkçe|ingilizce.*çevir|en iyi ifade eden|çevirisi/.test(stem)) return "Çeviri";
   if (/anlam bütünlüğünü bozan|akışını bozan/.test(stem)) return "Anlam Bütünlüğü";
@@ -3835,7 +3840,9 @@ function saveWrong() { store.set("wrong", JSON.stringify(WRONG)); }
 /* --- cevap anahtarını metinden yakala: "1.A 2.C" / "1-A" / "1) A" --- */
 function parseKey(text) {
   const key = {};
-  const rx = /(?:^|[\s;,])(\d{1,3})\s*[).\-:]?\s*([A-EÂ])(?![A-Za-z])/g;
+  // aynı satırda "1.A / 1-A / 1) A" biçimi; satır atlayarak eşleşmez ve
+  // "21." satırının altındaki "A) şık" ile karışmaz (harften sonra ")" veya "." gelirse şıktır)
+  const rx = /(?:^|[\s;,])(\d{1,3})[^\S\n]*[).\-:]?[^\S\n]*([A-EÂ])(?![A-Za-z).])/g;
   let m, hits = 0;
   while ((m = rx.exec(text))) {
     const n = parseInt(m[1], 10);
@@ -3855,39 +3862,63 @@ SADECE geçerli JSON döndür. Markdown, kod bloğu işareti, açıklama YAZMA.`
 function localQuestions(text) {
   const lines = String(text).replace(/\r/g, "").split("\n");
   const optRe = /^\s*\(?([A-Ea-e])[\)\.\:]\s+(.+)$/;
-  const numRe = /^\s*\d{1,3}[\.\)\-]\s+/;
+  const numOnly = /^\s*(\d{1,3})\s*[\.\)\-]\s*$/;              // "21." tek başına bir satırda
+  const numLead = /^\s*(\d{1,3})\s*[\.\)]\s+(.+)$/;            // "21. soru kökü..."
+  const passHead = /(\d{1,3})\s*[-–.]{1,3}\s*(\d{1,3})\s*\.?\s*sorular/i; // "21-25. sorular ... parçaya göre"
   const out = [];
   let cur = null;
+  let passage = "", passLines = null, passRange = null;
+
   const flush = () => {
     if (!cur) return;
-    const stemRaw = cur.stemLines.join("\n").trim();
-    const m = stemRaw.match(/^\s*(\d{1,3})[\.\)\-]\s+/);
-    const stem = stemRaw.replace(numRe, "").trim();
+    let stem = cur.stemLines.join("\n").trim();
+    const n = cur.n || 0;
+    let pas = "";
+    if (passage && passRange && n >= passRange[0] && n <= passRange[1]) pas = passage;
+    if (!stem && pas) stem = "(" + n + ") numaralı boşluğa uygun ifadeyi seçiniz.";
     if (cur.opts.length >= 2 && (stem || cur.opts.length >= 4)) {
       const options = {};
       cur.opts.forEach(o => { options[o.k] = o.t; });
-      out.push({ n: m ? parseInt(m[1], 10) : 0, stem, options, passage: "",
-                 answer: null, fromKey: false, pick: null, why: null });
+      out.push({ n, stem, options, passage: pas, answer: null, fromKey: false, pick: null, why: null });
     }
     cur = null;
   };
+  const startQ = (n, rest) => {
+    flush();
+    if (passLines !== null) { passage = passLines.join("\n").trim(); passLines = null; }
+    if (passRange && n > passRange[1]) { passage = ""; passRange = null; }
+    cur = { n, stemLines: rest ? [rest] : [], opts: [] };
+  };
+
   for (const raw of lines) {
     const line = raw.trim();
     if (!line) continue;
+    const ph = line.match(passHead);
+    if (ph && !optRe.test(line)) { // "21-25. sorular aşağıdaki parçaya göre..." → parça toplamaya başla
+      flush();
+      passage = ""; passLines = []; passRange = [parseInt(ph[1], 10), parseInt(ph[2], 10)];
+      continue;
+    }
+    const no = line.match(numOnly);
+    if (no) { startQ(parseInt(no[1], 10), ""); continue; }
     const m = line.match(optRe);
     if (m) {
-      if (!cur) cur = { stemLines: [], opts: [] };
+      if (passLines !== null) { passage = passLines.join("\n").trim(); passLines = null; }
+      if (!cur) cur = { n: 0, stemLines: [], opts: [] };
       const K = m[1].toUpperCase();
-      if (cur.opts.some(o => o.k === K)) { flush(); cur = { stemLines: [], opts: [] }; }
+      if (cur.opts.some(o => o.k === K)) { flush(); cur = { n: 0, stemLines: [], opts: [] }; }
       cur.opts.push({ k: K, t: m[2].trim() });
+      continue;
+    }
+    const nl = line.match(numLead);
+    if (nl && (!cur || cur.opts.length > 0)) { startQ(parseInt(nl[1], 10), nl[2].trim()); continue; }
+    if (passLines !== null) { passLines.push(line); continue; }
+    if (cur && cur.opts.length > 0) {
+      if (cur.opts.length >= 5) startQ(0, line);
+      else cur.opts[cur.opts.length - 1].t += " " + line;
     } else {
-      if (cur && cur.opts.length > 0) {
-        if (cur.opts.length >= 5 || numRe.test(line)) { flush(); cur = { stemLines: [line], opts: [] }; }
-        else cur.opts[cur.opts.length - 1].t += " " + line;
-      } else {
-        if (!cur) cur = { stemLines: [], opts: [] };
-        cur.stemLines.push(line);
-      }
+      if (!cur) cur = { n: 0, stemLines: [], opts: [] };
+      cur.stemLines.push(line);
     }
   }
   flush();
@@ -3929,8 +3960,8 @@ ${chunks[i]}`;
         const opts = q.options || {};
         const keys = Object.keys(opts).filter(k => String(opts[k] || "").trim());
         if (!q.stem || keys.length < 2) return;
-        const dupKey = String(q.stem).toLowerCase().replace(/\s+/g, " ").trim().slice(0, 80);
-        if (all.some(x => String(x.stem).toLowerCase().replace(/\s+/g, " ").trim().slice(0, 80) === dupKey)) return;
+        const norm2 = z => (parseInt(z.n, 10) || 0) + "|" + String(z.stem).toLowerCase().replace(/\s+/g, " ").trim().slice(0, 80);
+        if (all.some(x => norm2(x) === norm2(q))) return;
         all.push({
           n: parseInt(q.n, 10) || 0,
           stem: String(q.stem).trim(),
@@ -3966,7 +3997,7 @@ async function addQuestions(text, tryLocal) {
   const fresh = [];
   let dup = 0;
   qs.forEach(q => {
-    const id = qbId(q.stem);
+    const id = qbId(q);
     if (QBANK.some(x => x.id === id)) { dup++; return; }
     q.id = id;
     q.cat = heuristicCat(q);
