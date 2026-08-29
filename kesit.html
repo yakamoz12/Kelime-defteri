@@ -260,6 +260,24 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .qtr{font-family:"Source Serif 4",serif;font-size:14.5px;color:var(--ink2);margin:8px 0 4px;line-height:1.5}
 .qtopic{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
   color:var(--deep);background:var(--deep-soft);border-radius:6px;padding:3px 8px;margin:6px 0 2px}
+.qstats{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:15px}
+.qs-total{font-size:15px;margin-bottom:12px}
+.qs-total b{font-size:19px}
+.qs-row{display:flex;justify-content:space-between;font-size:13.5px;font-weight:500;margin-top:9px}
+.qs-name{text-transform:capitalize}
+.qs-n{color:var(--ink3);font-variant-numeric:tabular-nums}
+.qs-bar{height:6px;background:var(--line2);border-radius:99px;overflow:hidden;margin-top:4px}
+.qs-bar i{display:block;height:100%;background:var(--deep);border-radius:99px}
+.qs-tip{margin-top:14px;background:var(--acc-soft);color:var(--acc-ink);border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.5}
+.qanat{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:2px 0 10px;background:var(--card)}
+.qanat > div{display:flex;gap:10px;padding:8px 11px;border-bottom:1px solid var(--line2);font-size:14px;line-height:1.45}
+.qanat > div:last-child{border-bottom:none}
+.qanat b{flex:0 0 72px;color:var(--ink3);font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding-top:1px}
+.qanat span{flex:1}
+.qstruct{background:var(--deep-soft);border-left:3px solid var(--deep);border-radius:0 10px 10px 0;padding:9px 12px;margin:0 0 8px;font-size:14px;line-height:1.5}
+.qstruct b{color:var(--deep);display:block;margin-bottom:2px}
+.qstruct i{display:block;color:var(--ink2);font-family:"Source Serif 4",serif;margin-bottom:3px}
+.qstruct p{margin:0 !important}
 .elm{margin:0 0 9px;font-size:14.5px;line-height:1.5}
 .elm b{color:var(--acc-ink)}
 .elm s{text-decoration:none;font-family:"Source Serif 4",serif;font-weight:600}
@@ -301,6 +319,7 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .flagbtn{margin-top:14px;font-size:13px;font-weight:600;color:var(--ink3);border:1px solid var(--line);
   border-radius:999px;padding:8px 16px;background:var(--card)}
 .flagbtn.on{color:#B8860B;border-color:#E0A21A;background:#E0A21A18}
+.witem .mov{color:var(--ink3);padding:6px;line-height:1;flex:none}
 .witem .del{color:var(--ink3);padding:4px 6px;font-size:21px;line-height:1;flex:none}
 .wdet{flex-basis:100%;margin-top:12px;padding-top:12px;border-top:1px solid var(--line2);display:none}
 .witem.open .wdet{display:block}
@@ -380,6 +399,17 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .pltr{font-size:22px;color:var(--acc-ink);font-weight:600;margin-top:16px;min-height:28px;opacity:.25;transition:opacity .2s}
 .pltr.on{opacity:1}
 .plw.hot{color:var(--acc)}
+.gsheet{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;background:#0008}
+.gsheet.on{display:flex}
+.gsheet .gs-in{background:var(--card);border-radius:18px 18px 0 0;width:100%;max-height:70vh;overflow-y:auto;
+  padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+.gsheet h3{margin:0 0 12px;font-size:16px;font-weight:600}
+.gsheet button.gopt{display:flex;width:100%;text-align:left;align-items:center;gap:10px;
+  padding:13px 12px;border-radius:12px;font-size:15.5px;font-weight:500;color:var(--ink)}
+.gsheet button.gopt:active{background:var(--line2)}
+.gsheet button.gopt .gn{margin-left:auto;font-size:12.5px;color:var(--ink3)}
+.gsheet button.gopt.dim{color:var(--ink2)}
+.gsheet button.gopt.acc{color:var(--acc);font-weight:600}
 .selbar{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));z-index:41;
   display:flex;gap:8px;padding:10px 14px;background:var(--card);border-top:1px solid var(--line);
   box-shadow:0 -4px 20px #0000001a}
@@ -639,6 +669,11 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
         <span><h3 id="qWrongTitle"></h3><p>Yanlış yaptığın soruları tekrar çöz</p></span>
       </button>
     </div>
+
+    <div id="qStatsWrap" class="hid">
+      <div class="label">Durumun</div>
+      <div id="qStats" class="qstats"></div>
+    </div>
   </div>
 
   <div id="qRun" class="hid">
@@ -894,6 +929,17 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   </div>
 
   <div class="row">
+    <h4>Tam yedek</h4>
+    <p>Kelimeler, defterler, gramer notları, cümle analizleri, sorular, yanlışlar ve kitaplık — hepsi tek dosyada. API anahtarı ve Firebase bilgileri yedeğe <b>yazılmaz</b>.</p>
+    <p id="usageInfo" style="margin:6px 0 0;font-size:12.5px;color:var(--ink3)"></p>
+    <div class="field">
+      <button class="btn" id="fullExport" style="flex:1">Yedek Al (JSON)</button>
+      <button class="btn ghost" id="fullImport" style="flex:1">Geri Yükle</button>
+    </div>
+    <input type="file" id="fullImportFile" accept=".json,application/json" class="hid">
+  </div>
+
+  <div class="row">
     <h4>Çeviri üslubu</h4>
     <div class="opt"><input type="radio" name="style" id="s3" value="3"><label for="s3">Türkçe + İngilizce yan yana<small>iskemik inme <i>(ischemic stroke)</i> — terim eşleştirmek için</small></label></div>
     <div class="opt"><input type="radio" name="style" id="s1" value="1"><label for="s1">İngilizce terim + açıklama<small><i>ischemic stroke</i> (damar tıkanmasına bağlı felç)</small></label></div>
@@ -1052,6 +1098,43 @@ async function loadModels(quiet) {
   }
 }
 
+/* --- ücretsiz kota koruması: çağrı aralığı + günlük sayaç + 429'da geri sayım --- */
+let lastGeminiAt = 0;
+const GAP_MS = 4000; // ücretsiz katman dakikalık limitine takılmamak için asgari aralık
+function bumpUsage() {
+  const today = new Date().toISOString().slice(0, 10);
+  let u = { date: today, count: 0 };
+  try { u = JSON.parse(store.get("usage", "null")) || u; } catch (e) {}
+  if (u.date !== today) { u.date = today; u.count = 0; }
+  u.count++;
+  store.set("usage", JSON.stringify(u));
+  const el = $("#usageInfo");
+  if (el) el.textContent = "Bugün yapılan çağrı: " + u.count;
+  return u.count;
+}
+function usageToday() {
+  const today = new Date().toISOString().slice(0, 10);
+  try { const u = JSON.parse(store.get("usage", "null")); if (u && u.date === today) return u.count; } catch (e) {}
+  return 0;
+}
+function retryDelayFrom(d) {
+  try {
+    for (const item of (d.error.details || [])) {
+      if (item.retryDelay) { const m = String(item.retryDelay).match(/(\d+)/); if (m) return Math.min(120, parseInt(m[1], 10) + 1); }
+    }
+  } catch (e) {}
+  return null;
+}
+async function quotaWait(sec, why) {
+  for (let s = sec; s > 0; s--) {
+    const msg = why + " — " + s + " sn sonra otomatik denenecek…";
+    const bv = $("#busyv");
+    if (bv && bv.classList.contains("on")) { const bm = $("#busyMsg"); if (bm) bm.textContent = msg; }
+    else toast(msg, 1200);
+    await sleep(1000);
+  }
+}
+
 async function gemini(parts, system, opts = {}) {
   const tries = opts.tries === undefined ? 2 : opts.tries;
   if (!state.key) throw new Error("Önce ayarlardan Gemini anahtarını gir.");
@@ -1065,6 +1148,10 @@ async function gemini(parts, system, opts = {}) {
   };
   if (system) body.systemInstruction = { parts: [{ text: system }] };
 
+  const gap = Date.now() - lastGeminiAt;
+  if (gap < GAP_MS) await sleep(GAP_MS - gap);
+  lastGeminiAt = Date.now();
+
   let lastErr;
   for (let i = 0; i <= tries; i++) {
     try {
@@ -1076,9 +1163,16 @@ async function gemini(parts, system, opts = {}) {
       const d = await r.json();
       if (!r.ok) {
         const msg = d?.error?.message || ("HTTP " + r.status);
-        if ((r.status === 429 || r.status >= 500) && i < tries) { await sleep(1200 * (i + 1)); continue; }
+        if ((r.status === 429 || r.status >= 500) && i < tries) {
+          const wait = r.status === 429 ? (retryDelayFrom(d) || 35) : 8 * (i + 1);
+          await quotaWait(wait, r.status === 429 ? "Dakikalık kota doldu" : "Sunucu yoğun");
+          lastGeminiAt = Date.now();
+          continue;
+        }
+        if (r.status === 429) throw new Error("Kota doldu. Bir iki dakika bekleyip tekrar dene; olmuyorsa ayarlardan Flash bir model seç.");
         throw new Error(msg);
       }
+      bumpUsage();
       const cand = d.candidates && d.candidates[0];
       const txt = ((cand?.content?.parts) || []).filter(p => p.text && !p.thought).map(p => p.text).join("").trim();
       if (!txt) {
@@ -1352,6 +1446,9 @@ JSON şekli tam olarak:
     cRenderReport(data, sentence);
     CU.lastAnalysis = JSON.stringify(data);
     CU.lastData = data;
+    // her analiz otomatik deftere kaydedilir (kopya varsa atlanır) — kaybolmaz, eşitlenir
+    if (!hasGram(sentence)) { cSaveToNotebook(data, sentence); }
+    setCSaveBtn(true);
     $("#cChat").classList.add("on");
   }catch(e){
     toast("Analiz alınamadı: " + e.message, 4000);
@@ -1510,7 +1607,7 @@ async function cBuildCumlePdf(){
       ensure(size*0.6 + 3);
       doc.setFont("Kalam", fonts.bold ? "bold" : "normal");
       doc.setFontSize(size);
-      const c = color || [140,140,140];
+      const c = color || [90,90,90];
       doc.setTextColor(c[0], c[1], c[2]);
       doc.text(text, M.l, y);
       y += size*0.55 + 1;
@@ -2521,7 +2618,7 @@ Kelime türü ne olursa olsun (bağlaç, edat, fiil, isim, sıfat) uygun eş anl
 /* ============================================================
    Akademik örnek cümle + renk eşleştirme
    ============================================================ */
-const PAL = [[192, 57, 43], [31, 111, 178], [30, 122, 69], [142, 68, 173], [185, 119, 14]];
+const PAL = [[150, 36, 26], [16, 76, 134], [14, 88, 46], [100, 44, 130], [136, 86, 8]];
 
 const SEN_SYS = `Sen akademik İngilizce öğreten bir dil uzmanısın. Kullanıcı Türk bir sağlık çalışanı, YÖKDİL sınavına hazırlanıyor.
 SADECE geçerli JSON döndür. Markdown, kod bloğu işareti, açıklama YAZMA.`;
@@ -2655,8 +2752,8 @@ function renderGroupChips(){
     const g = c.dataset.g;
     if(g === wGroup && g !== "all"){
       if(confirm(`"${g}" defterini kaldırmak istiyor musun?\n\nİçindeki kelimeler SİLİNMEZ, sadece bu defter etiketleri kalkar.`)){
-        GROUPS = GROUPS.filter(x=>x!==g); saveGroups();
-        WORDS.forEach(x => { if((x.group||"")===g) x.group=""; });
+        dropGroup(g);
+        WORDS.forEach(x => { if((x.group||"")===g){ x.group=""; x.t=Date.now(); } });
         saveWords(); syncSoon();
         wGroup = "all";
         renderWords();
@@ -2670,7 +2767,7 @@ function renderGroupChips(){
     const name = (prompt("Yeni defter adı:") || "").trim();
     if(!name) return;
     if(GROUPS.includes(name)){ wGroup=name; renderWords(); return; }
-    GROUPS.push(name); saveGroups();
+    addGroup(name);
     wGroup = name;
     renderWords();
     toast(`"${name}" defteri oluşturuldu. Şimdi eklediğin kelimeler otomatik buraya gidecek.`, 3800);
@@ -2718,6 +2815,9 @@ function renderWords() {
         <button class="gen" data-k="rad" aria-label="Eş anlamlı üret" title="Eş anlamlı">
           <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.6"/><circle cx="19" cy="5" r="2.2"/><circle cx="19" cy="12" r="2.2"/><circle cx="19" cy="19" r="2.2"/><path d="M7.3 11H16.8M7.3 12.3L17 6M7.3 12.9L17 18.5"/></svg>
         </button>
+        <button class="mov" aria-label="Deftere taşı" title="Deftere taşı">
+          <svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M11 9l3 3-3 3"/></svg>
+        </button>
         <button class="del" aria-label="Sil">×</button>
       </div>
       <div class="wdet">${radialHtml(x)}</div>
@@ -2741,6 +2841,10 @@ function renderWords() {
       el.classList.add("open");
       radialFor(w, el, g);
     }));
+    el.querySelector(".mov").addEventListener("click", e => {
+      e.stopPropagation();
+      chooseGroup('"' + w + '" kelimesini taşı', target => moveWordsTo(new Set([w]), target));
+    });
     el.querySelector(".wtxt").addEventListener("click", () => {
       if (selMode) { if (SEL.has(w)) SEL.delete(w); else SEL.add(w); renderWords(); return; }
       el.classList.toggle("open");
@@ -3077,7 +3181,7 @@ function flowRuns(doc, runs, x, y, maxW, lineH, draw, keepColor) {
 function pdfHeader(doc, sub, page, head) {
   doc.setFont(KALAM.light ? "KalamLight" : "Kalam", "normal");
   doc.setFontSize(9.5);
-  doc.setTextColor(140, 140, 140);
+  doc.setTextColor(90, 90, 90);
   doc.text((head || "Kelime defteri") + " · " + sub, M.l, 11);
   doc.text(String(page), PW - M.r, 11, { align: "right" });
   doc.setDrawColor(214, 210, 200);
@@ -3111,13 +3215,13 @@ function studyEntry(doc, x, y, k) {
   if (x.oku) {
     doc.setFont("Kalam", "normal");
     doc.setFontSize(9.6 * k);
-    doc.setTextColor(150, 154, 170);
+    doc.setTextColor(96, 102, 124);
     doc.text("  [" + x.oku + "]", wEnd, y);
     wEnd += doc.getTextWidth("  [" + x.oku + "]");
   }
   doc.setFont("Kalam", "normal");
   doc.setFontSize(11.5 * k);
-  doc.setTextColor(162, 22, 72);
+  doc.setTextColor(128, 12, 54);
   doc.text("  —  " + (x.tr || ""), wEnd, y);
   y += 6.3 * k;
 
@@ -3128,14 +3232,14 @@ function studyEntry(doc, x, y, k) {
     fam.forEach(f => {
       doc.setFont("Kalam", "normal");
       doc.setFontSize(8.4 * k);
-      doc.setTextColor(120, 128, 152);
+      doc.setTextColor(78, 86, 108);
       const tag = (f.pos || "").toUpperCase();
       doc.text(tag, M.l + 2, y);
       doc.setFontSize(9.6 * k);
-      doc.setTextColor(46, 58, 102);
+      doc.setTextColor(30, 40, 80);
       const tx = M.l + 20 * k;
       doc.text(f.w || "", tx, y);
-      doc.setTextColor(140, 146, 164);
+      doc.setTextColor(92, 98, 118);
       doc.text("  " + (f.tr || ""), tx + doc.getTextWidth(f.w || ""), y);
       y += FL;
     });
@@ -3184,7 +3288,7 @@ function sheetLayout(doc, group, k, order, y0, draw, gap) {
     if (draw) {
       doc.setFont("Kalam", "normal");
       doc.setFontSize(11 * k);
-      doc.setTextColor(140, 146, 164);
+      doc.setTextColor(92, 98, 118);
       doc.text((i + 1) + ".", M.l, y);
 
       // İngilizce kelime
@@ -3198,7 +3302,7 @@ function sheetLayout(doc, group, k, order, y0, draw, gap) {
         const wEnd = M.l + 7 * k + doc.getTextWidth(x.w);
         doc.setFont("Kalam", "normal");
         doc.setFontSize(9.4 * k);
-        doc.setTextColor(178, 182, 196);
+        doc.setTextColor(110, 116, 134);
         doc.text("  [" + x.oku + "]", wEnd, y);
       }
 
@@ -3220,22 +3324,25 @@ function sheetHeight(doc, group, k, order, gap) {
 function radialCardPdf(doc, x, x0, y0, w) {
   // sabit boyutlu ışınsal kart: merkez daire + eğri omurga + 5 dal — jsPDF vektörleriyle
   const BR = [
-    { ink:[161,22,72],  bg:[251,231,239] },
-    { ink:[31,95,168],  bg:[232,238,251] },
-    { ink:[30,122,69],  bg:[229,243,234] },
-    { ink:[107,63,160], bg:[240,231,247] },
-    { ink:[163,102,15], bg:[251,238,220] }
+    { ink:[120,10,50]  },
+    { ink:[14,62,120]  },
+    { ink:[12,84,44]   },
+    { ink:[78,40,122]  },
+    { ink:[122,72,6]   }
   ];
+  const CORE = [26,36,72]; // koyu lacivert — dolgu yok, sadece çizgi ve yazı
   const coreR = 17, coreX = x0 + coreR, coreY = y0 + 32.5;
 
-  doc.setFillColor(46,58,102);
-  doc.circle(coreX, coreY, coreR, 'F');
-  doc.setTextColor(255,255,255);
-  doc.setFont('Kalam','normal'); doc.setFontSize(8.5);
-  doc.text(x.w, coreX, coreY - 4.5, {align:'center'});
-  doc.setFont('Kalam','bold'); doc.setFontSize(11.5);
-  const trLines = doc.splitTextToSize(x.tr || "", coreR*1.6);
-  trLines.slice(0,2).forEach((l,i)=> doc.text(l, coreX, coreY + 2 + i*6, {align:'center'}));
+  doc.setDrawColor(CORE[0],CORE[1],CORE[2]);
+  doc.setLineWidth(0.7);
+  doc.circle(coreX, coreY, coreR, 'S');
+  doc.setTextColor(CORE[0],CORE[1],CORE[2]);
+  doc.setFont('Kalam', KALAM.bold ? 'bold' : 'normal'); doc.setFontSize(10);
+  const wLines = doc.splitTextToSize(x.w || "", coreR*1.7);
+  wLines.slice(0,2).forEach((l,i)=> doc.text(l, coreX, coreY - 4.5 + i*5, {align:'center'}));
+  doc.setFont('Kalam','normal'); doc.setFontSize(9.5);
+  const trLines = doc.splitTextToSize(x.tr || "", coreR*1.7);
+  trLines.slice(0,2).forEach((l,i)=> doc.text(l, coreX, coreY + (wLines.length>1?7:3) + i*5, {align:'center'}));
 
   function bez(t){
     const p0={x:6,y:0}, p1={x:-8,y:22}, p2={x:-8,y:43}, p3={x:6,y:65};
@@ -3257,15 +3364,15 @@ function radialCardPdf(doc, x, x0, y0, w) {
     doc.setFillColor(c.ink[0],c.ink[1],c.ink[2]);
     doc.circle(spineX+dp.x, y0+dp.y, 1, 'F');
 
-    doc.setFillColor(255,255,255); doc.setDrawColor(225,227,238);
-    doc.circle(numX, yy, 4.3, 'FD');
-    doc.setTextColor(95,103,132); doc.setFont('Kalam','bold'); doc.setFontSize(7);
+    doc.setDrawColor(c.ink[0],c.ink[1],c.ink[2]); doc.setLineWidth(0.35);
+    doc.circle(numX, yy, 4.3, 'S');
+    doc.setTextColor(c.ink[0],c.ink[1],c.ink[2]); doc.setFont('Kalam', KALAM.bold?'bold':'normal'); doc.setFontSize(7);
     doc.text(String(i+1).padStart(2,'0'), numX, yy+1.1, {align:'center'});
 
-    doc.setFillColor(c.bg[0],c.bg[1],c.bg[2]);
-    doc.roundedRect(cardX, yy-4.8, cardW, 9.6, 3.5, 3.5, 'F');
+    doc.setDrawColor(c.ink[0],c.ink[1],c.ink[2]); doc.setLineWidth(0.3);
+    doc.roundedRect(cardX, yy-4.8, cardW, 9.6, 3.5, 3.5, 'S');
     doc.setTextColor(c.ink[0],c.ink[1],c.ink[2]);
-    doc.setFont('Kalam','bold'); doc.setFontSize(11);
+    doc.setFont('Kalam', KALAM.bold?'bold':'normal'); doc.setFontSize(11);
     doc.text(s.w, cardX+5, yy+1.4);
     doc.setFont('Kalam','normal'); doc.setFontSize(9);
     doc.text(s.tr||"", cardX+cardW-5, yy+1.1, {align:'right'});
@@ -3401,8 +3508,20 @@ function removeGram(sen) { GRAMS = GRAMS.filter(x => gkey(x.s) !== gkey(sen)); s
 let gFilter = "";
 let wFilter = "all";
 let GROUPS = JSON.parse(store.get("word_groups", "[]"));
+let GROUPT = {};
+try { GROUPT = JSON.parse(store.get("word_groups_t", "{}")) || {}; } catch (e) { GROUPT = {}; }
+function addGroup(name) {
+  if (!GROUPS.includes(name)) GROUPS.push(name);
+  GROUPT[name] = Date.now();
+  saveGroups(); syncSoon();
+}
+function dropGroup(name) {
+  GROUPS = GROUPS.filter(x => x !== name);
+  delete GROUPT[name];
+  saveGroups(); tomb("grp:" + name); syncSoon();
+}
 let wGroup = "all";
-function saveGroups(){ store.set("word_groups", JSON.stringify(GROUPS)); }
+function saveGroups(){ store.set("word_groups", JSON.stringify(GROUPS)); store.set("word_groups_t", JSON.stringify(GROUPT)); }
 
 function renderGrams() {
   const chips = $("#gChips"), box = $("#gList");
@@ -3519,7 +3638,7 @@ async function buildGramPdf() {
       if (cx + w > M.l + CW) { cx = M.l; y += 4.4; }
       doc.setFillColor(g[0], g[1], g[2]);
       doc.rect(cx, y - 2, 2.2, 2.2, "F");
-      doc.setTextColor(110, 116, 134);
+      doc.setTextColor(70, 78, 100);
       doc.text(label, cx + 3.4, y);
       cx += w + 4;
     });
@@ -3534,7 +3653,7 @@ async function buildGramPdf() {
 
     doc.setFont("Kalam", "normal");
     doc.setFontSize(9);
-    doc.setTextColor(46, 58, 102);
+    doc.setTextColor(30, 40, 80);
     doc.text((x.topic || "genel").toUpperCase(), M.l, y);
     y += 5.5;
 
@@ -3548,7 +3667,7 @@ async function buildGramPdf() {
 
     doc.setFont("Kalam", "normal");
     doc.setFontSize(9.5);
-    doc.setTextColor(70, 78, 100);
+    doc.setTextColor(44, 52, 74);
     (x.points || []).forEach(q => {
       y += LEAD - 0.3;
       y = flowRuns(doc, [{ text: "· " + q, c: -1 }], M.l + 2, y, CW - 2, LEAD - 0.3, true).y;
@@ -3614,10 +3733,56 @@ function parseKey(text) {
 const QSYS = `Sen YÖKDİL Sağlık sınavına hazırlanan bir öğrenciye yardım eden bir uzmansın.
 SADECE geçerli JSON döndür. Markdown, kod bloğu işareti, açıklama YAZMA.`;
 
+/* --- yerel ayrıştırıcı: yapıştırılan soruları API HARCAMADAN böler.
+   A) B) / a. b. / (A) biçimlerini, satıra taşan şıkları ve numaralı-numarasız
+   soruları tanır. Başaramazsa Gemini'li yol devreye girer. --- */
+function localQuestions(text) {
+  const lines = String(text).replace(/\r/g, "").split("\n");
+  const optRe = /^\s*\(?([A-Ea-e])[\)\.\:]\s+(.+)$/;
+  const numRe = /^\s*\d{1,3}[\.\)\-]\s+/;
+  const out = [];
+  let cur = null;
+  const flush = () => {
+    if (!cur) return;
+    const stemRaw = cur.stemLines.join("\n").trim();
+    const m = stemRaw.match(/^\s*(\d{1,3})[\.\)\-]\s+/);
+    const stem = stemRaw.replace(numRe, "").trim();
+    if (cur.opts.length >= 2 && (stem || cur.opts.length >= 4)) {
+      const options = {};
+      cur.opts.forEach(o => { options[o.k] = o.t; });
+      out.push({ n: m ? parseInt(m[1], 10) : 0, stem, options, passage: "",
+                 answer: null, fromKey: false, pick: null, why: null });
+    }
+    cur = null;
+  };
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    const m = line.match(optRe);
+    if (m) {
+      if (!cur) cur = { stemLines: [], opts: [] };
+      const K = m[1].toUpperCase();
+      if (cur.opts.some(o => o.k === K)) { flush(); cur = { stemLines: [], opts: [] }; }
+      cur.opts.push({ k: K, t: m[2].trim() });
+    } else {
+      if (cur && cur.opts.length > 0) {
+        if (cur.opts.length >= 5 || numRe.test(line)) { flush(); cur = { stemLines: [line], opts: [] }; }
+        else cur.opts[cur.opts.length - 1].t += " " + line;
+      } else {
+        if (!cur) cur = { stemLines: [], opts: [] };
+        cur.stemLines.push(line);
+      }
+    }
+  }
+  flush();
+  return out;
+}
+
 async function extractQuestions(text) {
   const chunks = [];
   const CH = 6000;
-  for (let i = 0; i < text.length; i += CH) chunks.push(text.slice(i, i + CH));
+  const OVERLAP = 700; // parça sınırında ortadan bölünen soru kaybolmasın
+  for (let i = 0; i < text.length; i += CH - OVERLAP) chunks.push(text.slice(i, i + CH));
   const all = [];
   for (let i = 0; i < chunks.length; i++) {
     if (stopFlag) break;
@@ -3648,6 +3813,8 @@ ${chunks[i]}`;
         const opts = q.options || {};
         const keys = Object.keys(opts).filter(k => String(opts[k] || "").trim());
         if (!q.stem || keys.length < 2) return;
+        const dupKey = String(q.stem).toLowerCase().replace(/\s+/g, " ").trim().slice(0, 80);
+        if (all.some(x => String(x.stem).toLowerCase().replace(/\s+/g, " ").trim().slice(0, 80) === dupKey)) return;
         all.push({
           n: parseInt(q.n, 10) || 0,
           stem: String(q.stem).trim(),
@@ -3662,17 +3829,26 @@ ${chunks[i]}`;
   return all;
 }
 
-async function startQuiz(text, title) {
-  if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
-  busyShow("Sorular hazırlanıyor", "Metin okunuyor…");
-  const qs = await extractQuestions(text);
-  if (!qs.length) { busyHide(); toast("Soru bulunamadı. Metni kontrol et."); return; }
+async function startQuiz(text, title, tryLocal) {
+  let qs = [];
+  let viaLocal = false;
+  if (tryLocal) {
+    qs = localQuestions(text);
+    viaLocal = qs.length > 0;
+  }
+  if (!qs.length) {
+    if (!state.key) { toast("Gemini anahtarı gerekli."); openSettings(); return; }
+    busyShow("Sorular hazırlanıyor", "Metin okunuyor…");
+    qs = await extractQuestions(text);
+    busyHide();
+  }
+  if (!qs.length) { toast("Soru bulunamadı. Metni kontrol et."); return; }
   const key = parseKey(text);
   if (key) qs.forEach(q => { if (key[q.n]) { q.answer = key[q.n]; q.fromKey = true; } });
   QZ = { title: title || "Sorular", qs, i: 0, mode: "normal" };
   saveQuiz();
-  busyHide();
-  toast(qs.length + " soru bulundu" + (key ? " · cevap anahtarı okundu" : " · anahtar yok, cevaplar modelce bulunacak"), 4000);
+  toast(qs.length + " soru bulundu" + (viaLocal ? " (cihazda ayrıştırıldı, kota harcanmadı)" : "")
+    + (key ? " · cevap anahtarı okundu" : " · anahtar yok, cevaplar modelce bulunacak"), 4000);
   showQuiz();
 }
 
@@ -3734,9 +3910,13 @@ async function pick(k) {
     <b>${right ? "Doğru." : "Yanlış. Doğrusu " + esc(q.answer || "?") + "."}</b>
     ${q.fromKey ? "" : '<div class="qwarn">Bu cevap kitapçığın anahtarından değil, model tarafından bulundu. Şüphelenirsen doğrula.</div>'}
   </div>`;
+  const wid = (q.n || 0) + "|" + q.stem.slice(0, 60);
   if (!right) {
-    const id = (q.n || 0) + "|" + q.stem.slice(0, 60);
-    if (!WRONG.some(x => x.id === id)) { WRONG.push({ id, q: JSON.parse(JSON.stringify(q)), at: Date.now() }); saveWrong(); }
+    if (!WRONG.some(x => x.id === wid)) { WRONG.push({ id: wid, q: JSON.parse(JSON.stringify(q)), at: Date.now(), t: Date.now() }); saveWrong(); syncSoon(); }
+  } else if (QZ.mode === "wrong" && WRONG.some(x => x.id === wid)) {
+    WRONG = WRONG.filter(x => x.id !== wid);
+    saveWrong(); tomb("wr:" + wid); syncSoon();
+    toast("Doğru! Soru yanlış defterinden çıkarıldı.", 2200);
   }
   archive(q);
   saveQuiz();
@@ -3783,6 +3963,9 @@ DOĞRU CEVAP: ${q.answer}
 "cozum": doğru cevabın neden doğru olduğu. 3-4 cümle, adım adım.
 "eleme": her yanlış şık için bir nesne içeren dizi. Her nesne {"harf": şık harfi, "metin": şıkkın kendisi, "neden": neden elendiği, 1-2 cümle}.
 "ders": bu sorudan çıkarılacak genel kural. Benzer sorularda işe yarayacak somut bir ipucu.
+"anatomi": soru cümlesinin (doğru cevap yerleştirilmiş haliyle) öğeleri: {"ozne": "cümlenin öznesi", "fiil": "ana fiil/yüklem", "nesne": "nesne, yoksa \\"-\\"", "diger": "önemli zarf/edat öbekleri, yoksa \\"\\""}.
+"tense": {"zaman": "ana yüklemin zamanı, örn. Present Perfect Passive", "neden": "bu zamanın/çatının burada kullanılma gerekçesi, 1-2 cümle"}.
+"yapilar": cümlede GERÇEKTEN bulunan gramer yapıları dizisi (yoksa boş dizi). Her biri {"yapi": "Relative Clause | Noun Clause | Adverbial Clause | Gerund | Infinitive | Participle | Passive | Reduction | Inversion | Modal | Conditional | Comparative vb.", "alinti": "cümledeki ilgili bölüm aynen", "aciklama": "yapının bu cümledeki görevi, 1-2 cümle"}.
 "kelimeler": soru kökünde ve şıklarda geçen, orta seviye bir öğrencinin bilmeyebileceği İngilizce kelimeler. 3-8 nesne, her biri {"w": kelime, "oku": TÜRKÇE harflerle okunuşu, "tr": Türkçe karşılığı}.`, QSYS, { temp: 0.3 }));
     q.why = d;
     saveQuiz();
@@ -3805,6 +3988,16 @@ function showWhy(d) {
     ${d.temel ? "<h4>Konunun temeli</h4><p>" + esc(d.temel) + "</p>" : ""}
     ${d.anahtar ? "<h4>Anahtar ipucu</h4><p>" + esc(d.anahtar) + "</p>" : ""}
     ${d.cozum ? "<h4>Neden bu cevap</h4><p>" + esc(d.cozum) + "</p>" : ""}
+    ${d.anatomi ? `<h4>Cümle anatomisi</h4>
+      <div class="qanat">
+        <div><b>Özne</b><span>${esc(d.anatomi.ozne || "-")}</span></div>
+        <div><b>Ana fiil</b><span>${esc(d.anatomi.fiil || "-")}</span></div>
+        <div><b>Nesne</b><span>${esc(d.anatomi.nesne || "-")}</span></div>
+        ${d.anatomi.diger ? `<div><b>Diğer</b><span>${esc(d.anatomi.diger)}</span></div>` : ""}
+      </div>` : ""}
+    ${d.tense && d.tense.zaman ? `<h4>Tense</h4><div class="qstruct"><b>${esc(d.tense.zaman)}</b><p>${esc(d.tense.neden || "")}</p></div>` : ""}
+    ${A("yapilar").length ? "<h4>Gramer yapıları</h4>" + A("yapilar").map(x =>
+      `<div class="qstruct"><b>${esc(x.yapi || "")}</b>${x.alinti ? `<i>"${esc(x.alinti)}"</i>` : ""}<p>${esc(x.aciklama || "")}</p></div>`).join("") : ""}
     ${A("eleme").length ? "<h4>Diğer şıklar neden değil</h4>" + A("eleme").map(x =>
       typeof x === "string" ? `<div class="elm">${esc(x)}</div>`
       : `<div class="elm"><b>${esc(x.harf || "")})</b> <s>${esc(x.metin || "")}</s><i>${esc(x.neden || "")}</i></div>`).join("") : ""}
@@ -3829,6 +4022,35 @@ function refreshQuizHome() {
   const w = $("#qWrongWrap");
   if (WRONG.length) { w.classList.remove("hid"); $("#qWrongTitle").textContent = WRONG.length + " yanlış soru"; }
   else w.classList.add("hid");
+  renderQuizStats();
+}
+
+/* konu bazlı başarı — çözüm anlatımındaki "konu" alanından beslenir */
+function renderQuizStats() {
+  const wrap = $("#qStatsWrap");
+  if (!wrap) return;
+  const graded = SOLVED.filter(x => x.pick && x.answer);
+  if (graded.length < 3) { wrap.classList.add("hid"); return; }
+  const right = graded.filter(x => x.pick === x.answer).length;
+  const byTopic = {};
+  graded.forEach(x => {
+    const k = (x.why && x.why.konu ? String(x.why.konu) : "diğer").toLowerCase().trim().slice(0, 40);
+    byTopic[k] = byTopic[k] || { t: 0, c: 0 };
+    byTopic[k].t++; if (x.pick === x.answer) byTopic[k].c++;
+  });
+  const rows = Object.entries(byTopic)
+    .filter(([, v]) => v.t >= 2)
+    .sort((a, b) => (a[1].c / a[1].t) - (b[1].c / b[1].t));
+  let html = `<div class="qs-total"><b>${right} / ${graded.length}</b> doğru · %${Math.round(100 * right / graded.length)}</div>`;
+  rows.slice(0, 8).forEach(([k, v]) => {
+    const pct = Math.round(100 * v.c / v.t);
+    html += `<div class="qs-row"><span class="qs-name">${esc(k)}</span><span class="qs-n">${v.c}/${v.t}</span></div>
+      <div class="qs-bar"><i style="width:${pct}%;${pct < 60 ? "background:var(--acc)" : ""}"></i></div>`;
+  });
+  const weak = rows.find(([, v]) => v.t >= 3 && v.c / v.t < 0.7);
+  if (weak) html += `<div class="qs-tip">🎯 En zayıf alanın: <b>${esc(weak[0])}</b>. Yanlışlarım listesinden bu konuları tekrar çöz.</div>`;
+  $("#qStats").innerHTML = html;
+  wrap.classList.remove("hid");
 }
 
 /* --- düğmeler --- */
@@ -3855,7 +4077,7 @@ $("#qPaste").addEventListener("click", () => { $("#qPasteBox").classList.toggle(
 $("#qTextGo").addEventListener("click", () => {
   const t = $("#qText").value.trim();
   if (t.length < 20) { toast("Soruyu yapıştır."); return; }
-  startQuiz(t, "Yapıştırılan soru");
+  startQuiz(t, "Yapıştırılan soru", true);
 });
 $("#qResumeBtn").addEventListener("click", () => { QZ.mode = "normal"; showQuiz(); });
 $("#qWrongBtn").addEventListener("click", () => {
@@ -3930,6 +4152,27 @@ async function solvedPdf() {
     if (d.temel) { sub("KONUNUN TEMELİ"); put(d.temel, { indent: 4, color: INK }); }
     if (d.anahtar) { sub("ANAHTAR İPUCU"); put(d.anahtar, { indent: 4, color: BLUE }); }
     if (d.cozum) { sub("NEDEN BU CEVAP"); put(d.cozum, { indent: 4, color: INK }); }
+
+    if (d.anatomi) {
+      sub("CÜMLE ANATOMİSİ");
+      put("Özne: " + (d.anatomi.ozne || "-"), { indent: 4, size: 9.8, color: INK, lead: 4.9 });
+      put("Ana fiil: " + (d.anatomi.fiil || "-"), { indent: 4, size: 9.8, color: INK, lead: 4.9 });
+      put("Nesne: " + (d.anatomi.nesne || "-"), { indent: 4, size: 9.8, color: INK, lead: 4.9 });
+      if (d.anatomi.diger) put("Diğer: " + d.anatomi.diger, { indent: 4, size: 9.8, color: GREY, lead: 4.9 });
+    }
+    if (d.tense && d.tense.zaman) {
+      sub("TENSE");
+      put(d.tense.zaman, { indent: 4, size: 10, color: BLUE, bold: true, lead: 4.9 });
+      if (d.tense.neden) put(d.tense.neden, { indent: 4, size: 9.6, color: INK, lead: 4.8 });
+    }
+    if (A("yapilar").length) {
+      sub("GRAMER YAPILARI");
+      A("yapilar").forEach(x => {
+        put(x.yapi || "", { indent: 4, size: 10, color: BLUE, bold: true, lead: 4.9 });
+        if (x.alinti) put('"' + x.alinti + '"', { indent: 6, size: 9.4, color: GREY, lead: 4.7 });
+        put(x.aciklama || "", { indent: 6, size: 9.6, color: INK, lead: 4.8, after: 0.8 });
+      });
+    }
 
     if (A("eleme").length) {
       sub("DİĞER ŞIKLAR NEDEN DEĞİL");
@@ -4238,8 +4481,14 @@ async function syncNow(quiet) {
     GRAMS = mergeList(GRAMS, remote && remote.grams, x => "g:" + gkey(x.s));
     LIB = mergeList(LIB, remote && remote.lib, x => "l:" + x.id);
     SOLVED = mergeList(SOLVED, remote && remote.solved, x => x.id);
-    saveWords(); saveGrams(); saveLib(); saveSolved();
-    await fbPush({ v: 1, at: new Date().toISOString(), words: WORDS, grams: GRAMS, lib: LIB, solved: SOLVED, tomb: tombOut() });
+    WRONG = mergeList(WRONG, remote && remote.wrong, x => "wr:" + x.id);
+    const gLocal = GROUPS.map(g => ({ k: "grp:" + g, g, t: GROUPT[g] || 0 }));
+    const gMerged = mergeList(gLocal, remote && remote.groups, x => x.k).filter(x => x.g);
+    GROUPS = gMerged.map(x => x.g);
+    GROUPT = {}; gMerged.forEach(x => { GROUPT[x.g] = x.t || 0; });
+    saveWords(); saveGrams(); saveLib(); saveSolved(); saveWrong(); saveGroups();
+    await fbPush({ v: 1, at: new Date().toISOString(), words: WORDS, grams: GRAMS, lib: LIB, solved: SOLVED,
+                   wrong: WRONG, groups: gMerged, tomb: tombOut() });
     fbSet("last", new Date().toISOString());
     setSyncMsg(syncLabel());
     if (state.screen === "words") renderWords();
@@ -4454,6 +4703,50 @@ $("#plWake").addEventListener("click", () => {
 });
 document.addEventListener("visibilitychange", () => { if (document.hidden && PL.on) { plStop(); const b = $("#plPlay"); if (b) b.textContent = "Devam et"; } });
 
+/* ---------- defter seçici (taşıma) ---------- */
+function chooseGroup(title, cb) {
+  let sh = $("#gSheet");
+  if (!sh) {
+    sh = document.createElement("div");
+    sh.className = "gsheet"; sh.id = "gSheet";
+    document.body.appendChild(sh);
+  }
+  const rows = GROUPS.map(g => {
+    const n = WORDS.filter(x => (x.group || "") === g).length;
+    return `<button class="gopt" data-g="${esc(g)}">📓 ${esc(g)}<span class="gn">${n} kelime</span></button>`;
+  }).join("");
+  sh.innerHTML = `<div class="gs-in">
+    <h3>${esc(title)}</h3>
+    ${rows || '<p style="color:var(--ink2);font-size:14px;margin:0 0 10px">Henüz defter yok — aşağıdan yeni bir tane aç.</p>'}
+    <button class="gopt acc" data-act="new">＋ Yeni defter…</button>
+    <button class="gopt dim" data-act="none">Defterden çıkar</button>
+    <button class="gopt dim" data-act="cancel">Vazgeç</button>
+  </div>`;
+  const close = () => sh.classList.remove("on");
+  sh.onclick = e => { if (e.target === sh) close(); };
+  sh.querySelectorAll(".gopt").forEach(b => b.addEventListener("click", () => {
+    const act = b.dataset.act;
+    if (act === "cancel") { close(); return; }
+    if (act === "none") { close(); cb(""); return; }
+    if (act === "new") {
+      const name = (prompt("Yeni defter adı:") || "").trim();
+      if (!name) return;
+      addGroup(name);
+      close(); cb(name); return;
+    }
+    close(); cb(b.dataset.g);
+  }));
+  sh.classList.add("on");
+}
+
+function moveWordsTo(words, target) {
+  let n = 0;
+  WORDS.forEach(x => { if (words.has(x.w)) { x.group = target; x.t = Date.now(); n++; } });
+  saveWords(); syncSoon();
+  toast(target ? n + ' kelime "' + target + '" defterine taşındı.' : n + " kelime defterden çıkarıldı.");
+  renderWords();
+}
+
 /* ---------- seçim modu ---------- */
 function selBar() {
   let bar = $("#selBar");
@@ -4475,16 +4768,11 @@ function selBar() {
   $("#selNone").addEventListener("click", () => { SEL.clear(); renderWords(); });
   $("#selMove").addEventListener("click", () => {
     if (!SEL.size) { toast("Önce kelime seç."); return; }
-    const list = GROUPS.length ? "Mevcut defterler: " + GROUPS.join(", ") + "\n\n" : "";
-    const name = (prompt(list + SEL.size + " kelimeyi hangi deftere taşıyalım? (Yeni isim yazarsan oluşturulur, boş bırakırsan defterden çıkarılır)") ?? null);
-    if (name === null) return;
-    const clean = name.trim();
-    if (clean && !GROUPS.includes(clean)) { GROUPS.push(clean); saveGroups(); }
-    WORDS.forEach(x => { if (SEL.has(x.w)) x.group = clean; });
-    saveWords(); syncSoon();
-    toast(clean ? SEL.size + " kelime \"" + clean + "\" defterine taşındı." : SEL.size + " kelime defterden çıkarıldı.");
-    SEL.clear(); selMode = false; $("#speakBtn").classList.remove("on");
-    renderWords();
+    chooseGroup(SEL.size + " kelimeyi taşı", target => {
+      moveWordsTo(new Set(SEL), target);
+      SEL.clear(); selMode = false; $("#speakBtn").classList.remove("on");
+      renderWords();
+    });
   });
   $("#selPlay").addEventListener("click", () => {
     const list = WORDS.filter(x => SEL.has(x.w));
@@ -4763,11 +5051,11 @@ $("#lsQ").addEventListener("keydown", e => { if (e.key === "Enter") lessonAsk();
 $("#lsClose").addEventListener("click", () => { $("#lesson").classList.remove("on"); renderKonu(); });
 
 /* ---------- ders PDF: dört kalem rengiyle ---------- */
-const INK   = [26, 31, 53];      // siyah — normal metin
-const RED   = [178, 32, 62];     // kırmızı — başlık, uyarı, yanlış
-const BLUE  = [26, 82, 156];     // mavi — İngilizce cümle, formül
-const GREEN = [22, 110, 62];     // yeşil — doğru, kural
-const GREY  = [120, 128, 152];   // gri — çeviri, yan bilgi
+const INK   = [16, 20, 36];      // siyaha yakın — normal metin
+const RED   = [140, 18, 44];     // koyu kırmızı — başlık, uyarı, yanlış
+const BLUE  = [14, 58, 118];     // koyu mavi — İngilizce cümle, formül
+const GREEN = [12, 82, 44];      // koyu yeşil — doğru, kural
+const GREY  = [80, 88, 108];     // koyu gri — çeviri, yan bilgi
 
 async function lessonPdf() {
   if (!LS.data) { toast("Önce bir konu aç."); return; }
@@ -4982,8 +5270,53 @@ $$("#gTabs .chip").forEach(c => c.addEventListener("click", () => {
 /* ============================================================
    Ayarlar / arayüz bağlantıları
    ============================================================ */
-function openSettings() { $("#settings").classList.add("on"); $("#keyInp").value = state.key; }
+function openSettings() {
+  $("#settings").classList.add("on");
+  $("#keyInp").value = state.key;
+  const u = $("#usageInfo"); if (u) u.textContent = "Bugün yapılan çağrı: " + usageToday();
+}
 $("#setClose").addEventListener("click", () => $("#settings").classList.remove("on"));
+
+/* ---------- tam yedek: tüm veriler tek JSON, gizli bilgiler hariç ---------- */
+const BACKUP_SKIP = k => k === "key" || k.indexOf("fb_") === 0;
+$("#fullExport").addEventListener("click", () => {
+  const data = { app: "kesit", v: 1, at: new Date().toISOString(), store: {} };
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const full = localStorage.key(i);
+      if (!full || full.indexOf("kesit.") !== 0) continue;
+      const k = full.slice(6);
+      if (BACKUP_SKIP(k)) continue;
+      data.store[k] = localStorage.getItem(full);
+    }
+  } catch (e) {}
+  Object.keys(mem).forEach(k => { if (!BACKUP_SKIP(k) && !(k in data.store)) data.store[k] = mem[k]; });
+  if (!Object.keys(data.store).length) { toast("Yedeklenecek veri yok."); return; }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: "application/json" }));
+  a.download = "kesit-tam-yedek-" + new Date().toISOString().slice(0, 10) + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast("Tam yedek indirildi — Dosyalar'a kaydet.");
+});
+$("#fullImport").addEventListener("click", () => $("#fullImportFile").click());
+$("#fullImportFile").addEventListener("change", e => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const d = JSON.parse(rd.result);
+      if (!d || d.app !== "kesit" || !d.store) throw new Error("biçim");
+      const n = Object.keys(d.store).length;
+      if (!confirm("Yedekte " + n + " kayıt var (" + (d.at || "").slice(0, 10) + ").\n\nMevcut verilerin ÜZERİNE yazılacak (API anahtarına dokunulmaz). Devam?")) return;
+      Object.keys(d.store).forEach(k => { if (!BACKUP_SKIP(k)) store.set(k, d.store[k]); });
+      toast("Yedek geri yüklendi, uygulama yenileniyor…");
+      setTimeout(() => location.reload(), 900);
+    } catch (err) { toast("Geçersiz yedek dosyası."); }
+  };
+  rd.readAsText(f);
+});
 
 $("#keySave").addEventListener("click", async () => {
   const v = $("#keyInp").value.trim();
