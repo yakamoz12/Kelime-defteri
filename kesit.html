@@ -260,6 +260,39 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
 .qtr{font-family:"Source Serif 4",serif;font-size:14.5px;color:var(--ink2);margin:8px 0 4px;line-height:1.5}
 .qtopic{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
   color:var(--deep);background:var(--deep-soft);border-radius:6px;padding:3px 8px;margin:6px 0 2px}
+/* ---------- strateji ---------- */
+.stgrp{background:var(--card);border:1px solid var(--line);border-radius:13px;box-shadow:var(--sh);margin-bottom:9px;overflow:hidden}
+.stgrp.hl{border-color:var(--deep);background:var(--deep-soft)}
+.sthead{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:13px 14px}
+.stic{font-size:19px;flex:none;line-height:1}
+.sttl{font-weight:600;font-size:15.5px;flex:1;display:flex;align-items:center;gap:7px}
+.stek{font-style:normal;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+  background:var(--acc-soft);color:var(--acc-ink);padding:2px 6px;border-radius:5px}
+.stn{font-size:12px;color:var(--ink3);font-variant-numeric:tabular-nums;flex:none}
+.stcar{color:var(--ink3);font-size:13px;flex:none;transition:transform .18s}
+.stgrp.open .stcar{transform:rotate(180deg)}
+.stbody{display:none;padding:0 14px 12px}
+.stgrp.open .stbody{display:block}
+.stitem{display:flex;gap:9px;padding:8px 0;border-top:1px solid var(--line2);font-size:14.5px;line-height:1.55}
+.stitem b{color:var(--acc-ink);font-weight:700}
+.stdot{flex:none;width:6px;height:6px;border-radius:50%;background:var(--deep);margin-top:8px}
+.stitem.ek .stdot{background:var(--acc)}
+.stp{display:inline-block;margin-top:3px;font-size:11px;color:var(--ink3);background:var(--card2);
+  border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.stnote{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+.stnote label{display:block;font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);font-weight:600;margin-bottom:5px}
+.stnote textarea{min-height:52px;font-size:14.5px}
+.stsh-g{margin-bottom:10px;border-bottom:1px solid var(--line2);padding-bottom:8px}
+.stsh-g h4{margin:0;font-size:14.5px;font-weight:600;color:var(--acc-ink);cursor:pointer;
+  display:flex;align-items:center;gap:8px;padding:7px 0}
+.stsh-g h4 .stshn{margin-left:auto;font-size:11.5px;color:var(--ink3);font-weight:500}
+.stsh-g h4 .stcar{transition:transform .18s}
+.stsh-g.open h4 .stcar{transform:rotate(180deg)}
+.stsh-body{display:none}
+.stsh-g.open .stsh-body{display:block}
+.stmynote{margin-top:8px;background:var(--deep-soft);border-radius:9px;padding:8px 11px;font-size:14px;line-height:1.5}
+.qstratbtn{width:100%;margin-top:10px;background:var(--deep-soft);color:var(--deep);border-radius:12px;
+  padding:11px;font-size:14px;font-weight:600;border:1px solid var(--deep)}
 .qcat{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
   background:var(--card);border:1px solid var(--line);border-radius:13px;box-shadow:var(--sh);
   padding:13px 15px;margin-bottom:8px}
@@ -793,6 +826,18 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   </div>
 </section>
 
+<!-- ============ STRATEJİ ============ -->
+<section class="screen max" id="strat">
+  <h1 class="lede" style="font-size:23px;margin-bottom:6px">Soru çözüm stratejisi</h1>
+  <p class="sub" style="margin-bottom:14px">Kaynak: YÖKDİL Sağlık Bilimleri Sınav Stratejileri. <b>ek</b> işaretli maddeler kaynakta yoktur, çalışma için eklenmiştir. Soru çözerken ilgili strateji ekrana kendiliğinden gelir.</p>
+  <div class="wbar" style="margin-bottom:12px">
+    <button class="btn ghost" id="stPdfBtn" style="flex:1">PDF çıkar</button>
+    <button class="btn ghost" id="stAllBtn" style="flex:0 0 auto">Tümünü aç/kapat</button>
+  </div>
+  <input class="inp" id="stSearch" placeholder="Strateji ara: inversion, whose, controlling idea…" autocapitalize="off" style="margin-bottom:14px">
+  <div id="stList"></div>
+</section>
+
 <!-- ============ KONU DERSİ ============ -->
 <div class="modal" id="lesson">
   <div class="mh">
@@ -990,6 +1035,10 @@ mark.hl{background:var(--mark-bg);color:inherit;padding:0 2px;border-radius:3px;
   <button class="tb" data-go="gram">
     <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h13"/><circle cx="18.5" cy="12" r="2.2"/></svg>
     <span>Gramer</span>
+  </button>
+  <button class="tb" data-go="strat">
+    <svg viewBox="0 0 24 24"><path d="M9 11l2.5 2.5L17 8"/><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h9"/></svg>
+    <span>Strateji</span>
   </button>
   <button class="tb" data-go="set">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.7 1.7 0 008 19.4a1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H2a2 2 0 110-4h.1A1.7 1.7 0 003.6 8a1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H8a1.7 1.7 0 001-1.5V2a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V8a1.7 1.7 0 001.5 1H22a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
@@ -2184,9 +2233,9 @@ function show(which) {
   $("#fontBtn").classList.toggle("hid", which !== "reader");
   $("#allBtn").classList.toggle("hid", which !== "reader");
   if (which !== "reader" && which !== "quiz") { $("#selBtn").classList.add("hid"); closeSheet(); }
-  const tabOf = { home: "home", reader: "home", quiz: "quiz", words: "words", gram: "gram" };
+  const tabOf = { home: "home", reader: "home", quiz: "quiz", words: "words", gram: "gram", strat: "strat" };
   $$(".tb").forEach(b => b.classList.toggle("on", b.dataset.go === tabOf[which]));
-  const titles = { home: ["Kesit", "İngilizce makale okuyucu"], quiz: ["Çalışma", "Soru çöz"], words: ["Defter", "Kelimelerim"], gram: ["Defter", "Gramer notlarım"] };
+  const titles = { home: ["Kesit", "İngilizce makale okuyucu"], quiz: ["Çalışma", "Soru çöz"], words: ["Defter", "Kelimelerim"], gram: ["Defter", "Gramer notlarım"], strat: ["Strateji", "Soru çözüm yöntemleri"] };
   if (which !== "reader") {
     $("#crumbTop").textContent = titles[which][0];
     $("#crumbMain").textContent = titles[which][1];
@@ -2207,6 +2256,7 @@ $$(".tb").forEach(b => b.addEventListener("click", () => {
   if (go === "quiz") refreshQuizHome();
   if (go === "words") renderWords();
   if (go === "gram") renderGrams();
+  if (go === "strat") renderStrat();
   show(go);
 }));
 
@@ -4065,6 +4115,16 @@ function drawQ() {
     `<button class="qopt" data-k="${k}"><span class="ltr">${k}</span><span class="txt">${esc(q.options[k])}</span></button>`).join("");
   box.querySelectorAll(".qopt").forEach(b => b.addEventListener("click", () => pick(b.dataset.k)));
   $("#qFeed").innerHTML = "";
+  const sb = $("#qStratBtn");
+  if (sb) sb.remove();
+  const cat = q.cat || (QZ.mode === "bank" ? "" : "");
+  if (cat) {
+    const b = document.createElement("button");
+    b.className = "qstratbtn"; b.id = "qStratBtn";
+    b.textContent = "📋 " + cat + " stratejisi";
+    b.addEventListener("click", () => openStratSheet(cat));
+    $("#qOpts").after(b);
+  }
   if (q.pick) paintPick();
   if (q.why) showWhy(q.why);
 }
@@ -4707,13 +4767,18 @@ async function syncNow(quiet) {
     SOLVED = mergeList(SOLVED, remote && remote.solved, x => x.id);
     WRONG = mergeList(WRONG, remote && remote.wrong, x => "wr:" + x.id);
     QBANK = mergeList(QBANK, remote && remote.qbank, x => x.id);
+    if (remote && remote.stratnotes && (remote.stratnotes._t || 0) > (STRATNOTE._t || 0)) {
+      STRATNOTE = remote.stratnotes;
+      store.set("strat_notes", JSON.stringify(STRATNOTE));
+      if (state.screen === "strat") renderStrat();
+    }
     const gLocal = GROUPS.map(g => ({ k: "grp:" + g, g, t: GROUPT[g] || 0 }));
     const gMerged = mergeList(gLocal, remote && remote.groups, x => x.k).filter(x => x.g);
     GROUPS = gMerged.map(x => x.g);
     GROUPT = {}; gMerged.forEach(x => { GROUPT[x.g] = x.t || 0; });
     saveWords(); saveGrams(); saveLib(); saveSolved(); saveWrong(); saveGroups(); saveBank();
     await fbPush({ v: 1, at: new Date().toISOString(), words: WORDS, grams: GRAMS, lib: LIB, solved: SOLVED,
-                   wrong: WRONG, groups: gMerged, qbank: QBANK, tomb: tombOut() });
+                   wrong: WRONG, groups: gMerged, qbank: QBANK, stratnotes: STRATNOTE, tomb: tombOut() });
     if (state.screen === "quiz" && $("#qRun").classList.contains("hid")) refreshQuizHome();
     fbSet("last", new Date().toISOString());
     setSyncMsg(syncLabel());
@@ -5652,6 +5717,482 @@ $("#textGo").addEventListener("click", () => {
   const blocks = t.split(/\n{1,}/).map(s => s.replace(/\s+/g, " ").trim()).filter(Boolean)
     .map(s => ({ type: looksLikeHeading(s) ? "h" : "p", text: s }));
   openDoc("Yapıştırılan metin", blocks, "Metin");
+});
+
+
+/* ============================================================
+   Soru Çözüm Stratejileri
+   Kaynak: YÖKDİL Sağlık Bilimleri Sınav Stratejileri (PDF 1-664).
+   "ek:true" işaretli maddeler kaynakta yoktur, çalışma için eklenmiştir.
+   ============================================================ */
+const STRAT = [
+{ id:"akis", t:"Genel Çözüm Akışı", ic:"⚡", hl:true, cats:["*"], items:[
+  {s:"**Önce yapısal eleme yap.** Yalnız birden fazla seçenek kaldığında anlamı ayrıntılı değerlendir."},
+  {s:"**Hızlı tekrar sırası:** 1) Yapı türünü belirle. 2) Boşluk öncesi/sonrası öğe ihtiyacını bul. 3) Tense — active/passive — özne/nesne uyumunu kontrol et. 4) Referans ve noktalama bağını izle. 5) En son anlamı ve kapsamı değerlendir.", p:"s. 38"},
+  {s:"Uzun cümlede açıklayıcı ara bölümü paranteze alıp ana kalıbı gör.", p:"s. 198-200"},
+  {s:"Cümle boşluk olmadan zaten anlamlıysa boşluk adverb / even / comparative-superlative vurgu yapısı olabilir.", p:"s. 198-200"}
+]},
+
+{ id:"tense", t:"Tense — Zamanlar", ic:"⏱", cats:["Tense"], items:[
+  {s:"**İlk tarama sırası:** zaman ifadesi → fiilin aktif/pasif olması → özne/nesne → iki olay arasındaki sıra.", p:"s. 56-60"},
+  {s:"Eylemin kaç kez tekrarlandığı belirtiliyorsa (three times, several times) **progressive seçeneklerden uzaklaş**.", p:"s. 10"},
+  {s:"for two days, all day, throughout the year gibi süreç ifadelerinde am/is/are V-ing, was/were V-ing, will be V-ing **elenir**.", p:"s. 11"},
+  {s:"Genel, bilimsel veya kalıcı bilgi → **Present Simple (V1)** önceliklidir. Ana cümle Past olsa bile aktarılan bilgi genel gerçekse V1 kalabilir.", p:"s. 12-13"},
+  {s:"If ve zaman bağlaçlarının yan cümlesinde gelecek anlam olsa bile **will/would/be going to/shall kullanılmaz**; Present yapı aranır.", p:"s. 14, 52-54"},
+  {s:"date back to, go back to, date from fiilleri için ilk tercih çoğunlukla **V1**.", p:"s. 15"},
+  {s:"now, currently, at the moment, at present, presently, for the time being + Look!/Listen! → **Present Continuous**. Pasif gerekiyorsa am/is/are being V3.", p:"s. 16-17"},
+  {s:"**now'u tek başına yorumlama:** at that moment → Past; up to/till now ve for ... years now → Perfect; from now on → Future.", p:"s. 17"},
+  {s:"nowadays, these days, for the time being geçici durum → Present Continuous. gradually, more and more, day by day değişim süreci → progressive.", p:"s. 18-19"},
+  {s:"yesterday, last, ago, in/during/between + geçmiş tarih, in ancient times, during World War II → **V2**. originate fiili sınavda sıkça **originated** biçiminde sorulur.", p:"s. 19-20"},
+  {s:"Ölmüş kişinin tamamlanmış yaşamındaki işler **V2** ile anlatılır. previously, formerly, initially, until recently geçmişte kalan durumu gösteriyorsa V2'yi kontrol et.", p:"s. 21-25"},
+  {s:"**recently ≠ until recently:** recently → Present Perfect / Perfect Continuous; until recently → sınav önceliği **V2**.", p:"s. 24-26"},
+  {s:"Geçmişte başlayıp şimdiyle bağlantısı süren olay, hayat tecrübesi veya sonucu şimdi önemli olan eylem → **have/has V3**.", p:"s. 26-32"},
+  {s:"ever/never, the first/second..., the only ve superlative + ever → **Present Perfect** için güçlü ipucu.", p:"s. 28-32"},
+  {s:"Net rakamsal sonuç varsa progressive'den uzaklaş: ten cigarettes gibi tamamlanmış miktar → have/has V3.", p:"s. 33"},
+  {s:"three times a day gibi sıklık ifadesi **tek başına zamanı belirlemez**; Present bağlamda V1, Past bağlamda V2, Future bağlamda will V0.", p:"s. 34"},
+  {s:"yet olumsuz ve soru cümlelerinde Perfect ile kullanılır. before 'daha önce' anlamında zarfsa Present Perfect ile görülebilir.", p:"s. 35-36"},
+  {s:"**since** başlangıç noktası, **for** süre miktarı. Geçmişten şimdiye süren ve süreç vurgulanan eylemde have/has been V-ing kontrol et.", p:"s. 36-40"},
+  {s:"Geçmişte iki olay: önce olan **had V3**, sonra olan **V2**. Ama before/after tek başına otomatik Past Perfect seçtirmez — olay sırasını kontrol et.", p:"s. 41-45"},
+  {s:"by the time + V2 → diğer cümlede had V3. by the time + Present → will have V3.", p:"s. 43-47"},
+  {s:"**by** + gelecek zaman noktası tamamlanmayı, **until/till** o noktaya kadar sürekliliği öne çıkarır.", p:"s. 46-48, 354"},
+  {s:"future continuous: gelecekte belli bir anda sürmekte olan. future perfect: bir noktaya kadar tamamlanmış. future perfect continuous: o noktaya kadar süren süreç.", p:"s. 48-52"},
+  {s:"**stative fiilleri progressive biçimde otomatik seçme**; anlamı ve fiilin durum/eylem kullanımını kontrol et.", p:"s. 54-56"},
+  {s:"Restatement ve reading sorularında soru kökündeki zarfın eş anlamlısını şıklarda ara: often → frequently; now → currently.", p:"s. 15, 17-18"}
+]},
+
+{ id:"modal", t:"Modality — Modallar", ic:"🔑", cats:["Gramer"], items:[
+  {s:"**Önce zaman katmanını belirle:** şimdi/genel → modal + V0; geçmiş → modal + have V3. Sonra anlamı belirle.", p:"s. 76-80"},
+  {s:"may/might/could + V0 olasılık; modal + have V3 geçmiş olasılık. Dikkat: modal + have V3, by tomorrow gibi ifadelerle **geleceğe de** gönderme yapabilir.", p:"s. 77-80"},
+  {s:"can hem yetenek hem olasılık verebilir; yalnız 'yapabilmek' diye dar yorumlama.", p:"s. 79-80"},
+  {s:"Geçmişte **genel yetenek → could**; **belirli bir olayda başarı → was/were able to**. fortunately/luckily gibi sonuç bildiren bağlamlarda was/were able to güçlü aday.", p:"s. 81-84"},
+  {s:"be able to, can'in farklı zamanlara giren alternatifi: will be able to, have been able to.", p:"s. 83-84"},
+  {s:"must/have to zorunluluk; geçmişte had to; have/has got to da zorunluluk verir.", p:"s. 84-87"},
+  {s:"**mustn't** yasak veya olumsuz çıkarım; **don't have to / needn't** zorunluluk yokluğu. Karıştırma.", p:"s. 87-89"},
+  {s:"should/ought to tavsiye; **had better + V0** güçlü tavsiye. had better'dan sonra **to gelmez**; olumsuzu had better not + V0.", p:"s. 89-91"},
+  {s:"**should have V3:** yapmalıydı ama yapmadı. **shouldn't have V3:** yapmamalıydı ama yaptı.", p:"s. 91-93"},
+  {s:"**needn't have V3:** yaptı ama gerek yoktu. **didn't need to V0:** yapması gerekli değildi — eylemin gerçekleşip gerçekleşmediğini bağlamdan çıkar.", p:"s. 93-95"},
+  {s:"**must have V3** güçlü geçmiş çıkarım; **may/might/could have V3** olasılık; **can't/couldn't have V3** güçlü olumsuz çıkarım.", p:"s. 95-98"},
+  {s:"Süren eylem için modal + be V-ing; geçmişte sürmekte olan çıkarım için modal + have been V-ing. **must be V-ing** kaynağın özel ipuçlarından.", p:"s. 98-100"},
+  {s:"be likely/unlikely/bound to ve may/might/could well olasılık derecelerine göre değerlendirilir.", p:"s. 101-104"},
+  {s:"used to + V0 geçmiş alışkanlık; would geçmişte tekrarlanan eylem; **be/get used to + noun/V-ing** alışkın olmak/alışmak.", p:"s. 105-108"},
+  {s:"would rather / prefer / had better yapılarını geçmiş görünüşlerine bakarak tense sanma; devam kalıbına odaklan.", p:"s. 106-110"}
+]},
+
+{ id:"passive", t:"Passive & Causative", ic:"🔄", cats:["Gramer"], items:[
+  {s:"Temel dönüşüm: S + V + O → **O + be V3**. İki nesneli fiillerde uygun nesne özne konumuna taşınabilir.", p:"s. 117-119"},
+  {s:"Modal passive: **modal + be V3**; gerund passive: **being V3**; perfect passive: **been V3**; infinitive passive: **to be V3**.", p:"s. 119-120"},
+  {s:"Phrasal verb passive olduğunda **preposition cümlede kalır**.", p:"s. 121"},
+  {s:"is broken, interested in, addicted to gibi biçimler her zaman gerçek eylem Passive'i değildir; **stative passive / sıfat** olabilir.", p:"s. 122"},
+  {s:"**Fiil nesne almıyorsa Passive olamaz.** Nesne alan fiilde boşluktan sonra nesne varsa Active, yoksa Passive güçlü aday.", p:"s. 123-125"},
+  {s:"Reporting verbs: aynı zaman/genel → to V0; daha önce olmuş → to have V3; passive aynı zaman → to be V3; passive önce olmuş → to have been V3.", p:"s. 126-129"},
+  {s:"It is said/thought... → that + SVO. Kişi özne yapılmışsa He is said/thought... + to... kalıbı.", p:"s. 127-130"},
+  {s:"catch/find + object + V-ing. **have/get + object + V3** bir işi yaptırma anlamı.", p:"s. 130-132"},
+  {s:"have/make/let + agent + **V0**; get/force/want/ask/tell + agent + **to V0**; help + object + V0 / to V0.", p:"s. 132-134"},
+  {s:"make/let passive olunca **to gelir**: be made to, be allowed to. Genel eğilim verb + object + to V0; V0 istisnaları have/make/let/help/see/hear; V-ing grubu catch/find/spend/waste.", p:"s. 133-134"}
+]},
+
+{ id:"gerinf", t:"Gerund & Infinitive", ic:"🔗", cats:["Gramer"], items:[
+  {s:"**Preposition + V-ing.** by + V-ing yöntem; without + V-ing 'yapmadan'.", p:"s. 141-144"},
+  {s:"be used to, get used to, look forward to, object to → buradaki **to preposition** olduğu için **V-ing** alır.", p:"s. 144-146"},
+  {s:"possessive + V-ing; spend/waste + zaman/para + V-ing; have difficulty/trouble + V-ing.", p:"s. 146-149"},
+  {s:"Algı fiillerinde **V0 tamamlanmış/bütün eylemi**, **V-ing sürmekte olan bölümü** öne çıkarır.", p:"s. 149-151"},
+  {s:"having V3 / having been V3 → ana fiilden önce gerçekleşen aktif/pasif gerund. to have V3 / to have been V3 → ana fiilden önce gerçekleşen infinitive.", p:"s. 151-153"},
+  {s:"mean, try, stop, forget, remember, regret, go on, come fiillerinde **V-ing ve to V0 anlam değiştirir**; seçim biçime değil anlama göre yapılır.", p:"s. 154-157"},
+  {s:"need V-ing = need to be V3.", p:"s. 158"},
+  {s:"Pratik yaklaşım: daha önce olmuş / genel deneyim → **V-ing**; daha sonra / niyet / amaç → **to V0**.", p:"s. 159-160"}
+]},
+
+{ id:"adjadv", t:"Sıfat, Zarf & Karşılaştırma", ic:"📐", cats:["Gramer"], items:[
+  {s:"**Fiil niteleniyorsa adverb; isim niteleniyorsa adjective.** Boşluğun konumunu önce yapısal olarak çöz.", p:"s. 177-179"},
+  {s:"Linking verb sonrasında adjective; hareket fiilini niteleyen unsur adverb.", p:"s. 170-174"},
+  {s:"**-ing adjective** etkileyen/özellik veren; **-ed adjective** etkilenen/hisseden tarafı niteler.", p:"s. 172-174"},
+  {s:"late ≠ lately; hard ≠ hardly. hardly/barely/scarcely 'neredeyse hiç'; almost/nearly/practically 'neredeyse'.", p:"s. 174-176"},
+  {s:"quite, rather, fairly derece ve ton bakımından aynı değildir; neyi nitelediğini kontrol et.", p:"s. 176-178"},
+  {s:"much/far/a lot/rather/a little/a bit/no + comparative. **than her comparative'de zorunlu değildir**; ama iki unsur açıkça kıyaslanıyorsa comparative + than aranır.", p:"s. 180"},
+  {s:"farther/further, older/elder, later/latter ayrımına; the former / the latter göndermelerine dikkat.", p:"s. 180"},
+  {s:"more ... than; the more ..., the more ...; as ... as / so ... as; as much/many ... as kalıplarını **bütün olarak gör**.", p:"s. 181-186"},
+  {s:"such ... as ≠ such as (örnekleme). **like + noun** 'gibi'; **as + noun** 'olarak'.", p:"s. 186-189"},
+  {s:"**so + adj/adv + that**; **such + (a/an) + adj + noun + that** sonuç kalıpları.", p:"s. 188-190"},
+  {s:"too + adj/adv + to V0; enough + noun; adj/adv + enough + to V0 — dizilimi konumdan çöz.", p:"s. 190-192"},
+  {s:"Superlative için **the**; **by far** güçlü superlative vurgusu. the last ≠ the latest.", p:"s. 192-195"},
+  {s:"as + SVO farklı bağlamlarda 'gibi, iken, çünkü' anlamı verebilir; cümle ilişkisini kontrol et.", p:"s. 195-197"}
+]},
+
+{ id:"adjcl", t:"Adjective Clause (Relative)", ic:"🧩", cats:["Relative Clause","Gramer"], items:[
+  {s:"Defining: insan özne **who/that**; nesne/şey **which/that**. Virgüllü **Non-defining**: insan için who, insan dışı için which — **that kullanılmaz**.", p:"s. 205"},
+  {s:"Boşluktan önce **preposition** varsa yalnız **whom, which veya whose + noun** yönüne git; who/when/that elenir.", p:"s. 207"},
+  {s:"Devamda özne var ve fiilin nesnesi eksikse **nesne sorusudur**: whom/which; virgül yoksa that yedek olabilir.", p:"s. 208"},
+  {s:"**whose** devamında artikel/determiner değil doğrudan noun ya da adjective + noun ister; sahiplik kurar.", p:"s. 209-210"},
+  {s:"Yer ismi + **tam cümle** → where / preposition + which. Yer ismi + **özne/nesne eksiği** → which/that.", p:"s. 212-213"},
+  {s:"reason/explanation + tam cümle → **why**; özne/nesne eksiği → which/that. Sınavlarda **the reason why** kalıbı öne çıkar.", p:"s. 214"},
+  {s:"Zaman ifadesi + tam cümle → when / preposition + which; özne/nesne eksiği → which.", p:"s. 215"},
+  {s:"**Reduction yalnız nitelenen isim relative clause'un öznesiyse yapılır.** Active → V-ing; Passive → V3 / being V3.", p:"s. 217-220"},
+  {s:"Noun + V-ing aktif kısaltma; Noun + V3/being V3 pasif kısaltma; superlative + to V0 / to be V3; noun + adjective/preposition kısaltma kalıpları.", p:"s. 221, 230"},
+  {s:"**Tuzak:** Boşluktan önce bir isim ve onun öncesinde bir fiil varsa 'reduction' diye atlama — verb + object + to V0 kuralı olabilir.", p:"s. 221, 230"},
+  {s:"Relative sorusunda preposition seçeneği varsa relative'den sonraki fiil/sıfat/isimle kullanılan edatı bul: responsible for, work on.", p:"s. 223"},
+  {s:"Testte önce **nitelenen ismi**, sonra clause içinde **eksik olan öğeyi** belirle; yalnız anlama bakarak seçme.", p:"s. 231-240"}
+]},
+
+{ id:"nouncl", t:"Noun Clause & Yardımcı Fiiller", ic:"📦", cats:["Gramer"], items:[
+  {s:"Kararlı/kesin durum → **that / the fact that**; kararsız/belirsiz → **whether/if** ve wh- yapıları. Preposition sonrasında yalın that değil **the fact that**.", p:"s. 241-246"},
+  {s:"Noun clause **özne konumundaysa that atılmaz**; özne konumunda whether kullanılabilir, **if kullanılmaz**.", p:"s. 244"},
+  {s:"**Subjunctive:** tavsiye/talep/zorunluluk/önem bildiren fiil-sıfat-isim + that + subject + **(should) V0**; pasifte (should) be V3.", p:"s. 252"},
+  {s:"Tense uyumu: ana fiil Present ise çoğunlukla Present; Past ise çoğunlukla Past. **İstisnalar:** it boş öznesi, gerçek tarih, genel gerçek, içeride if/zaman bağlacı, should/might/must.", p:"s. 254, 268"},
+  {s:"Seçeneklerde what/where/which/who/when birlikteyse önce **adjective clause mı noun clause mu** diye sınıflandır.", p:"s. 255"},
+  {s:"how + adjective/adverb + subject + verb diziliminde how 'ne kadar' anlamı verir.", p:"s. 255"},
+  {s:"that/the fact that ↔ whether/if/wh- ayrımını önce **kesinlik–belirsizlik** anlamından yap. wonder gibi belirsizlik fiillerinde that'ten uzaklaş.", p:"s. 257"},
+  {s:"Noun clause içeren tense sorusunda ana fiil boşsa **V-ing, would ve will türü seçenekleri işaretlemekten kaçınma** uyarısı vardır.", p:"s. 257"},
+  {s:"Olumsuz iki cümlede ekleme **... either**; olumlu iki cümlede **... too / as well**. Kısaltmada ikinci cümlenin yardımcı fiili ilk yükleme göre seçilir.", p:"s. 258-260"},
+  {s:"**do so** önceki eylemi tekrarlar; boşluktan hemen önce do varsa **so** güçlü aday.", p:"s. 262"},
+  {s:"Onaylayan **so + subject + auxiliary** devrik DEĞİL (So it is). Katılım bildiren **So + auxiliary + subject** inversion'dır.", p:"s. 260-264"},
+  {s:"whether; özne konumunda, preposition sonrasında, or not'tan hemen önce ve reduction'da kullanılır.", p:"s. 268"},
+  {s:"**Cümle başındaki if** şart bağlacıdır. Cümle ortasında önceki fiilin nesnesi eksikse if noun clause olup '-ıp -madığı' anlamı verir; önceki kısım tam cümleyse conditional düşün.", p:"s. 280"}
+]},
+
+{ id:"cond", t:"Conditionals & Wish", ic:"🔀", cats:["Gramer"], items:[
+  {s:"İki tarafın **type uyumunu** kontrol et. Ana cümlede Past Perfect sınav tarzında beklenmez; açık zaman işareti yoksa **mixed type seçme**.", p:"s. 283"},
+  {s:"**Type 2** şimdi/geleceğin gerçeğe aykırı durumu; one tense back: Present→Past, will→would, may→might. **were to + V0** daha varsayımsal gelecek.", p:"s. 284"},
+  {s:"provided/providing (that), as long as / so long as, on condition that → if yerine kullanılabilir.", p:"s. 291-296"},
+  {s:"**only if** cümle ortasındaysa normal; **cümle başındaysa ana cümle inversion** olur.", p:"s. 292, 595"},
+  {s:"in case + SVO; in case of + noun phrase. just in case 'ihtimaline karşılık'.", p:"s. 296"},
+  {s:"if it weren't/hadn't been for ve **but for + noun phrase** '... olmasa/olmasaydı'; ana cümle type'a göre çekilir.", p:"s. 297"},
+  {s:"whether ... or diziliminde **or güçlü ipucudur**; iki olasılığı bağlar.", p:"s. 299"},
+  {s:"**otherwise** sonrasını if clause ana cümlesi gibi yorumla; if ana cümleye gelmeyen yapı otherwise sonrasında da gelmez. otherwise **zarftır**, or/or else bağlaçtır.", p:"s. 300-301"},
+  {s:"**Wish:** Present/Future biçimleri doğrudan kullanılmaz. Şimdiki isteğin aksi → Past; geçmiş pişmanlık → had V3 / could have V3.", p:"s. 306"},
+  {s:"as if / as though unreal anlamdaysa **one tense back** uygula; now/at present gibi gerçek zaman işaretleri varken yan cümlede Present seçmekten kaçın.", p:"s. 359"}
+]},
+
+{ id:"conj", t:"Bağlaçlar — Zıtlık, Neden, Amaç", ic:"🔗", cats:["Bağlaç"], items:[
+  {s:"**Eleme sırası:** ardından SVO mu NP/V-ing mi geliyor → aynı grup yapılar → cümledeki konum → noktalama → **en son anlam**.", p:"s. 325"},
+  {s:"Önce iki tarafın anlam ilişkisini bul: vanish/reappear gibi açık karşıtlık but/contrast grubuna yönlendirir.", p:"s. 318"},
+  {s:"**nor sonrasında inversion** gerekir. FANTBOYS içinde for tam cümle ister; ATBOYS'ta ortak özne varsa ikinci özne düşebilir.", p:"s. 319"},
+  {s:"not only kalıbı not merely/not solely/not just/not simply biçiminde gelebilir; karşılığı but also / as well / too.", p:"s. 321"},
+  {s:"**not ... but ...** 'değil ...' anlamında; **but sonrasındaki öğe gerçek/doğru olandır**.", p:"s. 322"},
+  {s:"both...and, either...or, neither...nor, not only...but also **paralel yapıdır**; bağlanan iki öğenin türü/görevi aynı olmalı.", p:"s. 323-325"},
+  {s:"neither ... nor iki cümleyi bağlarsa **nor sonrasındaki cümle inversion** olur.", p:"s. 325"},
+  {s:"**+ SVO:** although/though/even though/even if/while/much as. **+ noun/V-ing:** despite / in spite of.", p:"s. 327-329"},
+  {s:"though noktalama ile ara/son konumda kullanılabilir; alternatifleri however/nonetheless/nevertheless.", p:"s. 327"},
+  {s:"however / no matter how + adjective/adverb; **no matter mutlaka wh-/how ile devam eder**.", p:"s. 331-332"},
+  {s:"whereas/while iki özne veya iki durumu **doğrudan karşılaştıran** zıtlıkta kullanılır.", p:"s. 335"},
+  {s:"on the grounds that + SVO gerekçe. **in that + SVO** 'bakımından/çünkü'; **in terms of + NP** 'bakımından'.", p:"s. 338-339"},
+  {s:"**Neden + SVO:** because/as/since/inasmuch as/seeing that/seeing as/now that. **Neden + NP:** because of/due to/owing to/on account of/in view of/thanks to/as a result of.", p:"s. 339-340"},
+  {s:"be in view of, diğer neden edatlarından farklı olarak 'fikrinde olmak' anlamı verebilir; be + due to ile karıştırma.", p:"s. 341"},
+  {s:"Boşluktan önce largely/partly gibi derece zarfı + neden ilişkisi varsa **neden-sonuç edatlarına öncelik** ver.", p:"s. 343"},
+  {s:"because of/due to/owing to/on account of/in view of/thanks to **+ the fact that + SVO** kullanılabilir.", p:"s. 344"},
+  {s:"**Amaç:** to/in order to/so as to + V0; with a view to + V-ing/noun; so that/in order that + SVO (çoğunlukla modal). Amaç **so that** ile sonuç **so (that)** ayrımına dikkat.", p:"s. 347"},
+  {s:"after + noun/SVO; **since** geçmiş başlangıçtan şimdiye uzanıyorsa ana cümlede have/has V3 beklenir.", p:"s. 350"},
+  {s:"as soon as / the moment (that) / immediately '-r ...-mez'; **once** '-dığı andan itibaren'.", p:"s. 351-353"},
+  {s:"Zaman bağlacı sonrası reduction'da V-ing görülür; **boşluktan sonra V-ing varsa while/before/after'a öncelik** ver.", p:"s. 356"},
+  {s:"just as ... (so) ... benzerlik kurar; so ile ana cümle normal veya inversion olabilir.", p:"s. 357"}
+]},
+
+{ id:"prep", t:"Edatlar & Cümle Zarfları", ic:"🧷", cats:["Edat"], items:[
+  {s:"Preposition sorusunda yalnız öncesine değil **sonrasındaki fiil/sıfat/isimle kalıplaşan edata** da bak.", p:"s. 487"},
+  {s:"Cümle zarflarında **noktalama önemlidir**; iki bağımsız cümleyi yalnız virgülle bağlamak kurala aykırıdır. Ama ÖSYM bazı sorularda however/nevertheless/therefore sonrası virgülle ikinci cümleyi verir.", p:"s. 367"},
+  {s:"**Zıtlık/çürütme:** however, nevertheless, nonetheless, even so, still, yet. Neden ve sonuç zamanlarının mantıksal uyumunu da kontrol et.", p:"s. 368-372"},
+  {s:"**and sonrasında boşluk** varsa therefore/thus/consequently/as a result grubuna öncelik ver. Virgül + sonuç zarfı doğrudan fiille devam ederse V-ing: , thus + V-ing.", p:"s. 371-372"},
+  {s:"also genellikle özne/yardımcı/modal sonrası, ana fiil öncesi. besides zarf olabilir; edat olarak besides/in addition to/as well as/apart from + NP/V-ing.", p:"s. 373-374"},
+  {s:"that is 'başka bir deyişle'; in fact/actually vurgu ve düzeltme; summary zarfları sonucu toparlar.", p:"s. 376-379"},
+  {s:"apart from / aside from hem 'yanı sıra' hem 'hariç' anlamı verebilir — **bağlama bak**.", p:"s. 379"},
+  {s:"by means of 'aracılığıyla'; regardless/irrespective of 'bakılmaksızın'; regardless of what = whatever / no matter what.", p:"s. 380"}
+]},
+
+{ id:"redinv", t:"Reduction & Inversion", ic:"✂️", cats:["Gramer"], items:[
+  {s:"**Adverbial reduction ön koşulu: ortak özne.** Virgüle kadar özne yok, virgülden sonra özne çıkıyorsa reduction düşün.", p:"s. 361"},
+  {s:"**V-ing** eş zamanlı aktif; **V3 / being V3** eş zamanlı pasif; **having V3** farklı zamanlı aktif; **having been V3** farklı zamanlı pasif.", p:"s. 361-366"},
+  {s:"Adverbial reduction cümle başında **to V0 / to have V3 ile kurulmaz** — bu seçenekleri ele.", p:"s. 366"},
+  {s:"Cümle başına gelen olumsuz/sınırlayıcı zarf, cümleyi **soru düzeninde inversion** yapar; soru işareti kullanılmaz.", p:"s. 382-386"},
+  {s:"**Inversion tetikleyicileri:** never, rarely, seldom, little, hardly/scarcely, at no time, under no circumstances, not until, only then/after/by/if.", p:"s. 382-386"},
+  {s:"**no sooner ... than** ve **hardly/scarcely ... when** yapılarında ilk taraf inversion olur.", p:"s. 383-385"},
+  {s:"only + zarf cümle başındaysa ana cümle inversion ister; **for the first time aynı şekilde zorunlu inversion oluşturmaz**.", p:"s. 386"},
+  {s:"Karşılaştırmada tekrar edilen fiil yardımcı fiille verilir; öznenin zamanı ve tekil/çoğulluğu do/does/did seçimini belirler.", p:"s. 386"}
+]},
+
+{ id:"quant", t:"Quantifiers — Miktar", ic:"🔢", cats:["Gramer"], items:[
+  {s:"**İlk eleme ölçütü isim türüdür:** tekil, çoğul sayılabilir, sayılamayan. Anlamı en sona bırak.", p:"s. 434-440"},
+  {s:"**a number of** + çoğul isim + **çoğul fiil**; **the number of** + çoğul isim + **tekil fiil**. Karıştırma.", p:"s. 408"},
+  {s:"many/a great many/a large number of/scores of + çoğul sayılabilir. much/a great deal of/a large amount of + sayılamayan.", p:"s. 401-410"},
+  {s:"**few/little** olumsuza yakın 'yok denecek kadar az'; **a few/a little** 'az ama yeterli'. only a few/only a little olumsuz vurgu taşır.", p:"s. 410-412"},
+  {s:"all/some/any/no/most seçiminde isim türünü ve cümlenin olumlu-olumsuz-soru yapısını birlikte kontrol et. any olumlu cümlede 'herhangi/her' olabilir.", p:"s. 412-414"},
+  {s:"either/neither **iki öğe** içindir: either/neither of + them/us/you veya determiner + çoğul isim; fiil çoğunlukla tekil.", p:"s. 416"},
+  {s:"each/every tekil isim + tekil fiil; each of + çoğul grup. both ikisi; neither ikisi de değil.", p:"s. 416-420"},
+  {s:"one/another/the other/the others/others seçiminde **grubun belirli olup olmadığını ve kaç öğe kaldığını** belirle.", p:"s. 421-434"},
+  {s:"another + tekil isim; other + çoğul/sayılamayan; **the other** belirli kalan tek öğe; **the others** belirli grubun kalanları.", p:"s. 421-430"},
+  {s:"one another / each other karşılıklı eylem bildirir; another/other ile karıştırma.", p:"s. 429-433"}
+]},
+
+{ id:"reading", t:"Okuma (Reading)", ic:"📖", cats:["Okuma","Yakın Anlam"], items:[
+  {s:"**Parçayı baştan sona edebiyat metni gibi okuyup her cümleyi çevirmeye çalışma** — bu yaklaşım zaman kaybettirir.", p:"s. 445"},
+  {s:"**Üç aşama:** 1) topic sentence/ilk cümle veya **45 saniyeyi geçmeyen** genel tarama. 2) Soru kökleri analizi. 3) Parçanın okunması.", p:"s. 445-448"},
+  {s:"Hızlı taramada cümleleri tek tek okuma; **dikkat çeken isim, tarih, sayı ve ikili kelime gruplarını işaretle**. Amaç konuyu önceden tahmin etmek.", p:"s. 446-447"},
+  {s:"Soru köklerini **spesifik / genel** diye ayır. Spesifik soru ilgili bölgeye götürür; **genel soru tüm parça okunmadan çözülmez**.", p:"s. 447-449"},
+  {s:"Soru köklerindeki anahtar kelimeleri akılda tutarak oku; belirgin isim/tarih geldiğinde ilgili soruya dön.", p:"s. 449-452"},
+  {s:"**Soruların sırası ile cevapların parçadaki yeri arasında zorunlu paralellik yoktur** — sıra takip edeceğim diye metni yanlış bölme.", p:"s. 465"},
+  {s:"**Reference sorusu:** zamirin önceki en yakın mantıklı isme gönderimini kontrol et; yalnız kelime benzerliğine güvenme.", p:"s. 451-458"},
+  {s:"**Inference sorusu** birebir cümle değil, verilen bilgiye dayalı mantıksal çıkarım ister.", p:"s. 459"},
+  {s:"**Main idea sorusunda** ilk cümleyi ve bütün parçayı birlikte değerlendir; yalnız bir bölümde geçen spesifik doğru bilgi ana fikir değildir.", p:"s. 460"},
+  {s:"**Şık eleme:** all, only, always, never, completely, inevitably, most important gibi iddialı ifadelere negatif önyargıyla yaklaş; parça açıkça desteklemiyorsa ele.", p:"s. 461"},
+  {s:"**Seçenek doğru görünse bile parçada kanıtı olmalı.** Parçada değinilmeyen veya kapsamı büyüten bilgi çeldiricidir.", p:"s. 461-464"},
+  {s:"Parçadaki neden-sonuç ve bağlaç dönüşümleri seçeneklerde eş anlamlı verilebilir: led to ↔ as a result of.", p:"s. 463"},
+  {s:"**Çözüm özeti:** ilk cümle/genel tarama → soru kökleri → anahtar kelimeler → ilgili bölge → **kanıtla doğrulama**.", p:"s. 466"},
+  {s:"Sınav zaman planında okuma bölümüne yaklaşık **60-75 dakika** ayır.", p:"s. 466"}
+]},
+
+{ id:"cloze", t:"Cloze Test", ic:"🕳", cats:["Cloze"], items:[
+  {s:"**Beş ayrı soru gibi görünse de tek paragraftır**; ilk cümle veya hızlı taramayla genel konu ve zaman akışını belirle.", p:"s. 487-488"},
+  {s:"Her boşluğun seçeneklerini önce **soru türüne ayır:** adjective/noun clause, tense/özne-yüklem, kelime, preposition, bağlaç/zarf.", p:"s. 489-494"},
+  {s:"**Boşlukları 1'den 5'e sırayla çözmek zorunda değilsin** — doğrudan çözülebilenlerden başla, paragraf hakkında bilgi topla.", p:"s. 491-494"},
+  {s:"**Tense boşluğunda cümlede zaman ipucu yoksa** önceki ve sonraki cümlelerin zamanını paragraf akışı olarak kullan.", p:"s. 487, 491"},
+  {s:"Preposition sorusunda sonrasındaki fiil/sıfat/isimle kalıplaşan edata bak.", p:"s. 487"},
+  {s:"Bağlaç/zarf sorusunda **devamında tam cümle olup olmadığı + noktalama + iki cümle arasındaki anlam ilişkisi** birlikte kontrol edilir.", p:"s. 487-490"},
+  {s:"Reduction şüphesinde: virgüle kadar özne yok, virgülden sonra özne çıkıyorsa **ortak özne kuralını** uygula.", p:"s. 490"}
+]},
+
+{ id:"trans", t:"Çeviri", ic:"🔁", cats:["Çeviri"], items:[
+  {s:"**Sıra: yüklem → özne → özel yapı → active/passive.** Birebir kelime değil **cümle işlevi** eşleşmesine bak.", p:"s. 521-530"},
+  {s:"Önce **ana yüklemi** bul ve seçeneklerin cümle sonundaki yüklem çevirisini karşılaştır. **Clause içindeki fiili ana yüklem sanma.**", p:"s. 510-513"},
+  {s:"Ana yüklemden sonra özneyi bul; **özne yalınsa** seçeneklerde gereksiz adjective clause ekleyen çevirileri ele.", p:"s. 513"},
+  {s:"İki seçenek kaldığında and/but/until/both...and/despite gibi **özel yapıların** doğru çevirisine bak.", p:"s. 513-514"},
+  {s:"**Active/passive ayrımını koru;** aktifi pasif, pasifi aktif çeviren seçenek elenir.", p:"s. 514"},
+  {s:"Ana fiil be ise devamındaki isim/sıfat yapısına göre çevir: is to increase → '... yükseltilmesidir' (isim yüklemi).", p:"s. 515"},
+  {s:"would like + that-clause → 'isterim ki'; Noun Clause'un ana fiili ayrıca doğru çevrilmeli.", p:"s. 516"},
+  {s:"not ... but ... → '... değil ...'; **but sonrasındaki öğeye odaklan**.", p:"s. 517"},
+  {s:"be of + noun → sahiplik veya sıfat anlamı: **of importance = important**.", p:"s. 518"},
+  {s:"no/not/never/nothing varsa yüklemin Türkçe anlamını **olumsuz kur**: existed 'vardı' → no evidence existed 'kanıt yoktu'.", p:"s. 519"},
+  {s:"**Cümle başındaki** V-ing/V3/having V3/having been V3 → adverbial reduction. **İsim sonrasındaki** V-ing/V3 → adjective reduction.", p:"s. 520"},
+  {s:"**Türkçe→İngilizce:** Türkçe yüklem sonda, İngilizce ana fiil özneden sonra. Önce Türkçe yüklemin İngilizce karşılığını seçeneklerde bul.", p:"s. 533"},
+  {s:"Türkçe sıfat-fiil ekleri (-an, -ası, -mez, -ar, -dik, -ecek, -miş) ismi niteliyorsa İngilizcede **adjective clause veya reduction** ara.", p:"s. 534"},
+  {s:"Bağlaç, zaman, active/passive ve sayı/miktar bilgisini Türkçe kökle **kapsam bakımından** karşılaştır.", p:"s. 535-540"}
+]},
+
+{ id:"sentcomp", t:"Cümle Tamamlama", ic:"🧱", cats:["Cümle Tamamlama"], items:[
+  {s:"**Öncelik sırası:** nesne ihtiyacı → Noun Clause; tam cümlenin son ismi → Adjective Clause; sonra FANTBOYS; sonra edat/zarf; **en son adverbial bağlaç**.", p:"s. 577-580"},
+  {s:"Önce kökün **tam cümle mi eksik dizilim mi** olduğunu belirle; ana fiil/yardımcı fiilin altını çiz.", p:"s. 551-552"},
+  {s:"Seçeneklerin başındaki if, since, as regards, that, whose gibi yapıları sınıflandır; hangi clause türü gerektiğini belirle.", p:"s. 551"},
+  {s:"**Kök nesne isteyen fiille bitiyorsa Noun Clause ara** (that + SVO, whether/if/wh-, how...); adverbial clause seçeneklerini ele.", p:"s. 558-561"},
+  {s:"state + that, wonder + if/whether/wh- güçlü eşleşmelerdir. Preposition sonrasında yalın that/if gelmez.", p:"s. 558-563"},
+  {s:"that + SVO köküyle birleşen seçenek **tam cümle oluşturmalı**; anlamlı görünen ama fiilsiz/nesnesiz seçenek elenir.", p:"s. 559-563"},
+  {s:"**Kök tam cümleyse Noun Clause'u bırak**; son isim nitelenebiliyorsa önce Adjective Clause ara.", p:"s. 566-569"},
+  {s:"Relative'den sonra **tekil fiil** varsa nitelenen antecedent tekil olmalı — tekil/çoğul uyumunu şık elemede kullan.", p:"s. 569"},
+  {s:"Unless ile başlayan kök çoğunlukla olumsuz koşul; ana cümlede will/can aranabilir, ama type uyumu kontrol edilir.", p:"s. 553-554"},
+  {s:"**Zıtlık bağlacı Past yan cümleye bağlandığında ana cümlede now/Present karşıtlığı doğru olabilir — yalnız tense eşleşmedi diye eleme.**", p:"s. 573"},
+  {s:"Reduction kökünde virgüle kadar özne yoksa seçeneklerde ortak özneyi ara; **eylemi gerçekten yapabilen özneyi** seç.", p:"s. 575-576"},
+  {s:"Seçenekteki it/he/she/they/this/such/these **referanslarının kökte açık karşılığı olmalı**; birden fazla aday varsa zamirin yapabildiği eylemi kontrol et.", p:"s. 581"},
+  {s:"**would V0** içeren ana cümlede if/unless/as long as seçeneklerini önceliklendir; type uyumunu kontrol et.", p:"s. 584"},
+  {s:"**will V0** ana cümlesinde when/as soon as/once/if/unless/before/until/by the time yan cümlesi **Present olmalı**; Type 3 yan cümleyi ele.", p:"s. 585"},
+  {s:"Kökte rakamsal/miktar ifadesi varsa seçeneklerde karşıt veya eş miktar ifadesi ara; zıtlık bağlacıyla oran karşılaştırması kurulabilir.", p:"s. 587"},
+  {s:"actually/still/nevertheless/nonetheless gibi vurgu-zıtlık zarfları köktesise **although/though/even though** grubuna öncelik ver.", p:"s. 591"},
+  {s:"Past kökte iki aday kaldığında **already/yet/still** gibi zaman zarflarının eşleşmesini ara.", p:"s. 593"},
+  {s:"After + Past genelde Past devam eder; ama anlam '...olduğundan beri' gibi şimdiye uzanıyorsa **Present Perfect istisnasını açık tut**.", p:"s. 593"},
+  {s:"Kökte we/you/our/your varsa seçeneklerde **aynı kişi akışını** sürdüren zamirleri önceliklendir.", p:"s. 595-596"}
+]},
+
+{ id:"paracomp", t:"Paragraf Tamamlama", ic:"📄", cats:["Paragraf"], items:[
+  {s:"İlk cümlede **topic** ve **controlling idea**'yı ayır. 'Tigers' topic, 'speed' controlling idea ise bütün destek cümleleri hızla ilgili olmalı.", p:"s. 609-610"},
+  {s:"**Çözüm döngüsü:** topic/controlling idea → boşluk sonrası cümle → seçeneklerde referans → gerekirse bir cümle daha önce/sonra → yeniden seçenekler.", p:"s. 613-616"},
+  {s:"**Boşluk ilk cümleyse** hızlı genel tarama yap; paragrafın ortak topic + controlling idea'sını kuran cümleyi seç.", p:"s. 610-612"},
+  {s:"**Boşluk ortadaysa** önce boşluk sonrasındaki cümleyi okuyup seçeneklerle bağ kur; iki-üç seçenek kalırsa boşluk öncesine açıl.", p:"s. 616"},
+  {s:"**Son boşluk** çoğunlukla tüm paragrafı özetlemez; önceki cümleyi destekleyen **supporting sentence** ister.", p:"s. 622"},
+  {s:"Boşluktan sonraki zamir/referansı izle: his, this method, such people, they → seçenek açık bir antecedent istemeli.", p:"s. 612-614"},
+  {s:"in fact, actually, however, moreover, therefore gibi cümle zarflarının önceki cümleyle kurması gereken **vurgu/zıtlık/ekleme/sonuç** ilişkisini doğrula.", p:"s. 623-624"},
+  {s:"Tense akışı yardımcıdır; ama geçmiş anlatının içine genel geçer Present bilgi girebilir — **Present diye otomatik eleme yapma**.", p:"s. 620"}
+]},
+
+{ id:"irrel", t:"Anlam Bütünlüğünü Bozan Cümle", ic:"🚫", cats:["Anlam Bütünlüğü"], items:[
+  {s:"**Bütün cümleleri oku**; ilk cümleden controlling idea'yı çıkar ve her cümlenin bunu destekleyip desteklemediğini sırayla kontrol et.", p:"s. 637-639"},
+  {s:"**Son kontrol listesi:** controlling idea → olumlu-olumsuz kutup → referans → sentence adverb → tense → özne → kronoloji.", p:"s. 648"},
+  {s:"**Tense akışında beklenmedik değişim + aynı anda konu değişimi** güçlü şüphe işaretidir. Relative clause içindeki fiili ana tense sanma.", p:"s. 638"},
+  {s:"Zamir/referans önce bir önceki, yoksa iki önceki cümlede antecedent arar; **araya girip bu bağı bozan cümle atılabilir**.", p:"s. 639-640"},
+  {s:"actually/in fact önceki ifadeyi **vurgulamalıdır**; farklı konuya geçiyorsa o cümleden şüphelen.", p:"s. 641"},
+  {s:"sadly/fortunately/however gibi **kutup değiştiren** sözcük mantıklı bir karşıtlık kurmuyorsa akış bozulur.", p:"s. 642"},
+  {s:"for example/for instance önceki genel ifadenin **gerçek örneği** olmalı.", p:"s. 643"},
+  {s:"also/another/comparative ifadeler öncesinde **eklenen/karşılaştırılan bir temel bilgi** ister; karşılığı yoksa şüphelen.", p:"s. 643-644"},
+  {s:"some of these / the others gibi grup ifadeleri **aynı gruba** gönderme yapmalı.", p:"s. 645"},
+  {s:"even 'hatta/bile' vurgusu öncesinde **derecelendirilecek bir bilgi** ister.", p:"s. 646"},
+  {s:"**Özne akışını izle;** birden bire başka özneye geçip sonraki referans bağını koparan cümle elenir.", p:"s. 646-647"},
+  {s:"indeed/further/moreover önceki cümleyi desteklemeli veya ilerletmeli; **yalnız konu aynı diye yeterli sayma**.", p:"s. 647"},
+  {s:"Tarihsel/kronolojik akışta **sıralamayı bozan** cümleye dikkat.", p:"s. 648"}
+]},
+
+{ id:"kelime", t:"Kelime Soruları", ic:"💊", cats:["Kelime"], ekgrup:true, items:[
+  {s:"Boşluğun **hangi tür kelime** istediğini önce belirle (fiil mi, sıfat mı, isim mi) — şıkların çoğu zaten yanlış türdeyse hızlı elenir.", ek:true},
+  {s:"Cümledeki **kutup işaretini** bul: however, although, despite varsa boşluk önceki fikrin **tersini** ister; moreover, furthermore varsa **aynı yönde** devam eder.", ek:true},
+  {s:"Kelimenin **birlikte kullanıldığı edata** bak — bu tek başına doğru şıkkı verir: attribute **to**, susceptible **to**, associated **with**, result **in/from**, protect **against**.", ek:true},
+  {s:"Tıp metinlerinde en sık çıkan anlam eksenleri: **artış** (surge, soar, escalate), **azalış** (decline, diminish, alleviate), **kötüleşme** (aggravate, exacerbate, deteriorate), **engelleme** (inhibit, impede, hinder, curb), **ortaya çıkma** (emerge, arise, originate).", ek:true},
+  {s:"Bilmediğin kelimede **kökü ve ekleri parçala**: in-/im- olumsuz, -ate fiil, -ous/-ive sıfat. Tam anlamı bilmesen de yönünü bulursun.", ek:true},
+  {s:"İki şık arasında kaldıysan cümleye **ikisini de yerleştirip oku** — abartılı/mutlak anlam taşıyan (eradicate, annihilate) genelde çeldiricidir.", ek:true}
+]},
+
+{ id:"diyalog", t:"Diyalog Tamamlama", ic:"💬", cats:["Diyalog"], ekgrup:true, items:[
+  {s:"**Boşluktan sonraki replik cevabın kendisidir.** Önce boşluğun ALTINDAKİ cümleyi oku; verilen cevap neyin karşılığıysa boşluk odur.", ek:true},
+  {s:"Konuşmanın **soru mu cevap mı** istediğini belirle: altındaki replik 'Yes/No' veya bir bilgi veriyorsa boşluk sorudur.", ek:true},
+  {s:"**Zaman ve kişi uyumunu** izle: konuşmacılar arasında geçen zaman kipi ve zamirler (I/you/we) kopmamalı.", ek:true},
+  {s:"Konu dışına çıkan, doğru ama **bağlamsız** şıkkı ele — diyalogda her replik bir öncekine cevap verir.", ek:true},
+  {s:"Nezaket kalıplarına dikkat: öneri (Why don't we...?), rica (Could you...?), katılma (So do I / Neither do I) kalıpları çoğu zaman doğrudan eşleşir.", ek:true}
+]},
+
+{ id:"sinav", t:"Sınav Günü & Zaman Yönetimi", ic:"⏳", cats:["*"], ekgrup:true, items:[
+  {s:"**Sıralama:** önce gramer ve kelime (hızlı puan), sonra cümle tamamlama ve çeviri, **en son okuma parçaları**. Okumaya 60-75 dakika ayır.", p:"s. 466"},
+  {s:"Bir soruda **90 saniyeyi geçme.** Takıldıysan işaretle, geç, sonra dön. Takılan soruya harcanan 4 dakika, 3 kolay soru demektir.", ek:true},
+  {s:"**Boş bırakma.** Yanlış doğruyu götürmüyor; en az bir şıkkı eleyebildiysen işaretle.", ek:true},
+  {s:"Cloze ve parça sorularında **kolay boşluktan zora** git; çözdüğün her boşluk kalanların bağlamını açar.", p:"s. 491-494"},
+  {s:"Şıkkı işaretlemeden önce **cümleyi doğru cevapla birlikte içinden bir kez oku** — kulağa yanlış geliyorsa büyük ihtimalle yanlıştır.", ek:true},
+  {s:"Son 10 dakikada yeni soruya girme; **işaretlediğin şüpheli soruları** ve optik kaydırma hatası olup olmadığını kontrol et.", ek:true}
+]},
+
+{ id:"yol", t:"55 → 70 Yol Haritası", ic:"🎯", cats:["*"], ekgrup:true, items:[
+  {s:"**55'ten 70'e çıkış yeni konu öğrenmekle değil, tekrar eden hataları kapatmakla olur.** Her hafta Durum ekranındaki en zayıf iki kategoriye yüklen.", ek:true},
+  {s:"**Günlük 1 saat bölüşümü:** 20 dk yeni soru (kategori seçerek) + 20 dk yanlışlarını tekrar çöz + 20 dk makale okuyup takıldığın cümleyi analiz ettir.", ek:true},
+  {s:"Bir soruyu yanlış yaptığında **cevabı ezberleme, kuralı yaz.** Çözüm ekranındaki 'Aklında kalsın' maddesini kendi cümlenle gramer defterine ekle.", ek:true},
+  {s:"Yanlış defterindeki soruyu **doğru çözene kadar** listede tutuyoruz — üç kez üst üste doğru yaptığın kural artık senindir.", ek:true},
+  {s:"**Kelime ezberi yaparken tek başına kelime çalışma;** kelimeyi gördüğün cümleyle birlikte deftere al. YÖKDİL kelimeyi bağlam içinde sorar.", ek:true},
+  {s:"Sınava 1 ay kala haftada bir **tam deneme** çöz; kalan üç gün yalnız yanlış analizine ayır.", ek:true}
+]}
+];
+
+const STRAT_ALL = () => STRAT;
+let stratOpen = {};
+try { stratOpen = JSON.parse(store.get("strat_open", "{}")) || {}; } catch (e) { stratOpen = {}; }
+let STRATNOTE = {};
+try { STRATNOTE = JSON.parse(store.get("strat_notes", "{}")) || {}; } catch (e) { STRATNOTE = {}; }
+function saveStratNotes() { store.set("strat_notes", JSON.stringify(STRATNOTE)); syncSoon(); }
+
+function stratMd(t) { return mdBold(esc(t)); }
+
+function renderStrat() {
+  const q = norm($("#stSearch") ? $("#stSearch").value : "");
+  const box = $("#stList");
+  let html = "", hits = 0;
+  STRAT.forEach(g => {
+    const items = q
+      ? g.items.filter(it => norm(it.s).includes(q) || norm(g.t).includes(q))
+      : g.items;
+    if (!items.length) return;
+    hits += items.length;
+    const open = q ? true : !!stratOpen[g.id];
+    const note = STRATNOTE[g.id] || "";
+    html += `<div class="stgrp${g.hl ? " hl" : ""}${open ? " open" : ""}" data-g="${g.id}">
+      <button class="sthead">
+        <span class="stic">${g.ic}</span>
+        <span class="sttl">${esc(g.t)}${g.ekgrup ? '<i class="stek">ek</i>' : ""}</span>
+        <span class="stn">${items.length}</span>
+        <span class="stcar">▾</span>
+      </button>
+      <div class="stbody">
+        ${items.map(it => `<div class="stitem${it.ek ? " ek" : ""}">
+          <span class="stdot"></span>
+          <div><div>${stratMd(it.s)}</div>${it.p ? `<span class="stp">${esc(it.p)}</span>` : ""}</div>
+        </div>`).join("")}
+        <div class="stnote">
+          <label>Kendi notum</label>
+          <textarea class="inp stnotein" data-g="${g.id}" rows="2" placeholder="Bu konuda kendi püf noktanı yaz…">${esc(note)}</textarea>
+        </div>
+      </div>
+    </div>`;
+  });
+  if (!hits) html = '<div class="empty">Eşleşen strateji yok.</div>';
+  box.innerHTML = html;
+
+  box.querySelectorAll(".stgrp").forEach(el => {
+    el.querySelector(".sthead").addEventListener("click", () => {
+      const id = el.dataset.g;
+      stratOpen[id] = !el.classList.contains("open");
+      el.classList.toggle("open");
+      store.set("strat_open", JSON.stringify(stratOpen));
+    });
+  });
+  box.querySelectorAll(".stnotein").forEach(t => {
+    t.addEventListener("change", () => {
+      const id = t.dataset.g, v = t.value.trim();
+      if (v) STRATNOTE[id] = v; else delete STRATNOTE[id];
+      STRATNOTE._t = Date.now();
+      saveStratNotes();
+      toast("Notun kaydedildi.");
+    });
+  });
+}
+
+/* soru çözerken: o kategorinin stratejisini aç */
+function stratForCat(cat) {
+  return STRAT.filter(g => (g.cats || []).includes(cat));
+}
+function openStratSheet(cat) {
+  const groups = stratForCat(cat);
+  const list = groups.length ? groups : STRAT.filter(g => g.id === "akis");
+  let sh = $("#stSheet");
+  if (!sh) {
+    sh = document.createElement("div");
+    sh.className = "gsheet"; sh.id = "stSheet";
+    document.body.appendChild(sh);
+  }
+  sh.innerHTML = `<div class="gs-in" style="max-height:80vh">
+    <h3 style="display:flex;align-items:center;gap:8px">📋 ${esc(cat)} stratejisi
+      <button class="ghostx" id="stShClose" style="margin-left:auto;color:var(--ink3);font-size:22px;line-height:1">×</button></h3>
+    ${list.map((g, gi) => `<div class="stsh-g${(list.length === 1 || gi === 0) ? " open" : ""}" data-gi="${gi}">
+      <h4>${g.ic} ${esc(g.t)}<span class="stshn">${g.items.length}</span><span class="stcar">▾</span></h4>
+      <div class="stsh-body">
+      ${g.items.map(it => `<div class="stitem${it.ek ? " ek" : ""}"><span class="stdot"></span>
+        <div><div>${stratMd(it.s)}</div>${it.p ? `<span class="stp">${esc(it.p)}</span>` : ""}</div></div>`).join("")}
+      ${STRATNOTE[g.id] ? `<div class="stmynote"><b>Kendi notum:</b> ${esc(STRATNOTE[g.id])}</div>` : ""}
+      </div>
+    </div>`).join("")}
+  </div>`;
+  sh.onclick = e => { if (e.target === sh) sh.classList.remove("on"); };
+  sh.querySelectorAll(".stsh-g h4").forEach(h =>
+    h.addEventListener("click", () => h.parentElement.classList.toggle("open")));
+  $("#stShClose").addEventListener("click", () => sh.classList.remove("on"));
+  sh.classList.add("on");
+}
+
+/* strateji PDF'i — koyu renkler, Kalam */
+async function stratPdf() {
+  busyShow("PDF hazırlanıyor", "Font yükleniyor…");
+  try { await ensureFonts(); }
+  catch (e) { busyHide(); toast("Kalam font indirilemedi: " + e.message, 5000); return; }
+  const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+  regFonts(doc, KALAM);
+  const stamp = new Date().toLocaleDateString("tr-TR");
+  let page = 0, y = 0;
+  const limit = PH - M.b;
+  const newPage = () => { if (page) doc.addPage(); page++; pdfHeader(doc, stamp, page, "Soru çözüm stratejileri"); y = M.t + 3; };
+  const put = (runs, o) => {
+    o = o || {};
+    doc.setFont("Kalam", o.bold && KALAM.bold ? "bold" : "normal");
+    doc.setFontSize(o.size || 9.8);
+    const lead = o.lead || 4.9;
+    const x0 = M.l + (o.indent || 0), w = CW - (o.indent || 0);
+    const need = flowRuns(doc, runs, 0, 0, w, lead, false).lines * lead;
+    if (y + need + (o.before || 0) > limit) newPage();
+    y += o.before || 0;
+    const g = o.color || INK;
+    doc.setTextColor(g[0], g[1], g[2]);
+    y = flowRuns(doc, runs, x0, y, w, lead, true, !!o.keep).y + lead + (o.after || 0);
+  };
+  newPage();
+  STRAT.forEach(g => {
+    if (y > limit - 25) newPage();
+    put([{ text: g.t.toUpperCase(), c: -1 }], { bold: true, size: 12.5, color: BLUE, before: 3, after: 1.4, keep: true });
+    g.items.forEach(it => {
+      const runs = mdToRuns("• " + it.s.replace(/\*\*/g, "**"));
+      put(runs, { indent: 3, size: 9.8, lead: 4.9, color: INK });
+      if (it.p) put([{ text: it.p, c: -1 }], { indent: 6, size: 8, lead: 3.9, color: GREY, keep: true, after: 0.8 });
+    });
+    if (STRATNOTE[g.id]) put([{ text: "Kendi notum: " + STRATNOTE[g.id], c: -1 }], { indent: 3, size: 9.4, color: GREEN, bold: true, before: 1, after: 1.6, keep: true });
+    doc.setDrawColor(228, 224, 214); doc.setLineWidth(0.15);
+    if (y < limit - 4) { doc.line(M.l, y, PW - M.r, y); y += 4; }
+  });
+  doc.save("yokdil-stratejiler-" + new Date().toISOString().slice(0, 10) + ".pdf");
+  busyHide();
+  toast(page + " sayfa strateji PDF'i hazır.");
+}
+
+$("#stSearch").addEventListener("input", renderStrat);
+$("#stPdfBtn").addEventListener("click", stratPdf);
+$("#stAllBtn").addEventListener("click", () => {
+  const anyClosed = STRAT.some(g => !stratOpen[g.id]);
+  STRAT.forEach(g => { stratOpen[g.id] = anyClosed; });
+  store.set("strat_open", JSON.stringify(stratOpen));
+  renderStrat();
 });
 
 /* açılış */
