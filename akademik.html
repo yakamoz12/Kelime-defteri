@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atıflı Paragraf — PubMed + Gemini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDF1F0;
+    --surface:#FFFFFF;
+    --ink:#12212B;
+    --muted:#5C6B70;
+    --line:#CFD9D7;
+    --clinic:#0E6E63;
+    --clinic-soft:#DCEAE7;
+    --amber:#9A6B12;
+    --amber-soft:#F6EAD2;
+    --danger:#8E2F2F;
+    --radius:3px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px}
+  header.top{
+    border-bottom:2px solid var(--ink);
+    padding-bottom:14px;margin-bottom:26px;
+    display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;justify-content:space-between;
+  }
+  header.top h1{
+    font-family:Spectral,Georgia,serif;font-weight:600;
+    font-size:29px;line-height:1.15;margin:0;letter-spacing:-.01em;
+  }
+  header.top p{margin:6px 0 0;color:var(--muted);max-width:56ch;font-size:14px}
+  .pill{
+    font-size:12px;color:var(--clinic);background:var(--clinic-soft);
+    border:1px solid #B9D3CE;border-radius:100px;padding:4px 11px;white-space:nowrap;
+  }
+  .grid{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:26px;align-items:start}
+  @media (max-width:860px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+  .panel > .body{padding:16px}
+  .panel h2{
+    font-family:"IBM Plex Sans",sans-serif;font-size:13px;font-weight:600;margin:0;
+    padding:11px 16px;border-bottom:1px solid var(--line);color:var(--muted);
+  }
+  label{display:block;font-size:13px;font-weight:500;margin:0 0 5px}
+  .hint{font-size:12px;color:var(--muted);margin:5px 0 0;line-height:1.45}
+  .hint a{color:var(--clinic)}
+  input[type=text],input[type=password],input[type=number],select,textarea{
+    width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:var(--radius);
+    background:#FBFCFC;color:var(--ink);font-family:inherit;font-size:14px;
+  }
+  textarea{font-family:Spectral,Georgia,serif;font-size:15.5px;line-height:1.6;resize:vertical;min-height:190px}
+  input:focus,select:focus,textarea:focus,button:focus-visible{
+    outline:2px solid var(--clinic);outline-offset:1px;border-color:var(--clinic);
+  }
+  .field{margin-bottom:14px}
+  .row{display:flex;gap:10px}
+  .row > *{flex:1;min-width:0}
+  button{
+    font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;
+    border:1px solid var(--ink);background:var(--ink);color:#fff;
+    padding:9px 14px;border-radius:var(--radius);
+  }
+  button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  button.ghost:hover{border-color:var(--ink)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  button.small{padding:5px 10px;font-size:12.5px}
+  .primary{width:100%;background:var(--clinic);border-color:var(--clinic);padding:12px;font-size:15px}
+  fieldset{border:0;padding:0;margin:0 0 14px}
+  .checks{display:flex;flex-direction:column;gap:7px}
+  .checks label{display:flex;gap:8px;align-items:center;font-weight:400;margin:0;font-size:13.5px}
+  .checks input{width:auto}
+  /* pipeline */
+  #steps{list-style:none;margin:0;padding:0}
+  #steps li{
+    display:flex;gap:10px;padding:8px 16px;border-bottom:1px solid #E7ECEB;
+    font-size:13px;color:var(--muted);align-items:baseline;
+  }
+  #steps li:last-child{border-bottom:0}
+  #steps .mark{width:14px;flex:none;font-family:ui-monospace,monospace}
+  #steps li.run{color:var(--ink)}
+  #steps li.done{color:var(--ink)}
+  #steps li.done .mark{color:var(--clinic)}
+  #steps li.fail{color:var(--danger)}
+  /* output */
+  .out{display:none}
+  .out.on{display:block}
+  .paragraph{
+    font-family:Spectral,Georgia,serif;font-size:17px;line-height:1.72;
+    padding:20px 22px;white-space:pre-wrap;
+  }
+  .paragraph cite-mark{color:var(--clinic);font-style:normal}
+  .ref{padding:14px 16px;border-bottom:1px solid #E7ECEB}
+  .ref:last-child{border-bottom:0}
+  .apa{
+    font-family:Spectral,Georgia,serif;font-size:15px;line-height:1.6;
+    padding-left:22px;text-indent:-22px;
+  }
+  .meta{margin-top:7px;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .meta a{color:var(--clinic)}
+  blockquote{
+    margin:10px 0 0;padding:9px 0 9px 13px;border-left:3px solid var(--clinic-soft);
+    font-family:Spectral,Georgia,serif;font-style:italic;font-size:14.5px;line-height:1.6;color:#25333B;
+  }
+  .tag{font-size:11.5px;padding:2px 7px;border-radius:2px;border:1px solid;white-space:nowrap}
+  .tag.ok{color:var(--clinic);border-color:#B9D3CE;background:var(--clinic-soft)}
+  .tag.warn{color:var(--amber);border-color:#E4CFA4;background:var(--amber-soft)}
+  .toolbar{display:flex;gap:8px;padding:11px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+  .stack{display:flex;flex-direction:column;gap:20px}
+  .notice{
+    padding:12px 14px;border-radius:var(--radius);font-size:13.5px;line-height:1.5;
+    background:var(--amber-soft);border:1px solid #E4CFA4;color:#4A3410;margin-bottom:20px;
+  }
+  .notice.err{background:#F7E4E4;border-color:#E0B9B9;color:#5C1A1A}
+  .empty{padding:26px 18px;color:var(--muted);font-size:14px;line-height:1.6}
+  .empty b{color:var(--ink);font-weight:600}
+  .spin{display:inline-block;animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.spin{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Atıflı akademik paragraf</h1>
+      <p>Paragrafınızı yazın; uygulama PubMed / Europe PMC üzerinden son yılların makalelerini bulur, metni APA 7 atıflarıyla yeniden yazar ve her atıf için makalenin özgün cümlesini gösterir.</p>
+    </div>
+    <span class="pill">Gemini · ücretsiz katman</span>
+  </header>
+
+  <div class="grid">
+    <!-- SOL: kontroller -->
+    <div class="stack">
+      <section class="panel">
+        <h2>Gemini bağlantısı</h2>
+        <div class="body">
+          <div class="field">
+            <label for="key">API anahtarı</label>
+            <input id="key" type="password" placeholder="AIza..." autocomplete="off" spellcheck="false">
+            <p class="hint">Anahtar yalnızca bu sekmede tutulur ve doğrudan Google'a gider. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a></p>
+          </div>
+          <div class="field">
+            <label for="model">Model</label>
+            <div class="row">
+              <select id="model"><option value="gemini-2.0-flash">gemini-2.0-flash</option></select>
+              <button class="ghost small" id="loadModels" style="flex:none">Modelleri getir</button>
+            </div>
+            <p class="hint" id="modelHint">Anahtarı girip listeyi çekin. Ücretsiz katmanda flash modelleri en yüksek kotaya sahiptir.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Literatür ayarları</h2>
+        <div class="body">
+          <fieldset>
+            <label>Veri tabanı</label>
+            <div class="checks">
+              <label><input type="checkbox" id="dbEpmc" checked> Europe PMC (PubMed + PMC + Agricola)</label>
+              <label><input type="checkbox" id="dbPubmed"> PubMed (NCBI E-utilities)</label>
+            </div>
+          </fieldset>
+          <div class="row field">
+            <div>
+              <label for="yFrom">Başlangıç yılı</label>
+              <input id="yFrom" type="number" min="1900" max="2100" value="2021">
+            </div>
+            <div>
+              <label for="yTo">Bitiş yılı</label>
+              <input id="yTo" type="number" min="1900" max="2100" value="2026">
+            </div>
+          </div>
+          <div class="row field">
+            <div>
+              <label for="count">Makale sayısı</label>
+              <input id="count" type="number" min="3" max="30" value="12">
+            </div>
+            <div>
+              <label for="lang">Metin dili</label>
+              <select id="lang">
+                <option value="Türkçe">Türkçe</option>
+                <option value="İngilizce">İngilizce</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="extra">Arama sorgusu (isteğe bağlı)</label>
+            <input id="extra" type="text" placeholder="Boş bırakırsanız model üretir">
+            <p class="hint">PubMed sözdizimi geçerlidir: <code>sepsis AND lactate[tiab]</code></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>İşlem</h2>
+        <ol id="steps">
+          <li data-k="q"><span class="mark">·</span><span>Anahtar kavramlar ve arama sorgusu</span></li>
+          <li data-k="s"><span class="mark">·</span><span>Veri tabanı taraması</span></li>
+          <li data-k="a"><span class="mark">·</span><span>Özetlerin okunması</span></li>
+          <li data-k="w"><span class="mark">·</span><span>Paragrafın APA 7 ile yazımı</span></li>
+          <li data-k="v"><span class="mark">·</span><span>Alıntı doğrulama</span></li>
+        </ol>
+      </section>
+    </div>
+
+    <!-- SAĞ: giriş + çıktı -->
+    <div class="stack">
+      <div id="alert"></div>
+
+      <section class="panel">
+        <h2>Akademik paragrafınız</h2>
+        <div class="body">
+          <textarea id="input" placeholder="Örn: Sepsiste erken laktat klirensi mortalite ile ilişkilidir ve sıvı resüsitasyonunun yönlendirilmesinde kullanılabilir..."></textarea>
+        </div>
+        <div class="toolbar">
+          <button class="primary" id="run">Kaynakları bul ve yeniden yaz</button>
+        </div>
+      </section>
+
+      <section class="panel out" id="outPara">
+        <h2>Atıflı metin</h2>
+        <div class="paragraph" id="paraBox"></div>
+        <div class="toolbar">
+          <button class="ghost small" id="copyPara">Metni kopyala</button>
+          <button class="ghost small" id="copyAll">Metin + kaynakça kopyala</button>
+        </div>
+      </section>
+
+      <section class="panel out" id="outRefs">
+        <h2>Kaynakça ve kanıt cümleleri</h2>
+        <div id="refBox"></div>
+      </section>
+
+      <section class="panel out" id="outUnused">
+        <h2>Taranan ama kullanılmayan makaleler</h2>
+        <div id="unusedBox"></div>
+      </section>
+
+      <section class="panel" id="placeholder">
+        <div class="empty">
+          <b>Nasıl çalışır?</b><br>
+          Paragrafınızdaki iddialar İngilizce arama sorgularına çevrilir, seçtiğiniz yıl aralığında özeti olan makaleler taranır, ardından metin yalnızca bulunan kaynaklara dayanarak yeniden yazılır. Her atıfın altında makalenin özgün İngilizce cümlesi ve bağlantısı yer alır; alıntının özette birebir geçip geçmediği ayrıca işaretlenir.
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const EPMC = "https://www.ebi.ac.uk/europepmc/webservices/rest/search";
+const EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
+
+/* ---------- durum ---------- */
+let SOURCES = [];
+
+/* ---------- yardımcılar ---------- */
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function norm(s){ return String(s||"").toLowerCase().replace(/[\u2018\u2019\u201c\u201d]/g,"'").replace(/\s+/g," ").replace(/[^a-z0-9' ]/g,"").trim(); }
+function step(k, state){
+  const li = document.querySelector('#steps li[data-k="'+k+'"]');
+  if(!li) return;
+  li.className = state || "";
+  const m = li.querySelector(".mark");
+  m.innerHTML = state==="run" ? '<span class="spin">◐</span>' : state==="done" ? "✓" : state==="fail" ? "×" : "·";
+}
+function resetSteps(){ ["q","s","a","w","v"].forEach(k=>step(k,"")); }
+function alertBox(msg, kind){
+  $("#alert").innerHTML = msg ? '<div class="notice '+(kind==="err"?"err":"")+'">'+msg+'</div>' : "";
+}
+function show(id, on){ $(id).classList.toggle("on", !!on); }
+
+/* ---------- Gemini ---------- */
+async function gemini(prompt, json){
+  const key = $("#key").value.trim();
+  const model = $("#model").value;
+  if(!key) throw new Error("API anahtarı girilmedi.");
+  const body = {
+    contents:[{role:"user", parts:[{text:prompt}]}],
+    generationConfig:{ temperature:0.25, maxOutputTokens:8192 }
+  };
+  if(json) body.generationConfig.responseMimeType = "application/json";
+  const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+model+":generateContent?key="+encodeURIComponent(key),{
+    method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)
+  });
+  const data = await r.json().catch(()=>({}));
+  if(!r.ok){
+    const m = (data.error && data.error.message) || ("HTTP "+r.status);
+    throw new Error("Gemini: "+m);
+  }
+  const cand = data.candidates && data.candidates[0];
+  if(!cand) throw new Error("Gemini boş yanıt döndürdü. Modeli veya kotanızı kontrol edin.");
+  const text = (cand.content && cand.content.parts || []).map(p=>p.text||"").join("");
+  if(!text.trim()) throw new Error("Yanıt kesildi (finishReason: "+(cand.finishReason||"?")+"). Makale sayısını azaltıp tekrar deneyin.");
+  if(!json) return text;
+  const clean = text.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
+  try { return JSON.parse(clean); }
+  catch(e){
+    const a = clean.indexOf("{"), b = clean.lastIndexOf("}");
+    if(a>-1 && b>a) return JSON.parse(clean.slice(a,b+1));
+    throw new Error("Model geçerli JSON üretmedi.");
+  }
+}
+
+async function loadModels(){
+  const key = $("#key").value.trim();
+  if(!key){ alertBox("Önce API anahtarınızı girin.","err"); return; }
+  const btn = $("#loadModels"); btn.disabled = true; btn.textContent = "Getiriliyor…";
+  try{
+    const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?key="+encodeURIComponent(key)+"&pageSize=200");
+    const d = await r.json();
+    if(!r.ok) throw new Error((d.error&&d.error.message)||("HTTP "+r.status));
+    const list = (d.models||[])
+      .filter(m => (m.supportedGenerationMethods||[]).indexOf("generateContent")>-1)
+      .map(m => m.name.replace("models/",""))
+      .filter(n => /gemini/i.test(n))
+      .sort();
+    if(!list.length) throw new Error("Uygun model bulunamadı.");
+    const sel = $("#model");
+    sel.innerHTML = list.map(n=>'<option value="'+esc(n)+'">'+esc(n)+"</option>").join("");
+    const pref = list.find(n=>/2\.5-flash$/.test(n)) || list.find(n=>/2\.0-flash$/.test(n)) || list.find(n=>/flash/.test(n)) || list[0];
+    sel.value = pref;
+    $("#modelHint").textContent = list.length+" model bulundu. Seçili: "+pref;
+    alertBox("");
+  }catch(e){
+    alertBox("Model listesi alınamadı — "+esc(e.message),"err");
+  }finally{
+    btn.disabled = false; btn.textContent = "Modelleri getir";
+  }
+}
+
+/* ---------- Europe PMC ---------- */
+async function searchEpmc(query, y1, y2, n){
+  const q = "("+query+") AND (FIRST_PDATE:["+y1+"-01-01 TO "+y2+"-12-31]) AND HAS_ABSTRACT:Y AND (LANG:eng)";
+  const url = EPMC+"?query="+encodeURIComponent(q)+"&format=json&resultType=core&pageSize="+n+"&sort=CITED%20desc";
+  const r = await fetch(url);
+  if(!r.ok) throw new Error("Europe PMC HTTP "+r.status);
+  const d = await r.json();
+  return (d.resultList && d.resultList.result || []).map(x => ({
+    db: "Europe PMC",
+    pmid: x.pmid || "",
+    doi: x.doi || "",
+    title: x.title || "",
+    authors: x.authorString || "",
+    journal: (x.journalInfo && x.journalInfo.journal && x.journalInfo.journal.title) || x.bookOrReportDetails && x.bookOrReportDetails.publisher || "",
+    volume: (x.journalInfo && x.journalInfo.volume) || "",
+    issue: (x.journalInfo && x.journalInfo.issue) || "",
+    pages: x.pageInfo || "",
+    year: x.pubYear || "",
+    abstract: (x.abstractText||"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim(),
+    url: x.doi ? "https://doi.org/"+x.doi : (x.pmid ? "https://pubmed.ncbi.nlm.nih.gov/"+x.pmid+"/" : "")
+  })).filter(s => s.abstract.length > 120);
+}
+
+/* ---------- PubMed E-utilities ---------- */
+async function searchPubmed(query, y1, y2, n){
+  const term = query+" AND ("+y1+"[PDAT] : "+y2+"[PDAT]) AND hasabstract AND english[lang]";
+  const s = await fetch(EUTILS+"esearch.fcgi?db=pubmed&retmode=json&sort=relevance&retmax="+n+"&term="+encodeURIComponent(term));
+  if(!s.ok) throw new Error("PubMed HTTP "+s.status);
+  const sj = await s.json();
+  const ids = (sj.esearchresult && sj.esearchresult.idlist) || [];
+  if(!ids.length) return [];
+  const f = await fetch(EUTILS+"efetch.fcgi?db=pubmed&retmode=xml&id="+ids.join(","));
+  const xml = new DOMParser().parseFromString(await f.text(), "text/xml");
+  const out = [];
+  xml.querySelectorAll("PubmedArticle").forEach(a => {
+    const t = n => { const e = a.querySelector(n); return e ? e.textContent.trim() : ""; };
+    const authors = Array.from(a.querySelectorAll("AuthorList > Author")).map(x=>{
+      const ln = x.querySelector("LastName"), ini = x.querySelector("Initials");
+      return ln ? ln.textContent + (ini ? " "+ini.textContent : "") : (x.querySelector("CollectiveName")||{textContent:""}).textContent;
+    }).filter(Boolean).join(", ");
+    const abs = Array.from(a.querySelectorAll("Abstract > AbstractText")).map(x=>{
+      const lb = x.getAttribute("Label");
+      return (lb ? lb+": " : "") + x.textContent.trim();
+    }).join(" ").replace(/\s+/g," ").trim();
+    const doiEl = a.querySelector('ArticleId[IdType="doi"]');
+    const pmid = t("MedlineCitation > PMID");
+    if(abs.length > 120) out.push({
+      db:"PubMed", pmid, doi: doiEl ? doiEl.textContent.trim() : "",
+      title: t("ArticleTitle"), authors,
+      journal: t("Journal > Title"),
+      volume: t("JournalIssue > Volume"), issue: t("JournalIssue > Issue"),
+      pages: t("Pagination > MedlinePgn"),
+      year: t("PubDate > Year") || (t("PubDate > MedlineDate").match(/\d{4}/)||[""])[0],
+      abstract: abs,
+      url: pmid ? "https://pubmed.ncbi.nlm.nih.gov/"+pmid+"/" : ""
+    });
+  });
+  return out;
+}
+
+/* ---------- akış ---------- */
+async function run(){
+  const text = $("#input").value.trim();
+  if(!$("#key").value.trim()) return alertBox("API anahtarı gerekli.","err");
+  if(text.length < 40) return alertBox("Yeniden yazılacak paragrafı girin (en az birkaç cümle).","err");
+  const y1 = +$("#yFrom").value, y2 = +$("#yTo").value, n = +$("#count").value;
+  const useEpmc = $("#dbEpmc").checked, usePm = $("#dbPubmed").checked;
+  if(!useEpmc && !usePm) return alertBox("En az bir veri tabanı seçin.","err");
+
+  alertBox(""); resetSteps();
+  ["#outPara","#outRefs","#outUnused"].forEach(i=>show(i,false));
+  $("#placeholder").style.display = "none";
+  $("#run").disabled = true; $("#run").textContent = "Çalışıyor…";
+
+  try{
+    /* 1) sorgu */
+    step("q","run");
+    let queries;
+    const manual = $("#extra").value.trim();
+    if(manual){ queries = [manual]; }
+    else{
+      const qp = 'Aşağıdaki akademik paragraf için PubMed taraması yapacağım. Paragrafın ana iddialarını kapsayan, İngilizce, boolean operatörlü 3 arama sorgusu üret. Sorgular geniş tutulsun (çok dar sorgular sonuç getirmez), MeSH terimleri ve eşanlamlıları OR ile birleştir.\nSadece şu JSON: {"queries":["...","...","..."]}\n\nPARAGRAF:\n"""'+text+'"""';
+      const r = await gemini(qp, true);
+      queries = (r.queries||[]).filter(x=>typeof x==="string" && x.trim()).slice(0,3);
+      if(!queries.length) throw new Error("Arama sorgusu üretilemedi.");
+    }
+    step("q","done");
+
+    /* 2) tarama */
+    step("s","run");
+    const per = Math.max(4, Math.ceil(n / queries.length));
+    const jobs = [];
+    queries.forEach(q => {
+      if(useEpmc) jobs.push(searchEpmc(q,y1,y2,per).catch(e=>{console.warn(e);return[];}));
+      if(usePm)   jobs.push(searchPubmed(q,y1,y2,per).catch(e=>{console.warn(e);return[];}));
+    });
+    const found = (await Promise.all(jobs)).flat();
+    const seen = new Set(); SOURCES = [];
+    found.forEach(s=>{
+      const k = (s.doi || s.pmid || s.title).toLowerCase();
+      if(k && !seen.has(k)){ seen.add(k); SOURCES.push(s); }
+    });
+    SOURCES = SOURCES.slice(0, n);
+    if(!SOURCES.length) throw new Error("Bu yıl aralığında sonuç bulunamadı. Yıl aralığını genişletin veya kendi sorgunuzu yazın. Denenen sorgu: "+esc(queries[0]));
+    SOURCES.forEach((s,i)=> s.n = i+1);
+    step("s","done"); step("a","done");
+
+    /* 3) yazım */
+    step("w","run");
+    const lang = $("#lang").value;
+    const pack = SOURCES.map(s => ({
+      no:s.n, authors:s.authors, year:s.year, title:s.title, journal:s.journal,
+      volume:s.volume, issue:s.issue, pages:s.pages, doi:s.doi, abstract:s.abstract
+    }));
+    const wp = [
+'Sen tıp alanında çalışan bir akademik editörsün. Sana bir paragraf ve gerçek makale özetleri veriyorum.',
+'',
+'GÖREV: Paragrafı '+lang+' dilinde, akademik üslupla yeniden yaz ve APA 7 metin içi atıflarını ekle.',
+'',
+'KURALLAR',
+'1. Yalnızca aşağıdaki KAYNAKLAR listesindeki makalelere atıf yap. Listede olmayan hiçbir yazar, yıl veya çalışma uydurma.',
+'2. Metin içi atıf APA 7 biçiminde olsun: (Smith ve ark., 2023) — İngilizce metinde (Smith et al., 2023). İki yazarlıysa (Smith ve Jones, 2022), tek yazarlıysa (Smith, 2021).',
+'3. Her atıf, o kaynağın özetinde gerçekten geçen bir bulguya dayanmalı. Özette olmayan bir iddiayı o kaynağa bağlama.',
+'4. Paragrafın anlamını koru, cümleleri akademik hale getir; gerekiyorsa kaynaklardan gelen bilgiyle destekle.',
+'5. Her atıf için "quote" alanına, ilgili özetten BİREBİR kopyalanmış tam bir İngilizce cümle yaz (tek karakter değiştirme, kısaltma, birleştirme yapma).',
+'6. apa alanı: yazarlar listesinin tamamı APA 7 kaynakça biçiminde. Örnek: Smith, J. A., & Jones, B. C. (2023). Başlık cümle düzeninde. Journal Name, 12(3), 45-58. https://doi.org/xx',
+'',
+'SADECE şu JSON şemasıyla yanıt ver:',
+'{"paragraph":"atıflı yeni metin","citations":[{"no":1,"claim":"metindeki ilgili cümle","quote":"özetten birebir İngilizce cümle","note":"kaynağın bu iddiayı nasıl desteklediği, 1 cümle"}],"references":[{"no":1,"apa":"APA 7 kaynakça satırı"}],"unused":[3,7]}',
+'',
+'PARAGRAF:','"""'+text+'"""','',
+'KAYNAKLAR (JSON):', JSON.stringify(pack)
+    ].join("\n");
+    const res = await gemini(wp, true);
+    if(!res || !res.paragraph) throw new Error("Model beklenen çıktıyı üretmedi.");
+    step("w","done");
+
+    /* 4) doğrulama + render */
+    step("v","run");
+    render(res);
+    step("v","done");
+  }catch(e){
+    ["q","s","a","w","v"].forEach(k=>{
+      const li = document.querySelector('#steps li[data-k="'+k+'"]');
+      if(li && li.className==="run") step(k,"fail");
+    });
+    alertBox(esc(e.message||String(e)),"err");
+  }finally{
+    $("#run").disabled = false; $("#run").textContent = "Kaynakları bul ve yeniden yaz";
+  }
+}
+
+function render(res){
+  $("#paraBox").textContent = res.paragraph;
+  show("#outPara", true);
+
+  const cites = res.citations || [];
+  const refs = res.references || [];
+  const used = new Set();
+  refs.forEach(r=>used.add(+r.no));
+  cites.forEach(c=>used.add(+c.no));
+
+  const html = [];
+  Array.from(used).sort((a,b)=>a-b).forEach(no=>{
+    const src = SOURCES.find(s=>s.n===no);
+    if(!src) return;
+    const ref = refs.find(r=>+r.no===no);
+    const mine = cites.filter(c=>+c.no===no);
+    const apa = ref && ref.apa ? ref.apa : (src.authors+" ("+src.year+"). "+src.title+" "+src.journal+".");
+    let s = '<div class="ref"><div class="apa">'+esc(apa)+"</div>";
+    s += '<div class="meta">';
+    if(src.url) s += '<a href="'+esc(src.url)+'" target="_blank" rel="noopener">Makaleye git</a>';
+    if(src.pmid) s += "<span>PMID "+esc(src.pmid)+"</span>";
+    s += "<span>"+esc(src.db)+"</span></div>";
+    mine.forEach(c=>{
+      const q = String(c.quote||"").trim();
+      const ok = q && norm(src.abstract).indexOf(norm(q)) > -1;
+      s += "<blockquote>“"+esc(q||"—")+"” <span class=\"tag "+(ok?"ok":"warn")+'">'+(ok?"özetle birebir eşleşti":"özette birebir bulunamadı")+"</span>";
+      if(c.note) s += '<div class="meta">'+esc(c.note)+"</div>";
+      s += "</blockquote>";
+    });
+    s += "</div>";
+    html.push(s);
+  });
+  $("#refBox").innerHTML = html.join("") || '<div class="empty">Model hiçbir kaynağa atıf yapmadı.</div>';
+  show("#outRefs", true);
+
+  const rest = SOURCES.filter(s=>!used.has(s.n));
+  if(rest.length){
+    $("#unusedBox").innerHTML = rest.map(s =>
+      '<div class="ref"><div class="apa">'+esc(s.authors)+" ("+esc(s.year)+"). "+esc(s.title)+" <i>"+esc(s.journal)+"</i>.</div>"+
+      '<div class="meta">'+(s.url?'<a href="'+esc(s.url)+'" target="_blank" rel="noopener">Makaleye git</a>':"")+"<span>"+esc(s.db)+"</span></div></div>"
+    ).join("");
+    show("#outUnused", true);
+  }
+}
+
+/* ---------- kopyalama ---------- */
+function copy(txt, btn){
+  const done = ()=>{ const o=btn.textContent; btn.textContent="Kopyalandı"; setTimeout(()=>btn.textContent=o,1400); };
+  if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(txt).then(done, ()=>fallback(txt,done)); }
+  else fallback(txt,done);
+}
+function fallback(txt, done){
+  const ta = document.createElement("textarea");
+  ta.value = txt; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){}
+  document.body.removeChild(ta);
+}
+
+/* ---------- olaylar ---------- */
+$("#loadModels").addEventListener("click", loadModels);
+$("#run").addEventListener("click", run);
+$("#copyPara").addEventListener("click", e => copy($("#paraBox").textContent, e.target));
+$("#copyAll").addEventListener("click", e => {
+  const refs = Array.from(document.querySelectorAll("#refBox .apa")).map(x=>x.textContent).join("\n");
+  copy($("#paraBox").textContent + "\n\nKaynakça\n" + refs, e.target);
+});
+$("#yTo").value = new Date().getFullYear();
+$("#yFrom").value = new Date().getFullYear() - 4;
+</script>
+</body>
+</html>
