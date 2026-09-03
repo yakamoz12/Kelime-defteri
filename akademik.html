@@ -214,6 +214,7 @@
           <li data-k="w"><span class="mark">·</span><span>Paragrafın APA 7 ile yazımı</span></li>
           <li data-k="v"><span class="mark">·</span><span>Alıntı doğrulama</span></li>
         </ol>
+        <div id="usedQ" class="hint" style="padding:10px 16px;border-top:1px solid var(--line);margin:0"></div>
       </section>
     </div>
 
@@ -281,7 +282,10 @@ function step(k, state){
 }
 function resetSteps(){ ["q","s","a","w","v"].forEach(k=>step(k,"")); }
 function alertBox(msg, kind){
-  $("#alert").innerHTML = msg ? '<div class="notice '+(kind==="err"?"err":"")+'">'+msg+'</div>' : "";
+  const box = $("#alert");
+  if(!msg){ box.innerHTML = ""; return; }
+  box.innerHTML = '<div class="notice '+(kind==="err"?"err":"")+'" style="white-space:pre-wrap"></div>';
+  box.firstChild.textContent = msg;
 }
 function show(id, on){ $(id).classList.toggle("on", !!on); }
 
@@ -338,7 +342,7 @@ async function loadModels(){
     $("#modelHint").textContent = list.length+" model bulundu. Seçili: "+pref;
     alertBox("");
   }catch(e){
-    alertBox("Model listesi alınamadı — "+esc(e.message),"err");
+    alertBox("Model listesi alınamadı — "+e.message,"err");
   }finally{
     btn.disabled = false; btn.textContent = "Modelleri getir";
   }
@@ -346,8 +350,8 @@ async function loadModels(){
 
 /* ---------- Europe PMC ---------- */
 async function searchEpmc(query, y1, y2, n){
-  const q = "("+query+") AND (FIRST_PDATE:["+y1+"-01-01 TO "+y2+"-12-31]) AND HAS_ABSTRACT:Y AND (LANG:eng)";
-  const url = EPMC+"?query="+encodeURIComponent(q)+"&format=json&resultType=core&pageSize="+n+"&sort=CITED%20desc";
+  const q = "("+query+") AND (FIRST_PDATE:["+y1+"-01-01 TO "+y2+"-12-31]) AND HAS_ABSTRACT:Y";
+  const url = EPMC+"?query="+encodeURIComponent(q)+"&format=json&resultType=core&pageSize="+n;
   const r = await fetch(url);
   if(!r.ok) throw new Error("Europe PMC HTTP "+r.status);
   const d = await r.json();
@@ -404,6 +408,57 @@ async function searchPubmed(query, y1, y2, n){
   return out;
 }
 
+/* ---------- sorgu işleme ---------- */
+// Europe PMC PubMed alan etiketlerini ([MeSH], [tiab]) anlamaz
+function cleanForEpmc(q){
+  return q.replace(/\[[^\]]*\]/g,"").replace(/\(\s*\)/g,"").replace(/\s{2,}/g," ")
+          .replace(/^\s*(AND|OR)\s+/i,"").replace(/\s+(AND|OR)\s*$/i,"").trim();
+}
+// üst düzey AND bloklarına ayır (parantez derinliğine saygılı)
+function splitAnd(q){
+  const parts=[]; let depth=0, cur="";
+  for(let i=0;i<q.length;i++){
+    const ch=q[i];
+    if(ch==="(") depth++;
+    if(ch===")") depth--;
+    if(depth===0 && /\s/.test(ch) && /^and\s/i.test(q.slice(i+1,i+5))){
+      parts.push(cur.trim()); cur=""; i+=4; continue;
+    }
+    cur+=ch;
+  }
+  if(cur.trim()) parts.push(cur.trim());
+  return parts.filter(Boolean);
+}
+// dar sorgudan geniş sorguya doğru varyantlar üret
+function variantsOf(queries){
+  const v=[];
+  queries.forEach(q=>{
+    const b=splitAnd(q);
+    for(let k=b.length;k>=1;k--) v.push(b.slice(0,k).join(" AND "));
+    if(b.length>1) v.push(b[b.length-1]);
+  });
+  return Array.from(new Set(v.map(x=>x.trim()).filter(x=>x.length>2)));
+}
+// yeterli sonuç bulana kadar sorguları sırayla dener
+async function gather(queries, y1, y2, n, useEpmc, usePm){
+  const seen=new Set(), out=[], tried=[];
+  for(const v of variantsOf(queries)){
+    if(out.length>=n) break;
+    const jobs=[];
+    if(useEpmc) jobs.push(searchEpmc(cleanForEpmc(v),y1,y2,n).catch(e=>{console.warn("EPMC",e);return[];}));
+    if(usePm)   jobs.push(searchPubmed(v,y1,y2,n).catch(e=>{console.warn("PubMed",e);return[];}));
+    const rs=(await Promise.all(jobs)).flat();
+    let added=0;
+    rs.forEach(s=>{
+      const k=(s.doi||s.pmid||s.title).toLowerCase();
+      if(k && !seen.has(k)){ seen.add(k); out.push(s); added++; }
+    });
+    tried.push(v);
+    if(added) return {list:out.slice(0,n), used:v, tried};
+  }
+  return {list:out.slice(0,n), used:tried[tried.length-1]||"", tried};
+}
+
 /* ---------- akış ---------- */
 async function run(){
   const text = $("#input").value.trim();
@@ -413,7 +468,7 @@ async function run(){
   const useEpmc = $("#dbEpmc").checked, usePm = $("#dbPubmed").checked;
   if(!useEpmc && !usePm) return alertBox("En az bir veri tabanı seçin.","err");
 
-  alertBox(""); resetSteps();
+  alertBox(""); resetSteps(); $("#usedQ").textContent = "";
   ["#outPara","#outRefs","#outUnused"].forEach(i=>show(i,false));
   $("#placeholder").style.display = "none";
   $("#run").disabled = true; $("#run").textContent = "Çalışıyor…";
@@ -425,7 +480,19 @@ async function run(){
     const manual = $("#extra").value.trim();
     if(manual){ queries = [manual]; }
     else{
-      const qp = 'Aşağıdaki akademik paragraf için PubMed taraması yapacağım. Paragrafın ana iddialarını kapsayan, İngilizce, boolean operatörlü 3 arama sorgusu üret. Sorgular geniş tutulsun (çok dar sorgular sonuç getirmez), MeSH terimleri ve eşanlamlıları OR ile birleştir.\nSadece şu JSON: {"queries":["...","...","..."]}\n\nPARAGRAF:\n"""'+text+'"""';
+      const qp = [
+        'Aşağıdaki akademik paragraf için literatür taraması yapacağım. İngilizce, boolean arama sorguları üret.',
+        'KURALLAR:',
+        '- Alan etiketi KULLANMA: [MeSH], [tiab], [Title/Abstract] gibi ekler yasak. Sadece kelimeler, tırnak, OR, AND, parantez.',
+        '- Her sorguda EN FAZLA 2 adet AND bloğu olsun. Üç ve daha fazla AND içeren sorgular sonuç getirmez.',
+        '- "definition", "concept", "framework", "aspects" gibi genel akademik kelimeleri sorguya koyma; sadece konunun kendisini tarif eden terimleri kullan.',
+        '- Her blokta eşanlamlıları OR ile birleştir.',
+        '- 1. sorgu en dar (2 blok), 2. sorgu orta, 3. sorgu tek bloklu ve geniş olsun.',
+        'Örnek biçim: ("frailty" OR "functional decline") AND ("older adults" OR elderly OR aging)',
+        '',
+        'Sadece şu JSON: {"queries":["...","...","..."]}',
+        '','PARAGRAF:','"""'+text+'"""'
+      ].join("\n");
       const r = await gemini(qp, true);
       queries = (r.queries||[]).filter(x=>typeof x==="string" && x.trim()).slice(0,3);
       if(!queries.length) throw new Error("Arama sorgusu üretilemedi.");
@@ -434,21 +501,13 @@ async function run(){
 
     /* 2) tarama */
     step("s","run");
-    const per = Math.max(4, Math.ceil(n / queries.length));
-    const jobs = [];
-    queries.forEach(q => {
-      if(useEpmc) jobs.push(searchEpmc(q,y1,y2,per).catch(e=>{console.warn(e);return[];}));
-      if(usePm)   jobs.push(searchPubmed(q,y1,y2,per).catch(e=>{console.warn(e);return[];}));
-    });
-    const found = (await Promise.all(jobs)).flat();
-    const seen = new Set(); SOURCES = [];
-    found.forEach(s=>{
-      const k = (s.doi || s.pmid || s.title).toLowerCase();
-      if(k && !seen.has(k)){ seen.add(k); SOURCES.push(s); }
-    });
-    SOURCES = SOURCES.slice(0, n);
-    if(!SOURCES.length) throw new Error("Bu yıl aralığında sonuç bulunamadı. Yıl aralığını genişletin veya kendi sorgunuzu yazın. Denenen sorgu: "+esc(queries[0]));
+    const g = await gather(queries, y1, y2, n, useEpmc, usePm);
+    SOURCES = g.list;
+    if(!SOURCES.length){
+      throw new Error("Sonuç bulunamadı. Yıl aralığını genişletmeyi veya kendi sorgunuzu yazmayı deneyin.\nDenenen sorgular:\n· " + g.tried.slice(0,4).join("\n· "));
+    }
     SOURCES.forEach((s,i)=> s.n = i+1);
+    $("#usedQ").innerHTML = "Kullanılan sorgu: <code>"+esc(g.used)+"</code> — "+SOURCES.length+" makale";
     step("s","done"); step("a","done");
 
     /* 3) yazım */
@@ -490,7 +549,7 @@ async function run(){
       const li = document.querySelector('#steps li[data-k="'+k+'"]');
       if(li && li.className==="run") step(k,"fail");
     });
-    alertBox(esc(e.message||String(e)),"err");
+    alertBox(e.message||String(e),"err");
   }finally{
     $("#run").disabled = false; $("#run").textContent = "Kaynakları bul ve yeniden yaz";
   }
