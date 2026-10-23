@@ -266,6 +266,17 @@ svg.ink{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointe
 .libitem:first-of-type{border-top:0}
 .libmeta{color:var(--muted);font-size:13px;margin:4px 0 8px}
 .libact{display:flex;gap:8px;flex-wrap:wrap}
+.lrow{display:flex;gap:14px;align-items:flex-start}
+.lcheck{flex:none;width:44px;height:44px;min-height:0;padding:0;border-radius:50%;border:2px solid var(--line);background:var(--surface);color:transparent;margin-top:4px}
+.lcheck.on{background:#1f7a4a;border-color:#1f7a4a;color:#fff}
+.lread{color:#1f7a4a;font-weight:600}
+.lunread{color:var(--ink);font-weight:600}
+.llast{display:inline-block;font-size:11.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:3px 9px;margin-bottom:4px}
+.readtog{flex:none;min-height:44px;padding:6px 14px 6px 10px;border-radius:12px;gap:6px;font-weight:600;color:var(--muted)}
+.readtog[hidden]{display:none}
+.readtog svg{color:var(--line)}
+.readtog.on{background:#e6f4ec;border-color:#1f7a4a;color:#1f7a4a}
+.readtog.on svg{color:#1f7a4a}
 .docprev{max-height:46vh;overflow-y:auto;border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--bg);font-family:"Times New Roman",var(--serif);font-size:15px;line-height:1.55;margin-top:12px}
 .docprev h4{text-align:center;margin:6px 0 12px;font-size:16px}
 .docprev .n{padding-left:1.6em;text-indent:-1.6em;margin:0 0 10px}
@@ -346,6 +357,7 @@ details.setup li{margin-bottom:6px}
       <div class="readcol">
         <header class="top">
           <button class="pname" id="pname"><b>Makale Okuyucu</b><small>Makale seçilmedi</small></button>
+          <button class="readtog" id="bRead" aria-pressed="false" hidden>Okudum</button>
           <div class="seg" id="viewSeg" role="group" aria-label="Görünüm" hidden></div>
         </header>
         <div class="secbar" id="secbar" hidden></div>
@@ -871,8 +883,13 @@ function refreshNoted() {
 }
 function renderHeader() {
   const p = curPaper(); const b = $('#pname');
-  if (!p) { b.innerHTML = '<b>Makale Okuyucu</b><small>Makale seçilmedi</small>'; }
-  else { b.innerHTML = `<b>${esc(p.meta.title || p.name)}</b><small>${esc(inText(p))}. Künyeyi düzenlemek için dokun</small>`; }
+  const r = $('#bRead');
+  if (!p) { b.innerHTML = '<b>Makale Okuyucu</b><small>Makale seçilmedi</small>'; r.hidden = true; }
+  else {
+    b.innerHTML = `<b>${esc(p.meta.title || p.name)}</b><small>${esc(inText(p))}. Künyeyi düzenlemek için dokun</small>`;
+    r.hidden = false; r.classList.toggle('on', !!p.read); r.setAttribute('aria-pressed', p.read ? 'true' : 'false');
+    r.innerHTML = CHECK_SVG + (p.read ? 'Okundu' : 'Okudum');
+  }
   $('#noteCount').textContent = S.notes.length;
 }
 function renderSectionBar() {
@@ -1024,6 +1041,7 @@ function renderAll(keepScroll) { renderHeader(); renderSectionBar(); renderReade
 function openPaper(id) {
   const p = S.papers[id]; if (!p) return;
   S.cur = id; S.sec = Math.min(p.lastSec || 0, p.sections.length - 1); S.undo = []; showScreen('read');
+  p.opened = Date.now(); savePaper(p);
   LS.set('mo:last', id); renderAll();
 }
 
@@ -1121,6 +1139,7 @@ $('#secbar').addEventListener('click', e => {
   else if (a) handleAct(a.dataset.act);
 });
 $('#pname').onclick = () => { if (S.cur) openMeta(S.cur); };
+$('#bRead').onclick = () => { const p = curPaper(); if (!p) return; setRead(p, !p.read); toast(p.read ? 'Okundu olarak işaretlendi. Kütüphanede tikli görünecek.' : 'Okunmadı olarak işaretlendi.'); };
 $('#viewSeg').addEventListener('click', e => {
   const v = e.target.closest('[data-view]'); if (!v || !curPaper()) return;
   S.view = v.dataset.view; renderSectionBar(); renderReader(true);
@@ -1912,15 +1931,37 @@ async function restoreData(d) {
   if (Array.isArray(d.archive)) { ARC.merge({ items: d.archive, folders: d.arcFolders || [] }); ARC.touch(); }
 }
 
+const fmtDay = t => new Date(t).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: new Date(t).getFullYear() === new Date().getFullYear() ? undefined : 'numeric' });
+function setRead(p, v) { p.read = v; p.readAt = v ? Date.now() : null; savePaper(p); renderHeader(); }
+const CHECK_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
 function openLib() {
-  const list = Object.values(S.papers).sort((a, b) => b.added - a.added); const sm = suffixMap();
-  modal(`<h3>Kütüphane</h3>${list.length ? list.map(p => {
-    const c = S.notes.filter(n => n.paperId === p.id).length;
-    return `<div class="libitem"><p class="refp">${refHTML(p, sm)}</p><div class="libmeta">${c} not, ${p.sections.length} bölüm</div>
-      <div class="libact"><button class="primary" data-open="${p.id}">Aç</button><button data-meta="${p.id}">Künyeyi düzenle</button><button class="danger" data-delp="${p.id}">Sil</button></div></div>`;
-  }).join('') : '<p class="hint">Henüz makale eklemedin.</p>'}
+  let filter = LS.get('mo:libFilter', 'all');
+  modal(`<h3>Kütüphane</h3><div class="seg wide" id="lFilter" role="group" aria-label="Filtre" style="margin-top:12px"></div><div id="lList"></div>
     <div class="mact"><label class="btn" for="file">PDF ekle</label><button data-close>Kapat</button></div>`, box => {
+    const render = () => {
+      const all = Object.values(S.papers);
+      const nRead = all.filter(p => p.read).length;
+      $('#lFilter').innerHTML = [['all', `Tümü (${all.length})`], ['unread', `Okunmadı (${all.length - nRead})`], ['read', `Okundu (${nRead})`]]
+        .map(([k, l]) => `<button data-lf="${k}" class="${filter === k ? 'on' : ''}">${l}</button>`).join('');
+      const lastId = all.filter(p => p.opened).sort((a, b) => b.opened - a.opened)[0];
+      const list = all.filter(p => filter === 'all' || (filter === 'read' ? p.read : !p.read))
+        .sort((a, b) => (b.opened || b.added) - (a.opened || a.added));
+      const sm = suffixMap();
+      $('#lList').innerHTML = list.length ? list.map(p => {
+        const c = S.notes.filter(n => n.paperId === p.id).length;
+        const status = p.read ? `<b class="lread">Okundu${p.readAt ? ', ' + fmtDay(p.readAt) : ''}</b>` : '<b class="lunread">Okunmadı</b>';
+        const opened = p.opened ? `son açılış ${fmtDay(p.opened)}` : 'hiç açılmadı';
+        return `<div class="libitem lrow"><button class="lcheck${p.read ? ' on' : ''}" data-tick="${p.id}" aria-pressed="${p.read ? 'true' : 'false'}" aria-label="${p.read ? 'Okunmadı olarak işaretle' : 'Okudum olarak işaretle'}">${CHECK_SVG}</button>
+          <div style="flex:1;min-width:0">${lastId && lastId.id === p.id ? '<span class="llast">En son açtığın</span>' : ''}<p class="refp">${refHTML(p, sm)}</p>
+          <div class="libmeta">${status}, ${opened}, ${c} not</div>
+          <div class="libact"><button class="primary" data-open="${p.id}">Aç</button><button data-meta="${p.id}">Künyeyi düzenle</button><button class="danger" data-delp="${p.id}">Sil</button></div></div></div>`;
+      }).join('') : `<p class="hint">${all.length ? (filter === 'read' ? 'Henüz okundu olarak işaretlediğin makale yok.' : 'Okunmamış makale kalmadı.') : 'Henüz makale eklemedin.'}</p>`;
+    };
+    render();
     box.addEventListener('click', e => {
+      const f = e.target.closest('[data-lf]'); if (f) { filter = f.dataset.lf; LS.set('mo:libFilter', filter); render(); return; }
+      const t = e.target.closest('[data-tick]');
+      if (t) { const p = S.papers[t.dataset.tick]; if (p) { setRead(p, !p.read); render(); toast(p.read ? 'Okundu olarak işaretlendi.' : 'Okunmadı olarak işaretlendi.'); } return; }
       const o = e.target.closest('[data-open]'), m = e.target.closest('[data-meta]'), d = e.target.closest('[data-delp]');
       if (o) { closeModal(); S.view = 'orig'; openPaper(o.dataset.open); }
       else if (m) openMeta(m.dataset.meta);
@@ -1929,7 +1970,7 @@ function openLib() {
         if (!confirm(c ? `Bu makale ve ondan aldığın ${c} not silinecek. Emin misin?` : 'Bu makale silinecek. Emin misin?')) return;
         delete S.papers[id]; DB.del('paper:' + id); S.notes = S.notes.filter(n => n.paperId !== id); saveNotes();
         if (S.cur === id) { S.cur = null; LS.set('mo:last', null); }
-        renderAll(); openLib();
+        renderAll(); render();
       }
     });
   });
