@@ -274,6 +274,7 @@ svg.ink{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointe
 .llast{display:inline-block;font-size:11.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:3px 9px;margin-bottom:4px}
 .readtog{flex:none;min-height:44px;padding:6px 14px 6px 10px;border-radius:12px;gap:6px;font-weight:600;color:var(--muted)}
 .readtog[hidden]{display:none}
+.trnote{color:var(--muted);font-size:13.5px;font-weight:600}
 .readtog svg{color:var(--line)}
 .readtog.on{background:#e6f4ec;border-color:#1f7a4a;color:#1f7a4a}
 .readtog.on svg{color:#1f7a4a}
@@ -568,6 +569,51 @@ function joinT(a, b) {
   if (/[A-Za-zÀ-ɏ]-$/.test(a) && /^[a-zà-ɏ]/.test(b)) return a.slice(0, -1) + b;
   return a + ' ' + b;
 }
+/* Some PDFs (often Turkish ones) map letters like "i" to wrong Unicode characters.
+   Find foreign characters that sit inside Latin words and map them back. */
+const OK_CH = /[\u0000-\u036F\u0370-\u03FF\u2000-\u206F\u20A0-\u20CF\u2100-\u214F\u2190-\u23FF\u25A0-\u25FF\uFB00-\uFB06]/u;
+const LAT_CH = /[A-Za-zÀ-ɏ]/;
+function glyphMap(text) {
+  const chars = Array.from(text); const stats = new Map();
+  for (let i = 0; i < chars.length; i++) {
+    const c = chars[i]; if (OK_CH.test(c) || /\s/.test(c)) continue;
+    const a = chars[i - 1] || ' ', b = chars[i + 1] || ' ';
+    if (!LAT_CH.test(a) && !LAT_CH.test(b)) continue;
+    const s = stats.get(c) || { n: 0, start: 0 }; s.n++; if (!LAT_CH.test(a)) s.start++; stats.set(c, s);
+  }
+  const cands = [...stats.entries()].filter(([, s]) => s.n >= 3).sort((x, y) => y[1].n - x[1].n);
+  if (!cands.length) return null;
+  const letters = (text.match(/[A-Za-zÀ-ɏ]/g) || []).length || 1;
+  const cnt = ch => text.split(ch).length - 1;
+  const tr = (text.match(/[ğşçöüĞŞÇÖÜ]/g) || []).length > letters * 0.01;
+  const map = {}; const used = new Set();
+  for (const [c, s] of cands) {
+    if (s.start / s.n > 0.7) { const up = tr ? 'İ' : 'I'; if (!used.has(up)) { map[c] = up; used.add(up); } continue; }
+    if (!used.has('i') && cnt('i') / letters < 0.035) { map[c] = 'i'; used.add('i'); continue; }
+    if (tr && !used.has('ı') && cnt('ı') / letters < 0.01) { map[c] = 'ı'; used.add('ı'); }
+  }
+  return Object.keys(map).length ? map : null;
+}
+const applyGlyphs = (s, m) => { if (!m || !s) return s; for (const [a, b] of Object.entries(m)) s = s.split(a).join(b); return s; };
+function isTurkishText(text) {
+  const letters = (text.match(/[A-Za-zÀ-ɏ]/g) || []).length || 1;
+  return (text.match(/[ğşıİĞŞ]/g) || []).length / letters > 0.012;
+}
+function repairPaper(p) {
+  const m = glyphMap(p.paras.map(x => x.t).join('\n')); let changed = false;
+  if (m) {
+    p.paras.forEach(x => { x.t = applyGlyphs(x.t, m); });
+    for (const k of Object.keys(p.tr || {})) p.tr[k] = applyGlyphs(p.tr[k], m);
+    if (p.meta) for (const k of ['title', 'journal']) if (p.meta[k]) p.meta[k] = applyGlyphs(p.meta[k], m);
+    for (const n of S.notes) if (n.paperId === p.id) n.text = applyGlyphs(n.text, m);
+    changed = true;
+  }
+  if (!p.lang) { p.lang = isTurkishText(p.paras.slice(0, 60).map(x => x.t).join(' ')) ? 'tr' : 'xx'; changed = true; }
+  const N = p.paras.length; const before = (p.skip || []).length;
+  p.skip = (p.skip || []).filter(i => i >= 0 && i < N && p.paras[i].t.length < 200);
+  if (p.skip.length !== before) changed = true;
+  return changed;
+}
 async function extractPdf(file, onProg, maxPages = Infinity) {
   const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
   const paras = [];
@@ -608,7 +654,8 @@ async function extractPdf(file, onProg, maxPages = Infinity) {
         const g = prev.y - L.y;
         if (Math.abs(L.h - prev.h) > Math.max(L.h, prev.h) * 0.18) brk = true;
         else if (g > med * 1.45) brk = true;
-        else if ((prev.xEnd - prev.x) < wide * 0.72 && PUNCT_END.test(prev.text.trim())) brk = true;
+        else if ((prev.xEnd - prev.x) < wide * 0.8 && PUNCT_END.test(prev.text.trim())) brk = true;
+        else if (L.x - prev.x > L.h * 0.9 && L.x - prev.x < L.h * 8 && PUNCT_END.test(prev.text.trim()) && /^[A-ZÇĞİÖŞÜ0-9“"(]/.test(t)) brk = true;
       }
       if (brk) { if (para) pageParas.push(para); para = { t, pg: pn }; }
       else para.t = joinT(para.t, t);
@@ -622,8 +669,11 @@ async function extractPdf(file, onProg, maxPages = Infinity) {
     paras.push(...pageParas);
     if (page.cleanup) page.cleanup();
   }
-  const fix = s => s.replace(/ﬁ/g, 'fi').replace(/ﬂ/g, 'fl').replace(/ﬀ/g, 'ff').replace(/ﬃ/g, 'ffi').replace(/ﬄ/g, 'ffl').replace(/\u00AD/g, '').replace(/\s+/g, ' ').trim();
-  return paras.map(p => ({ t: fix(p.t), pg: p.pg })).filter(p => p.t && !/^\d{1,4}$/.test(p.t));
+  const fix = s => s.replace(/ﬁ/g, 'fi').replace(/ﬂ/g, 'fl').replace(/ﬀ/g, 'ff').replace(/ﬃ/g, 'ffi').replace(/ﬄ/g, 'ffl').replace(/[ﬅﬆ]/g, 'st').replace(/\u00AD/g, '').replace(/\s+/g, ' ').trim();
+  const out = paras.map(p => ({ t: fix(p.t), pg: p.pg })).filter(p => p.t && !/^\d{1,4}$/.test(p.t));
+  const gm = glyphMap(out.map(p => p.t).join('\n'));
+  if (gm) out.forEach(p => { p.t = applyGlyphs(p.t, gm); });
+  return out;
 }
 
 /* ---------- Gemini ---------- */
@@ -636,6 +686,7 @@ function parseJSON(txt) {
   if (start >= 0 && end > start) return JSON.parse(s.slice(start, end + 1));
   throw new Error('Gemini yanıtı okunamadı.');
 }
+let gemNext = 0, gemGap = 0, gemWaitCb = null;
 async function gemini(prompt, { json = true, temperature = 0.2 } = {}) {
   const parts = Array.isArray(prompt) ? prompt : [{ text: prompt }];
   const key = String(S.settings.key || '').trim(); if (!key) throw new Error('NOKEY');
@@ -644,16 +695,26 @@ async function gemini(prompt, { json = true, temperature = 0.2 } = {}) {
   if (json) gc.responseMimeType = 'application/json';
   if (/2\.5-flash/.test(model)) gc.thinkingConfig = { thinkingBudget: 0 };
   let last = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const wait = gemNext - Date.now(); if (wait > 0) await sleep(wait);
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: gc })
     });
     const data = await r.json().catch(() => ({}));
+    gemNext = Date.now() + gemGap;
     if (r.status === 429 || r.status === 503 || r.status === 500) {
+      const det = (data.error && data.error.details) || [];
+      if (r.status === 429 && /PerDay|per day|daily/i.test(JSON.stringify(det) + ((data.error && data.error.message) || ''))) throw new Error('DAILY_QUOTA');
       last = new Error((data.error && data.error.message) || ('HTTP ' + r.status + ' RESOURCE_EXHAUSTED'));
-      await sleep(5000 * (attempt + 1)); continue;
+      if (r.status === 429) gemGap = Math.max(gemGap, 6500);
+      const ri = det.find(d => /RetryInfo/.test(d['@type'] || ''));
+      const ms = Math.min(90000, (ri && parseFloat(ri.retryDelay) * 1000) || 8000 * (attempt + 1)) + 1000;
+      const sec = Math.round(ms / 1000);
+      if (gemWaitCb) gemWaitCb(sec);
+      if (!$('#busy').hidden) busy(`Gemini ücretsiz sınırına takıldı, ${sec} sn bekleyip devam edeceğim…`);
+      await sleep(ms); continue;
     }
     if (!r.ok) throw new Error((data.error && data.error.message) || ('HTTP ' + r.status));
     const c = data.candidates && data.candidates[0];
@@ -667,6 +728,7 @@ function errMsg(e) {
   const m = String((e && e.message) || e);
   if (m === 'NOKEY') return 'Gemini API anahtarı eklenmemiş. Ayarlar’dan ekle.';
   if (/API key not valid|API_KEY_INVALID|API key expired/i.test(m)) return 'API anahtarı geçersiz. Ayarlar’dan kontrol et.';
+  if (m === 'DAILY_QUOTA') return 'Gemini’nin günlük ücretsiz kotası doldu. Yarın tekrar dene ya da Ayarlar’dan “Flash-Lite” modelini seç.';
   if (/429|quota|RESOURCE_EXHAUSTED|rate/i.test(m)) return 'Ücretsiz kullanım sınırına ulaşıldı. Bir dakika bekleyip tekrar dene.';
   if (m === 'DRIVE_AUTH') return 'Drive oturumu sona erdi. Arşiv’den ya da Ayarlar’dan tekrar bağlan.';
   if (/^Drive/.test(m)) return m.replace(/^Drive: /, 'Drive hatası: ');
@@ -759,7 +821,7 @@ function applyStructure(p, res) {
   if (!secs.length) secs = [{ title: 'Tüm Metin', original: '', start: 0 }];
   if (secs[0].start > 0) secs.unshift({ title: 'Başlık ve Künye', original: '', start: 0 });
   secs.forEach((s, i) => { s.end = i < secs.length - 1 ? secs[i + 1].start - 1 : N - 1; });
-  p.skip = (res && Array.isArray(res.skip) ? res.skip : []).map(Number).filter(n => Number.isInteger(n) && n >= 0 && n < N);
+  p.skip = (res && Array.isArray(res.skip) ? res.skip : []).map(Number).filter(n => Number.isInteger(n) && n >= 0 && n < N && p.paras[n].t.length < 200);
   const sk = new Set(p.skip);
   const kept = secs.filter(s => { for (let i = s.start; i <= s.end; i++) if (!sk.has(i)) return true; return false; });
   p.sections = kept.length ? kept : secs;
@@ -802,6 +864,7 @@ async function translateCurrent() {
   if (cur.length) batches.push(cur);
   S.translating = true; let done = 0;
   S.trText = `Çevriliyor 0/${todo.length}`; renderSectionBar();
+  gemWaitCb = sec => { S.trText = `Sınır: ${sec} sn bekleniyor`; renderSectionBar(); };
   try {
     for (const b of batches) {
       const out = await translateBatch(b.map(i => p.paras[i].t));
@@ -812,8 +875,8 @@ async function translateCurrent() {
       renderSectionBar();
     }
     toast('Bölüm çevrildi.');
-  } catch (e) { toast(errMsg(e), 'err'); }
-  finally { S.translating = false; renderSectionBar(); }
+  } catch (e) { toast(errMsg(e) + (done ? ` ${done} paragraf çevrildi, kalanı için tekrar “Bölümü çevir”e dokun.` : ''), 'err'); }
+  finally { S.translating = false; gemWaitCb = null; renderSectionBar(); renderReader(true); }
 }
 
 /* ---------- rendering ---------- */
@@ -859,7 +922,7 @@ function renderReader(keepScroll) {
   const idx = sectionParas(p, S.sec);
   const missing = idx.filter(i => !sk.has(i) && !p.tr[i]).length;
   let h = `<div class="article"><div class="sec-head">${sec.original ? `<div class="orig">${esc(sec.original)}</div>` : ''}<h2>${esc(sec.title)}</h2></div>`;
-  if (S.view !== 'orig' && missing) h += `<div class="notice"><span>Bu bölümün ${missing} paragrafı henüz çevrilmedi.</span>${S.translating ? '' : '<button class="primary" data-act="translate">Bölümü çevir</button>'}</div>`;
+  if (S.view !== 'orig' && missing && p.lang !== 'tr') h += `<div class="notice"><span>Bu bölümün ${missing} paragrafı henüz çevrilmedi.</span>${S.translating ? '' : '<button class="primary" data-act="translate">Bölümü çevir</button>'}</div>`;
   for (const i of idx) {
     const o = p.paras[i].t, t = p.tr[i], skp = sk.has(i);
     h += '<div class="para">';
@@ -901,11 +964,14 @@ function renderSectionBar() {
     const ids = sectionParas(p, k, false); const full = ids.length && ids.every(i => p.tr[i]);
     return `<button class="chip${k === S.sec ? ' on' : ''}" data-sec="${k}">${esc(s.title)}${full ? '<span class="ok">✓</span>' : ''}</button>`;
   }).join('');
+  const trPaper = p.lang === 'tr';
+  if (trPaper) S.view = 'orig';
+  V.hidden = trPaper;
   const need = sectionParas(p, S.sec, false).filter(i => !p.tr[i]).length;
   const views = { orig: 'Orijinal', tr: 'Çeviri', both: 'İkisi' };
   V.innerHTML = Object.keys(views).map(v => `<button data-view="${v}" class="${S.view === v ? 'on' : ''}">${views[v]}</button>`).join('');
-  B.innerHTML = `<div class="chips">${chips}</div><div class="ctrls">`
-    + `<button class="primary" data-act="translate" ${S.translating || !need ? 'disabled' : ''}>${S.translating ? esc(S.trText) : (need ? 'Bölümü çevir' : 'Çevrildi ✓')}</button></div>`;
+  B.innerHTML = `<div class="chips">${chips.replace(trPaper ? /<span class="ok">✓<\/span>/g : /$^/, '')}</div><div class="ctrls">` + (trPaper ? '<span class="trnote">Türkçe makale, çeviri gerekmiyor</span></div>' : '')
+    + (trPaper ? '' : `<button class="primary" data-act="translate" ${S.translating || !need ? 'disabled' : ''}>${S.translating ? esc(S.trText) : (need ? 'Bölümü çevir' : 'Çevrildi ✓')}</button></div>`);
   B.querySelector('.chips').scrollLeft = sl;
 }
 /* ---------- categories (two levels: main › sub) ---------- */
@@ -1345,7 +1411,7 @@ async function importPdf(f, { arcItem = null } = {}) {
       busy('Gemini bölümleri ve künyeyi belirliyor…');
       try { res = await analyze(p); } catch (err) { toast(errMsg(err) + ' Bölümler ayrılamadı, künyeyi elle girebilirsin.', 'err'); }
     } else toast('API anahtarı olmadığı için bölümler ayrılmadı. Ayarlar’dan ekleyebilirsin.', 'err');
-    applyStructure(p, res);
+    applyStructure(p, res); repairPaper(p);
     if (arcItem) { p.meta = JSON.parse(JSON.stringify(arcItem.meta || {})); p.keywords = (arcItem.keywords || []).slice(); p.arcId = arcItem.id; }
     else S.pendingFiles[p.id] = f;
     S.papers[p.id] = p; savePaper(p);
@@ -2182,6 +2248,9 @@ async function init() {
       if (String(k).startsWith('paper:')) { const p = await DB.get(k); if (p && p.id) { p.strokes = p.strokes || {}; p.tr = p.tr || {}; S.papers[p.id] = p; } }
     }
     S.notes = (await DB.get('notes')) || [];
+    let fixed = 0;
+    for (const p of Object.values(S.papers)) if (repairPaper(p)) { fixed++; await DB.set('paper:' + p.id, p); }
+    if (fixed) await DB.set('notes', S.notes);
     S.cats = (await DB.get('cats')) || [];
     ARC.items = (await DB.get('archive')) || [];
     ARC.folders = (await DB.get('arcFolders')) || [];
