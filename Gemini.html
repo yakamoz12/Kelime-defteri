@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Makale Okuyucu">
+<title>Makale Okuyucu</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📑</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{
+  --bg:#f7f7f4;--surface:#ffffff;--surface2:#eef0f2;--ink:#1b2230;--muted:#5d6675;--line:#dfe2e7;
+  --accent:#2b4c8c;--accent-soft:#e6ecf7;--on-accent:#ffffff;
+  --hl:rgba(255,222,60,.55);--trbg:#f1f5fb;--trbar:#8aa6d8;--danger:#b3261e;
+  --shadow:0 12px 32px rgba(20,30,50,.14);
+  --serif:"Literata",Georgia,"Times New Roman",serif;
+  --sans:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;box-sizing:border-box;height:100%;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  background:var(--bg);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#12151b;--surface:#1a1e26;--surface2:#232834;--ink:#e6e9ef;--muted:#98a1b0;--line:#2c323e;
+  --accent:#8fb0f0;--accent-soft:#1f2a40;--on-accent:#0d1424;
+  --hl:rgba(255,215,60,.26);--trbg:#182030;--trbar:#4f6fa8;--danger:#f2857b;
+  --shadow:0 12px 32px rgba(0,0,0,.5);color-scheme:dark;
+}}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%}
+body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font:15px/1.45 var(--sans);-webkit-text-size-adjust:100%}
+button,input,textarea,select{font:inherit;color:inherit}
+button,.btn{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;min-height:42px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;-webkit-tap-highlight-color:transparent;text-decoration:none}
+button.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+button.danger{color:var(--danger)}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+#app{height:100%;display:flex;flex-direction:column}
+
+/* Header */
+.top{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{flex:1;min-width:0;display:flex;align-items:center;gap:10px}
+.mark{width:34px;height:34px;border-radius:9px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:18px;flex:none}
+.pname{border:0;background:none;padding:0;min-height:0;display:block;text-align:left;min-width:0;max-width:100%}
+.pname b{display:block;font-family:var(--serif);font-weight:600;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pname small{display:block;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbtns{display:flex;gap:8px;flex:none}
+.badge{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:1px 8px;font-size:12px;font-weight:700;min-width:22px;text-align:center}
+
+/* Section bar */
+.secbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.secbar[hidden]{display:none}
+.chips{display:flex;gap:6px;overflow-x:auto;flex:1 1 380px;min-width:0;padding:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{border-radius:999px;min-height:38px;padding:6px 15px;background:var(--surface2);border-color:transparent}
+.chip.on{background:var(--ink);color:var(--bg);font-weight:600}
+.chip .ok{color:var(--accent);font-weight:700;margin-left:2px}
+.chip.on .ok{color:inherit}
+.ctrls{display:flex;gap:8px;align-items:center;margin-left:auto}
+.seg{display:inline-flex;background:var(--surface2);border-radius:11px;padding:3px}
+.seg button{border:0;background:transparent;min-height:36px;padding:4px 13px;border-radius:8px}
+.seg button.on{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.14);font-weight:600}
+
+/* Reader */
+.main{flex:1;display:flex;min-height:0;position:relative}
+.readcol{flex:1;min-width:0;position:relative;display:flex}
+#reader{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:30px 28px 150px}
+.article{max-width:720px;margin:0 auto}
+.sec-head{margin:0 0 24px}
+.sec-head .orig{color:var(--muted);font-size:14px;font-style:italic;font-family:var(--serif)}
+.sec-head h2{font-family:var(--serif);font-weight:600;font-size:32px;line-height:1.2;margin:2px 0 0}
+.notice{display:flex;align-items:center;gap:12px;justify-content:space-between;background:var(--accent-soft);border-radius:12px;padding:10px 14px;margin:0 0 20px}
+.para{margin:0 0 16px}
+.blk{position:relative;margin:0 -14px;padding:6px 44px 6px 14px;border-radius:6px;font-family:var(--serif);font-size:19px;line-height:1.66;transition:background-color .25s}
+.blk p{margin:0;-webkit-hyphens:auto;hyphens:auto}
+.blk.tr{background:var(--trbg);box-shadow:inset 3px 0 0 var(--trbar);margin-top:6px}
+.blk.skipped{opacity:.5;font-size:15px}
+.blk.noted,.blk.hl-live{background:var(--hl)}
+.blk.tr.noted{box-shadow:inset 3px 0 0 var(--trbar)}
+.blk.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%,55%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 3px transparent}}
+.addn{position:absolute;right:6px;top:6px;width:32px;height:32px;min-height:0;padding:0;border-radius:50%;font-size:18px;line-height:1;opacity:.5}
+.noted .addn{opacity:1;background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+svg.ink{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+#reader.tooling .blk{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.showskip{margin:18px 0 0;color:var(--muted);background:transparent}
+
+/* Empty state */
+.empty{max-width:560px;margin:6vh auto 0;text-align:left}
+.empty h2{font-family:var(--serif);font-size:34px;font-weight:600;line-height:1.15;margin:0 0 10px}
+.empty p.lead{color:var(--muted);font-size:17px;margin:0 0 24px}
+.empty .acts{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px}
+.big{min-height:52px;padding:10px 22px;font-size:16px}
+.steps{list-style:none;padding:0;margin:0;border-top:1px solid var(--line)}
+.steps li{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);font-size:15.5px}
+.steps li span{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:14px}
+
+/* Toolbar */
+.toolbar{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:6px;border-radius:20px;background:var(--surface);background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--line);box-shadow:var(--shadow);z-index:20}
+.toolbar[hidden]{display:none}
+.tool{flex-direction:column;gap:1px;min-width:60px;min-height:54px;padding:4px 8px;border:0;background:transparent;font-size:11.5px;border-radius:14px}
+.tool svg{width:23px;height:23px}
+.tool.on{background:var(--accent);color:var(--on-accent)}
+.sw{width:28px;height:28px;min-height:0;padding:0;border-radius:50%;border:3px solid var(--surface);margin:0 2px}
+.sw.on{box-shadow:0 0 0 2px var(--ink)}
+.tsep{width:1px;height:32px;background:var(--line);margin:0 5px}
+.selpill{position:absolute;left:50%;transform:translateX(-50%);bottom:94px;z-index:21;box-shadow:var(--shadow)}
+.selpill[hidden]{display:none}
+
+/* Notes */
+.notes{width:390px;flex:none;border-left:1px solid var(--line);background:var(--bg);display:none;flex-direction:column;min-height:0}
+body.notes-open .notes{display:flex}
+.nhead{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+.nhead h3{margin:0;flex:1;font-family:var(--serif);font-size:20px;font-weight:600}
+#notesList{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;margin-bottom:12px}
+.note-top{display:flex;align-items:center;gap:8px}
+.num{flex:none;width:24px;height:24px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-size:12px;font-weight:700}
+.src{flex:1;min-width:0;border:0;background:none;padding:0;min-height:30px;justify-content:flex-start;color:var(--accent);font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.src.free{color:var(--muted)}
+.nact button{min-height:32px;width:32px;padding:0;border:0;background:transparent;color:var(--muted)}
+.note textarea{display:block;width:100%;border:0;background:transparent;resize:none;font-family:var(--serif);font-size:16px;line-height:1.55;padding:6px 0 0;outline:none;overflow:hidden;min-height:48px}
+.cite{color:var(--muted);font-size:13px;margin-top:4px}
+.empty-notes{color:var(--muted);text-align:center;padding:30px 10px;font-size:14.5px}
+.empty-notes b{color:var(--ink)}
+.nclose{display:none}
+@media (max-width:1050px){
+  .notes{position:fixed;top:0;right:0;bottom:0;width:min(430px,92vw);display:flex;transform:translateX(105%);transition:transform .28s ease;z-index:30;box-shadow:var(--shadow);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  body.notes-open .notes{transform:none}
+  .nclose{display:inline-flex}
+}
+@media (max-width:640px){
+  .tool span{display:none}.tool{min-width:44px}
+  .hbtns .lbl{display:none}
+  #reader{padding:22px 18px 140px}
+  .blk{font-size:18px}
+}
+
+/* Overlay canvas, modal, busy, toast */
+#ov{position:fixed;left:0;top:0;pointer-events:none;z-index:16}
+.modal{position:fixed;inset:0;z-index:40;background:rgba(10,15,25,.45);display:flex;align-items:flex-start;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) 16px 24px;overflow-y:auto}
+.modal[hidden]{display:none}
+.mbox{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);width:min(620px,100%);padding:22px;margin:auto 0}
+.mbox h3{margin:0 0 6px;font-family:var(--serif);font-size:24px;font-weight:600}
+.mbox label{display:block;font-weight:600;font-size:13.5px;margin:12px 0 0}
+.mbox input,.mbox textarea{display:block;width:100%;margin-top:5px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-weight:400;font-size:16px}
+.mbox textarea{resize:vertical;line-height:1.4}
+.hint{color:var(--muted);font-size:13.5px;margin:6px 0 0}
+.g2{display:grid;grid-template-columns:1fr 1.6fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:10px}
+.row{display:flex;gap:8px;align-items:center;margin-top:5px}
+.row input{margin-top:0}
+.mact{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;flex-wrap:wrap}
+.preview{margin-top:16px;padding:12px 14px;border-radius:12px;background:var(--surface2)}
+.preview .pl{font-size:12.5px;color:var(--muted);margin-bottom:4px}
+.refp{font-family:var(--serif);padding-left:2em;text-indent:-2em;margin:4px 0;line-height:1.5}
+.field{margin-top:16px}
+.flabel{font-weight:600;font-size:13.5px;margin-bottom:6px}
+.seg.wide{display:flex}.seg.wide button{flex:1;white-space:normal}
+.libitem{border-top:1px solid var(--line);padding:14px 0}
+.libitem:first-of-type{border-top:0}
+.libmeta{color:var(--muted);font-size:13px;margin:4px 0 8px}
+.libact{display:flex;gap:8px;flex-wrap:wrap}
+.docprev{max-height:46vh;overflow-y:auto;border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--bg);font-family:"Times New Roman",var(--serif);font-size:15px;line-height:1.55;margin-top:12px}
+.docprev h4{text-align:center;margin:6px 0 12px;font-size:16px}
+.docprev .n{padding-left:1.6em;text-indent:-1.6em;margin:0 0 10px}
+.busy{position:fixed;inset:0;z-index:50;background:rgba(10,15,25,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#fff;font-weight:600;text-align:center;padding:20px}
+.busy[hidden]{display:none}
+.spin{width:44px;height:44px;border-radius:50%;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:60;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 16px;max-width:min(560px,92vw);display:flex;align-items:center;gap:12px;transition:opacity .2s,transform .2s;box-shadow:var(--shadow)}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast.err{background:var(--danger);color:#fff}
+.toast button{min-height:34px;background:transparent;color:inherit;border-color:currentColor}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">M</div>
+      <button class="pname" id="pname"><b>Makale Okuyucu</b><small>Makale seçilmedi</small></button>
+    </div>
+    <div class="hbtns">
+      <button id="bLib" title="Kütüphane"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h7"/></svg><span class="lbl">Kütüphane</span></button>
+      <label class="btn primary" for="file"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">PDF ekle</span></label>
+      <button id="bNotes"><span class="lbl">Notlar</span><span class="badge" id="noteCount">0</span></button>
+      <button id="bSet" title="Ayarlar" aria-label="Ayarlar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
+    <input type="file" id="file" class="vh" accept="application/pdf,.pdf">
+  </header>
+  <div class="secbar" id="secbar" hidden></div>
+  <div class="main">
+    <div class="readcol">
+      <div id="reader"></div>
+      <button id="bSel" class="selpill primary" hidden>Seçimi notlara ekle</button>
+      <div class="toolbar" id="toolbar" hidden>
+        <button class="tool on" data-tool="select" title="Seç ve kaydır"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 8-6 2-3 6z"/></svg><span>Seç</span></button>
+        <button class="tool" data-tool="highlight" title="Fosforlu: paragrafı notlara ekle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l-5 5v3h3l5-5"/><path d="M14.5 4.5l5 5-7 7-5-5z"/><path d="M3 22h8" stroke-width="3"/></svg><span>Fosforlu</span></button>
+        <button class="tool" data-tool="pen" title="Kalem: serbest çizim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4L8 20H4v-4z"/><path d="M14 6l4 4"/></svg><span>Kalem</span></button>
+        <button class="tool" data-tool="erase" title="Silgi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21h12"/><path d="M3.5 14.5l9-9a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L11 19H7.5z"/><path d="M8 10l6 6"/></svg><span>Silgi</span></button>
+        <span class="tsep"></span>
+        <button class="sw on" data-color="#d9342b" style="background:#d9342b" aria-label="Kırmızı"></button>
+        <button class="sw" data-color="#2f6fde" style="background:#2f6fde" aria-label="Mavi"></button>
+        <button class="sw" data-color="#1f9d55" style="background:#1f9d55" aria-label="Yeşil"></button>
+        <button class="sw" data-color="#e8890c" style="background:#e8890c" aria-label="Turuncu"></button>
+        <span class="tsep"></span>
+        <button class="tool" id="bUndo" title="Son çizimi geri al"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg><span>Geri al</span></button>
+      </div>
+    </div>
+    <aside class="notes" id="notes">
+      <div class="nhead">
+        <h3>Notlar</h3>
+        <button id="bFree" title="Kendi notunu yaz">+ Not</button>
+        <button id="bExport" class="primary">Word’e aktar</button>
+        <button id="bCloseNotes" class="nclose" aria-label="Notları kapat">✕</button>
+      </div>
+      <div id="notesList"></div>
+    </aside>
+  </div>
+</div>
+<canvas id="ov"></canvas>
+<div class="modal" id="modal" hidden><div class="mbox" id="mbox"></div></div>
+<div class="busy" id="busy" hidden><div class="spin"></div><div id="busyText"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const PUNCT_END = /[.!?:]["”’)\]]?$/;
+
+/* ---------- storage ---------- */
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+const DB = {
+  db: null, mem: new Map(),
+  open() { return new Promise((res, rej) => { const r = indexedDB.open('makale-okuyucu', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => { this.db = r.result; res(); }; r.onerror = () => rej(r.error); }); },
+  tx(mode) { return this.db.transaction('kv', mode).objectStore('kv'); },
+  get(k) { if (!this.db) return Promise.resolve(this.mem.get(k)); return new Promise((res, rej) => { const q = this.tx('readonly').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); },
+  set(k, v) { if (!this.db) { this.mem.set(k, v); return Promise.resolve(); } return new Promise((res, rej) => { const t = this.db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); },
+  del(k) { if (!this.db) { this.mem.delete(k); return Promise.resolve(); } return new Promise((res, rej) => { const t = this.db.transaction('kv', 'readwrite'); t.objectStore('kv').delete(k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); },
+  keys() { if (!this.db) return Promise.resolve([...this.mem.keys()]); return new Promise((res, rej) => { const q = this.tx('readonly').getAllKeys(); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+};
+
+const S = {
+  settings: Object.assign({ key: '', model: 'gemini-2.5-flash', style: 'en' }, LS.get('mo:settings', {})),
+  papers: {}, notes: [], cur: null, sec: 0, view: 'orig', tool: 'select', color: '#d9342b',
+  undo: [], translating: false, trText: '', showSkipped: false, hinted: {}
+};
+const curPaper = () => S.papers[S.cur] || null;
+
+const timers = {};
+function savePaper(p, delay = 0) {
+  clearTimeout(timers[p.id]);
+  timers[p.id] = setTimeout(() => { DB.set('paper:' + p.id, p).catch(() => toast('Kaydedilemedi. Depolama dolu olabilir.', 'err')); }, delay);
+}
+function saveNotes() {
+  clearTimeout(timers.notes);
+  timers.notes = setTimeout(() => { DB.set('notes', S.notes).catch(() => toast('Notlar kaydedilemedi.', 'err')); }, 250);
+}
+function saveSettings() { LS.set('mo:settings', S.settings); }
+
+/* ---------- UI helpers ---------- */
+let toastT;
+function toast(msg, type = '', action = null) {
+  const T = $('#toast');
+  T.innerHTML = `<span>${esc(msg)}</span>${action ? `<button>${esc(action.label)}</button>` : ''}`;
+  T.className = 'toast show ' + type;
+  if (action) T.querySelector('button').onclick = () => { action.fn(); T.className = 'toast'; };
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { T.className = 'toast'; }, action ? 6500 : (type === 'err' ? 5500 : 3000));
+}
+function busy(text) {
+  const B = $('#busy');
+  if (text === false) { B.hidden = true; return; }
+  $('#busyText').textContent = text; B.hidden = false;
+}
+function modal(html, onMount) { $('#mbox').innerHTML = html; $('#modal').hidden = false; if (onMount) onMount($('#mbox')); }
+function closeModal() { $('#modal').hidden = true; $('#mbox').innerHTML = ''; }
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal' || e.target.closest('[data-close]')) closeModal(); });
+
+/* ---------- APA 7 ---------- */
+const authorsOf = p => ((p.meta && p.meta.authors) || []).filter(a => a && (a.family || a.given));
+function initials(given) {
+  return String(given || '').trim().split(/\s+/).filter(Boolean).map(w =>
+    w.split('-').map(part => { const c = part.replace(/[^\p{L}]/gu, '')[0]; return c ? c.toUpperCase() + '.' : ''; }).filter(Boolean).join('-')
+  ).filter(Boolean).join(' ');
+}
+function suffixMap() {
+  const groups = {};
+  const ids = new Set(S.notes.map(n => n.paperId).filter(id => id && S.papers[id]));
+  for (const id of ids) {
+    const p = S.papers[id]; const A = authorsOf(p); if (!A.length) continue;
+    const k = A.map(a => (a.family + '|' + initials(a.given)).toLocaleLowerCase('tr')).join(';') + '#' + String(p.meta.year || '').trim();
+    (groups[k] = groups[k] || []).push(p);
+  }
+  const m = {};
+  for (const g of Object.values(groups)) if (g.length > 1) {
+    g.sort((a, b) => String(a.meta.title || '').localeCompare(String(b.meta.title || ''), 'tr'));
+    g.forEach((p, i) => { m[p.id] = String.fromCharCode(97 + i); });
+  }
+  return m;
+}
+function yearLabel(p, sm) {
+  const y = String((p.meta && p.meta.year) || '').trim() || (S.settings.style === 'tr' ? 't.y.' : 'n.d.');
+  const suf = (sm || suffixMap())[p.id] || '';
+  return y + (suf ? (/^\d/.test(y) ? suf : '-' + suf) : '');
+}
+function shortTitle(p) {
+  const t = String((p.meta && p.meta.title) || p.name || 'Adsız').trim();
+  const w = t.split(/\s+/); return '“' + (w.length > 4 ? w.slice(0, 4).join(' ') + '…' : t) + '”';
+}
+function inTextAuthors(p) {
+  const A = authorsOf(p), tr = S.settings.style === 'tr';
+  if (!A.length) return shortTitle(p);
+  const f = a => a.family || a.given;
+  if (A.length === 1) return f(A[0]);
+  if (A.length === 2) return `${f(A[0])} ${tr ? 've' : '&'} ${f(A[1])}`;
+  return `${f(A[0])} ${tr ? 'vd.' : 'et al.'}`;
+}
+const inText = (p, sm) => `${inTextAuthors(p)}, ${yearLabel(p, sm)}`;
+function refAuthors(p) {
+  const A = authorsOf(p).map(a => a.given && a.family ? `${a.family}, ${initials(a.given)}` : (a.family || a.given));
+  const amp = S.settings.style === 'tr' ? 've' : '&';
+  if (!A.length) return '';
+  if (A.length === 1) return A[0];
+  if (A.length <= 20) return A.slice(0, -1).join(', ') + `, ${amp} ` + A[A.length - 1];
+  return A.slice(0, 19).join(', ') + ', . . . ' + A[A.length - 1];
+}
+const pagesFmt = s => String(s || '').trim().replace(/\s*[-‐‑–—]+\s*/g, '–');
+function doiFmt(s) {
+  s = String(s || '').trim(); if (!s) return '';
+  const d = s.replace(/^https?:\/\/(dx\.)?doi\.org\//i, '').replace(/^doi:\s*/i, '');
+  if (/^10\./.test(d)) return 'https://doi.org/' + d;
+  return s;
+}
+function refParts(p, sm) {
+  const m = p.meta || {}; const out = []; const add = (t, i = false) => { if (t) out.push([t, i]); };
+  const au = refAuthors(p); const yr = `(${yearLabel(p, sm)}).`;
+  let title = String(m.title || '').trim().replace(/\s+/g, ' ');
+  if (title && !/[.?!]$/.test(title)) title += '.';
+  if (au) { add(au + (/\.$/.test(au) ? '' : '.') + ' ' + yr + ' '); if (title) add(title + ' '); }
+  else if (title) add(title + ' ' + yr + ' ');
+  else add((p.name || 'Adsız') + '. ' + yr + ' ');
+  const jo = String(m.journal || '').trim();
+  if (jo) {
+    add(jo, true);
+    if (String(m.volume || '').trim()) { add(', '); add(String(m.volume).trim(), true); }
+    if (String(m.issue || '').trim()) add(`(${String(m.issue).trim()})`);
+    if (String(m.pages || '').trim()) add(', ' + pagesFmt(m.pages));
+    add('. ');
+  }
+  const doi = doiFmt(m.doi); if (doi) add(doi);
+  if (out.length) { const l = out[out.length - 1]; l[0] = l[0].replace(/\s+$/, ''); }
+  return out;
+}
+const refHTML = (p, sm) => refParts(p, sm).map(([t, i]) => i ? `<i>${esc(t)}</i>` : esc(t)).join('');
+const refSortKey = p => (refAuthors(p) || String(p.meta.title || p.name || '')).toLocaleLowerCase('tr');
+function citedPapers() {
+  const sm = suffixMap();
+  const ids = [...new Set(S.notes.filter(n => n.paperId && S.papers[n.paperId]).map(n => n.paperId))];
+  return ids.map(id => S.papers[id]).sort((a, b) =>
+    refSortKey(a).localeCompare(refSortKey(b), 'tr') || yearLabel(a, sm).localeCompare(yearLabel(b, sm)));
+}
+function noteWithCite(n, sm) {
+  const p = S.papers[n.paperId]; const t = String(n.text || '').trim();
+  if (!p) return t;
+  const c = `(${inText(p, sm)})`;
+  if (/[^.]\.$/.test(t)) return t.slice(0, -1) + ' ' + c + '.';
+  return t + ' ' + c;
+}
+
+/* ---------- PDF extraction ---------- */
+function joinT(a, b) {
+  if (/[A-Za-zÀ-ɏ]-$/.test(a) && /^[a-zà-ɏ]/.test(b)) return a.slice(0, -1) + b;
+  return a + ' ' + b;
+}
+async function extractPdf(file, onProg) {
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+  const paras = [];
+  for (let pn = 1; pn <= pdf.numPages; pn++) {
+    onProg(pn, pdf.numPages);
+    const page = await pdf.getPage(pn);
+    const tc = await page.getTextContent();
+    const lines = []; let cur = null;
+    const push = () => { if (cur && cur.text.trim()) lines.push(cur); cur = null; };
+    for (const it of tc.items) {
+      if (typeof it.str !== 'string') continue;
+      const tf = it.transform, x = tf[4], y = tf[5];
+      const h = Math.hypot(tf[2], tf[3]) || it.height || 10;
+      if (it.str.length) {
+        if (cur && Math.abs(y - cur.y) > Math.max(h, cur.h) * 0.5) push();
+        if (!cur) cur = { text: '', x, y, h, xEnd: x };
+        if (cur.text && !/\s$/.test(cur.text) && !/^\s/.test(it.str) && x - cur.xEnd > h * 0.15) cur.text += ' ';
+        cur.text += it.str;
+        cur.xEnd = Math.max(cur.xEnd, x + (it.width || 0));
+        cur.x = Math.min(cur.x, x);
+        if (h > cur.h) cur.h = h;
+      }
+      if (it.hasEOL) push();
+    }
+    push();
+    const gaps = [];
+    for (let i = 1; i < lines.length; i++) { const g = lines[i - 1].y - lines[i].y; if (g > 0 && g < lines[i].h * 2.5) gaps.push(g); }
+    gaps.sort((a, b) => a - b);
+    const med = gaps.length ? gaps[gaps.length >> 1] : 14;
+    const ws = lines.map(l => l.xEnd - l.x).sort((a, b) => a - b);
+    const wide = ws.length ? ws[Math.floor(ws.length * 0.85)] : 400;
+    const pageParas = []; let para = null, prev = null;
+    for (const L of lines) {
+      const t = L.text.replace(/\s+/g, ' ').trim(); if (!t) continue;
+      let brk = !para;
+      if (!brk) {
+        const g = prev.y - L.y;
+        if (Math.abs(L.h - prev.h) > Math.max(L.h, prev.h) * 0.18) brk = true;
+        else if (g > med * 1.45) brk = true;
+        else if ((prev.xEnd - prev.x) < wide * 0.72 && PUNCT_END.test(prev.text.trim())) brk = true;
+      }
+      if (brk) { if (para) pageParas.push(para); para = { t, pg: pn }; }
+      else para.t = joinT(para.t, t);
+      prev = L;
+    }
+    if (para) pageParas.push(para);
+    if (pageParas.length && paras.length) {
+      const last = paras[paras.length - 1], first = pageParas[0];
+      if (!PUNCT_END.test(last.t) && /^[a-zçğıöşü]/.test(first.t)) { last.t = joinT(last.t, first.t); pageParas.shift(); }
+    }
+    paras.push(...pageParas);
+    if (page.cleanup) page.cleanup();
+  }
+  const fix = s => s.replace(/ﬁ/g, 'fi').replace(/ﬂ/g, 'fl').replace(/ﬀ/g, 'ff').replace(/ﬃ/g, 'ffi').replace(/ﬄ/g, 'ffl').replace(/\u00AD/g, '').replace(/\s+/g, ' ').trim();
+  return paras.map(p => ({ t: fix(p.t), pg: p.pg })).filter(p => p.t && !/^\d{1,4}$/.test(p.t));
+}
+
+/* ---------- Gemini ---------- */
+function parseJSON(txt) {
+  let s = String(txt).replace(/```json|```/g, '').trim();
+  try { return JSON.parse(s); } catch {}
+  const a = s.indexOf('['), o = s.indexOf('{');
+  const start = (a >= 0 && (o < 0 || a < o)) ? a : o;
+  const end = Math.max(s.lastIndexOf(']'), s.lastIndexOf('}'));
+  if (start >= 0 && end > start) return JSON.parse(s.slice(start, end + 1));
+  throw new Error('Gemini yanıtı okunamadı.');
+}
+async function gemini(prompt, { json = true, temperature = 0.2 } = {}) {
+  const key = String(S.settings.key || '').trim(); if (!key) throw new Error('NOKEY');
+  const model = String(S.settings.model || '').trim() || 'gemini-2.5-flash';
+  const gc = { temperature };
+  if (json) gc.responseMimeType = 'application/json';
+  if (/2\.5-flash/.test(model)) gc.thinkingConfig = { thinkingBudget: 0 };
+  let last = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: gc })
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.status === 429 || r.status === 503 || r.status === 500) {
+      last = new Error((data.error && data.error.message) || ('HTTP ' + r.status + ' RESOURCE_EXHAUSTED'));
+      await sleep(5000 * (attempt + 1)); continue;
+    }
+    if (!r.ok) throw new Error((data.error && data.error.message) || ('HTTP ' + r.status));
+    const c = data.candidates && data.candidates[0];
+    const txt = ((c && c.content && c.content.parts) || []).map(p => p.text || '').join('');
+    if (!txt) throw new Error('Gemini boş yanıt döndürdü' + (c && c.finishReason ? ` (${c.finishReason})` : '') + '.');
+    return json ? parseJSON(txt) : txt;
+  }
+  throw last || new Error('Gemini yanıt vermedi.');
+}
+function errMsg(e) {
+  const m = String((e && e.message) || e);
+  if (m === 'NOKEY') return 'Gemini API anahtarı eklenmemiş. Ayarlar’dan ekle.';
+  if (/API key not valid|API_KEY_INVALID|API key expired/i.test(m)) return 'API anahtarı geçersiz. Ayarlar’dan kontrol et.';
+  if (/429|quota|RESOURCE_EXHAUSTED|rate/i.test(m)) return 'Ücretsiz kullanım sınırına ulaşıldı. Bir dakika bekleyip tekrar dene.';
+  if (/not found|is not supported|404/i.test(m)) return 'Model bulunamadı. Ayarlar’dan başka bir model seç.';
+  if (/Failed to fetch|NetworkError|Load failed|network/i.test(m)) return 'Bağlantı kurulamadı. İnternetini kontrol et.';
+  return 'Hata: ' + m;
+}
+async function analyze(p) {
+  const list = p.paras.map((x, i) => `[${i}] ${i < 25 ? x.t.slice(0, 1500) : x.t.slice(0, 280)}`).join('\n');
+  const prompt = `Aşağıda bir akademik makalenin PDF’ten çıkarılmış, numaralandırılmış paragrafları var (uzun paragraflar kısaltıldı).
+Görevlerin:
+1) Makalenin künye bilgilerini çıkar (APA 7 kaynakçası için).
+2) Makalenin ana bölümlerini belirle ve her bölümün başladığı paragraf numarasını ver. Bölüm başlığı ayrı bir paragrafsa bölüm o başlık paragrafından başlasın ve başlık paragrafını "skip" listesine ekle.
+3) Okuma akışına ait olmayan paragrafları "skip" listesine ekle: sayfa üst/alt bilgisi, sayfa numarası, dergi adı tekrarları, telif ve lisans satırları, "Downloaded from" satırları.
+Bölüm adlarını Türkçe ver (ör. "Başlık ve Künye", "Özet", "Giriş", "Kuramsal Çerçeve", "Yöntem", "Bulgular", "Tartışma", "Sonuç", "Kaynakça", "Ekler"). Alt başlıkları ayrı bölüm yapma. "original" alanına makaledeki özgün başlığı yaz.
+Yalnızca şu yapıda JSON döndür:
+{"meta":{"authors":[{"family":"Soyadı","given":"Adı"}],"year":"","title":"","journal":"","volume":"","issue":"","pages":"","doi":""},"sections":[{"title":"Özet","original":"Abstract","start":0}],"skip":[0]}
+Bilinmeyen alanları boş bırak. Yazar adlarını makaledeki gibi tam yaz. pages "45-60" biçiminde, doi yalnızca "10." ile başlayan kısım olsun. Makale başlığını özgün dilinde ve büyük-küçük harf düzenini koruyarak yaz.
+
+PARAGRAFLAR:
+${list}`;
+  return gemini(prompt);
+}
+function applyStructure(p, res) {
+  const N = p.paras.length; const str = v => String(v ?? '').trim();
+  const m = (res && res.meta) || {};
+  p.meta = {
+    authors: Array.isArray(m.authors) ? m.authors.filter(a => a && (a.family || a.given)).map(a => ({ family: str(a.family), given: str(a.given) })) : [],
+    year: str(m.year), title: str(m.title), journal: str(m.journal), volume: str(m.volume), issue: str(m.issue), pages: str(m.pages), doi: str(m.doi)
+  };
+  let secs = (res && Array.isArray(res.sections) ? res.sections : []).map(s => ({
+    title: str(s.title) || 'Bölüm', original: str(s.original), start: Math.max(0, Math.min(N - 1, parseInt(s.start, 10) || 0))
+  })).sort((a, b) => a.start - b.start);
+  secs = secs.filter((s, i) => i === 0 || s.start !== secs[i - 1].start);
+  if (!secs.length) secs = [{ title: 'Tüm Metin', original: '', start: 0 }];
+  if (secs[0].start > 0) secs.unshift({ title: 'Başlık ve Künye', original: '', start: 0 });
+  secs.forEach((s, i) => { s.end = i < secs.length - 1 ? secs[i + 1].start - 1 : N - 1; });
+  p.skip = (res && Array.isArray(res.skip) ? res.skip : []).map(Number).filter(n => Number.isInteger(n) && n >= 0 && n < N);
+  const sk = new Set(p.skip);
+  const kept = secs.filter(s => { for (let i = s.start; i <= s.end; i++) if (!sk.has(i)) return true; return false; });
+  p.sections = kept.length ? kept : secs;
+}
+async function translateBatch(texts) {
+  const prompt = `Aşağıdaki JSON dizisindeki akademik makale paragraflarını akıcı ve akademik bir Türkçeye çevir.
+Kurallar: Anlamı birebir koru; özetleme, yorum veya ekleme yapma. Atıfları (ör. "Smith et al., 2020", "[12]"), sayıları, istatistikleri, formülleri ve kısaltmaları olduğu gibi bırak. Yerleşik Türkçe karşılığı olmayan teknik terimlerin yanına parantez içinde özgün terimi yaz. Paragraf zaten Türkçeyse aynen döndür.
+Yalnızca girdiyle aynı uzunlukta (${texts.length} öğe) bir JSON dizisi döndür: ["...", "..."]
+
+${JSON.stringify(texts)}`;
+  const out = await gemini(prompt);
+  const arr = Array.isArray(out) ? out : (out && Array.isArray(out.translations) ? out.translations : null);
+  if (arr && arr.length === texts.length) return arr.map(x => String(x ?? ''));
+  if (texts.length === 1) return [String((arr && arr[0]) || (typeof out === 'string' ? out : ''))];
+  const res = [];
+  for (const t of texts) res.push((await translateBatch([t]))[0]);
+  return res;
+}
+
+/* ---------- sections ---------- */
+function sectionParas(p, k, includeSkipped = S.showSkipped) {
+  const s = p.sections[k]; if (!s) return [];
+  const sk = new Set(p.skip || []); const out = [];
+  for (let i = s.start; i <= s.end; i++) if (includeSkipped || !sk.has(i)) out.push(i);
+  return out;
+}
+const secOf = (p, i) => p.sections.find(s => i >= s.start && i <= s.end);
+
+async function translateCurrent() {
+  const p = curPaper(); if (!p || S.translating) return;
+  if (!S.settings.key) { openSettings(); toast('Önce Gemini API anahtarını ekle.'); return; }
+  const todo = sectionParas(p, S.sec, false).filter(i => !p.tr[i] && p.paras[i].t.trim());
+  if (!todo.length) return;
+  const batches = []; let cur = [], len = 0;
+  for (const i of todo) {
+    const l = p.paras[i].t.length;
+    if (cur.length && (len + l > 4500 || cur.length >= 18)) { batches.push(cur); cur = []; len = 0; }
+    cur.push(i); len += l;
+  }
+  if (cur.length) batches.push(cur);
+  S.translating = true; let done = 0;
+  S.trText = `Çevriliyor 0/${todo.length}`; renderSectionBar();
+  try {
+    for (const b of batches) {
+      const out = await translateBatch(b.map(i => p.paras[i].t));
+      b.forEach((i, k) => { if (out[k] && out[k].trim()) p.tr[i] = out[k].trim(); });
+      done += b.length; S.trText = `Çevriliyor ${done}/${todo.length}`;
+      savePaper(p, 300);
+      if (S.cur === p.id) { if (S.view === 'orig') S.view = 'both'; renderReader(true); }
+      renderSectionBar();
+    }
+    toast('Bölüm çevrildi.');
+  } catch (e) { toast(errMsg(e), 'err'); }
+  finally { S.translating = false; renderSectionBar(); }
+}
+
+/* ---------- rendering ---------- */
+const R = $('#reader');
+function inkPaths(p, key) {
+  return ((p.strokes || {})[key] || []).map(s =>
+    `<path d="${s.pts.map((q, i) => (i ? 'L' : 'M') + (q[0] * 1000).toFixed(1) + ' ' + (q[1] * 1000).toFixed(1)).join('')}" stroke="${esc(s.c)}" stroke-width="${s.w}" fill="none" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`
+  ).join('');
+}
+function isNoted(p, i, l) { return S.notes.some(n => n.paperId === p.id && n.para === i && n.lang === l); }
+function blk(p, i, l, text, skipped) {
+  const noted = isNoted(p, i, l);
+  return `<div class="blk${l === 't' ? ' tr' : ''}${noted ? ' noted' : ''}${skipped ? ' skipped' : ''}" data-p="${i}" data-l="${l}">`
+    + `<button class="addn" data-add aria-label="${noted ? 'Nottan çıkar' : 'Notlara ekle'}">${noted ? '✓' : '+'}</button>`
+    + `<p>${esc(text)}</p><svg class="ink" viewBox="0 0 1000 1000" preserveAspectRatio="none">${inkPaths(p, i + ':' + l)}</svg></div>`;
+}
+function emptyState() {
+  const hasKey = !!S.settings.key; const hasPapers = Object.keys(S.papers).length > 0;
+  return `<div class="empty">
+    <h2>Okumak istediğin makaleyi ekle</h2>
+    <p class="lead">PDF’i seçtiğinde Gemini makaleyi Özet, Giriş, Yöntem gibi bölümlere ayırır ve künyesini çıkarır.</p>
+    <div class="acts">
+      ${hasKey ? '' : '<button class="primary big" data-act="settings">Gemini API anahtarını ekle</button>'}
+      <label class="btn big ${hasKey ? 'primary' : ''}" for="file">PDF seç</label>
+      ${hasPapers ? '<button class="big" data-act="lib">Kütüphaneyi aç</button>' : ''}
+    </div>
+    <ol class="steps">
+      <li><span>1</span><div>Üstten bir bölüm seç ve <b>Bölümü çevir</b>’e dokun.</div></li>
+      <li><span>2</span><div>Apple Pencil’ı <b>Fosforlu</b> moda al, beğendiğin paragrafın üstünden geç. Paragraf notlarına eklenir.</div></li>
+      <li><span>3</span><div><b>Kalem</b> ile metnin üstüne çiz, <b>Silgi</b> ile sil. Parmağınla kaydırmaya devam edebilirsin.</div></li>
+      <li><span>4</span><div><b>Word’e aktar</b> ile APA 7 atıflı notlarını ve kaynakçanı indir.</div></li>
+    </ol>
+  </div>`;
+}
+function renderReader(keepScroll) {
+  const p = curPaper(); const top = R.scrollTop;
+  $('#toolbar').hidden = !p;
+  if (!p) { R.innerHTML = emptyState(); return; }
+  const sec = p.sections[S.sec] || p.sections[0];
+  const sk = new Set(p.skip || []);
+  const idx = sectionParas(p, S.sec);
+  const missing = idx.filter(i => !sk.has(i) && !p.tr[i]).length;
+  let h = `<div class="article"><div class="sec-head">${sec.original ? `<div class="orig">${esc(sec.original)}</div>` : ''}<h2>${esc(sec.title)}</h2></div>`;
+  if (S.view !== 'orig' && missing) h += `<div class="notice"><span>Bu bölümün ${missing} paragrafı henüz çevrilmedi.</span>${S.translating ? '' : '<button class="primary" data-act="translate">Bölümü çevir</button>'}</div>`;
+  for (const i of idx) {
+    const o = p.paras[i].t, t = p.tr[i], skp = sk.has(i);
+    h += '<div class="para">';
+    if (S.view !== 'tr' || !t) h += blk(p, i, 'o', o, skp);
+    if (S.view !== 'orig' && t) h += blk(p, i, 't', t, skp);
+    h += '</div>';
+  }
+  const hidden = sectionParas(p, S.sec, true).length - sectionParas(p, S.sec, false).length;
+  if (hidden) h += `<button class="showskip" data-act="toggleskip">${S.showSkipped ? 'Gizlenen satırları sakla' : `Gizlenen ${hidden} satırı göster (sayfa başlığı, numara vb.)`}</button>`;
+  h += '</div>';
+  R.innerHTML = h;
+  R.scrollTop = keepScroll ? top : 0;
+}
+function refreshNoted() {
+  const p = curPaper(); if (!p) return;
+  for (const b of $$('.blk', R)) {
+    const n = isNoted(p, +b.dataset.p, b.dataset.l);
+    b.classList.toggle('noted', n);
+    const a = b.querySelector('.addn'); a.textContent = n ? '✓' : '+'; a.setAttribute('aria-label', n ? 'Nottan çıkar' : 'Notlara ekle');
+  }
+}
+function renderHeader() {
+  const p = curPaper(); const b = $('#pname');
+  if (!p) { b.innerHTML = '<b>Makale Okuyucu</b><small>Makale seçilmedi</small>'; }
+  else { b.innerHTML = `<b>${esc(p.meta.title || p.name)}</b><small>${esc(inText(p))}. Künyeyi düzenlemek için dokun</small>`; }
+  $('#noteCount').textContent = S.notes.length;
+}
+function renderSectionBar() {
+  const p = curPaper(); const B = $('#secbar');
+  if (!p) { B.hidden = true; return; }
+  B.hidden = false;
+  const oldChips = B.querySelector('.chips'); const sl = oldChips ? oldChips.scrollLeft : 0;
+  const chips = p.sections.map((s, k) => {
+    const ids = sectionParas(p, k, false); const full = ids.length && ids.every(i => p.tr[i]);
+    return `<button class="chip${k === S.sec ? ' on' : ''}" data-sec="${k}">${esc(s.title)}${full ? '<span class="ok">✓</span>' : ''}</button>`;
+  }).join('');
+  const need = sectionParas(p, S.sec, false).filter(i => !p.tr[i]).length;
+  const views = { orig: 'Orijinal', tr: 'Çeviri', both: 'İkisi' };
+  B.innerHTML = `<div class="chips">${chips}</div><div class="ctrls"><div class="seg">${Object.keys(views).map(v => `<button data-view="${v}" class="${S.view === v ? 'on' : ''}">${views[v]}</button>`).join('')}</div>`
+    + `<button class="primary" data-act="translate" ${S.translating || !need ? 'disabled' : ''}>${S.translating ? esc(S.trText) : (need ? 'Bölümü çevir' : 'Çevrildi ✓')}</button></div>`;
+  B.querySelector('.chips').scrollLeft = sl;
+}
+function renderNotes() {
+  const L = $('#notesList'); const sm = suffixMap();
+  if (!S.notes.length) {
+    L.innerHTML = `<div class="empty-notes">Henüz not yok.<br><br><b>Fosforlu</b> kalemle bir paragrafın üstünden geç ya da paragrafın yanındaki <b>+</b> düğmesine dokun.</div>`;
+  } else {
+    L.innerHTML = S.notes.map((n, k) => {
+      const p = S.papers[n.paperId];
+      const src = p ? `<button class="src" data-jump>${esc(inText(p, sm))}${n.secTitle ? ', ' + esc(n.secTitle) : ''}${n.lang === 't' ? ' (çeviri)' : ''}</button>` : '<span class="src free">Kendi notum</span>';
+      return `<div class="note" data-k="${k}"><div class="note-top"><span class="num">${k + 1}</span>${src}
+        <span class="nact"><button data-up aria-label="Yukarı taşı">↑</button><button data-down aria-label="Aşağı taşı">↓</button><button data-del aria-label="Sil">✕</button></span></div>
+        <textarea data-edit rows="2" placeholder="Notunu yaz. Apple Pencil ile elle de yazabilirsin.">${esc(n.text)}</textarea>
+        ${p ? `<div class="cite">Atıf: (${esc(inText(p, sm))})</div>` : ''}</div>`;
+    }).join('');
+    $$('textarea', L).forEach(autosize);
+  }
+  $('#noteCount').textContent = S.notes.length;
+}
+function autosize(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
+function renderAll(keepScroll) { renderHeader(); renderSectionBar(); renderReader(keepScroll); renderNotes(); }
+
+function openPaper(id) {
+  const p = S.papers[id]; if (!p) return;
+  S.cur = id; S.sec = Math.min(p.lastSec || 0, p.sections.length - 1); S.undo = [];
+  LS.set('mo:last', id); renderAll();
+}
+
+/* ---------- notes ---------- */
+function addNoteFromBlk(p, b, text) {
+  const i = +b.dataset.p, l = b.dataset.l;
+  const full = l === 't' ? p.tr[i] : p.paras[i].t;
+  const t = String(text || full || '').trim(); if (!t) return false;
+  if (!text && S.notes.some(n => n.paperId === p.id && n.para === i && n.lang === l && !n.partial)) return false;
+  const s = secOf(p, i);
+  S.notes.push({ id: uid(), paperId: p.id, para: i, lang: l, secTitle: s ? s.title : '', text: t, partial: !!text, created: Date.now() });
+  return true;
+}
+function removeNoteAt(k) {
+  const [n] = S.notes.splice(k, 1); saveNotes(); renderNotes(); refreshNoted(); renderHeader();
+  toast('Not silindi.', '', { label: 'Geri al', fn: () => { S.notes.splice(k, 0, n); saveNotes(); renderNotes(); refreshNoted(); renderHeader(); } });
+}
+function pulseNotes() {
+  const b = $('#bNotes'); b.animate && b.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], { duration: 380 });
+}
+function jumpTo(n) {
+  const p = S.papers[n.paperId]; if (!p) return;
+  if (S.cur !== p.id) openPaper(p.id);
+  const k = p.sections.findIndex(s => n.para >= s.start && n.para <= s.end);
+  if (k >= 0 && k !== S.sec) { S.sec = k; p.lastSec = k; }
+  if ((n.lang === 't' && S.view === 'orig') || (n.lang === 'o' && S.view === 'tr')) S.view = 'both';
+  renderSectionBar(); renderReader();
+  const b = R.querySelector(`.blk[data-p="${n.para}"][data-l="${n.lang}"]`) || R.querySelector(`.blk[data-p="${n.para}"]`);
+  if (b) { b.scrollIntoView({ block: 'center', behavior: 'smooth' }); b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 1700); }
+  if (innerWidth <= 1050) document.body.classList.remove('notes-open');
+}
+$('#notesList').addEventListener('click', e => {
+  const card = e.target.closest('.note'); if (!card) return;
+  const k = +card.dataset.k; const n = S.notes[k];
+  if (e.target.closest('[data-del]')) removeNoteAt(k);
+  else if (e.target.closest('[data-up]') && k > 0) { [S.notes[k - 1], S.notes[k]] = [S.notes[k], S.notes[k - 1]]; saveNotes(); renderNotes(); }
+  else if (e.target.closest('[data-down]') && k < S.notes.length - 1) { [S.notes[k + 1], S.notes[k]] = [S.notes[k], S.notes[k + 1]]; saveNotes(); renderNotes(); }
+  else if (e.target.closest('[data-jump]')) jumpTo(n);
+});
+$('#notesList').addEventListener('input', e => {
+  if (!e.target.matches('[data-edit]')) return;
+  const k = +e.target.closest('.note').dataset.k; S.notes[k].text = e.target.value; autosize(e.target); saveNotes();
+});
+$('#bFree').onclick = () => {
+  S.notes.push({ id: uid(), paperId: null, text: '', created: Date.now() }); saveNotes(); renderNotes();
+  const ta = $$('#notesList textarea').pop(); if (ta) { ta.scrollIntoView({ block: 'center' }); ta.focus(); }
+};
+$('#bNotes').onclick = () => document.body.classList.toggle('notes-open');
+$('#bCloseNotes').onclick = () => document.body.classList.remove('notes-open');
+
+/* ---------- reader events ---------- */
+R.addEventListener('click', e => {
+  const act = e.target.closest('[data-act]');
+  if (act) { handleAct(act.dataset.act); return; }
+  const add = e.target.closest('[data-add]');
+  if (add) {
+    const p = curPaper(); const b = add.closest('.blk'); const i = +b.dataset.p, l = b.dataset.l;
+    const k = S.notes.findIndex(n => n.paperId === p.id && n.para === i && n.lang === l);
+    if (k >= 0) removeNoteAt(k);
+    else if (addNoteFromBlk(p, b)) { saveNotes(); renderNotes(); refreshNoted(); renderHeader(); pulseNotes(); toast('Paragraf notlara eklendi.'); }
+  }
+});
+function handleAct(a) {
+  if (a === 'translate') translateCurrent();
+  else if (a === 'settings') openSettings();
+  else if (a === 'lib') openLib();
+  else if (a === 'toggleskip') { S.showSkipped = !S.showSkipped; renderReader(true); }
+}
+$('#secbar').addEventListener('click', e => {
+  const c = e.target.closest('[data-sec]'), v = e.target.closest('[data-view]'), a = e.target.closest('[data-act]');
+  const p = curPaper(); if (!p) return;
+  if (c) { S.sec = +c.dataset.sec; p.lastSec = S.sec; savePaper(p, 800); renderSectionBar(); renderReader(); }
+  else if (v) { S.view = v.dataset.view; renderSectionBar(); renderReader(true); }
+  else if (a) handleAct(a.dataset.act);
+});
+$('#pname').onclick = () => { if (S.cur) openMeta(S.cur); };
+$('#bLib').onclick = openLib;
+$('#bSet').onclick = openSettings;
+$('#bExport').onclick = openExport;
+
+/* selection → note */
+const bSel = $('#bSel');
+document.addEventListener('selectionchange', () => {
+  const sel = getSelection();
+  const ok = sel && !sel.isCollapsed && sel.toString().trim().length > 2 && sel.anchorNode && R.contains(sel.anchorNode) && S.tool === 'select';
+  bSel.hidden = !ok;
+});
+bSel.addEventListener('pointerdown', e => e.preventDefault());
+bSel.addEventListener('mousedown', e => e.preventDefault());
+bSel.onclick = () => {
+  const sel = getSelection(); const txt = sel.toString().replace(/\s+/g, ' ').trim(); const node = sel.anchorNode;
+  const el = node && (node.nodeType === 1 ? node : node.parentElement).closest('.blk'); const p = curPaper();
+  if (!el || !p || !txt) return;
+  addNoteFromBlk(p, el, txt); saveNotes(); renderNotes(); refreshNoted(); renderHeader(); sel.removeAllRanges(); bSel.hidden = true; pulseNotes();
+  toast('Seçili metin notlara eklendi.');
+};
+
+/* ---------- Apple Pencil ---------- */
+const ov = $('#ov'); const ctx = ov.getContext('2d');
+function resizeOv() {
+  const d = window.devicePixelRatio || 1;
+  ov.width = Math.round(innerWidth * d); ov.height = Math.round(innerHeight * d);
+  ov.style.width = innerWidth + 'px'; ov.style.height = innerHeight + 'px';
+  ctx.setTransform(d, 0, 0, d, 0, 0);
+}
+addEventListener('resize', resizeOv);
+
+const TOOL_HINTS = {
+  highlight: 'Fosforlu: Kalemle paragrafın üstünden geç, paragraf notlara eklenir. Parmağınla kaydırabilirsin.',
+  pen: 'Kalem: Metnin üstüne çiz. Parmağınla kaydırmaya devam edebilirsin.',
+  erase: 'Silgi: Kalemle çizimin üstünden geç.'
+};
+function setTool(t) {
+  S.tool = t;
+  $$('.tool[data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t));
+  R.classList.toggle('tooling', t !== 'select');
+  if (t !== 'select') { const s = getSelection(); if (s) s.removeAllRanges(); bSel.hidden = true; }
+  if (TOOL_HINTS[t] && !S.hinted[t]) { S.hinted[t] = true; toast(TOOL_HINTS[t]); }
+}
+$('#toolbar').addEventListener('click', e => {
+  const t = e.target.closest('[data-tool]'), c = e.target.closest('[data-color]');
+  if (t) setTool(t.dataset.tool);
+  else if (c) { S.color = c.dataset.color; $$('.sw').forEach(s => s.classList.toggle('on', s === c)); setTool('pen'); }
+  else if (e.target.closest('#bUndo')) undo();
+});
+
+let drawing = null, raf = 0;
+const inkPointer = e => e.pointerType === 'pen' || e.pointerType === 'mouse';
+function blkAt(x, y) { const el = document.elementFromPoint(x, y); return el && el.closest ? el.closest('#reader .blk') : null; }
+function nearestBlk(x, y) {
+  const b = blkAt(x, y); if (b) return b;
+  let best = null, bd = Infinity;
+  for (const el of $$('.blk', R)) {
+    const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) continue;
+    const dy = y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0;
+    const dx = x < r.left ? r.left - x : x > r.right ? x - r.right : 0;
+    const d = dy * 3 + dx; if (d < bd) { bd = d; best = el; }
+  }
+  return best;
+}
+function stopStylusTouch(e) {
+  if (S.tool === 'select' || !curPaper()) return;
+  if (e.target.closest && e.target.closest('button,label,input,textarea')) return;
+  for (const t of e.touches) if (t.touchType === 'stylus') { e.preventDefault(); return; }
+}
+R.addEventListener('touchstart', stopStylusTouch, { passive: false });
+R.addEventListener('touchmove', stopStylusTouch, { passive: false });
+
+function sched() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; drawOv(); }); }
+function drawOv() {
+  ctx.clearRect(0, 0, innerWidth, innerHeight);
+  if (!drawing) return;
+  const P = drawing.pts;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (drawing.tool === 'erase') {
+    const [x, y] = P[P.length - 1];
+    ctx.strokeStyle = 'rgba(120,130,150,.8)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(x, y, 16, 0, Math.PI * 2); ctx.stroke(); return;
+  }
+  if (drawing.tool === 'highlight') { ctx.strokeStyle = 'rgba(255,205,0,.4)'; ctx.lineWidth = 22; }
+  else { ctx.strokeStyle = S.color; ctx.lineWidth = 2.6; }
+  ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]);
+  for (let i = 1; i < P.length; i++) ctx.lineTo(P[i][0], P[i][1]);
+  if (P.length === 1) ctx.lineTo(P[0][0] + 0.1, P[0][1]);
+  ctx.stroke();
+}
+function stepTool(x, y) {
+  if (drawing.tool === 'highlight') {
+    const b = blkAt(x, y);
+    if (b && !drawing.touched.has(b)) { drawing.touched.add(b); b.classList.add('hl-live'); }
+  } else if (drawing.tool === 'erase') eraseAt(x, y);
+}
+R.addEventListener('pointerdown', e => {
+  if (S.tool === 'select' || !inkPointer(e) || !curPaper()) return;
+  if (e.target.closest('button,a,input,textarea,label')) return;
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  e.preventDefault();
+  try { R.setPointerCapture(e.pointerId); } catch {}
+  drawing = { id: e.pointerId, tool: S.tool, pts: [[e.clientX, e.clientY]], touched: new Set(), start: nearestBlk(e.clientX, e.clientY) };
+  stepTool(e.clientX, e.clientY); sched();
+});
+R.addEventListener('pointermove', e => {
+  if (!drawing || e.pointerId !== drawing.id) return;
+  e.preventDefault();
+  const evs = (e.getCoalescedEvents && e.getCoalescedEvents()) || [];
+  for (const ev of (evs.length ? evs : [e])) { drawing.pts.push([ev.clientX, ev.clientY]); if (drawing.tool === 'highlight') stepTool(ev.clientX, ev.clientY); }
+  if (drawing.tool !== 'highlight') stepTool(e.clientX, e.clientY);
+  sched();
+});
+function simplify(pts) {
+  const out = [pts[0]];
+  for (const q of pts.slice(1)) { const l = out[out.length - 1]; if (Math.hypot(q[0] - l[0], q[1] - l[1]) >= 1.5) out.push(q); }
+  return out;
+}
+function drawInk(b, p) { const svg = b.querySelector('svg.ink'); if (svg) svg.innerHTML = inkPaths(p, b.dataset.p + ':' + b.dataset.l); }
+function finish(e) {
+  if (!drawing || e.pointerId !== drawing.id) return;
+  const d = drawing; drawing = null; cancelAnimationFrame(raf); raf = 0; ctx.clearRect(0, 0, innerWidth, innerHeight);
+  const p = curPaper(); if (!p) return;
+  if (d.tool === 'highlight') {
+    const [x0, y0] = d.pts[0]; const moved = d.pts.some(([x, y]) => Math.hypot(x - x0, y - y0) > 14);
+    const blks = [...d.touched]; blks.forEach(b => b.classList.remove('hl-live'));
+    if (!moved || !blks.length) return;
+    blks.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
+    let added = 0; for (const b of blks) if (addNoteFromBlk(p, b)) added++;
+    if (added) { saveNotes(); renderNotes(); refreshNoted(); renderHeader(); pulseNotes(); toast(added === 1 ? 'Paragraf notlara eklendi.' : `${added} paragraf notlara eklendi.`); }
+    else toast('Bu paragraf zaten notlarında.');
+  } else if (d.tool === 'pen') {
+    if (d.pts.length < 2) return;
+    const b = d.start || nearestBlk(d.pts[0][0], d.pts[0][1]); if (!b || !b.isConnected) return;
+    const r = b.getBoundingClientRect(); if (!r.width || !r.height) return;
+    const key = b.dataset.p + ':' + b.dataset.l;
+    const stroke = { c: S.color, w: 2.6, pts: simplify(d.pts).map(([x, y]) => [+((x - r.left) / r.width).toFixed(4), +((y - r.top) / r.height).toFixed(4)]) };
+    p.strokes = p.strokes || {};
+    (p.strokes[key] = p.strokes[key] || []).push(stroke);
+    S.undo.push({ pid: p.id, key, stroke, type: 'add' });
+    drawInk(b, p); savePaper(p, 600);
+  }
+}
+R.addEventListener('pointerup', finish);
+R.addEventListener('pointercancel', finish);
+function eraseAt(x, y) {
+  const p = curPaper(); if (!p || !p.strokes) return; let changed = false;
+  for (const b of $$('.blk', R)) {
+    const key = b.dataset.p + ':' + b.dataset.l; const arr = p.strokes[key]; if (!arr || !arr.length) continue;
+    const r = b.getBoundingClientRect(); if (y < r.top - 120 || y > r.bottom + 120) continue;
+    for (let k = arr.length - 1; k >= 0; k--) {
+      const s = arr[k];
+      if (s.pts.some(([fx, fy]) => Math.hypot(r.left + fx * r.width - x, r.top + fy * r.height - y) < 16)) {
+        arr.splice(k, 1); S.undo.push({ pid: p.id, key, stroke: s, type: 'erase' }); changed = true;
+      }
+    }
+    if (changed) drawInk(b, p);
+  }
+  if (changed) savePaper(p, 600);
+}
+function undo() {
+  const u = S.undo.pop(); if (!u) { toast('Geri alınacak çizim yok.'); return; }
+  const p = S.papers[u.pid]; if (!p) return;
+  const arr = p.strokes[u.key] = p.strokes[u.key] || [];
+  if (u.type === 'add') { const k = arr.indexOf(u.stroke); if (k >= 0) arr.splice(k, 1); } else arr.push(u.stroke);
+  savePaper(p, 300);
+  const [pi, l] = u.key.split(':');
+  const b = R.querySelector(`.blk[data-p="${pi}"][data-l="${l}"]`); if (b) drawInk(b, p);
+}
+
+/* ---------- PDF upload ---------- */
+$('#file').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (!window.pdfjsLib) { toast('PDF okuyucu yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.', 'err'); return; }
+  closeModal();
+  try {
+    busy('PDF okunuyor…');
+    const paras = await extractPdf(f, (i, n) => busy(`PDF okunuyor, sayfa ${i}/${n}`));
+    if (paras.reduce((a, x) => a + x.t.length, 0) < 300) throw new Error('SCAN');
+    const p = { id: 'p' + uid(), name: f.name.replace(/\.pdf$/i, ''), added: Date.now(), paras, tr: {}, strokes: {}, sections: [], skip: [], meta: {} };
+    let res = null;
+    if (S.settings.key) {
+      busy('Gemini bölümleri ve künyeyi belirliyor…');
+      try { res = await analyze(p); } catch (err) { toast(errMsg(err) + ' Bölümler ayrılamadı, künyeyi elle girebilirsin.', 'err'); }
+    } else toast('API anahtarı olmadığı için bölümler ayrılmadı. Ayarlar’dan ekleyebilirsin.', 'err');
+    applyStructure(p, res);
+    S.papers[p.id] = p; savePaper(p);
+    busy(false); S.view = 'orig'; openPaper(p.id); openMeta(p.id, true);
+  } catch (err) {
+    busy(false);
+    toast(err.message === 'SCAN' ? 'Bu PDF’ten metin çıkarılamadı. Taranmış bir görüntü olabilir.' : errMsg(err), 'err');
+  }
+});
+
+/* ---------- modals ---------- */
+function parseAuthors(txt) {
+  return String(txt).split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+    const k = l.indexOf(',');
+    return k >= 0 ? { family: l.slice(0, k).trim(), given: l.slice(k + 1).trim() } : { family: l, given: '' };
+  });
+}
+function openMeta(pid, fresh) {
+  const p = S.papers[pid]; if (!p) return; const m = p.meta || {};
+  const au = (m.authors || []).map(a => a.given ? `${a.family}, ${a.given}` : a.family).join('\n');
+  const inp = (id, v) => `<input id="${id}" value="${esc(v || '')}" autocapitalize="off" autocomplete="off" spellcheck="false">`;
+  modal(`<h3>Künye</h3>
+    <p class="hint">${fresh ? 'Gemini’nin bulduğu bilgileri kontrol et. ' : ''}Kaynakça bu bilgilerle APA 7’ye göre yazılır. Her satıra bir yazar, <b>Soyadı, Adı</b> biçiminde.</p>
+    <label>Yazarlar<textarea id="mAu" rows="4" autocapitalize="words" spellcheck="false">${esc(au)}</textarea></label>
+    <div class="g2"><label>Yıl${inp('mYr', m.year)}</label><label>DOI${inp('mDoi', m.doi)}</label></div>
+    <label>Makale başlığı<textarea id="mTi" rows="2">${esc(m.title || '')}</textarea></label>
+    <label>Dergi${inp('mJo', m.journal)}</label>
+    <div class="g3"><label>Cilt${inp('mVo', m.volume)}</label><label>Sayı${inp('mIs', m.issue)}</label><label>Sayfalar${inp('mPg', m.pages)}</label></div>
+    <div class="preview"><div class="pl">Kaynakçada görünüşü</div><div id="mPrev"></div></div>
+    <div class="mact"><button data-close>Vazgeç</button><button class="primary" id="mSave">Kaydet</button></div>`, box => {
+    const read = () => ({ authors: parseAuthors($('#mAu').value), year: $('#mYr').value.trim(), doi: $('#mDoi').value.trim(), title: $('#mTi').value.trim(), journal: $('#mJo').value.trim(), volume: $('#mVo').value.trim(), issue: $('#mIs').value.trim(), pages: $('#mPg').value.trim() });
+    const upd = () => { const tmp = Object.assign({}, p, { meta: read() }); $('#mPrev').innerHTML = `<p class="refp">${refHTML(tmp)}</p><p class="hint">Metin içi atıf: (${esc(inText(tmp))})</p>`; };
+    box.addEventListener('input', upd); upd();
+    $('#mSave').onclick = () => { p.meta = read(); savePaper(p); closeModal(); renderHeader(); renderNotes(); toast('Künye kaydedildi.'); };
+  });
+}
+function openLib() {
+  const list = Object.values(S.papers).sort((a, b) => b.added - a.added); const sm = suffixMap();
+  modal(`<h3>Kütüphane</h3>${list.length ? list.map(p => {
+    const c = S.notes.filter(n => n.paperId === p.id).length;
+    return `<div class="libitem"><p class="refp">${refHTML(p, sm)}</p><div class="libmeta">${c} not, ${p.sections.length} bölüm</div>
+      <div class="libact"><button class="primary" data-open="${p.id}">Aç</button><button data-meta="${p.id}">Künyeyi düzenle</button><button class="danger" data-delp="${p.id}">Sil</button></div></div>`;
+  }).join('') : '<p class="hint">Henüz makale eklemedin.</p>'}
+    <div class="mact"><label class="btn" for="file">PDF ekle</label><button data-close>Kapat</button></div>`, box => {
+    box.addEventListener('click', e => {
+      const o = e.target.closest('[data-open]'), m = e.target.closest('[data-meta]'), d = e.target.closest('[data-delp]');
+      if (o) { closeModal(); S.view = 'orig'; openPaper(o.dataset.open); }
+      else if (m) openMeta(m.dataset.meta);
+      else if (d) {
+        const id = d.dataset.delp; const c = S.notes.filter(n => n.paperId === id).length;
+        if (!confirm(c ? `Bu makale ve ondan aldığın ${c} not silinecek. Emin misin?` : 'Bu makale silinecek. Emin misin?')) return;
+        delete S.papers[id]; DB.del('paper:' + id); S.notes = S.notes.filter(n => n.paperId !== id); saveNotes();
+        if (S.cur === id) { S.cur = null; LS.set('mo:last', null); }
+        renderAll(); openLib();
+      }
+    });
+  });
+}
+function openSettings() {
+  let style = S.settings.style;
+  modal(`<h3>Ayarlar</h3>
+    <label>Gemini API anahtarı<div class="row"><input id="sKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AIza…" value="${esc(S.settings.key)}"><button id="sShow">Göster</button></div></label>
+    <p class="hint">Anahtar yalnızca bu cihazda saklanır ve sadece Google’a gönderilir.</p>
+    <label>Model<input id="sModel" list="mdl" autocapitalize="off" spellcheck="false" value="${esc(S.settings.model)}"></label>
+    <datalist id="mdl"><option value="gemini-2.5-flash"><option value="gemini-2.5-flash-lite"><option value="gemini-2.0-flash"></datalist>
+    <p class="hint">Model hatası alırsan listeden başka bir model dene.</p>
+    <div class="field"><div class="flabel">Atıf dili (APA 7)</div><div class="seg wide" id="sStyle">
+      <button data-style="en" class="${style === 'en' ? 'on' : ''}">İngilizce: “&amp;”, “et al.”</button>
+      <button data-style="tr" class="${style === 'tr' ? 'on' : ''}">Türkçe: “ve”, “vd.”</button></div></div>
+    <div class="field"><div class="flabel">Yedek</div>
+      <p class="hint">Makaleler ve notlar bu iPad’in tarayıcısında saklanır. Uygulamayı ana ekrana ekle ve ara sıra yedek al.</p>
+      <div class="row"><button id="sBk">Yedeği indir</button><label class="btn" for="bkIn">Yedeği yükle</label><input type="file" id="bkIn" class="vh" accept="application/json,.json"></div></div>
+    <div class="mact"><button id="sTest">Anahtarı test et</button><button class="primary" id="sSave">Kaydet</button></div>`, box => {
+    $('#sShow').onclick = () => { const k = $('#sKey'); k.type = k.type === 'password' ? 'text' : 'password'; $('#sShow').textContent = k.type === 'password' ? 'Göster' : 'Gizle'; };
+    $('#sStyle').onclick = e => { const b = e.target.closest('[data-style]'); if (!b) return; style = b.dataset.style; $$('#sStyle button').forEach(x => x.classList.toggle('on', x === b)); };
+    const apply = () => { S.settings.key = $('#sKey').value.trim(); S.settings.model = $('#sModel').value.trim() || 'gemini-2.5-flash'; S.settings.style = style; saveSettings(); };
+    $('#sTest').onclick = async () => {
+      apply(); const b = $('#sTest'); b.disabled = true; b.textContent = 'Deneniyor…';
+      try { await gemini('Sadece "tamam" yaz.', { json: false }); toast('Anahtar çalışıyor.'); }
+      catch (e) { toast(errMsg(e), 'err'); }
+      finally { b.disabled = false; b.textContent = 'Anahtarı test et'; }
+    };
+    $('#sSave').onclick = () => { apply(); closeModal(); renderAll(true); toast('Ayarlar kaydedildi.'); };
+    $('#sBk').onclick = () => {
+      const data = JSON.stringify({ app: 'makale-okuyucu', v: 1, papers: S.papers, notes: S.notes, style: S.settings.style });
+      downloadBlob(new Blob([data], { type: 'application/json' }), `makale-okuyucu-yedek-${new Date().toISOString().slice(0, 10)}.json`);
+    };
+    $('#bkIn').onchange = async ev => {
+      const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
+      try {
+        const d = JSON.parse(await f.text()); if (!d || d.app !== 'makale-okuyucu') throw new Error('Bu dosya bir Makale Okuyucu yedeği değil.');
+        if (!confirm('Yedekteki makaleler ve notlar mevcut verilerine eklenecek. Devam edilsin mi?')) return;
+        for (const p of Object.values(d.papers || {})) { S.papers[p.id] = p; await DB.set('paper:' + p.id, p); }
+        const ids = new Set(S.notes.map(n => n.id)); for (const n of (d.notes || [])) if (!ids.has(n.id)) S.notes.push(n);
+        saveNotes(); closeModal(); renderAll(); toast('Yedek yüklendi.');
+      } catch (e) { toast(errMsg(e), 'err'); }
+    };
+  });
+}
+
+/* ---------- Word export ---------- */
+function downloadBlob(blob, name) {
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+async function buildDocx() {
+  const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+  const X = s => String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const run = (t, o = {}) => {
+    const rp = (o.b ? '<w:b/>' : '') + (o.i ? '<w:i/>' : '') + (o.color ? `<w:color w:val="${o.color}"/>` : '') + (o.sz ? `<w:sz w:val="${o.sz}"/><w:szCs w:val="${o.sz}"/>` : '');
+    return `<w:r>${rp ? `<w:rPr>${rp}</w:rPr>` : ''}<w:t xml:space="preserve">${X(t)}</w:t></w:r>`;
+  };
+  const textRuns = t => String(t).split(/\n/).map((ln, k) => (k ? '<w:r><w:br/></w:r>' : '') + run(ln)).join('');
+  const para = (runs, o = {}) => `<w:p><w:pPr>${o.keep ? '<w:keepNext/>' : ''}<w:spacing w:before="${o.before || 0}" w:after="${o.after ?? 160}" w:line="${o.line || 360}" w:lineRule="auto"/>${o.ind || ''}${o.jc ? `<w:jc w:val="${o.jc}"/>` : ''}</w:pPr>${runs}</w:p>`;
+  const sm = suffixMap();
+  let body = para(run('Notlarım', { b: true, sz: 32 }), { jc: 'center', after: 80 });
+  body += para(run(new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }), { color: '666666', sz: 20 }), { jc: 'center', after: 360 });
+  S.notes.forEach((n, k) => {
+    body += para(run(`${k + 1}.`) + '<w:r><w:tab/></w:r>' + textRuns(noteWithCite(n, sm)), { ind: '<w:ind w:left="425" w:hanging="425"/>', after: 200 });
+  });
+  const refs = citedPapers();
+  if (refs.length) {
+    body += para(run('Kaynakça', { b: true }), { jc: 'center', before: 480, after: 240, keep: true });
+    for (const p of refs) body += para(refParts(p, sm).map(([t, i]) => run(t, { i })).join(''), { ind: '<w:ind w:left="720" w:hanging="720"/>', line: 480, after: 0 });
+  }
+  const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="${W}"><w:body>${body}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+  const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="${W}"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman" w:eastAsia="Times New Roman"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="tr-TR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="0" w:line="360" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style></w:styles>`;
+  const types = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>`;
+  const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
+  const docRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+  const zip = new JSZip();
+  zip.file('[Content_Types].xml', types); zip.file('_rels/.rels', rels);
+  zip.file('word/document.xml', doc); zip.file('word/styles.xml', styles); zip.file('word/_rels/document.xml.rels', docRels);
+  return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+}
+function openExport() {
+  if (!S.notes.some(n => String(n.text || '').trim())) { toast('Önce birkaç not ekle.'); return; }
+  if (!window.JSZip) { toast('Word oluşturucu yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.', 'err'); return; }
+  const sm = suffixMap(); const refs = citedPapers();
+  const def = 'Notlarim-' + new Date().toISOString().slice(0, 10);
+  modal(`<h3>Word’e aktar</h3><p class="hint">Notların sırasıyla, APA 7 metin içi atıflarıyla yazılır. Kaynakça en sonda alfabetik sıradadır.</p>
+    <div class="docprev"><h4>Notlarım</h4>${S.notes.filter(n => String(n.text || '').trim()).map((n, k) => `<p class="n">${k + 1}. ${esc(noteWithCite(n, sm))}</p>`).join('')}
+    ${refs.length ? `<h4 style="margin-top:22px">Kaynakça</h4>${refs.map(p => `<p class="refp">${refHTML(p, sm)}</p>`).join('')}` : ''}</div>
+    <label>Dosya adı<input id="xName" value="${esc(def)}" autocapitalize="off" spellcheck="false"></label>
+    <div class="mact"><button data-close>Kapat</button><button id="xShare">Paylaş</button><button class="primary" id="xDl">İndir (.docx)</button></div>`, () => {
+    const saved = S.notes; let blob = null;
+    S.notes = saved.filter(n => String(n.text || '').trim());
+    const ready = buildDocx().then(b => { blob = b; return b; }).finally(() => { S.notes = saved; });
+    const fname = () => ($('#xName').value.trim() || def).replace(/[\\/:*?"<>|]+/g, '-') + '.docx';
+    $('#xDl').onclick = async () => { const b = blob || await ready; downloadBlob(b, fname()); toast('Word dosyası indirildi.'); };
+    $('#xShare').onclick = async () => {
+      const b = blob || await ready;
+      const file = new File([b], fname(), { type: b.type });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: fname() }); } catch (e) { if (e.name !== 'AbortError') toast('Paylaşılamadı. İndir düğmesini kullan.', 'err'); }
+      } else { downloadBlob(b, fname()); toast('Paylaşım desteklenmiyor, dosya indirildi.'); }
+    };
+  });
+}
+
+/* ---------- init ---------- */
+async function init() {
+  if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  try {
+    await DB.open();
+    for (const k of await DB.keys()) {
+      if (String(k).startsWith('paper:')) { const p = await DB.get(k); if (p && p.id) { p.strokes = p.strokes || {}; p.tr = p.tr || {}; S.papers[p.id] = p; } }
+    }
+    S.notes = (await DB.get('notes')) || [];
+  } catch (e) {
+    DB.db = null; toast('Tarayıcı depolaması kullanılamıyor. Veriler kaydedilmeyecek.', 'err');
+  }
+  if (innerWidth > 1050) document.body.classList.add('notes-open');
+  resizeOv();
+  const last = LS.get('mo:last', null);
+  if (last && S.papers[last]) openPaper(last); else renderAll();
+}
+init();
+})();
+</script>
+</body>
+</html>
