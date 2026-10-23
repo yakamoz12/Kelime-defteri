@@ -143,6 +143,33 @@ svg.ink{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointe
 .nbottom{flex:none;padding:14px;border-top:1px solid var(--line);background:var(--surface)}
 .nbottom button{width:100%;min-height:52px;border-radius:14px;border:0;background:var(--ink);color:var(--bg);font-weight:600;font-size:15.5px}
 .nclose{display:none}
+.pane{flex:1;min-height:0;display:flex;flex-direction:column}
+.pane[hidden]{display:none}
+#bExport[hidden]{display:none}
+#paneTabs button{min-height:40px;padding:4px 12px;font-size:14px}
+.asklog{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;display:flex;flex-direction:column;gap:10px}
+.askintro{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.askintro b{font-family:var(--serif);font-size:17px}
+.askintro p{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.5}
+.asksug{display:flex;flex-direction:column;gap:8px}
+.asksug button{justify-content:flex-start;text-align:left;white-space:normal;min-height:46px;border-radius:12px;font-size:14.5px;background:var(--surface)}
+.askbar{display:flex;justify-content:flex-end}
+.link{border:0;background:none;color:var(--muted);font-size:13px;min-height:32px;padding:0 4px;text-decoration:underline}
+.qbub{align-self:flex-end;max-width:88%;background:var(--accent);color:var(--on-accent);border-radius:16px 16px 4px 16px;padding:10px 14px;font-size:15px;line-height:1.45;white-space:pre-wrap}
+.abub{align-self:stretch;background:var(--surface);border:1px solid var(--line);border-radius:16px 16px 16px 4px;padding:12px 14px}
+.abub.err{border-color:var(--danger);color:var(--danger)}
+.abub.wait{color:var(--muted);font-size:14px;display:flex;align-items:center;gap:10px}
+.atext{font-family:var(--serif);font-size:15.5px;line-height:1.6;white-space:pre-wrap}
+.pref{display:inline-flex;min-height:24px;padding:0 7px;margin:0 2px;border-radius:999px;border:0;background:var(--accent-soft);color:var(--accent);font:700 12px var(--sans);vertical-align:1px}
+.aact{display:flex;gap:8px;margin-top:10px}
+.aact button{min-height:38px;font-size:13.5px;border-radius:10px}
+.askin{flex:none;display:flex;gap:8px;align-items:flex-end;padding:12px 14px;border-top:1px solid var(--line);background:var(--surface)}
+.askin textarea{flex:1;min-width:0;resize:none;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:15px/1.4 var(--sans);background:var(--bg);color:var(--ink);max-height:140px}
+.askin button{min-height:46px;border-radius:12px;padding:0 18px}
+.dots{display:inline-flex;gap:4px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:dot 1s infinite ease-in-out}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,80%,100%{opacity:.25}40%{opacity:1}}
 .catbar{min-height:60px;flex-direction:column;align-items:stretch;gap:6px;overflow:visible}
 .crow{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;align-items:center}
 .crow::-webkit-scrollbar{display:none}
@@ -382,13 +409,20 @@ details.setup li{margin-bottom:6px}
       </div>
       <aside class="notes" id="notes" aria-label="Notlar">
         <div class="nhead">
-          <h3>Notlar</h3>
+          <div class="seg" id="paneTabs" role="tablist" aria-label="Sağ panel"><button data-pane="notes" class="on">Notlar</button><button data-pane="ask">Makaleye sor</button></div>
+          <span style="flex:1"></span>
           <button id="bExport" class="outline">Word’e aktar</button>
-          <button id="bCloseNotes" class="nclose" aria-label="Notları kapat">✕</button>
+          <button id="bCloseNotes" class="nclose" aria-label="Paneli kapat">✕</button>
         </div>
-        <div class="catbar" id="catbar"></div>
-        <div id="notesList"></div>
-        <div class="nbottom"><button id="bFree">+ Kendi notunu yaz</button></div>
+        <div class="pane" id="notesPane">
+          <div class="catbar" id="catbar"></div>
+          <div id="notesList"></div>
+          <div class="nbottom"><button id="bFree">+ Kendi notunu yaz</button></div>
+        </div>
+        <div class="pane" id="askPane" hidden>
+          <div class="asklog" id="askLog"></div>
+          <div class="askin"><textarea id="askQ" rows="2" placeholder="Makaleye bir soru sor… (ör. Yalnızlıkla ilgili neler yazıyor?)"></textarea><button class="primary" id="askGo" aria-label="Sor">Sor</button></div>
+        </div>
       </aside>
     </div>
   </div>
@@ -1109,6 +1143,7 @@ function openPaper(id) {
   S.cur = id; S.sec = Math.min(p.lastSec || 0, p.sections.length - 1); S.undo = []; showScreen('read');
   p.opened = Date.now(); savePaper(p);
   LS.set('mo:last', id); renderAll();
+  if (S.pane === 'ask') renderAsk();
 }
 
 /* ---------- notes ---------- */
@@ -1985,6 +2020,91 @@ $('#arcAttach').addEventListener('change', async e => {
   busy(false); toast(r.upErr ? 'PDF yüklenemedi: ' + errMsg(r.upErr) : 'PDF arşiv kaydına eklendi.', r.upErr ? 'err' : ''); openArchive();
 });
 $('#bArc').onclick = () => openArchive();
+
+/* ---------- ask the paper ---------- */
+const ASK_SUGGEST = ['Makalenin amacı ve ana bulguları neler?', 'Yöntemi ve örneklemi özetle', 'Sınırlılıklar ve öneriler neler?', 'Hangi kuramlara ve kavramlara dayanıyor?'];
+let askBusy = false;
+function setPane(which) {
+  S.pane = which;
+  $('#notesPane').hidden = which !== 'notes'; $('#askPane').hidden = which !== 'ask';
+  $('#bExport').hidden = which !== 'notes';
+  $$('#paneTabs button').forEach(b => b.classList.toggle('on', b.dataset.pane === which));
+  if (which === 'ask') renderAsk();
+}
+function askText(s) {
+  const p = curPaper();
+  return esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[(\d+(?:\s*[,–-]\s*\d+)*)\]/g, (m, g) => {
+    const nums = g.split(/\s*[,–-]\s*/).map(Number).filter(n => p && p.paras[n]);
+    return nums.length ? nums.map(n => `<button class="pref" data-ref="${n}" aria-label="Paragraf ${n + 1}e git">¶${n + 1}</button>`).join('') : m;
+  });
+}
+function renderAsk() {
+  const L = $('#askLog'); const p = curPaper();
+  $('#askQ').disabled = !p; $('#askGo').disabled = !p || askBusy;
+  if (!p) { L.innerHTML = '<div class="empty-notes">Soru sormak için önce bir makale aç.</div>'; return; }
+  const chat = p.chat || [];
+  let h = chat.length ? '<div class="askbar"><button class="link" data-askclear>Sohbeti temizle</button></div>' : `<div class="askintro"><b>Makaleye sor</b><p>Bu makale hakkında ne merak ediyorsan yaz. Örneğin “Kabul ve kararlılık terapisi hakkında neler yazıyor?” ya da “Yalnızlıkla ilgili bulgular neler?”. Cevaplar yalnızca bu makaleye dayanır, ¶ işaretine dokununca ilgili paragrafa gidersin.</p></div>
+    <div class="asksug">${ASK_SUGGEST.map(s => `<button data-sug="${esc(s)}">${esc(s)}</button>`).join('')}</div>`;
+  chat.forEach((m, k) => {
+    h += `<div class="qbub">${esc(m.q)}</div>`;
+    h += `<div class="abub${m.err ? ' err' : ''}" data-k="${k}"><div class="atext">${askText(m.a)}</div>`
+      + (m.err ? '' : `<div class="aact"><button data-anote>Notlara ekle</button><button data-acp>Kopyala</button></div>`) + '</div>';
+  });
+  if (askBusy) h += `<div class="abub wait"><span class="dots"><i></i><i></i><i></i></span>Makale okunuyor…</div>`;
+  L.innerHTML = h; L.scrollTop = L.scrollHeight;
+}
+async function askPaper(q) {
+  const p = curPaper(); q = String(q || '').trim(); if (!p || !q || askBusy) return;
+  if (!S.settings.key) { openSettings(); toast('Önce Gemini API anahtarını ekle.', 'err'); return; }
+  const sk = new Set(p.skip || []);
+  let body = ''; for (let i = 0; i < p.paras.length; i++) { if (sk.has(i)) continue; const s = secOf(p, i); body += `[${i}]${s ? ' (' + s.title + ')' : ''} ${p.paras[i].t}\n`; }
+  if (body.length > 600000) body = body.slice(0, 600000);
+  const hist = (p.chat || []).filter(m => !m.err).slice(-4).map(m => `Soru: ${m.q}\nCevap: ${m.a}`).join('\n\n');
+  const prompt = `Sen bir akademik okuma asistanısın. Aşağıda bir makalenin numaralandırılmış paragrafları var. Kullanıcının sorusunu YALNIZCA bu makalede yazanlara dayanarak Türkçe cevapla.
+Kurallar:
+- Makalede geçen ilgili bilgileri topla ve düzenli yaz; gerekirse "- " ile başlayan maddeler kullan, önemli kavramları **kalın** yaz.
+- Her bilginin sonuna dayandığı paragraf numarasını köşeli parantezle ekle, ör. [12] ya da [12, 15].
+- Makalede olmayan bir bilgiyi ekleme, tahmin yürütme. Konu makalede hiç geçmiyorsa bunu açıkça söyle ve varsa en yakın ilgili kısmı belirt.
+- Makale İngilizceyse de cevap Türkçe olsun; kısa doğrudan alıntı yaparsan tırnak içinde özgün dilinde ver.
+Yalnızca şu yapıda JSON döndür: {"answer":"..."}
+${hist ? `\nÖNCEKİ KONUŞMA:\n${hist}\n` : ''}
+MAKALE: ${p.meta.title || p.name}
+PARAGRAFLAR:
+${body}
+SORU: ${q}`;
+  p.chat = p.chat || []; const entry = { q, a: '', t: Date.now() }; p.chat.push(entry);
+  askBusy = true; $('#askQ').value = ''; renderAsk();
+  gemWaitCb = sec => { const w = $('#askLog .abub.wait'); if (w) w.lastChild.textContent = `Gemini sınırına takıldı, ${sec} sn bekleniyor…`; };
+  try {
+    const res = await gemini(prompt, { temperature: 0.2 });
+    entry.a = str(res && (res.answer || res.cevap)) || (typeof res === 'string' ? res : 'Cevap alınamadı.');
+  } catch (e) { entry.a = errMsg(e); entry.err = true; }
+  finally {
+    askBusy = false; gemWaitCb = null;
+    if (p.chat.length > 40) p.chat = p.chat.slice(-40);
+    savePaper(p); if (S.cur === p.id) renderAsk();
+  }
+}
+$('#paneTabs').addEventListener('click', e => { const b = e.target.closest('[data-pane]'); if (b) setPane(b.dataset.pane); });
+$('#askGo').onclick = () => askPaper($('#askQ').value);
+$('#askQ').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askPaper($('#askQ').value); } });
+$('#askLog').addEventListener('click', async e => {
+  const p = curPaper(); if (!p) return;
+  const sg = e.target.closest('[data-sug]'); if (sg) { askPaper(sg.dataset.sug); return; }
+  if (e.target.closest('[data-askclear]')) { if (!confirm('Bu makaleyle ilgili sohbet silinsin mi?')) return; p.chat = []; savePaper(p); renderAsk(); return; }
+  const rf = e.target.closest('[data-ref]'); if (rf) { jumpTo({ paperId: p.id, para: +rf.dataset.ref, lang: 'o' }); return; }
+  const card = e.target.closest('.abub[data-k]'); if (!card) return; const m = (p.chat || [])[+card.dataset.k]; if (!m) return;
+  const plain = m.a.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\[(\d+)(?:\s*[,–-]\s*(\d+))*\]/g, '').replace(/[ \t]+\n/g, '\n').trim();
+  if (e.target.closest('[data-acp]')) { try { await navigator.clipboard.writeText(plain); toast('Cevap kopyalandı.'); } catch { toast('Kopyalanamadı.', 'err'); } }
+  else if (e.target.closest('[data-anote]')) {
+    const first = (m.a.match(/\[(\d+)/) || [])[1]; const para = first !== undefined && p.paras[+first] ? +first : null;
+    pickCategory({ sub: 'Cevap, makalenin atfıyla birlikte not olarak eklenecek.' }, cat => {
+      const s = para !== null ? secOf(p, para) : null;
+      S.notes.push({ id: uid(), paperId: p.id, para: para ?? 0, lang: 'o', secTitle: s ? s.title : '', text: plain, partial: true, cat, created: Date.now() });
+      notesChanged(); pulseNotes(); toast(`Cevap “${catName(cat)}” notlarına eklendi.`);
+    });
+  }
+});
 
 /* ---------- backup ---------- */
 function backupData() { return { app: 'makale-okuyucu', v: 2, papers: S.papers, notes: S.notes, cats: S.cats, archive: ARC.items, arcFolders: ARC.folders, style: S.settings.style }; }
