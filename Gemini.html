@@ -143,7 +143,19 @@ svg.ink{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointe
 .nbottom{flex:none;padding:14px;border-top:1px solid var(--line);background:var(--surface)}
 .nbottom button{width:100%;min-height:52px;border-radius:14px;border:0;background:var(--ink);color:var(--bg);font-weight:600;font-size:15.5px}
 .nclose{display:none}
-.catbar{min-height:60px;align-items:center}
+.catbar{min-height:60px;flex-direction:column;align-items:stretch;gap:6px;overflow:visible}
+.crow{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;align-items:center}
+.crow::-webkit-scrollbar{display:none}
+.crow.sub{padding:6px 0 0;border-top:1px dashed var(--line)}
+.crow.sub .chip{min-height:32px;font-size:13px}
+.crow.sub{overflow:visible}
+.cscroll{display:flex;gap:4px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}
+.cscroll::-webkit-scrollbar{display:none}
+.cedit{flex:none;min-height:34px;padding:4px 10px;gap:5px;font-size:13px;font-weight:600;border-radius:10px;color:var(--accent);border-color:var(--accent-soft)}
+.quick{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;min-height:58px;padding:8px 16px;margin-top:14px;border-color:var(--accent);background:var(--accent-soft);text-align:left;white-space:normal}
+.quick small{font-size:12px;font-weight:600;color:var(--muted)}
+.quick b{font-size:16px;color:var(--accent)}
+.picklist button.direct{background:var(--surface2)}
 .catbar .chip{min-height:36px;padding:4px 13px;font-size:13.5px;font-weight:600;background:transparent;color:var(--muted)}
 .catbar .chip.on{background:var(--accent);color:var(--on-accent)}
 
@@ -683,7 +695,7 @@ function normKw(k) {
   return arr.filter(x => { const f = x.toLocaleLowerCase('tr'); if (seen.has(f)) return false; seen.add(f); return true; }).slice(0, 25);
 }
 const META_JSON = '{"meta":{"authors":[{"family":"Soyadı","given":"Adı"}],"year":"","title":"","journal":"","volume":"","issue":"","pages":"","doi":""},"keywords":["..."]}';
-const KW_RULE = 'Anahtar kelimeler: Yayında "Keywords" ya da "Anahtar kelimeler" listesi varsa onu aynen al; yoksa yayının dilinde 5-8 anahtar kelime öner.';
+const KW_RULE = 'Anahtar kelimeler TÜRKÇE olmalı: Yayında "Keywords" ya da "Anahtar kelimeler" listesi varsa her birini akademik Türkçeye çevir (zaten Türkçeyse aynen al); liste yoksa 5-8 Türkçe anahtar kelime öner. Kısaltmalar ve özel adlar (ör. PISA, COVID-19) olduğu gibi kalabilir. Özel adlar dışında küçük harfle yaz.';
 function metaPrompt(src) {
   return `Aşağıda bir akademik yayının ${src}. Görevin APA 7 kaynakçası için künye bilgilerini ve anahtar kelimeleri çıkarmak.
 Kurallar: Yazar adlarını yayındaki gibi tam yaz. Başlığı özgün dilinde ve büyük-küçük harf düzenini koruyarak yaz. pages "45-60" biçiminde, doi yalnızca "10." ile başlayan kısım olsun. Bilinmeyen alanları boş bırak.
@@ -879,28 +891,42 @@ function renderSectionBar() {
     + `<button class="primary" data-act="translate" ${S.translating || !need ? 'disabled' : ''}>${S.translating ? esc(S.trText) : (need ? 'Bölümü çevir' : 'Çevrildi ✓')}</button></div>`;
   B.querySelector('.chips').scrollLeft = sl;
 }
-/* ---------- categories ---------- */
-const catName = id => (S.cats.find(c => c.id === id) || {}).name || 'Genel';
-const catCount = id => S.notes.filter(n => n.cat === id).length;
-const visibleNotes = () => S.catView === 'all' ? S.notes : S.notes.filter(n => n.cat === S.catView);
-function newCat(name) { const c = { id: 'c' + uid(), name: name.trim() }; S.cats.push(c); saveCats(); return c; }
+/* ---------- categories (two levels: main › sub) ---------- */
+const catOf = id => S.cats.find(c => c.id === id) || null;
+const mains = () => S.cats.filter(c => !c.parent);
+const subsOf = id => S.cats.filter(c => c.parent === id);
+const catName = id => { const c = catOf(id); if (!c) return 'Genel'; const p = c.parent ? catOf(c.parent) : null; return p ? `${p.name} › ${c.name}` : c.name; };
+const inCat = (n, id) => { if (n.cat === id) return true; const c = catOf(n.cat); return !!(c && c.parent === id); };
+const catCount = id => S.notes.filter(n => inCat(n, id)).length;
+const visibleNotes = () => S.catView === 'all' ? S.notes : S.notes.filter(n => inCat(n, S.catView));
+const selMain = () => { const c = catOf(S.catView); return c ? (c.parent || c.id) : null; };
+function newCat(name, parent = null) { const c = { id: 'c' + uid(), name: name.trim(), parent }; S.cats.push(c); saveCats(); return c; }
 function setCatView(v) { S.catView = v; LS.set('mo:catView', v); renderNotes(); }
 function fixNotes() {
-  if (!S.cats.length) S.cats.push({ id: 'c-genel', name: 'Genel' });
+  if (!S.cats.length) S.cats.push({ id: 'c-genel', name: 'Genel', parent: null });
+  for (const c of S.cats) { const p = c.parent ? catOf(c.parent) : null; if (!p || p.parent || p.id === c.id) c.parent = null; }
   const ok = new Set(S.cats.map(c => c.id));
   for (const n of S.notes) { if (!n.id) n.id = uid(); if (!ok.has(n.cat)) n.cat = S.cats[0].id; }
 }
 function renderCatBar() {
   const B = $('#catbar');
-  if (S.catView !== 'all' && !S.cats.some(c => c.id === S.catView)) S.catView = 'all';
-  B.innerHTML = `<button class="chip${S.catView === 'all' ? ' on' : ''}" data-cv="all">Tümü<small>${S.notes.length}</small></button>`
-    + S.cats.map(c => `<button class="chip${S.catView === c.id ? ' on' : ''}" data-cv="${c.id}">${esc(c.name)}<small>${catCount(c.id)}</small></button>`).join('')
-    + `<button class="chip ghost" data-cnew>+ Kategori</button>`
-    + (S.catView !== 'all' ? `<button class="chip ghost" data-cedit>Düzenle</button>` : '');
-  const on = B.querySelector('.chip.on'); if (on && on.scrollIntoView) on.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+  if (S.catView !== 'all' && !catOf(S.catView)) S.catView = 'all';
+  const m = selMain(); const cur = catOf(S.catView);
+  let html = `<div class="crow"><button class="chip${S.catView === 'all' ? ' on' : ''}" data-cv="all">Tümü<small>${S.notes.length}</small></button>`
+    + mains().map(c => `<button class="chip${m === c.id ? ' on' : ''}" data-cv="${c.id}">${esc(c.name)}<small>${catCount(c.id)}</small></button>`).join('')
+    + `<button class="chip ghost" data-cnew>+ Kategori</button></div>`;
+  if (m) {
+    const mc = catOf(m);
+    html += `<div class="crow sub"><div class="cscroll"><button class="chip${S.catView === m ? ' on' : ''}" data-cv="${m}">Hepsi<small>${catCount(m)}</small></button>`
+      + subsOf(m).map(c => `<button class="chip${S.catView === c.id ? ' on' : ''}" data-cv="${c.id}">${esc(c.name)}<small>${catCount(c.id)}</small></button>`).join('')
+      + `<button class="chip ghost" data-csub>+ Alt kategori</button></div>`
+      + `<button class="cedit" data-cedit aria-label="“${esc(cur && cur.parent ? cur.name : mc.name)}” kategorisini düzenle ya da sil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3l4 4L8 20H4v-4z"/></svg>Düzenle</button></div>`;
+  }
+  B.innerHTML = html;
+  const on = B.querySelector('.crow.sub .chip.on') || B.querySelector('.chip.on'); if (on && on.scrollIntoView) on.scrollIntoView({ inline: 'nearest', block: 'nearest' });
 }
-function catNameModal(title, value, onOk) {
-  modal(`<h3>${esc(title)}</h3><label>Kategori adı<input id="cName" value="${esc(value || '')}" placeholder="ör. Kitap, 3. Bölüm" autocomplete="off"></label>
+function catNameModal(title, value, onOk, hint = '') {
+  modal(`<h3>${esc(title)}</h3>${hint ? `<p class="hint">${esc(hint)}</p>` : ''}<label>Ad<input id="cName" value="${esc(value || '')}" placeholder="ör. Tez, Proje, Giriş" autocomplete="off"></label>
     <div class="mact"><button data-close>Vazgeç</button><button class="primary" id="cOk">Kaydet</button></div>`, () => {
     const i = $('#cName');
     const go = () => { const v = i.value.trim(); if (!v) { i.focus(); return; } closeModal(); onOk(v); };
@@ -908,41 +934,66 @@ function catNameModal(title, value, onOk) {
   });
 }
 function editCat(id) {
-  const c = S.cats.find(x => x.id === id); if (!c) return;
-  const others = S.cats.filter(x => x.id !== id); const cnt = catCount(id);
-  modal(`<h3>Kategoriyi düzenle</h3><label>Kategori adı<input id="cName" value="${esc(c.name)}" autocomplete="off"></label>
+  const c = catOf(id); if (!c) return;
+  const kids = subsOf(id); const family = new Set([id, ...kids.map(k => k.id)]);
+  const others = S.cats.filter(x => !family.has(x.id)); const cnt = catCount(id);
+  const parentOpts = `<option value="">Yok, ana kategori olsun</option>` + mains().filter(x => x.id !== id).map(x => `<option value="${x.id}" ${c.parent === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
+  modal(`<h3>Kategoriyi düzenle</h3><label>Ad<input id="cName" value="${esc(c.name)}" autocomplete="off"></label>
+    <label>Hangi ana kategorinin altında?<select id="cPar" ${kids.length ? 'disabled' : ''}>${parentOpts}</select></label>
+    ${kids.length ? `<p class="hint">Bu kategorinin ${kids.length} alt kategorisi var, bu yüzden başka bir kategorinin altına taşınamaz.</p>` : ''}
     ${others.length ? '' : '<p class="hint">Tek kategori silinemez. Silmek için önce yeni bir kategori oluştur.</p>'}
-    <div class="mact">${others.length ? '<button class="danger" id="cDel">Kategoriyi sil</button>' : ''}<button data-close>Vazgeç</button><button class="primary" id="cOk">Kaydet</button></div>`, () => {
-    $('#cOk').onclick = () => { const v = $('#cName').value.trim(); if (!v) return; c.name = v; saveCats(); closeModal(); renderNotes(); toast('Kategori adı değişti.'); };
+    <div class="mact">${others.length ? '<button class="danger" id="cDel">Sil</button>' : ''}<button data-close>Vazgeç</button><button class="primary" id="cOk">Kaydet</button></div>`, () => {
+    $('#cOk').onclick = () => {
+      const v = $('#cName').value.trim(); if (!v) return; c.name = v;
+      if (!kids.length) c.parent = $('#cPar').value || null;
+      saveCats(); closeModal(); renderNotes(); toast('Kategori kaydedildi.');
+    };
     if (!others.length) return;
     $('#cDel').onclick = () => {
-      const drop = () => { S.cats = others; saveCats(); setCatView('all'); };
-      if (!cnt) { closeModal(); drop(); toast('Kategori silindi.'); return; }
-      modal(`<h3>“${esc(c.name)}” silinsin mi?</h3><p class="hint">Bu kategoride ${cnt} not var. Notları başka bir kategoriye taşıyabilir ya da onlarla birlikte silebilirsin.</p>
-        <label>Notları şuraya taşı<select id="cTo">${others.map(o => `<option value="${o.id}">${esc(o.name)}</option>`).join('')}</select></label>
+      const drop = () => { S.cats = S.cats.filter(x => !family.has(x.id)); saveCats(); setCatView('all'); refreshNoted(); renderHeader(); };
+      const what = kids.length ? `“${c.name}” ve ${kids.length} alt kategorisi` : `“${c.name}”`;
+      if (!cnt) { if (!confirm(`${what} silinecek. Emin misin?`)) return; closeModal(); drop(); toast('Kategori silindi.'); return; }
+      modal(`<h3>${esc(what)} silinsin mi?</h3><p class="hint">Burada ${cnt} not var. Notları başka bir kategoriye taşıyabilir ya da onlarla birlikte silebilirsin.</p>
+        <label>Notları şuraya taşı<select id="cTo">${others.map(o => `<option value="${o.id}">${esc(catName(o.id))}</option>`).join('')}</select></label>
         <div class="mact"><button class="danger" id="cAll">Notlarla birlikte sil</button><button data-close>Vazgeç</button><button class="primary" id="cMove">Taşı ve sil</button></div>`, () => {
-        $('#cMove').onclick = () => { const to = $('#cTo').value; S.notes.forEach(n => { if (n.cat === id) n.cat = to; }); saveNotes(); closeModal(); drop(); toast(`Notlar “${catName(to)}” kategorisine taşındı.`); };
-        $('#cAll').onclick = () => { if (!confirm(`${cnt} not kalıcı olarak silinecek. Emin misin?`)) return; S.notes = S.notes.filter(n => n.cat !== id); saveNotes(); closeModal(); drop(); refreshNoted(); renderHeader(); toast('Kategori ve notları silindi.'); };
+        $('#cMove').onclick = () => { const to = $('#cTo').value; S.notes.forEach(n => { if (family.has(n.cat)) n.cat = to; }); saveNotes(); closeModal(); drop(); toast(`Notlar “${catName(to)}” kategorisine taşındı.`); };
+        $('#cAll').onclick = () => { if (!confirm(`${cnt} not kalıcı olarak silinecek. Emin misin?`)) return; S.notes = S.notes.filter(n => !family.has(n.cat)); saveNotes(); closeModal(); drop(); toast('Kategori ve notları silindi.'); };
       });
     };
   });
 }
 function pickCategory({ title = 'Hangi nota eklensin?', sub = '', has = [], onRemove = null } = {}, done) {
-  const last = LS.get('mo:lastCat', null);
-  modal(`<h3>${esc(title)}</h3>${sub ? `<p class="hint">${esc(sub)}</p>` : ''}
-    <div class="picklist">${S.cats.map(c => { const inside = has.includes(c.id); return `<button data-pick="${c.id}" class="${c.id === last && !inside ? 'last' : ''}" ${inside ? 'disabled' : ''}><span>${esc(c.name)}</span><small>${inside ? 'Ekli ✓' : catCount(c.id) + ' not'}</small></button>`; }).join('')}</div>
-    <div class="newcat"><input id="pkNew" placeholder="Yeni kategori adı" autocomplete="off"><button id="pkAdd">Oluştur ve ekle</button></div>
-    <div class="mact">${onRemove ? '<button class="danger" id="pkDel">Notlardan çıkar</button>' : ''}<button data-close>Vazgeç</button></div>`, box => {
-    box.querySelector('.picklist').onclick = e => { const b = e.target.closest('[data-pick]'); if (!b || b.disabled) return; LS.set('mo:lastCat', b.dataset.pick); closeModal(); done(b.dataset.pick); };
-    const add = () => { const v = $('#pkNew').value.trim(); if (!v) { $('#pkNew').focus(); return; } const c = newCat(v); LS.set('mo:lastCat', c.id); closeModal(); renderCatBar(); done(c.id); };
-    $('#pkAdd').onclick = add; $('#pkNew').onkeydown = e => { if (e.key === 'Enter') add(); };
-    if (onRemove) $('#pkDel').onclick = () => { closeModal(); onRemove(); };
-  });
+  const last = catOf(LS.get('mo:lastCat', null));
+  const finish = id => { LS.set('mo:lastCat', id); closeModal(); renderCatBar(); done(id); };
+  const step = (mainId) => {
+    const m = mainId ? catOf(mainId) : null;
+    const items = m ? [m, ...subsOf(m.id)] : mains();
+    const lab = c => m && c.id === m.id ? `Doğrudan “${c.name}”` : c.name;
+    const meta = c => has.includes(c.id) ? 'Ekli ✓' : (!m && subsOf(c.id).length ? `${subsOf(c.id).length} alt kategori ›` : catCount(c.id) + ' not');
+    modal(`<h3>${esc(m ? m.name : title)}</h3>${sub && !m ? `<p class="hint">${esc(sub)}</p>` : ''}
+      ${!m && last && !has.includes(last.id) ? `<button class="quick" data-pick="${last.id}"><small>Son kullanılan</small><b>${esc(catName(last.id))}</b></button>` : ''}
+      <div class="picklist">${items.map(c => `<button data-pick="${c.id}" ${has.includes(c.id) ? 'disabled' : ''} class="${m && c.id === m.id ? 'direct' : ''}"><span>${esc(lab(c))}</span><small>${meta(c)}</small></button>`).join('')}</div>
+      <div class="newcat"><input id="pkNew" placeholder="${m ? `“${esc(m.name)}” altında yeni alt kategori` : 'Yeni ana kategori (ör. Tez)'}" autocomplete="off"><button id="pkAdd">Oluştur ve ekle</button></div>
+      <div class="mact">${onRemove ? '<button class="danger" id="pkDel">Notlardan çıkar</button>' : ''}${m ? '<button id="pkBack">‹ Geri</button>' : ''}<button data-close>Vazgeç</button></div>`, box => {
+      box.addEventListener('click', e => {
+        const b = e.target.closest('[data-pick]'); if (!b || b.disabled) return;
+        const c = catOf(b.dataset.pick);
+        if (!m && !b.classList.contains('quick') && c && !c.parent && subsOf(c.id).length) { step(c.id); return; }
+        finish(b.dataset.pick);
+      });
+      const add = () => { const v = $('#pkNew').value.trim(); if (!v) { $('#pkNew').focus(); return; } finish(newCat(v, m ? m.id : null).id); };
+      $('#pkAdd').onclick = add; $('#pkNew').onkeydown = e => { if (e.key === 'Enter') add(); };
+      if (onRemove) $('#pkDel').onclick = () => { closeModal(); onRemove(); };
+      if (m) $('#pkBack').onclick = () => step(null);
+    });
+  };
+  step(null);
 }
 $('#catbar').addEventListener('click', e => {
   const v = e.target.closest('[data-cv]');
   if (v) setCatView(v.dataset.cv);
-  else if (e.target.closest('[data-cnew]')) catNameModal('Yeni kategori', '', name => { const c = newCat(name); setCatView(c.id); toast(`“${c.name}” kategorisi oluşturuldu.`); });
+  else if (e.target.closest('[data-cnew]')) catNameModal('Yeni ana kategori', '', name => { const c = newCat(name); setCatView(c.id); toast(`“${c.name}” oluşturuldu. Altına alt kategori ekleyebilirsin.`); }, 'Örneğin Tez, Proje, Makale.');
+  else if (e.target.closest('[data-csub]')) { const m = selMain(); if (!m) return; catNameModal(`“${catOf(m).name}” altında yeni alt kategori`, '', name => { const c = newCat(name, m); setCatView(c.id); toast(`“${catName(c.id)}” oluşturuldu.`); }, 'Örneğin Giriş, Yöntem, Tartışma.'); }
   else if (e.target.closest('[data-cedit]')) editCat(S.catView);
 });
 
@@ -953,7 +1004,7 @@ function renderNotes() {
   if (!S.notes.length) {
     L.innerHTML = `<div class="empty-notes">Henüz not yok.<br><br><b>Fosforlu</b> kalemle bir paragrafın üstünden geç ya da paragrafın yanındaki <b>+</b> düğmesine dokun. Her eklemede hangi kategoriye gideceğini sen seçersin.</div>`;
   } else if (!list.length) {
-    L.innerHTML = `<div class="empty-notes">“${esc(catName(S.catView))}” kategorisinde henüz not yok.<br><br>Paragraf eklerken bu kategoriyi seç ya da <b>+ Not</b> ile kendi notunu yaz.</div>`;
+    L.innerHTML = `<div class="empty-notes">“${esc(catName(S.catView))}” kategorisinde henüz not yok.<br><br>Paragraf eklerken bu kategoriyi seç ya da <b>+ Kendi notunu yaz</b> ile not ekle.</div>`;
   } else {
     L.innerHTML = list.map((n, k) => {
       const p = S.papers[n.paperId];
@@ -1675,10 +1726,12 @@ function openArchive() {
     $('#aFolders').innerHTML = `<button class="fd${S.arcFolder === 'all' ? ' on' : ''}" data-fv="all"><svg ${ICO}><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9"/></svg><span>Tümü</span><small>${ARC.live().length}</small></button>`
       + ARC.liveFolders().map(f => `<button class="fd${S.arcFolder === f.id ? ' on' : ''}" data-fv="${f.id}">${FOLDER_SVG}<span>${esc(f.name)}</span><small>${cnt(f.id)}</small></button>`).join('')
       + `<button class="fd ghost" data-fnew><svg ${ICO}><path d="M12 5v14M5 12h14"/></svg><span>Yeni klasör</span></button>`
+      + `<button class="fd ghost" data-kwtr><svg ${ICO}><path d="M4 5h8M8 3v2M6 5c0 4 3 7 6 8M10 5c-1 4-4 7-6 8"/><path d="M13 21l4-9 4 9M14.5 18h5"/></svg><span>Etiketleri Türkçeleştir</span></button>`
       + (S.arcFolder !== 'all' ? `<button class="fd ghost" data-fedit><svg ${ICO}><path d="M17 3l4 4L8 20H4v-4z"/></svg><span>Klasörü düzenle</span></button>` : '');
     $('#aFbar').innerHTML = `<button class="chip${S.arcFolder === 'all' ? ' on' : ''}" data-fv="all">Tümü<small>${ARC.live().length}</small></button>`
       + ARC.liveFolders().map(f => `<button class="chip${S.arcFolder === f.id ? ' on' : ''}" data-fv="${f.id}">${esc(f.name)}<small>${cnt(f.id)}</small></button>`).join('')
       + '<button class="chip ghost" data-fnew>+ Klasör</button>' + (S.arcFolder !== 'all' ? '<button class="chip ghost" data-fedit>Düzenle</button>' : '')
+      + '<button class="chip ghost" data-kwtr>Etiketleri Türkçeleştir</button>'
       + `<div class="astat">${statHTML()}</div>`;
   };
   const detail = (open) => {
@@ -1738,6 +1791,7 @@ function openArchive() {
     const fv = t.closest('[data-fv]'); if (fv) { S.arcFolder = fv.dataset.fv; LS.set('mo:arcFolder', S.arcFolder); folders(); list(); return; }
     if (t.closest('[data-fnew]')) { const n = (prompt('Yeni klasörün adı (ör. Doktora makaleleri)') || '').trim(); if (n) { const f = newFolder(n); S.arcFolder = f.id; LS.set('mo:arcFolder', f.id); folders(); list(); toast(`“${f.name}” klasörü oluşturuldu.`); } return; }
     if (t.closest('[data-fedit]')) { editFolder(S.arcFolder); return; }
+    if (t.closest('[data-kwtr]')) { translateKeywords(); return; }
     const kw = t.closest('[data-kw]'); if (kw) { arcQ = kw.dataset.kw; $('#aSearch').value = arcQ; list(); $('#aDetail').classList.remove('open'); return; }
     const row = t.closest('[data-arow]'); if (row) { arcSel = row.dataset.arow; $$('.arow', box).forEach(r => r.classList.toggle('on', r === row)); detail(true); return; }
     const card = t.closest('[data-aid]'); if (!card) return;
@@ -1765,6 +1819,38 @@ function openArchive() {
       arcSel = null; all();
     }
   });
+}
+async function translateKeywords() {
+  if (!S.settings.key) { openSettings(); toast('Bu işlem için Gemini API anahtarı gerekli.', 'err'); return; }
+  const live = ARC.live(); const papers = Object.values(S.papers);
+  const uniq = [...new Set([...live.flatMap(x => x.keywords || []), ...papers.flatMap(p => p.keywords || [])])];
+  if (!uniq.length) { toast('Çevrilecek etiket yok.'); return; }
+  if (!confirm(`Arşivdeki ${uniq.length} farklı etiket Türkçeye çevrilecek. Zaten Türkçe olanlar aynen kalır. Devam edilsin mi?`)) return;
+  const map = {};
+  try {
+    for (let i = 0; i < uniq.length; i += 120) {
+      const part = uniq.slice(i, i + 120);
+      busy(`Etiketler çevriliyor ${Math.min(i + 120, uniq.length)}/${uniq.length}`);
+      const res = await gemini(`Aşağıdaki akademik anahtar kelimeleri akademik Türkçeye çevir. Zaten Türkçe olanları aynen bırak. Kısaltmalar ve özel adlar (ör. PISA, COVID-19) olduğu gibi kalabilir. Özel adlar dışında küçük harf kullan.
+Yalnızca şu yapıda JSON döndür: {"map":{"orijinal ifade":"türkçe karşılığı"}}
+ANAHTAR KELİMELER:
+${JSON.stringify(part)}`);
+      Object.assign(map, (res && res.map) || {});
+    }
+  } catch (e) { busy(false); toast(errMsg(e), 'err'); return; }
+  const tr = list => normKw((list || []).map(k => str(map[k]) || k));
+  const same = (a, b) => JSON.stringify(a || []) === JSON.stringify(b || []);
+  const changed = live.filter(x => !same(x.keywords, tr(x.keywords)));
+  for (const p of papers) { const k = tr(p.keywords); if (!same(p.keywords, k)) { p.keywords = k; savePaper(p); } }
+  let i = 0, fail = 0;
+  for (const x of changed) {
+    i++; busy(`Arşiv güncelleniyor ${i}/${changed.length}`);
+    const r = await saveArcItem({ item: x, meta: x.meta, keywords: tr(x.keywords) });
+    if (r.upErr) fail++;
+  }
+  busy(false); arcQ = '';
+  if (S.screen === 'arc') openArchive();
+  toast(changed.length ? `${changed.length} kaydın etiketleri Türkçeleştirildi.${fail ? ` ${fail} PDF’in Drive açıklaması güncellenemedi.` : ''}` : 'Etiketlerin zaten Türkçe.');
 }
 async function readFromArchive(x) {
   const ex = Object.values(S.papers).find(p => p.arcId === x.id);
@@ -1965,7 +2051,7 @@ async function buildDocx(set) {
   let body = para(run(set.title, { b: true, sz: 32 }), { jc: 'center', after: 80 });
   body += para(run(new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }), { color: '666666', sz: 20 }), { jc: 'center', after: 360 });
   for (const g of exportGroups(set)) {
-    if (g.name) body += para(run(g.name, { b: true, sz: 26 }), { before: 240, after: 160, keep: true });
+    if (g.name) body += para(run(g.name, { b: true, sz: g.level === 1 ? 28 : 24, i: g.level === 2 }), { before: g.level === 1 ? 320 : 200, after: 140, keep: true });
     g.notes.forEach((n, k) => {
       body += para(run(`${k + 1}.`) + '<w:r><w:tab/></w:r>' + textRuns(noteWithCite(n, sm)), { ind: '<w:ind w:left="425" w:hanging="425"/>', after: 200 });
     });
@@ -1987,28 +2073,46 @@ async function buildDocx(set) {
 }
 const hasText = n => String(n.text || '').trim();
 function exportSet(sel) {
-  const notes = S.notes.filter(n => hasText(n) && (sel === 'all' || n.cat === sel));
-  return { notes, title: sel === 'all' ? 'Notlarım' : catName(sel), grouped: sel === 'all' && new Set(notes.map(n => n.cat)).size > 1 };
+  const notes = S.notes.filter(n => hasText(n) && (sel === 'all' || inCat(n, sel)));
+  return { notes, sel, title: sel === 'all' ? 'Notlarım' : catName(sel) };
 }
 function exportGroups(set) {
-  if (!set.grouped) return [{ name: null, notes: set.notes }];
-  return S.cats.map(c => ({ name: c.name, notes: set.notes.filter(n => n.cat === c.id) })).filter(g => g.notes.length);
+  const ns = set.notes; const out = [];
+  const block = (m, withHead) => {
+    const direct = ns.filter(n => n.cat === m.id);
+    const subs = subsOf(m.id).map(c => ({ c, notes: ns.filter(n => n.cat === c.id) })).filter(x => x.notes.length);
+    if (!direct.length && !subs.length) return;
+    const lv = withHead ? 2 : 1;
+    if (withHead) out.push({ name: m.name, level: 1, notes: subs.length ? [] : direct });
+    if (subs.length) {
+      if (direct.length) out.push({ name: 'Genel', level: lv, notes: direct });
+      subs.forEach(x => out.push({ name: x.c.name, level: lv, notes: x.notes }));
+    } else if (!withHead) out.push({ name: null, level: 0, notes: direct });
+  };
+  if (set.sel === 'all') {
+    const used = mains().filter(m => ns.some(n => inCat(n, m.id)));
+    used.forEach(m => block(m, used.length > 1));
+  } else {
+    const c = catOf(set.sel);
+    if (c && !c.parent) block(c, false); else out.push({ name: null, level: 0, notes: ns });
+  }
+  return out.length ? out : [{ name: null, level: 0, notes: ns }];
 }
 function openExport() {
   if (!S.notes.some(hasText)) { toast('Önce birkaç not ekle.'); return; }
   if (!window.JSZip) { toast('Word oluşturucu yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.', 'err'); return; }
-  const cnt = id => S.notes.filter(n => hasText(n) && n.cat === id).length;
+  const cnt = id => S.notes.filter(n => hasText(n) && inCat(n, id)).length;
   let sel = S.catView !== 'all' && cnt(S.catView) ? S.catView : 'all';
   const slug = t => t.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '-');
   modal(`<h3>Word’e aktar</h3><p class="hint">Notların sırasıyla, APA 7 metin içi atıflarıyla yazılır. Kaynakça en sonda alfabetik sıradadır ve yalnızca bu notlarda geçen makaleleri içerir.</p>
-    <label>Hangi notlar?<select id="xCat"><option value="all">Tüm kategoriler (${S.notes.filter(hasText).length})</option>${S.cats.filter(c => cnt(c.id)).map(c => `<option value="${c.id}">${esc(c.name)} (${cnt(c.id)})</option>`).join('')}</select></label>
+    <label>Hangi notlar?<select id="xCat"><option value="all">Tüm kategoriler (${S.notes.filter(hasText).length})</option>${mains().filter(m => cnt(m.id)).map(m => `<option value="${m.id}">${esc(m.name)} (${cnt(m.id)})</option>` + subsOf(m.id).filter(c => cnt(c.id)).map(c => `<option value="${c.id}">   ${esc(m.name)} › ${esc(c.name)} (${cnt(c.id)})</option>`).join('')).join('')}</select></label>
     <div class="docprev" id="xPrev"></div>
     <label>Dosya adı<input id="xName" autocapitalize="off" spellcheck="false"></label>
     <div class="mact"><button data-close>Kapat</button><button id="xShare">Paylaş</button><button class="primary" id="xDl">İndir (.docx)</button></div>`, () => {
     let ready = null, blob = null;
     const build = () => {
       const set = exportSet(sel); const sm = suffixMap(set.notes); const refs = citedPapers(set.notes);
-      $('#xPrev').innerHTML = `<h4>${esc(set.title)}</h4>` + exportGroups(set).map(g => (g.name ? `<p style="font-weight:700;margin:14px 0 8px">${esc(g.name)}</p>` : '') + g.notes.map((n, k) => `<p class="n">${k + 1}. ${esc(noteWithCite(n, sm))}</p>`).join('')).join('')
+      $('#xPrev').innerHTML = `<h4>${esc(set.title)}</h4>` + exportGroups(set).map(g => (g.name ? `<p style="font-weight:700;margin:${g.level === 1 ? '20px 0 8px;font-size:17px' : '12px 0 6px;font-style:italic'}">${esc(g.name)}</p>` : '') + g.notes.map((n, k) => `<p class="n">${k + 1}. ${esc(noteWithCite(n, sm))}</p>`).join('')).join('')
         + (refs.length ? `<h4 style="margin-top:22px">Kaynakça</h4>${refs.map(p => `<p class="refp">${refHTML(p, sm)}</p>`).join('')}` : '');
       $('#xName').value = slug(set.title) + '-' + new Date().toISOString().slice(0, 10);
       blob = null; ready = buildDocx(set).then(b => { blob = b; return b; });
