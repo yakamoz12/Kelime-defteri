@@ -16,9 +16,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{
-  --bg:#f7f7f4;--surface:#ffffff;--surface2:#eef0f2;--ink:#1b2230;--muted:#5d6675;--line:#dfe2e7;
-  --accent:#2b4c8c;--accent-soft:#e6ecf7;--on-accent:#ffffff;
-  --hl:rgba(255,222,60,.55);--trbg:#f1f5fb;--trbar:#8aa6d8;--danger:#b3261e;
+  --bg:#f4f5f2;--bg2:#fafaf8;--surface:#ffffff;--surface2:#eceef1;--ink:#1a2130;--muted:#5b6474;--line:#e1e4e8;
+  --accent:#24508f;--accent-soft:#e5ecf7;--on-accent:#ffffff;
+  --hl:#fff3bf;--trbg:#f1f5fb;--trbar:#8aa6d8;--danger:#b3261e;
   --shadow:0 12px 32px rgba(20,30,50,.14);
   --serif:"Literata",Georgia,"Times New Roman",serif;
   --sans:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
@@ -27,7 +27,7 @@
   background:var(--bg);
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#12151b;--surface:#1a1e26;--surface2:#232834;--ink:#e6e9ef;--muted:#98a1b0;--line:#2c323e;
+  --bg:#12151b;--bg2:#161a21;--surface:#1a1e26;--surface2:#232834;--ink:#e6e9ef;--muted:#98a1b0;--line:#2c323e;
   --accent:#8fb0f0;--accent-soft:#1f2a40;--on-accent:#0d1424;
   --hl:rgba(255,215,60,.26);--trbg:#182030;--trbar:#4f6fa8;--danger:#f2857b;
   --shadow:0 12px 32px rgba(0,0,0,.5);color-scheme:dark;
@@ -42,43 +42,52 @@ button.danger{color:var(--danger)}
 button:disabled{opacity:.5;cursor:default}
 button:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
-#app{height:100%;display:flex;flex-direction:column}
 
-/* Header */
-.top{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
-.brand{flex:1;min-width:0;display:flex;align-items:center;gap:10px}
-.mark{width:34px;height:34px;border-radius:9px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:18px;flex:none}
-.pname{border:0;background:none;padding:0;min-height:0;display:block;text-align:left;min-width:0;max-width:100%}
-.pname b{display:block;font-family:var(--serif);font-weight:600;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pname small{display:block;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hbtns{display:flex;gap:8px;flex:none}
-.badge{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:1px 8px;font-size:12px;font-weight:700;min-width:22px;text-align:center}
+/* Rail (left menu) */
+#app{height:100%;display:flex;flex-direction:row}
+.rail{width:88px;flex:none;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:18px 0 14px;gap:6px;z-index:25}
+.rail .mark{width:44px;height:44px;border-radius:12px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:21px;margin-bottom:16px;flex:none}
+.rail .grow{flex:1}
+.nv{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:74px;min-height:62px;padding:8px 0;border:0;border-radius:14px;background:transparent;color:var(--muted);font:600 12px var(--sans);white-space:normal;text-align:center}
+.nv svg{width:26px;height:26px}
+.nv.on{background:var(--accent-soft);color:var(--accent)}
+.nv .badge{position:absolute;top:4px;right:8px;min-width:20px;padding:1px 6px;font-size:11px}
+.nvNotes{display:none}
+.work{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
+.work[hidden]{display:none}
+.badge{background:var(--accent);color:var(--on-accent);border-radius:999px;padding:1px 8px;font-size:12px;font-weight:700;min-width:22px;text-align:center}
 
-/* Section bar */
-.secbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+/* Reader column */
+.main{flex:1;display:flex;min-height:0;position:relative}
+.readcol{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{height:76px;flex:none;display:flex;align-items:center;gap:16px;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--line)}
+.pname{flex:1;border:0;background:none;padding:0;min-height:0;display:block;text-align:left;min-width:0}
+.pname b{display:block;font-family:var(--serif);font-weight:600;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pname small{display:block;color:var(--muted);font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg{display:inline-flex;background:var(--surface2);border-radius:12px;padding:4px;flex:none}
+.seg[hidden]{display:none}
+.seg button{border:0;background:transparent;min-height:40px;padding:4px 14px;border-radius:9px;color:var(--muted);font-weight:500}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.14);font-weight:600}
+.secbar{min-height:60px;flex:none;display:flex;align-items:center;gap:10px;padding:8px 24px;background:var(--bg2);border-bottom:1px solid var(--line)}
 .secbar[hidden]{display:none}
-.chips{display:flex;gap:6px;overflow-x:auto;flex:1 1 380px;min-width:0;padding:2px;scrollbar-width:none}
+.chips{display:flex;gap:8px;overflow-x:auto;flex:1 1 auto;min-width:0;padding:2px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{border-radius:999px;min-height:38px;padding:6px 15px;background:var(--surface2);border-color:transparent}
+.chip{border-radius:999px;min-height:40px;padding:6px 16px;background:var(--surface2);border-color:transparent;flex:none}
 .chip.on{background:var(--ink);color:var(--bg);font-weight:600}
 .chip .ok{color:var(--accent);font-weight:700;margin-left:2px}
 .chip.on .ok{color:inherit}
-.ctrls{display:flex;gap:8px;align-items:center;margin-left:auto}
-.seg{display:inline-flex;background:var(--surface2);border-radius:11px;padding:3px}
-.seg button{border:0;background:transparent;min-height:36px;padding:4px 13px;border-radius:8px}
-.seg button.on{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.14);font-weight:600}
-
-/* Reader */
-.main{flex:1;display:flex;min-height:0;position:relative}
-.readcol{flex:1;min-width:0;position:relative;display:flex}
-#reader{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:30px 28px 150px}
-.article{max-width:720px;margin:0 auto}
-.sec-head{margin:0 0 24px}
+.ctrls{display:flex;gap:8px;align-items:center;flex:none}
+.ctrls .primary{min-height:44px;border-radius:12px;padding:8px 18px}
+.readbody{flex:1;min-height:0;display:flex;gap:20px;padding:20px 20px 0;position:relative}
+.paper{flex:1;min-width:0;display:flex;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0;overflow:hidden}
+#reader{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:30px 30px 120px 26px}
+.article{max-width:700px;margin:0 auto}
+.sec-head{margin:0 0 22px;padding-left:16px}
 .sec-head .orig{color:var(--muted);font-size:14px;font-style:italic;font-family:var(--serif)}
-.sec-head h2{font-family:var(--serif);font-weight:600;font-size:32px;line-height:1.2;margin:2px 0 0}
+.sec-head h2{font-family:var(--serif);font-weight:600;font-size:30px;line-height:1.2;margin:2px 0 0}
 .notice{display:flex;align-items:center;gap:12px;justify-content:space-between;background:var(--accent-soft);border-radius:12px;padding:10px 14px;margin:0 0 20px}
 .para{margin:0 0 16px}
-.blk{position:relative;margin:0 -14px;padding:6px 44px 6px 14px;border-radius:6px;font-family:var(--serif);font-size:19px;line-height:1.66;transition:background-color .25s}
+.blk{position:relative;margin:0;padding:10px 54px 10px 16px;border-radius:10px;font-family:var(--serif);font-size:18.5px;line-height:1.68;transition:background-color .25s}
 .blk p{margin:0;-webkit-hyphens:auto;hyphens:auto}
 .blk.tr{background:var(--trbg);box-shadow:inset 3px 0 0 var(--trbar);margin-top:6px}
 .blk.skipped{opacity:.5;font-size:15px}
@@ -86,61 +95,135 @@ button:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visib
 .blk.tr.noted{box-shadow:inset 3px 0 0 var(--trbar)}
 .blk.flash{animation:flash 1.6s ease-out}
 @keyframes flash{0%,55%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 3px transparent}}
-.addn{position:absolute;right:6px;top:6px;width:32px;height:32px;min-height:0;padding:0;border-radius:50%;font-size:18px;line-height:1;opacity:.5}
-.noted .addn{opacity:1;background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.addn{position:absolute;right:8px;top:10px;width:36px;height:36px;min-height:0;padding:0;border-radius:50%;font-size:18px;line-height:1;color:var(--muted)}
+.noted .addn{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 svg.ink{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 #reader.tooling .blk{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .showskip{margin:18px 0 0;color:var(--muted);background:transparent}
 
 /* Empty state */
-.empty{max-width:560px;margin:6vh auto 0;text-align:left}
-.empty h2{font-family:var(--serif);font-size:34px;font-weight:600;line-height:1.15;margin:0 0 10px}
+.empty{max-width:560px;margin:5vh auto 0;text-align:left}
+.empty h2{font-family:var(--serif);font-size:32px;font-weight:600;line-height:1.15;margin:0 0 10px}
 .empty p.lead{color:var(--muted);font-size:17px;margin:0 0 24px}
 .empty .acts{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px}
-.big{min-height:52px;padding:10px 22px;font-size:16px}
+.big{min-height:52px;padding:10px 22px;font-size:16px;border-radius:12px}
 .steps{list-style:none;padding:0;margin:0;border-top:1px solid var(--line)}
 .steps li{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);font-size:15.5px}
 .steps li span{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:14px}
 
-/* Toolbar */
-.toolbar{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:6px;border-radius:20px;background:var(--surface);background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--line);box-shadow:var(--shadow);z-index:20}
+/* Pencil palette (vertical) */
+.toolbar{width:64px;flex:none;align-self:flex-start;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:0 6px 18px rgba(20,30,50,.08);z-index:20}
 .toolbar[hidden]{display:none}
-.tool{flex-direction:column;gap:1px;min-width:60px;min-height:54px;padding:4px 8px;border:0;background:transparent;font-size:11.5px;border-radius:14px}
-.tool svg{width:23px;height:23px}
+.tool{width:52px;height:52px;min-height:0;padding:0;border:0;background:transparent;border-radius:14px;color:var(--ink)}
+.tool svg{width:24px;height:24px}
+.tool span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .tool.on{background:var(--accent);color:var(--on-accent)}
-.sw{width:28px;height:28px;min-height:0;padding:0;border-radius:50%;border:3px solid var(--surface);margin:0 2px}
+.sw{width:28px;height:28px;min-height:0;padding:0;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line);margin:2px 0}
 .sw.on{box-shadow:0 0 0 2px var(--ink)}
-.tsep{width:1px;height:32px;background:var(--line);margin:0 5px}
-.selpill{position:absolute;left:50%;transform:translateX(-50%);bottom:94px;z-index:21;box-shadow:var(--shadow)}
+.tsep{width:36px;height:1px;background:var(--line);margin:6px 0}
+.selpill{position:absolute;left:50%;transform:translateX(-50%);bottom:28px;z-index:21;box-shadow:var(--shadow);min-height:48px;border-radius:14px}
 .selpill[hidden]{display:none}
 
-/* Notes */
-.notes{width:390px;flex:none;border-left:1px solid var(--line);background:var(--bg);display:none;flex-direction:column;min-height:0}
-body.notes-open .notes{display:flex}
-.nhead{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
-.nhead h3{margin:0;flex:1;font-family:var(--serif);font-size:20px;font-weight:600}
+/* Notes column */
+.notes{width:340px;flex:none;border-left:1px solid var(--line);background:var(--bg2);display:flex;flex-direction:column;min-height:0}
+.nhead{height:76px;flex:none;display:flex;align-items:center;gap:8px;padding:0 18px;border-bottom:1px solid var(--line);background:var(--surface)}
+.nhead h3{margin:0;flex:1;font-family:var(--serif);font-size:21px;font-weight:600}
+.nhead .outline{border-color:var(--accent);color:var(--accent);font-weight:600;min-height:44px;border-radius:12px}
 #notesList{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px}
-.note{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;margin-bottom:12px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px 12px;margin-bottom:12px}
 .note-top{display:flex;align-items:center;gap:8px}
 .num{flex:none;width:24px;height:24px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-size:12px;font-weight:700}
 .src{flex:1;min-width:0;border:0;background:none;padding:0;min-height:30px;justify-content:flex-start;color:var(--accent);font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis}
 .src.free{color:var(--muted)}
-.nact button{min-height:32px;width:32px;padding:0;border:0;background:transparent;color:var(--muted)}
-.note textarea{display:block;width:100%;border:0;background:transparent;resize:none;font-family:var(--serif);font-size:16px;line-height:1.55;padding:6px 0 0;outline:none;overflow:hidden;min-height:48px}
-.cite{color:var(--muted);font-size:13px;margin-top:4px}
+.nact button{min-height:34px;width:34px;padding:0;border:0;background:transparent;color:var(--muted)}
+.note textarea{display:block;width:100%;border:0;background:transparent;resize:none;font-family:var(--serif);font-size:15.5px;line-height:1.55;padding:6px 0 0;outline:none;overflow:hidden;min-height:48px}
+.cite{color:var(--muted);font-size:12.5px;margin-top:4px}
 .empty-notes{color:var(--muted);text-align:center;padding:30px 10px;font-size:14.5px}
 .empty-notes b{color:var(--ink)}
+.nbottom{flex:none;padding:14px;border-top:1px solid var(--line);background:var(--surface)}
+.nbottom button{width:100%;min-height:52px;border-radius:14px;border:0;background:var(--ink);color:var(--bg);font-weight:600;font-size:15.5px}
 .nclose{display:none}
-@media (max-width:1050px){
-  .notes{position:fixed;top:0;right:0;bottom:0;width:min(430px,92vw);display:flex;transform:translateX(105%);transition:transform .28s ease;z-index:30;box-shadow:var(--shadow);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.catbar{min-height:60px;align-items:center}
+.catbar .chip{min-height:36px;padding:4px 13px;font-size:13.5px;font-weight:600;background:transparent;color:var(--muted)}
+.catbar .chip.on{background:var(--accent);color:var(--on-accent)}
+
+/* Archive screen */
+.arc{flex:1;min-height:0;display:flex}
+.afold{width:240px;flex:none;background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px;padding:22px 12px 16px;overflow-y:auto}
+.afold h2{margin:0 6px 16px;font-family:var(--serif);font-weight:600;font-size:26px}
+.fd{display:flex;align-items:center;justify-content:flex-start;gap:12px;width:100%;min-height:52px;padding:0 14px;border:0;border-radius:12px;background:transparent;color:var(--ink);font-size:15px;font-weight:500;text-align:left;white-space:normal}
+.fd svg{width:22px;height:22px;flex:none;color:var(--muted)}
+.fd span{flex:1}
+.fd small{font-size:13px;font-weight:600;color:var(--muted)}
+.fd.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.fd.on svg,.fd.on small{color:var(--accent)}
+.fd.ghost{color:var(--muted)}
+.astat{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:13.5px}
+.astat b{display:block;font-weight:600}
+.astat small{display:block;color:var(--muted);font-size:12px}
+.astat button{min-height:38px;padding:4px 12px;margin-left:auto;font-size:13.5px}
+.amain{flex:1;min-width:0;display:flex;flex-direction:column;padding:22px 22px 0}
+.atop{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.asearch{flex:1 1 220px;display:flex;align-items:center;gap:10px;min-height:54px;padding:0 16px;border-radius:14px;background:var(--surface);border:2px solid var(--accent);min-width:0}
+.asearch svg{flex:none;color:var(--accent)}
+.asearch input{flex:1;min-width:0;border:0;outline:none;background:transparent;font:500 17px var(--sans);color:var(--ink);padding:0;margin:0}
+.atop .primary,.atop button{min-height:54px;border-radius:14px}
+.afbar{display:none;gap:6px;overflow-x:auto;margin-top:12px;scrollbar-width:none}
+.afbar::-webkit-scrollbar{display:none}
+.afbar .chip{min-height:38px;font-size:14px}
+.afbar .chip small{opacity:.65;margin-left:4px;font-weight:600;font-size:12px}
+.afbar .astat{flex:none;padding:4px 10px}
+.alist{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:6px;padding-bottom:24px}
+.arow{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border-radius:14px;border:1px solid transparent;cursor:pointer}
+.arow.on{background:var(--surface);border-color:var(--accent-soft);box-shadow:0 4px 14px rgba(20,30,50,.06)}
+.ficon{flex:none;width:40px;height:50px;border-radius:5px 14px 5px 5px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:11px;font-weight:700}
+.ficon.none{background:var(--surface2);color:var(--muted)}
+.arname{border:0;background:none;padding:0;min-height:0;display:block;text-align:left;white-space:normal;width:100%;color:var(--ink)}
+.arname b{display:block;font-weight:600;font-size:16px;line-height:1.35;word-break:break-word}
+.arname small{display:block;color:var(--muted);font-size:13.5px;margin-top:3px;line-height:1.35;font-weight:400}
+.arow .kw{margin:10px 0 0}
+.adetail{width:320px;flex:none;background:var(--surface);border-left:1px solid var(--line);padding:22px 20px;display:flex;flex-direction:column;gap:16px;overflow-y:auto}
+.adetail h3{margin:0;font-size:17px;font-weight:600;word-break:break-word}
+.adetail .lb{font-size:12.5px;font-weight:600;color:var(--muted);margin:0 0 6px}
+.adetail .refp{margin:0}
+.agrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.agrid button,.adetail .arow2 button{min-height:46px;border-radius:12px;white-space:normal}
+.arow2{display:flex;gap:8px;margin-top:auto}
+.arow2 button{flex:1}
+.adclose{display:none}
+.aempty{color:var(--muted);font-size:14.5px;text-align:center;margin:auto 0}
+
+/* Tablet portrait and smaller */
+@media (max-width:1100px){
+  .notes{position:fixed;top:0;right:0;bottom:0;width:min(400px,92vw);transform:translateX(105%);transition:transform .28s ease;z-index:30;box-shadow:var(--shadow);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
   body.notes-open .notes{transform:none}
   .nclose{display:inline-flex}
+  .nvNotes{display:flex}
+  .afold{display:none}
+  .afbar{display:flex}
+  .adetail{position:fixed;top:0;right:0;bottom:0;width:min(380px,92vw);z-index:30;box-shadow:var(--shadow);transform:translateX(105%);transition:transform .28s ease;padding-top:calc(22px + env(safe-area-inset-top,0px))}
+  .adetail.open{transform:none}
+  .adclose{display:inline-flex;align-self:flex-end}
 }
+/* Phone */
 @media (max-width:640px){
-  .tool span{display:none}.tool{min-width:44px}
-  .hbtns .lbl{display:none}
-  #reader{padding:22px 18px 140px}
-  .blk{font-size:18px}
+  #app{flex-direction:column}
+  .rail{order:2;width:auto;flex-direction:row;justify-content:space-around;padding:4px 6px;gap:2px;border-right:0;border-top:1px solid var(--line)}
+  .rail .mark,.rail .grow{display:none}
+  .nv{flex:1;width:auto;min-height:56px;font-size:10.5px;padding:4px 0}
+  .nv svg{width:22px;height:22px}
+  .top{height:auto;min-height:64px;padding:8px 14px;flex-wrap:wrap;gap:8px}
+  .secbar{padding:8px 12px}
+  .readbody{padding:10px 10px 0;gap:0}
+  .toolbar{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);flex-direction:row;width:auto;align-self:auto}
+  .toolbar{padding:4px;gap:2px;max-width:calc(100% - 12px)}
+  .tool{width:40px;height:40px}
+  .tsep{width:1px;height:26px;margin:0 3px}
+  .sw{width:24px;height:24px;margin:0 1px}
+  .selpill{bottom:84px}
+  #reader{padding:20px 14px 140px 10px}
+  .blk{font-size:17.5px;padding-right:48px}
+  .amain{padding:14px 12px 0}
 }
 
 /* Overlay canvas, modal, busy, toast */
@@ -227,47 +310,35 @@ details.setup li{margin-bottom:6px}
 .fbar .chip{flex:none;min-height:38px;padding:4px 14px;font-size:14px}
 .fbar .chip small{opacity:.65;margin-left:4px;font-weight:600;font-size:12px}
 .fbar .chip.ghost{background:transparent;border:1px dashed var(--line);color:var(--muted)}
-.aitem{border-top:1px solid var(--line);padding:14px 0}
-.aitem:first-child{border-top:0}
-.aname{border:0;background:none;padding:0;min-height:0;display:flex;gap:12px;align-items:flex-start;justify-content:flex-start;text-align:left;white-space:normal;width:100%;border-radius:8px}
-.aname b{display:block;font-weight:600;font-size:15.5px;line-height:1.35;word-break:break-word}
-.aname small{display:block;color:var(--muted);font-size:13px;margin-top:3px;line-height:1.35}
-.ficon{flex:none;width:34px;height:42px;border-radius:5px 12px 5px 5px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:10px;font-weight:700;letter-spacing:.02em}
-.ficon.none{background:var(--surface2);color:var(--muted)}
-.aitem .kw{margin:8px 0 8px 46px}
-.aitem > .libact{margin-left:46px}
 .kw button.hit{background:var(--accent);color:var(--on-accent)}
-.adet{margin:12px 0 0 46px;padding:12px 14px;border-radius:12px;background:var(--surface2)}
-.adet .refp{margin:0 0 10px}
 .picklist label.btn{justify-content:flex-start;min-height:54px;padding:10px 16px;font-size:16.5px}
-@media (max-width:640px){.aitem .kw,.aitem > .libact,.adet{margin-left:0}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <div id="app">
-  <header class="top">
-    <div class="brand">
-      <div class="mark" aria-hidden="true">M</div>
-      <button class="pname" id="pname"><b>Makale Okuyucu</b><small>Makale seçilmedi</small></button>
-    </div>
-    <div class="hbtns">
-      <button id="bLib" title="Kütüphane"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h7"/></svg><span class="lbl">Kütüphane</span></button>
-      <button id="bArc" title="Arşiv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><path d="M10 13h4"/></svg><span class="lbl">Arşiv</span></button>
-      <label class="btn primary" for="file"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">PDF ekle</span></label>
-      <button id="bNotes"><span class="lbl">Notlar</span><span class="badge" id="noteCount">0</span></button>
-      <button id="bSet" title="Ayarlar" aria-label="Ayarlar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
-    </div>
+  <nav class="rail" aria-label="Ana menü">
+    <div class="mark" aria-hidden="true">M</div>
+    <button class="nv on" id="nRead"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg>Oku</button>
+    <button class="nv" id="bLib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h7"/></svg>Kütüphane</button>
+    <button class="nv" id="bArc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9"/><path d="M10 13h4"/></svg>Arşiv</button>
+    <label class="nv" for="file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>PDF ekle</label>
+    <button class="nv nvNotes" id="bNotes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Notlar<span class="badge" id="noteCount">0</span></button>
+    <span class="grow"></span>
+    <button class="nv" id="bSet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Ayarlar</button>
     <input type="file" id="file" class="vh" accept="application/pdf,.pdf">
     <input type="file" id="arcFile" class="vh" accept="application/pdf,.pdf" multiple>
     <input type="file" id="arcAttach" class="vh" accept="application/pdf,.pdf">
-  </header>
-  <div class="secbar" id="secbar" hidden></div>
-  <div class="main">
-    <div class="readcol">
-      <div id="reader"></div>
-      <button id="bSel" class="selpill primary" hidden>Seçimi notlara ekle</button>
-      <div class="toolbar" id="toolbar" hidden>
+  </nav>
+  <div class="work" id="readView">
+    <div class="main">
+      <div class="readcol">
+        <header class="top">
+          <button class="pname" id="pname"><b>Makale Okuyucu</b><small>Makale seçilmedi</small></button>
+          <div class="seg" id="viewSeg" role="group" aria-label="Görünüm" hidden></div>
+        </header>
+        <div class="secbar" id="secbar" hidden></div>
+        <div class="readbody">
+          <div class="toolbar" id="toolbar" role="toolbar" aria-label="Kalem araçları" hidden>
         <button class="tool on" data-tool="select" title="Seç ve kaydır"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 8-6 2-3 6z"/></svg><span>Seç</span></button>
         <button class="tool" data-tool="highlight" title="Fosforlu: paragrafı notlara ekle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l-5 5v3h3l5-5"/><path d="M14.5 4.5l5 5-7 7-5-5z"/><path d="M3 22h8" stroke-width="3"/></svg><span>Fosforlu</span></button>
         <button class="tool" data-tool="pen" title="Kalem: serbest çizim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4L8 20H4v-4z"/><path d="M14 6l4 4"/></svg><span>Kalem</span></button>
@@ -280,18 +351,23 @@ details.setup li{margin-bottom:6px}
         <span class="tsep"></span>
         <button class="tool" id="bUndo" title="Son çizimi geri al"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg><span>Geri al</span></button>
       </div>
-    </div>
-    <aside class="notes" id="notes">
-      <div class="nhead">
-        <h3>Notlar</h3>
-        <button id="bFree" title="Kendi notunu yaz">+ Not</button>
-        <button id="bExport" class="primary">Word’e aktar</button>
-        <button id="bCloseNotes" class="nclose" aria-label="Notları kapat">✕</button>
+          <div class="paper"><div id="reader"></div></div>
+          <button id="bSel" class="selpill primary" hidden>Seçimi notlara ekle</button>
+        </div>
       </div>
-      <div class="catbar" id="catbar"></div>
-      <div id="notesList"></div>
-    </aside>
+      <aside class="notes" id="notes" aria-label="Notlar">
+        <div class="nhead">
+          <h3>Notlar</h3>
+          <button id="bExport" class="outline">Word’e aktar</button>
+          <button id="bCloseNotes" class="nclose" aria-label="Notları kapat">✕</button>
+        </div>
+        <div class="catbar" id="catbar"></div>
+        <div id="notesList"></div>
+        <div class="nbottom"><button id="bFree">+ Kendi notunu yaz</button></div>
+      </aside>
+    </div>
   </div>
+  <div class="work" id="arcView" hidden></div>
 </div>
 <canvas id="ov"></canvas>
 <div class="modal" id="modal" hidden><div class="mbox" id="mbox"></div></div>
@@ -788,9 +864,9 @@ function renderHeader() {
   $('#noteCount').textContent = S.notes.length;
 }
 function renderSectionBar() {
-  const p = curPaper(); const B = $('#secbar');
-  if (!p) { B.hidden = true; return; }
-  B.hidden = false;
+  const p = curPaper(); const B = $('#secbar'); const V = $('#viewSeg');
+  if (!p) { B.hidden = true; V.hidden = true; return; }
+  B.hidden = false; V.hidden = false;
   const oldChips = B.querySelector('.chips'); const sl = oldChips ? oldChips.scrollLeft : 0;
   const chips = p.sections.map((s, k) => {
     const ids = sectionParas(p, k, false); const full = ids.length && ids.every(i => p.tr[i]);
@@ -798,7 +874,8 @@ function renderSectionBar() {
   }).join('');
   const need = sectionParas(p, S.sec, false).filter(i => !p.tr[i]).length;
   const views = { orig: 'Orijinal', tr: 'Çeviri', both: 'İkisi' };
-  B.innerHTML = `<div class="chips">${chips}</div><div class="ctrls"><div class="seg">${Object.keys(views).map(v => `<button data-view="${v}" class="${S.view === v ? 'on' : ''}">${views[v]}</button>`).join('')}</div>`
+  V.innerHTML = Object.keys(views).map(v => `<button data-view="${v}" class="${S.view === v ? 'on' : ''}">${views[v]}</button>`).join('');
+  B.innerHTML = `<div class="chips">${chips}</div><div class="ctrls">`
     + `<button class="primary" data-act="translate" ${S.translating || !need ? 'disabled' : ''}>${S.translating ? esc(S.trText) : (need ? 'Bölümü çevir' : 'Çevrildi ✓')}</button></div>`;
   B.querySelector('.chips').scrollLeft = sl;
 }
@@ -895,7 +972,7 @@ function renderAll(keepScroll) { renderHeader(); renderSectionBar(); renderReade
 
 function openPaper(id) {
   const p = S.papers[id]; if (!p) return;
-  S.cur = id; S.sec = Math.min(p.lastSec || 0, p.sections.length - 1); S.undo = [];
+  S.cur = id; S.sec = Math.min(p.lastSec || 0, p.sections.length - 1); S.undo = []; showScreen('read');
   LS.set('mo:last', id); renderAll();
 }
 
@@ -927,7 +1004,7 @@ function jumpTo(n) {
   renderSectionBar(); renderReader();
   const b = R.querySelector(`.blk[data-p="${n.para}"][data-l="${n.lang}"]`) || R.querySelector(`.blk[data-p="${n.para}"]`);
   if (b) { b.scrollIntoView({ block: 'center', behavior: 'smooth' }); b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 1700); }
-  if (innerWidth <= 1050) document.body.classList.remove('notes-open');
+  if (innerWidth <= 1100) document.body.classList.remove('notes-open');
 }
 $('#notesList').addEventListener('click', e => {
   const card = e.target.closest('.note'); if (!card) return;
@@ -993,6 +1070,17 @@ $('#secbar').addEventListener('click', e => {
   else if (a) handleAct(a.dataset.act);
 });
 $('#pname').onclick = () => { if (S.cur) openMeta(S.cur); };
+$('#viewSeg').addEventListener('click', e => {
+  const v = e.target.closest('[data-view]'); if (!v || !curPaper()) return;
+  S.view = v.dataset.view; renderSectionBar(); renderReader(true);
+});
+function showScreen(s) {
+  S.screen = s;
+  $('#readView').hidden = s !== 'read'; $('#arcView').hidden = s !== 'arc';
+  $('#nRead').classList.toggle('on', s === 'read'); $('#bArc').classList.toggle('on', s === 'arc');
+  if (s !== 'arc') ARC.onChange = null;
+}
+$('#nRead').onclick = () => { closeModal(); showScreen('read'); };
 $('#bLib').onclick = openLib;
 $('#bSet').onclick = openSettings;
 $('#bExport').onclick = openExport;
@@ -1502,7 +1590,7 @@ function openArcEditor({ item = null, meta = {}, keywords = [], file = null, fol
       const folder = $('#aFolder').value; const fname = $('#aName') ? $('#aName').value.trim() : null;
       closeModal(); busy(doUp ? 'PDF Drive’a yükleniyor…' : 'Kaydediliyor…');
       const r = await saveArcItem({ item, meta: r0.meta, keywords: r0.keywords, file: doUp ? file : null, folderId: folder, fileName: fname });
-      busy(false);
+      busy(false); arcSel = r.item.id;
       for (const p of Object.values(S.papers)) if (p.arcId === r.item.id) { p.meta = JSON.parse(JSON.stringify(r0.meta)); p.keywords = r0.keywords.slice(); savePaper(p); }
       renderHeader(); renderNotes();
       if (r.upErr) toast('Kaydedildi ama Drive’daki dosya güncellenemedi. ' + errMsg(r.upErr), 'err'); else toast(`“${folderName(r.item.folderId)}” klasörüne kaydedildi.`);
@@ -1553,107 +1641,129 @@ function editFolder(id) {
     };
   });
 }
-let arcQ = ''; const arcOpen = new Set();
+let arcQ = ''; let arcSel = null;
+const ICO = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+const FOLDER_SVG = `<svg ${ICO}><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`;
 function openArchive() {
+  closeModal(); showScreen('arc');
   if (S.arcFolder !== 'all' && !ARC.folder(S.arcFolder)) S.arcFolder = 'all';
-  modal(`<h3>Arşiv</h3>
-    <div class="status" id="aStat"></div>
-    <div class="fbar" id="aFolders"></div>
-    <div class="row wrap"><button class="primary" id="aAdd">PDF ekle</button><button id="aManual">Elle künye gir</button></div>
-    <p class="hint" id="aTarget"></p>
-    <input id="aSearch" type="search" placeholder="Anahtar kelime, dosya adı, başlık ya da yazar yaz" value="${esc(arcQ)}" autocapitalize="off" autocomplete="off" spellcheck="false">
-    <div class="kw" id="aSug"></div>
-    <p class="count" id="aCount"></p>
-    <div id="aList"></div>
-    <div class="mact"><button data-close>Kapat</button></div>`, box => {
-    const stat = () => {
-      const el = $('#aStat'); if (!el) return;
-      if (Drive.ok()) el.innerHTML = `<span class="dot on"></span><span>Drive bağlı</span><button id="aSync">Eşitle</button>`;
-      else if (S.settings.clientId && Drive.web()) el.innerHTML = `<span class="dot"></span><span>Drive bağlı değil</span><button class="primary" id="aConn">Drive’a bağlan</button>`;
-      else el.innerHTML = `<span class="dot"></span><span>Drive kurulmadı</span><button id="aSet">Ayarlar’da kur</button>`;
-    };
-    const folders = () => {
-      const cnt = id => ARC.live().filter(x => x.folderId === id).length;
-      $('#aFolders').innerHTML = `<button class="chip${S.arcFolder === 'all' ? ' on' : ''}" data-fv="all">Tümü<small>${ARC.live().length}</small></button>`
-        + ARC.liveFolders().map(f => `<button class="chip${S.arcFolder === f.id ? ' on' : ''}" data-fv="${f.id}">${esc(f.name)}<small>${cnt(f.id)}</small></button>`).join('')
-        + '<button class="chip ghost" data-fnew>+ Klasör</button>' + (S.arcFolder !== 'all' ? '<button class="chip ghost" data-fedit>Düzenle</button>' : '');
-      $('#aTarget').textContent = S.arcFolder !== 'all' ? `Eklenen PDF’ler “${folderName(S.arcFolder)}” klasörüne gider. Birden çok PDF seçebilirsin.` : 'PDF eklerken hangi klasöre gideceğini seçersin. Birden çok PDF seçebilirsin.';
-    };
-    const list = () => {
-      const q = fold(arcQ).trim(); const toks = q.split(/\s+/).filter(Boolean);
-      const scope = ARC.live().filter(x => S.arcFolder === 'all' || x.folderId === S.arcFolder);
-      const hay = x => fold([x.fileName, x.meta.title, x.meta.journal, x.meta.year, x.meta.doi, ...(x.meta.authors || []).map(a => a.family + ' ' + a.given), ...(x.keywords || [])].join(' | '));
-      const kwHit = k => toks.length && toks.some(t => fold(k).includes(t));
-      const hits = x => (x.keywords || []).filter(kwHit).length;
-      const items = scope.filter(x => toks.every(t => hay(x).includes(t)))
-        .sort((a, b) => (hits(b) - hits(a)) || dispName(a).localeCompare(dispName(b), 'tr', { numeric: true }));
-      const freq = new Map(); for (const x of scope) for (const k of (x.keywords || [])) { const f = fold(k); const e = freq.get(f) || { k, n: 0 }; e.n++; freq.set(f, e); }
-      const sug = [...freq.values()].filter(e => !q || (fold(e.k).includes(q) && fold(e.k) !== q)).sort((a, b) => b.n - a.n).slice(0, q ? 12 : 14);
-      $('#aSug').innerHTML = sug.map(e => `<button data-kw="${esc(e.k)}">${esc(e.k)} (${e.n})</button>`).join('');
-      $('#aCount').textContent = scope.length ? (q ? `${items.length} makale bulundu` : `${scope.length} makale`) : '';
-      const reading = new Set(Object.values(S.papers).map(p => p.arcId).filter(Boolean));
-      $('#aList').innerHTML = items.length ? items.map(x => {
-        const m = x.meta || {}; const open = arcOpen.has(x.id);
-        const sub = [inText(asPaper(x), {}), m.journal, S.arcFolder === 'all' ? 'Klasör: ' + folderName(x.folderId) : '', reading.has(x.id) ? 'kütüphanende' : ''].filter(Boolean).join(', ');
-        return `<div class="aitem" data-aid="${esc(x.id)}">
-          <button class="aname" data-atoggle><span class="ficon${x.fileId ? '' : ' none'}">${x.fileId ? 'PDF' : 'YOK'}</span><span><b>${esc(dispName(x))}</b><small>${esc(sub)}</small></span></button>
-          <div class="kw">${(x.keywords || []).map(k => `<button data-kw="${esc(k)}" class="${kwHit(k) ? 'hit' : ''}">${esc(k)}</button>`).join('')}</div>
-          <div class="libact">${x.fileId ? '<button data-aopen>PDF’i aç</button><button data-aread>Okumaya aç</button>' : '<button data-aattach>PDF ekle</button>'}<button data-atoggle>${open ? 'Künyeyi gizle' : 'Künye'}</button></div>
-          ${open ? `<div class="adet"><p class="refp">${refHTML(asPaper(x), {})}</p><div class="libact"><button data-acopy>APA kopyala</button><button data-aedit>Düzenle</button><button data-amove>Taşı</button><button class="danger" data-adel>Sil</button></div></div>` : ''}
-        </div>`;
-      }).join('') : `<p class="hint">${scope.length ? 'Bu kelimeyle eşleşen makale yok.' : (ARC.live().length ? 'Bu klasör boş.' : 'Arşiv boş. Eski makalelerinin PDF’lerini ekleyerek başla.')}</p>`;
-    };
-    const all = () => { stat(); folders(); list(); };
-    all();
-    ARC.onChange = () => { if ($('#aList')) all(); else ARC.onChange = null; };
-    $('#aSearch').addEventListener('input', e => { arcQ = e.target.value; list(); });
-    box.addEventListener('click', async e => {
-      const t = e.target;
-      if (t.closest('#aConn')) { Drive.connect('archive'); return; }
-      if (t.closest('#aSet')) { openSettings('drive'); return; }
-      if (t.closest('#aSync')) { const b = t.closest('#aSync'); b.disabled = true; b.textContent = 'Eşitleniyor…'; const ok = await ARC.sync(false); if (ok) toast('Arşiv Drive ile eşitlendi.'); all(); return; }
-      if (t.closest('#aManual')) { openArcEditor({}); return; }
-      if (t.closest('#aAdd')) {
-        if (S.arcFolder !== 'all') { S.arcTarget = S.arcFolder; $('#arcFile').click(); return; }
-        modal(`<h3>PDF’ler hangi klasöre gitsin?</h3><div class="picklist">${ARC.liveFolders().map(f => `<label class="btn" for="arcFile" data-tg="${f.id}"><span>${esc(f.name)}</span></label>`).join('')}</div>
-          <div class="newcat"><input id="tgNew" placeholder="Yeni klasör adı" autocomplete="off"><button id="tgAdd">Oluştur</button></div>
-          <div class="mact"><button id="tgBack">Vazgeç</button></div>`, b2 => {
-          b2.querySelector('.picklist').addEventListener('click', ev => { const l = ev.target.closest('[data-tg]'); if (l) S.arcTarget = l.dataset.tg; });
-          $('#tgAdd').onclick = () => { const v = $('#tgNew').value.trim(); if (!v) return; const f = newFolder(v); S.arcFolder = f.id; LS.set('mo:arcFolder', f.id); openArchive(); toast(`“${f.name}” klasörü oluşturuldu. Şimdi PDF ekle’ye dokun.`); };
-          $('#tgBack').onclick = () => openArchive();
-        });
-        return;
-      }
-      const fv = t.closest('[data-fv]'); if (fv) { S.arcFolder = fv.dataset.fv; LS.set('mo:arcFolder', S.arcFolder); folders(); list(); return; }
-      if (t.closest('[data-fnew]')) { const n = (prompt('Yeni klasörün adı (ör. Doktora makaleleri)') || '').trim(); if (n) { const f = newFolder(n); S.arcFolder = f.id; LS.set('mo:arcFolder', f.id); folders(); list(); toast(`“${f.name}” klasörü oluşturuldu.`); } return; }
-      if (t.closest('[data-fedit]')) { editFolder(S.arcFolder); return; }
-      const kw = t.closest('[data-kw]'); if (kw) { arcQ = kw.dataset.kw; $('#aSearch').value = arcQ; list(); return; }
-      const card = t.closest('[data-aid]'); if (!card) return;
-      const x = ARC.get(card.dataset.aid); if (!x) return;
-      if (t.closest('[data-atoggle]')) { arcOpen.has(x.id) ? arcOpen.delete(x.id) : arcOpen.add(x.id); list(); }
-      else if (t.closest('[data-aopen]')) window.open(`https://drive.google.com/file/d/${encodeURIComponent(x.fileId)}/view`, '_blank', 'noopener');
-      else if (t.closest('[data-acopy]')) copyRef(x);
-      else if (t.closest('[data-aedit]')) openArcEditor({ item: x, meta: x.meta, keywords: x.keywords });
-      else if (t.closest('[data-aread]')) readFromArchive(x);
-      else if (t.closest('[data-amove]')) pickFolder({ title: 'Hangi klasöre taşınsın?', current: x.folderId, sub: dispName(x) }, async fid => {
-        busy('Taşınıyor…'); const r = await saveArcItem({ item: x, meta: x.meta, keywords: x.keywords, folderId: fid }); busy(false);
-        if (r.upErr) toast('Arşivde taşındı ama Drive’daki PDF taşınamadı. ' + errMsg(r.upErr), 'err'); else toast(`“${folderName(fid)}” klasörüne taşındı.`);
-        openArchive();
+  const old = $('#arcView'); const box = old.cloneNode(false); old.replaceWith(box); box.hidden = false;
+  box.innerHTML = `<div class="arc">
+    <section class="afold" aria-label="Klasörler"><h2>Arşiv</h2><div id="aFolders"></div><span style="flex:1"></span><div class="astat" id="aStat"></div></section>
+    <div class="amain">
+      <div class="atop">
+        <label class="asearch"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          <input id="aSearch" type="search" aria-label="Arşivde ara" placeholder="Anahtar kelime, dosya adı, yazar…" value="${esc(arcQ)}" autocapitalize="off" autocomplete="off" spellcheck="false"></label>
+        <button class="primary" id="aAdd">+ PDF ekle</button>
+        <button id="aManual">Elle künye gir</button>
+      </div>
+      <div class="afbar" id="aFbar"></div>
+      <div class="kw" id="aSug" style="margin:12px 0 4px"></div>
+      <p class="count" id="aCount" style="margin:6px 4px 10px"></p>
+      <div class="alist" id="aList"></div>
+    </div>
+    <aside class="adetail" id="aDetail" aria-label="Seçili makale"></aside>
+  </div>`;
+  const cnt = id => ARC.live().filter(x => x.folderId === id).length;
+  const statHTML = () => Drive.ok()
+    ? `<span class="dot on"></span><span><b>Drive bağlı</b><small>Klasörler Drive ile eşit</small></span><button id="aSync">Eşitle</button>`
+    : (S.settings.clientId && Drive.web()
+      ? `<span class="dot"></span><span><b>Drive bağlı değil</b></span><button class="primary" id="aConn">Bağlan</button>`
+      : `<span class="dot"></span><span><b>Drive kurulmadı</b></span><button id="aSet">Kur</button>`);
+  const stat = () => { $('#aStat').innerHTML = statHTML(); };
+  const folders = () => {
+    $('#aFolders').innerHTML = `<button class="fd${S.arcFolder === 'all' ? ' on' : ''}" data-fv="all"><svg ${ICO}><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9"/></svg><span>Tümü</span><small>${ARC.live().length}</small></button>`
+      + ARC.liveFolders().map(f => `<button class="fd${S.arcFolder === f.id ? ' on' : ''}" data-fv="${f.id}">${FOLDER_SVG}<span>${esc(f.name)}</span><small>${cnt(f.id)}</small></button>`).join('')
+      + `<button class="fd ghost" data-fnew><svg ${ICO}><path d="M12 5v14M5 12h14"/></svg><span>Yeni klasör</span></button>`
+      + (S.arcFolder !== 'all' ? `<button class="fd ghost" data-fedit><svg ${ICO}><path d="M17 3l4 4L8 20H4v-4z"/></svg><span>Klasörü düzenle</span></button>` : '');
+    $('#aFbar').innerHTML = `<button class="chip${S.arcFolder === 'all' ? ' on' : ''}" data-fv="all">Tümü<small>${ARC.live().length}</small></button>`
+      + ARC.liveFolders().map(f => `<button class="chip${S.arcFolder === f.id ? ' on' : ''}" data-fv="${f.id}">${esc(f.name)}<small>${cnt(f.id)}</small></button>`).join('')
+      + '<button class="chip ghost" data-fnew>+ Klasör</button>' + (S.arcFolder !== 'all' ? '<button class="chip ghost" data-fedit>Düzenle</button>' : '')
+      + `<div class="astat">${statHTML()}</div>`;
+  };
+  const detail = (open) => {
+    const D = $('#aDetail'); const x = arcSel ? ARC.get(arcSel) : null;
+    if (!x) { arcSel = null; D.classList.remove('open'); D.innerHTML = '<p class="aempty">Ayrıntılarını görmek için bir makaleye dokun.</p>'; return; }
+    const reading = Object.values(S.papers).some(p => p.arcId === x.id);
+    D.innerHTML = `<button class="adclose" data-aclose aria-label="Kapat">✕</button>
+      <div><h3>${esc(dispName(x))}</h3><p class="count" style="margin-top:4px">${esc(folderName(x.folderId))}${x.fileId ? '' : ', PDF yok'}${reading ? ', kütüphanende' : ''}</p></div>
+      <div><p class="lb">Künye (APA 7)</p><p class="refp">${refHTML(asPaper(x), {})}</p></div>
+      ${(x.keywords || []).length ? `<div><p class="lb">Anahtar kelimeler</p><div class="kw" style="margin:0">${x.keywords.map(k => `<button data-kw="${esc(k)}">${esc(k)}</button>`).join('')}</div></div>` : ''}
+      <div class="agrid" data-aid="${esc(x.id)}">${x.fileId ? '<button class="primary" data-aread>Okumaya aç</button><button data-aopen>PDF’i aç</button>' : '<button class="primary" data-aattach>PDF ekle</button>'}<button data-acopy>APA kopyala</button><button data-aedit>Düzenle</button></div>
+      <div class="arow2" data-aid="${esc(x.id)}"><button data-amove>Taşı</button><button class="danger" data-adel>Sil</button></div>`;
+    if (open) D.classList.add('open');
+  };
+  const list = () => {
+    const q = fold(arcQ).trim(); const toks = q.split(/\s+/).filter(Boolean);
+    const scope = ARC.live().filter(x => S.arcFolder === 'all' || x.folderId === S.arcFolder);
+    const hay = x => fold([x.fileName, x.meta.title, x.meta.journal, x.meta.year, x.meta.doi, ...(x.meta.authors || []).map(a => a.family + ' ' + a.given), ...(x.keywords || [])].join(' | '));
+    const kwHit = k => toks.length && toks.some(t => fold(k).includes(t));
+    const hits = x => (x.keywords || []).filter(kwHit).length;
+    const items = scope.filter(x => toks.every(t => hay(x).includes(t)))
+      .sort((a, b) => (hits(b) - hits(a)) || dispName(a).localeCompare(dispName(b), 'tr', { numeric: true }));
+    const freq = new Map(); for (const x of scope) for (const k of (x.keywords || [])) { const f = fold(k); const e = freq.get(f) || { k, n: 0 }; e.n++; freq.set(f, e); }
+    const sug = [...freq.values()].filter(e => !q || (fold(e.k).includes(q) && fold(e.k) !== q)).sort((a, b) => b.n - a.n).slice(0, q ? 12 : 14);
+    $('#aSug').innerHTML = sug.map(e => `<button data-kw="${esc(e.k)}">${esc(e.k)} (${e.n})</button>`).join('');
+    const where = S.arcFolder === 'all' ? 'Arşivde' : `“${folderName(S.arcFolder)}” içinde`;
+    $('#aCount').textContent = scope.length ? (q ? `${where} ${items.length} makale bulundu` : `${where} ${scope.length} makale`) : '';
+    $('#aList').innerHTML = items.length ? items.map(x => {
+      const m = x.meta || {};
+      const sub = [inText(asPaper(x), {}), m.journal, S.arcFolder === 'all' ? folderName(x.folderId) : ''].filter(Boolean).join(', ');
+      return `<div class="arow${x.id === arcSel ? ' on' : ''}" data-arow="${esc(x.id)}"><span class="ficon${x.fileId ? '' : ' none'}" aria-hidden="true">${x.fileId ? 'PDF' : 'YOK'}</span>
+        <div style="flex:1;min-width:0"><button class="arname" data-asel><b>${esc(dispName(x))}</b><small>${esc(sub)}</small></button>
+        <div class="kw">${(x.keywords || []).map(k => `<button data-kw="${esc(k)}" class="${kwHit(k) ? 'hit' : ''}">${esc(k)}</button>`).join('')}</div></div></div>`;
+    }).join('') : `<p class="hint" style="padding:0 4px">${scope.length ? 'Bu kelimeyle eşleşen makale yok.' : (ARC.live().length ? 'Bu klasör boş. PDF ekle ile başla.' : 'Arşiv boş. Eski makalelerinin PDF’lerini ekleyerek başla.')}</p>`;
+  };
+  const all = () => { stat(); folders(); list(); detail(false); };
+  all();
+  ARC.onChange = () => { if (S.screen === 'arc' && $('#aList')) all(); };
+  $('#aSearch').addEventListener('input', e => { arcQ = e.target.value; list(); });
+  box.addEventListener('click', async e => {
+    const t = e.target;
+    if (t.closest('#aConn')) { Drive.connect('archive'); return; }
+    if (t.closest('#aSet')) { openSettings('drive'); return; }
+    if (t.closest('#aSync')) { const b = t.closest('#aSync'); b.disabled = true; b.textContent = 'Eşitleniyor…'; const ok = await ARC.sync(false); if (ok) toast('Arşiv Drive ile eşitlendi.'); all(); return; }
+    if (t.closest('#aManual')) { openArcEditor({}); return; }
+    if (t.closest('[data-aclose]')) { $('#aDetail').classList.remove('open'); return; }
+    if (t.closest('#aAdd')) {
+      if (S.arcFolder !== 'all') { S.arcTarget = S.arcFolder; $('#arcFile').click(); return; }
+      modal(`<h3>PDF’ler hangi klasöre gitsin?</h3><div class="picklist">${ARC.liveFolders().map(f => `<label class="btn" for="arcFile" data-tg="${f.id}"><span>${esc(f.name)}</span></label>`).join('')}</div>
+        <div class="newcat"><input id="tgNew" placeholder="Yeni klasör adı" autocomplete="off"><button id="tgAdd">Oluştur</button></div>
+        <div class="mact"><button data-close>Vazgeç</button></div>`, b2 => {
+        b2.querySelector('.picklist').addEventListener('click', ev => { const l = ev.target.closest('[data-tg]'); if (l) S.arcTarget = l.dataset.tg; });
+        $('#tgAdd').onclick = () => { const v = $('#tgNew').value.trim(); if (!v) return; const f = newFolder(v); S.arcFolder = f.id; LS.set('mo:arcFolder', f.id); openArchive(); toast(`“${f.name}” klasörü oluşturuldu. Şimdi PDF ekle’ye dokun.`); };
       });
-      else if (t.closest('[data-aattach]')) {
-        if (!Drive.ok()) { toast('PDF eklemek için önce Drive’a bağlan.', '', S.settings.clientId ? { label: 'Bağlan', fn: () => Drive.connect('archive') } : null); return; }
-        S.attachFor = x.id; $('#arcAttach').click();
-      } else if (t.closest('[data-adel]')) {
-        if (!confirm(x.fileId ? 'Bu kayıt arşivden silinecek, PDF de Drive’da çöp kutusuna taşınacak. Emin misin?' : 'Bu kayıt arşivden silinecek. Emin misin?')) return;
-        if (x.fileId) {
-          if (Drive.ok()) { try { await Drive.patch(x.fileId, { trashed: true }); } catch { toast('PDF Drive’dan silinemedi, Drive’dan elle silebilirsin.', 'err'); } }
-          else toast('Drive bağlı değil. PDF Drive’da duruyor, oradan silebilirsin.');
-        }
-        const k = ARC.items.indexOf(x); ARC.items[k] = { id: x.id, deleted: true, updated: Date.now() }; ARC.touch();
-        for (const p of Object.values(S.papers)) if (p.arcId === x.id) { delete p.arcId; savePaper(p); }
-        all();
-      }
+      return;
+    }
+    const fv = t.closest('[data-fv]'); if (fv) { S.arcFolder = fv.dataset.fv; LS.set('mo:arcFolder', S.arcFolder); folders(); list(); return; }
+    if (t.closest('[data-fnew]')) { const n = (prompt('Yeni klasörün adı (ör. Doktora makaleleri)') || '').trim(); if (n) { const f = newFolder(n); S.arcFolder = f.id; LS.set('mo:arcFolder', f.id); folders(); list(); toast(`“${f.name}” klasörü oluşturuldu.`); } return; }
+    if (t.closest('[data-fedit]')) { editFolder(S.arcFolder); return; }
+    const kw = t.closest('[data-kw]'); if (kw) { arcQ = kw.dataset.kw; $('#aSearch').value = arcQ; list(); $('#aDetail').classList.remove('open'); return; }
+    const row = t.closest('[data-arow]'); if (row) { arcSel = row.dataset.arow; $$('.arow', box).forEach(r => r.classList.toggle('on', r === row)); detail(true); return; }
+    const card = t.closest('[data-aid]'); if (!card) return;
+    const x = ARC.get(card.dataset.aid); if (!x) return;
+    if (t.closest('[data-aopen]')) window.open(`https://drive.google.com/file/d/${encodeURIComponent(x.fileId)}/view`, '_blank', 'noopener');
+    else if (t.closest('[data-acopy]')) copyRef(x);
+    else if (t.closest('[data-aedit]')) openArcEditor({ item: x, meta: x.meta, keywords: x.keywords });
+    else if (t.closest('[data-aread]')) readFromArchive(x);
+    else if (t.closest('[data-amove]')) pickFolder({ title: 'Hangi klasöre taşınsın?', current: x.folderId, sub: dispName(x) }, async fid => {
+      closeModal(); busy('Taşınıyor…'); const r = await saveArcItem({ item: x, meta: x.meta, keywords: x.keywords, folderId: fid }); busy(false);
+      if (r.upErr) toast('Arşivde taşındı ama Drive’daki PDF taşınamadı. ' + errMsg(r.upErr), 'err'); else toast(`“${folderName(fid)}” klasörüne taşındı.`);
+      openArchive();
     });
+    else if (t.closest('[data-aattach]')) {
+      if (!Drive.ok()) { toast('PDF eklemek için önce Drive’a bağlan.', '', S.settings.clientId ? { label: 'Bağlan', fn: () => Drive.connect('archive') } : null); return; }
+      S.attachFor = x.id; $('#arcAttach').click();
+    } else if (t.closest('[data-adel]')) {
+      if (!confirm(x.fileId ? 'Bu kayıt arşivden silinecek, PDF de Drive’da çöp kutusuna taşınacak. Emin misin?' : 'Bu kayıt arşivden silinecek. Emin misin?')) return;
+      if (x.fileId) {
+        if (Drive.ok()) { try { await Drive.patch(x.fileId, { trashed: true }); } catch { toast('PDF Drive’dan silinemedi, Drive’dan elle silebilirsin.', 'err'); } }
+        else toast('Drive bağlı değil. PDF Drive’da duruyor, oradan silebilirsin.');
+      }
+      const k = ARC.items.indexOf(x); ARC.items[k] = { id: x.id, deleted: true, updated: Date.now() }; ARC.touch();
+      for (const p of Object.values(S.papers)) if (p.arcId === x.id) { delete p.arcId; savePaper(p); }
+      arcSel = null; all();
+    }
   });
 }
 async function readFromArchive(x) {
@@ -1934,7 +2044,6 @@ async function init() {
     DB.db = null; toast('Tarayıcı depolaması kullanılamıyor. Veriler kaydedilmeyecek.', 'err');
   }
   fixNotes(); saveCats(); ARC.fix();
-  if (innerWidth > 1050) document.body.classList.add('notes-open');
   resizeOv();
   const last = LS.get('mo:last', null);
   if (last && S.papers[last]) openPaper(last); else renderAll();
