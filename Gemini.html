@@ -169,6 +169,20 @@ svg.ink{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointe
 .dots{display:inline-flex;gap:4px}
 .dots i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:dot 1s infinite ease-in-out}
 .dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+mark.qm{background:rgba(36,80,143,.10);color:inherit;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2.5px;text-underline-offset:4px;border-radius:3px;padding:1px 0}
+.qdot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-left:6px;display:inline-block}
+.chip.on .qdot{background:var(--on-accent)}
+.abub.act{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.aintro{font-size:13.5px;font-weight:600;color:var(--muted);margin-bottom:8px}
+.qitem{padding:10px 0;border-top:1px solid var(--line)}
+.qitem:first-of-type{border-top:0;padding-top:2px}
+.qitem blockquote{margin:0;font-family:var(--serif);font-size:15.5px;line-height:1.55;border-left:3px solid var(--accent);padding-left:10px}
+.qitem.nf blockquote{border-left-color:var(--danger)}
+.qmeta{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--muted)}
+.qwarn{color:var(--danger);font-weight:600}
+.qadd{min-height:32px;padding:2px 10px;font-size:12.5px;border-radius:9px}
+.qnote{margin-top:6px;font-size:13.5px;color:var(--muted)}
+.asum{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
 @keyframes dot{0%,80%,100%{opacity:.25}40%{opacity:1}}
 .catbar{min-height:60px;flex-direction:column;align-items:stretch;gap:6px;overflow:visible}
 .crow{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;align-items:center}
@@ -925,7 +939,7 @@ function blk(p, i, l, text, skipped) {
   const noted = isNoted(p, i, l);
   return `<div class="blk${l === 't' ? ' tr' : ''}${noted ? ' noted' : ''}${skipped ? ' skipped' : ''}" data-p="${i}" data-l="${l}">`
     + `<button class="addn" data-add aria-label="${noted ? 'Nottan çıkar' : 'Notlara ekle'}">${noted ? '✓' : '+'}</button>`
-    + `<p>${esc(text)}</p><svg class="ink" viewBox="0 0 1000 1000" preserveAspectRatio="none">${inkPaths(p, i + ':' + l)}</svg></div>`;
+    + `<p>${l === 'o' ? markText(text, (activeMarks(p) || {})[i]) : esc(text)}</p><svg class="ink" viewBox="0 0 1000 1000" preserveAspectRatio="none">${inkPaths(p, i + ':' + l)}</svg></div>`;
 }
 function emptyState() {
   const hasKey = !!S.settings.key; const hasPapers = Object.keys(S.papers).length > 0;
@@ -996,7 +1010,8 @@ function renderSectionBar() {
   const oldChips = B.querySelector('.chips'); const sl = oldChips ? oldChips.scrollLeft : 0;
   const chips = p.sections.map((s, k) => {
     const ids = sectionParas(p, k, false); const full = ids.length && ids.every(i => p.tr[i]);
-    return `<button class="chip${k === S.sec ? ' on' : ''}" data-sec="${k}">${esc(s.title)}${full ? '<span class="ok">✓</span>' : ''}</button>`;
+    const mk = Object.keys(activeMarks(p)).some(i => +i >= s.start && +i <= s.end);
+    return `<button class="chip${k === S.sec ? ' on' : ''}" data-sec="${k}">${esc(s.title)}${full ? '<span class="ok">✓</span>' : ''}${mk ? '<span class="qdot" aria-label="alıntı var"></span>' : ''}</button>`;
   }).join('');
   const trPaper = p.lang === 'tr';
   if (trPaper) S.view = 'orig';
@@ -2022,14 +2037,47 @@ $('#arcAttach').addEventListener('change', async e => {
 $('#bArc').onclick = () => openArchive();
 
 /* ---------- ask the paper ---------- */
-const ASK_SUGGEST = ['Makalenin amacı ve ana bulguları neler?', 'Yöntemi ve örneklemi özetle', 'Sınırlılıklar ve öneriler neler?', 'Hangi kuramlara ve kavramlara dayanıyor?'];
+const ASK_SUGGEST = ['Makalenin amacı ve ana bulguları neler?', 'Yöntemi ve örneklemi anlatan cümleler', 'Sınırlılıklar ve öneriler neler?', 'Hangi kuramlara ve kavramlara dayanıyor?'];
 let askBusy = false;
+S.qk = LS.get('mo:qk', {}) || {};
 function setPane(which) {
   S.pane = which;
   $('#notesPane').hidden = which !== 'notes'; $('#askPane').hidden = which !== 'ask';
   $('#bExport').hidden = which !== 'notes';
   $$('#paneTabs button').forEach(b => b.classList.toggle('on', b.dataset.pane === which));
   if (which === 'ask') renderAsk();
+}
+/* Find a quote inside a paragraph even if spacing or punctuation differs slightly. */
+function normMap(s) {
+  let n = ''; const map = [];
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i].toLocaleLowerCase('tr');
+    if (/[\p{L}\p{N}]/u.test(c)) { n += c; map.push(i); }
+    else if (n && n[n.length - 1] !== ' ') { n += ' '; map.push(i); }
+  }
+  return { n, map };
+}
+function findQuote(para, quote) {
+  const P = normMap(para), Q = normMap(quote); const q = Q.n.trim(); if (q.length < 8) return null;
+  const toRange = (a, b) => { const s = P.map[a], e = P.map[Math.min(b, P.map.length) - 1]; return s === undefined || e === undefined ? null : [s, e + 1]; };
+  let k = P.n.indexOf(q); if (k >= 0) return { r: toRange(k, k + q.length), exact: true };
+  const w = q.split(' '); if (w.length < 8) return null;
+  const head = w.slice(0, 5).join(' '), tail = w.slice(-5).join(' ');
+  const a = P.n.indexOf(head); if (a < 0) return null;
+  const b = P.n.indexOf(tail, a + head.length); if (b < 0) return null;
+  const end = b + tail.length; if (end - a > q.length * 1.6) return null;
+  return { r: toRange(a, end), exact: false };
+}
+function activeMarks(p) {
+  const k = S.qk[p.id]; const m = k !== undefined && p.chat && p.chat[k]; if (!m || !m.r) return {};
+  const out = {}; for (const it of m.r.items) if (it.r) (out[it.p] = out[it.p] || []).push(it.r);
+  return out;
+}
+function markText(text, ranges) {
+  if (!ranges || !ranges.length) return esc(text);
+  const rs = ranges.slice().sort((a, b) => a[0] - b[0]); let h = '', pos = 0;
+  for (const [s, e] of rs) { if (s < pos) continue; h += esc(text.slice(pos, s)) + `<mark class="qm">${esc(text.slice(s, e))}</mark>`; pos = e; }
+  return h + esc(text.slice(pos));
 }
 function askText(s) {
   const p = curPaper();
@@ -2039,51 +2087,76 @@ function askText(s) {
   });
 }
 function renderAsk() {
+  LS.set('mo:qk', S.qk);
   const L = $('#askLog'); const p = curPaper();
   $('#askQ').disabled = !p; $('#askGo').disabled = !p || askBusy;
   if (!p) { L.innerHTML = '<div class="empty-notes">Soru sormak için önce bir makale aç.</div>'; return; }
-  const chat = p.chat || [];
-  let h = chat.length ? '<div class="askbar"><button class="link" data-askclear>Sohbeti temizle</button></div>' : `<div class="askintro"><b>Makaleye sor</b><p>Bu makale hakkında ne merak ediyorsan yaz. Örneğin “Kabul ve kararlılık terapisi hakkında neler yazıyor?” ya da “Yalnızlıkla ilgili bulgular neler?”. Cevaplar yalnızca bu makaleye dayanır, ¶ işaretine dokununca ilgili paragrafa gidersin.</p></div>
+  const chat = p.chat || []; const act = S.qk[p.id];
+  let h = chat.length ? `<div class="askbar">${act !== undefined ? '<button class="link" data-qoff>Metindeki çizgileri kaldır</button>' : ''}<button class="link" data-askclear>Sohbeti temizle</button></div>`
+    : `<div class="askintro"><b>Makaleye sor</b><p>Bir konu yaz, örneğin “Kabul ve kararlılık terapisiyle ilgili cümleler” ya da “Yalnızlıkla ilgili neler yazıyor?”. Cevapta makaledeki cümleler <b>olduğu gibi</b> gelir ve soldaki metinde altları çizilir. ¶ işaretine dokununca o cümleye gidersin.</p></div>
     <div class="asksug">${ASK_SUGGEST.map(s => `<button data-sug="${esc(s)}">${esc(s)}</button>`).join('')}</div>`;
   chat.forEach((m, k) => {
     h += `<div class="qbub">${esc(m.q)}</div>`;
-    h += `<div class="abub${m.err ? ' err' : ''}" data-k="${k}"><div class="atext">${askText(m.a)}</div>`
-      + (m.err ? '' : `<div class="aact"><button data-anote>Notlara ekle</button><button data-acp>Kopyala</button></div>`) + '</div>';
+    if (m.err) { h += `<div class="abub err">${esc(m.a)}</div>`; return; }
+    if (!m.r) { h += `<div class="abub" data-k="${k}"><div class="atext">${askText(m.a)}</div><div class="aact"><button data-anote>Notlara ekle</button><button data-acp>Kopyala</button></div></div>`; return; }
+    const its = m.r.items;
+    h += `<div class="abub${act === k ? ' act' : ''}" data-k="${k}">${m.r.intro ? `<div class="aintro">${esc(m.r.intro)}</div>` : ''}`
+      + its.map((it, j) => `<div class="qitem${it.r ? '' : ' nf'}" data-j="${j}"><blockquote>“${esc(it.quote)}”</blockquote>
+          <div class="qmeta"><button class="pref" data-ref="${it.p}" aria-label="Paragraf ${it.p + 1}e git">¶${it.p + 1}</button>${it.sec ? `<span>${esc(it.sec)}</span>` : ''}${it.r ? (it.exact ? '' : '<span class="qwarn">yakın eşleşme</span>') : '<span class="qwarn">metinde birebir bulunamadı</span>'}<span style="flex:1"></span>${it.r ? '<button class="qadd" data-qnote aria-label="Bu alıntıyı notlara ekle">+ Not</button>' : ''}</div>
+          ${it.note ? `<div class="qnote">${esc(it.note)}</div>` : ''}</div>`).join('')
+      + (m.r.summary ? `<div class="asum"><div class="aintro">Özet</div><div class="atext">${askText(m.r.summary)}</div></div>` : '')
+      + `<div class="aact">${its.length ? `<button data-qall>Tümünü notlara ekle</button>${act === k ? '' : '<button data-qshow>Metinde göster</button>'}` : ''}<button data-acp>Kopyala</button></div></div>`;
   });
-  if (askBusy) h += `<div class="abub wait"><span class="dots"><i></i><i></i><i></i></span>Makale okunuyor…</div>`;
+  if (askBusy) h += `<div class="abub wait"><span class="dots"><i></i><i></i><i></i></span><span>Makale okunuyor…</span></div>`;
   L.innerHTML = h; L.scrollTop = L.scrollHeight;
 }
+function refreshMarks() { renderReader(true); renderSectionBar(); }
 async function askPaper(q) {
   const p = curPaper(); q = String(q || '').trim(); if (!p || !q || askBusy) return;
   if (!S.settings.key) { openSettings(); toast('Önce Gemini API anahtarını ekle.', 'err'); return; }
   const sk = new Set(p.skip || []);
   let body = ''; for (let i = 0; i < p.paras.length; i++) { if (sk.has(i)) continue; const s = secOf(p, i); body += `[${i}]${s ? ' (' + s.title + ')' : ''} ${p.paras[i].t}\n`; }
   if (body.length > 600000) body = body.slice(0, 600000);
-  const hist = (p.chat || []).filter(m => !m.err).slice(-4).map(m => `Soru: ${m.q}\nCevap: ${m.a}`).join('\n\n');
-  const prompt = `Sen bir akademik okuma asistanısın. Aşağıda bir makalenin numaralandırılmış paragrafları var. Kullanıcının sorusunu YALNIZCA bu makalede yazanlara dayanarak Türkçe cevapla.
+  const hist = (p.chat || []).filter(m => !m.err).slice(-3).map(m => `Soru: ${m.q}\nBulunan paragraflar: ${m.r ? m.r.items.map(it => it.p).join(', ') : m.a.slice(0, 300)}`).join('\n');
+  const prompt = `Sen bir akademik okuma asistanısın. Aşağıda bir makalenin numaralandırılmış paragrafları var. Kullanıcının sorusuyla ilgili makalede GEÇEN cümleleri bul.
 Kurallar:
-- Makalede geçen ilgili bilgileri topla ve düzenli yaz; gerekirse "- " ile başlayan maddeler kullan, önemli kavramları **kalın** yaz.
-- Her bilginin sonuna dayandığı paragraf numarasını köşeli parantezle ekle, ör. [12] ya da [12, 15].
-- Makalede olmayan bir bilgiyi ekleme, tahmin yürütme. Konu makalede hiç geçmiyorsa bunu açıkça söyle ve varsa en yakın ilgili kısmı belirt.
-- Makale İngilizceyse de cevap Türkçe olsun; kısa doğrudan alıntı yaparsan tırnak içinde özgün dilinde ver.
-Yalnızca şu yapıda JSON döndür: {"answer":"..."}
-${hist ? `\nÖNCEKİ KONUŞMA:\n${hist}\n` : ''}
+- Her ilgili ifadeyi "items" listesine ekle. "quote" alanına cümleyi makaledeki haliyle HARFİ HARFİNE kopyala: kelime değiştirme, kısaltma, birleştirme, çeviri ya da yorum ekleme. Bir öğe bir ya da birkaç ardışık cümle olabilir ama tek bir paragraftan alınmalı. "p" o paragrafın numarası.
+- Kullanıcı bir sıralama isterse (ör. genelden özele, kronolojik, önem sırası) öğeleri o sırayla diz; istemezse makaledeki sırayla diz. En fazla 15 öğe.
+- "note" alanını boş bırak. Sadece kullanıcı açıklama isterse, makaleye dayanan tek kısa Türkçe cümle yaz.
+- "intro" alanına tek kısa Türkçe cümle yaz (ör. "Makalede bu konuyla ilgili 6 ifade geçiyor."). Konu makalede hiç geçmiyorsa "items" boş olsun ve intro'da bunu açıkça söyle.
+- "summary" alanını boş bırak. Sadece kullanıcı açıkça özet, açıklama ya da yorum isterse makaleye dayalı kısa bir Türkçe özet yaz ve dayandığın paragrafları [12] biçiminde belirt.
+Yalnızca şu yapıda JSON döndür: {"intro":"","items":[{"p":0,"quote":"","note":""}],"summary":""}
+${hist ? `\nÖNCEKİ SORULAR:\n${hist}\n` : ''}
 MAKALE: ${p.meta.title || p.name}
 PARAGRAFLAR:
 ${body}
 SORU: ${q}`;
   p.chat = p.chat || []; const entry = { q, a: '', t: Date.now() }; p.chat.push(entry);
   askBusy = true; $('#askQ').value = ''; renderAsk();
-  gemWaitCb = sec => { const w = $('#askLog .abub.wait'); if (w) w.lastChild.textContent = `Gemini sınırına takıldı, ${sec} sn bekleniyor…`; };
+  gemWaitCb = sec => { const w = $('#askLog .abub.wait span:last-child'); if (w) w.textContent = `Gemini sınırına takıldı, ${sec} sn bekleniyor…`; };
   try {
-    const res = await gemini(prompt, { temperature: 0.2 });
-    entry.a = str(res && (res.answer || res.cevap)) || (typeof res === 'string' ? res : 'Cevap alınamadı.');
+    const res = await gemini(prompt, { temperature: 0.1 });
+    const items = (res && Array.isArray(res.items) ? res.items : []).map(it => {
+      const n = parseInt(it && it.p, 10); const quote = str(it && it.quote);
+      if (!quote || !p.paras[n]) return null;
+      let f = findQuote(p.paras[n].t, quote); let pi = n;
+      if (!f) for (let i = 0; i < p.paras.length && !f; i++) { if (i === n) continue; const g = findQuote(p.paras[i].t, quote); if (g) { f = g; pi = i; } }
+      const s = secOf(p, pi);
+      return { p: pi, quote: f && f.exact ? p.paras[pi].t.slice(f.r[0], f.r[1]) : quote, note: str(it.note), r: f ? f.r : null, exact: !!(f && f.exact), sec: s ? s.title : '' };
+    }).filter(Boolean);
+    entry.r = { intro: str(res && res.intro), items, summary: str(res && res.summary) };
+    entry.a = [entry.r.intro, ...items.map(it => `“${it.quote}” [${it.p}]`), entry.r.summary].filter(Boolean).join('\n');
+    if (items.some(it => it.r)) S.qk[p.id] = p.chat.length - 1;
   } catch (e) { entry.a = errMsg(e); entry.err = true; }
   finally {
     askBusy = false; gemWaitCb = null;
-    if (p.chat.length > 40) p.chat = p.chat.slice(-40);
-    savePaper(p); if (S.cur === p.id) renderAsk();
+    if (p.chat.length > 40) { const cut = p.chat.length - 40; p.chat = p.chat.slice(cut); if (S.qk[p.id] !== undefined) S.qk[p.id] -= cut; if (S.qk[p.id] < 0) delete S.qk[p.id]; }
+    savePaper(p); if (S.cur === p.id) { renderAsk(); refreshMarks(); }
   }
+}
+function quoteNote(p, it, cat) {
+  const s = secOf(p, it.p);
+  S.notes.push({ id: uid(), paperId: p.id, para: it.p, lang: 'o', secTitle: s ? s.title : '', text: it.quote, partial: true, cat, created: Date.now() });
 }
 $('#paneTabs').addEventListener('click', e => { const b = e.target.closest('[data-pane]'); if (b) setPane(b.dataset.pane); });
 $('#askGo').onclick = () => askPaper($('#askQ').value);
@@ -2091,18 +2164,21 @@ $('#askQ').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftK
 $('#askLog').addEventListener('click', async e => {
   const p = curPaper(); if (!p) return;
   const sg = e.target.closest('[data-sug]'); if (sg) { askPaper(sg.dataset.sug); return; }
-  if (e.target.closest('[data-askclear]')) { if (!confirm('Bu makaleyle ilgili sohbet silinsin mi?')) return; p.chat = []; savePaper(p); renderAsk(); return; }
-  const rf = e.target.closest('[data-ref]'); if (rf) { jumpTo({ paperId: p.id, para: +rf.dataset.ref, lang: 'o' }); return; }
-  const card = e.target.closest('.abub[data-k]'); if (!card) return; const m = (p.chat || [])[+card.dataset.k]; if (!m) return;
-  const plain = m.a.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\[(\d+)(?:\s*[,–-]\s*(\d+))*\]/g, '').replace(/[ \t]+\n/g, '\n').trim();
-  if (e.target.closest('[data-acp]')) { try { await navigator.clipboard.writeText(plain); toast('Cevap kopyalandı.'); } catch { toast('Kopyalanamadı.', 'err'); } }
-  else if (e.target.closest('[data-anote]')) {
-    const first = (m.a.match(/\[(\d+)/) || [])[1]; const para = first !== undefined && p.paras[+first] ? +first : null;
-    pickCategory({ sub: 'Cevap, makalenin atfıyla birlikte not olarak eklenecek.' }, cat => {
-      const s = para !== null ? secOf(p, para) : null;
-      S.notes.push({ id: uid(), paperId: p.id, para: para ?? 0, lang: 'o', secTitle: s ? s.title : '', text: plain, partial: true, cat, created: Date.now() });
-      notesChanged(); pulseNotes(); toast(`Cevap “${catName(cat)}” notlarına eklendi.`);
-    });
+  if (e.target.closest('[data-askclear]')) { if (!confirm('Bu makaleyle ilgili sohbet silinsin mi?')) return; p.chat = []; delete S.qk[p.id]; savePaper(p); renderAsk(); refreshMarks(); return; }
+  if (e.target.closest('[data-qoff]')) { delete S.qk[p.id]; renderAsk(); refreshMarks(); return; }
+  const card = e.target.closest('.abub[data-k]'); const k = card ? +card.dataset.k : -1; const m = card ? (p.chat || [])[k] : null;
+  const rf = e.target.closest('[data-ref]');
+  if (rf) { if (m && m.r && S.qk[p.id] !== k) { S.qk[p.id] = k; renderAsk(); } jumpTo({ paperId: p.id, para: +rf.dataset.ref, lang: 'o' }); return; }
+  if (!m) return;
+  if (e.target.closest('[data-qshow]')) { S.qk[p.id] = k; renderAsk(); refreshMarks(); toast('Alıntıların altı metinde çizildi.'); return; }
+  const plain = m.a.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\s*\[(\d+)(?:\s*[,–-]\s*(\d+))*\]/g, '').trim();
+  if (e.target.closest('[data-acp]')) { try { await navigator.clipboard.writeText(plain); toast('Cevap kopyalandı.'); } catch { toast('Kopyalanamadı.', 'err'); } return; }
+  const qi = e.target.closest('[data-qnote]');
+  if (qi && m.r) { const it = m.r.items[+qi.closest('[data-j]').dataset.j]; pickCategory({ sub: 'Alıntı, makalenin atfıyla birlikte not olarak eklenecek.' }, cat => { quoteNote(p, it, cat); notesChanged(); pulseNotes(); toast(`Alıntı “${catName(cat)}” notlarına eklendi.`); }); return; }
+  if (e.target.closest('[data-qall]') && m.r) { const ok = m.r.items.filter(it => it.r); if (!ok.length) { toast('Metinde doğrulanan alıntı yok.'); return; } pickCategory({ sub: `${ok.length} alıntı ayrı ayrı not olarak eklenecek.` }, cat => { ok.forEach(it => quoteNote(p, it, cat)); notesChanged(); pulseNotes(); toast(`${ok.length} alıntı “${catName(cat)}” notlarına eklendi.`); }); return; }
+  if (e.target.closest('[data-anote]')) {
+    const first = (m.a.match(/\[(\d+)/) || [])[1]; const para = first !== undefined && p.paras[+first] ? +first : 0;
+    pickCategory({ sub: 'Cevap, makalenin atfıyla birlikte not olarak eklenecek.' }, cat => { quoteNote(p, { p: para, quote: plain }, cat); notesChanged(); pulseNotes(); toast(`Cevap “${catName(cat)}” notlarına eklendi.`); });
   }
 });
 
