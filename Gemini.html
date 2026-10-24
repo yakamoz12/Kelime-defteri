@@ -660,6 +660,7 @@ function repairPaper(p) {
   const N = p.paras.length; const before = (p.skip || []).length;
   p.skip = (p.skip || []).filter(i => i >= 0 && i < N && p.paras[i].t.length < 200);
   if (p.skip.length !== before) changed = true;
+  if (!p.boilerDone) { p.skip = [...new Set([...p.skip, ...boilerIdx(p)])].sort((a, b) => a - b); p.boilerDone = true; changed = true; }
   return changed;
 }
 async function extractPdf(file, onProg, maxPages = Infinity) {
@@ -847,7 +848,7 @@ async function analyze(p) {
 Görevlerin:
 1) Makalenin künye bilgilerini çıkar (APA 7 kaynakçası için).
 2) Makalenin ana bölümlerini belirle ve her bölümün başladığı paragraf numarasını ver. Bölüm başlığı ayrı bir paragrafsa bölüm o başlık paragrafından başlasın ve başlık paragrafını "skip" listesine ekle.
-3) Okuma akışına ait olmayan paragrafları "skip" listesine ekle: sayfa üst/alt bilgisi, sayfa numarası, dergi adı tekrarları, telif ve lisans satırları, "Downloaded from" satırları.
+3) Okuma akışına ait olmayan kısa satırları "skip" listesine ekle: sayfa üst/alt bilgisi, sayfa numarası, dergi adı tekrarları, yazar kurum ve e-posta satırları, ORCID, DOI, geliş/kabul tarihleri, telif ve lisans satırları, "Downloaded from" satırları.
 Bölüm adlarını Türkçe ver (ör. "Başlık ve Künye", "Özet", "Giriş", "Kuramsal Çerçeve", "Yöntem", "Bulgular", "Tartışma", "Sonuç", "Kaynakça", "Ekler"). Alt başlıkları ayrı bölüm yapma. "original" alanına makaledeki özgün başlığı yaz.
 Yalnızca şu yapıda JSON döndür:
 {"meta":{"authors":[{"family":"Soyadı","given":"Adı"}],"year":"","title":"","journal":"","volume":"","issue":"","pages":"","doi":""},"keywords":["..."],"sections":[{"title":"Özet","original":"Abstract","start":0}],"skip":[0]}
@@ -870,6 +871,7 @@ function applyStructure(p, res) {
   if (secs[0].start > 0) secs.unshift({ title: 'Başlık ve Künye', original: '', start: 0 });
   secs.forEach((s, i) => { s.end = i < secs.length - 1 ? secs[i + 1].start - 1 : N - 1; });
   p.skip = (res && Array.isArray(res.skip) ? res.skip : []).map(Number).filter(n => Number.isInteger(n) && n >= 0 && n < N && p.paras[n].t.length < 200);
+  p.skip = [...new Set([...p.skip, ...boilerIdx(p)])].sort((a, b) => a - b);
   const sk = new Set(p.skip);
   const kept = secs.filter(s => { for (let i = s.start; i <= s.end; i++) if (!sk.has(i)) return true; return false; });
   p.sections = kept.length ? kept : secs;
@@ -898,10 +900,23 @@ function sectionParas(p, k, includeSkipped = S.showSkipped) {
 }
 const secOf = (p, i) => p.sections.find(s => i >= s.start && i <= s.end);
 
+/* Sections that are not worth translating (references, acknowledgements, title/author block…) */
+const NO_TR = /kaynak|referen|bibliograph|teşekkür|acknowledg|çıkar çatışma|conflict of interest|competing interest|finansman|funding|yazar katkı|author contribution|author information|data availability|veri erişilebilir|ekler|appendi|başlık ve künye|künye/i;
+const isNoTr = s => !!s && !s.forceTr && NO_TR.test(`${s.title} ${s.original || ''}`);
+const wordy = t => String(t || '').trim().split(/\s+/).length >= 4;
+const trTodo = (p, k) => isNoTr(p.sections[k]) ? [] : sectionParas(p, k, false).filter(i => !p.tr[i] && wordy(p.paras[i].t));
+/* Short boilerplate lines that are not part of the text: e-mails, ORCID, DOI, dates, copyright… */
+const BOILER = /@|\borcid\b|orcid\.org|^\s*(doi\b|https?:)|doi\.org|\breceived\b|\baccepted\b|\brevised\b|published online|geliş tarihi|kabul tarihi|yayına kabul|yayın tarihi|sorumlu yazar|corresponding author|e-?posta|e-?mail|©|copyright|telif hakk|creative commons|\bcc by\b|downloaded from|cite this article|how to cite|atıf için|\be?-?issn\b|\bvol\.?\s*\d+.*\b(no|issue)\b|\bcilt\s*:?\s*\d+.*\bsayı\b/i;
+function boilerIdx(p) {
+  const f = new Map(); p.paras.forEach(x => { const t = x.t.trim(); if (t.length <= 90) f.set(t, (f.get(t) || 0) + 1); });
+  const out = [];
+  p.paras.forEach((x, i) => { const t = x.t.trim(); if ((t.length < 250 && BOILER.test(t)) || (t.length <= 90 && f.get(t) >= 3)) out.push(i); });
+  return out;
+}
 async function translateCurrent() {
   const p = curPaper(); if (!p || S.translating) return;
   if (!S.settings.key) { openSettings(); toast('Önce Gemini API anahtarını ekle.'); return; }
-  const todo = sectionParas(p, S.sec, false).filter(i => !p.tr[i] && p.paras[i].t.trim());
+  const todo = trTodo(p, S.sec);
   if (!todo.length) return;
   const batches = []; let cur = [], len = 0;
   for (const i of todo) {
@@ -968,7 +983,7 @@ function renderReader(keepScroll) {
   const sec = p.sections[S.sec] || p.sections[0];
   const sk = new Set(p.skip || []);
   const idx = sectionParas(p, S.sec);
-  const missing = idx.filter(i => !sk.has(i) && !p.tr[i]).length;
+  const missing = trTodo(p, S.sec).length;
   let h = `<div class="article"><div class="sec-head">${sec.original ? `<div class="orig">${esc(sec.original)}</div>` : ''}<h2>${esc(sec.title)}</h2></div>`;
   if (S.view !== 'orig' && missing && p.lang !== 'tr') h += `<div class="notice"><span>Bu bölümün ${missing} paragrafı henüz çevrilmedi.</span>${S.translating ? '' : '<button class="primary" data-act="translate">Bölümü çevir</button>'}</div>`;
   for (const i of idx) {
@@ -1009,18 +1024,18 @@ function renderSectionBar() {
   B.hidden = false; V.hidden = false;
   const oldChips = B.querySelector('.chips'); const sl = oldChips ? oldChips.scrollLeft : 0;
   const chips = p.sections.map((s, k) => {
-    const ids = sectionParas(p, k, false); const full = ids.length && ids.every(i => p.tr[i]);
+    const full = !isNoTr(s) && sectionParas(p, k, false).some(i => p.tr[i]) && !trTodo(p, k).length;
     const mk = Object.keys(activeMarks(p)).some(i => +i >= s.start && +i <= s.end);
     return `<button class="chip${k === S.sec ? ' on' : ''}" data-sec="${k}">${esc(s.title)}${full ? '<span class="ok">✓</span>' : ''}${mk ? '<span class="qdot" aria-label="alıntı var"></span>' : ''}</button>`;
   }).join('');
   const trPaper = p.lang === 'tr';
   if (trPaper) S.view = 'orig';
   V.hidden = trPaper;
-  const need = sectionParas(p, S.sec, false).filter(i => !p.tr[i]).length;
+  const need = trTodo(p, S.sec).length; const noTr = isNoTr(p.sections[S.sec]);
   const views = { orig: 'Orijinal', tr: 'Çeviri', both: 'İkisi' };
   V.innerHTML = Object.keys(views).map(v => `<button data-view="${v}" class="${S.view === v ? 'on' : ''}">${views[v]}</button>`).join('');
   B.innerHTML = `<div class="chips">${chips.replace(trPaper ? /<span class="ok">✓<\/span>/g : /$^/, '')}</div><div class="ctrls">` + (trPaper ? '<span class="trnote">Türkçe makale, çeviri gerekmiyor</span></div>' : '')
-    + (trPaper ? '' : `<button class="primary" data-act="translate" ${S.translating || !need ? 'disabled' : ''}>${S.translating ? esc(S.trText) : (need ? 'Bölümü çevir' : 'Çevrildi ✓')}</button></div>`);
+    + (trPaper ? '' : noTr ? '<span class="trnote">Bu bölüm çevrilmez</span><button data-act="forcetr">Yine de çevir</button></div>' : `<button class="primary" data-act="translate" ${S.translating || !need ? 'disabled' : ''}>${S.translating ? esc(S.trText) : (need ? 'Bölümü çevir' : 'Çevrildi ✓')}</button></div>`);
   B.querySelector('.chips').scrollLeft = sl;
 }
 /* ---------- categories (two levels: main › sub) ---------- */
@@ -1242,6 +1257,7 @@ R.addEventListener('click', e => {
 });
 function handleAct(a) {
   if (a === 'translate') translateCurrent();
+  if (a === 'forcetr') { const p = curPaper(); const s = p && p.sections[S.sec]; if (s) { s.forceTr = true; savePaper(p); renderSectionBar(); translateCurrent(); } }
   else if (a === 'settings') openSettings();
   else if (a === 'lib') openLib();
   else if (a === 'arc') openArchive();
@@ -2059,7 +2075,12 @@ function normMap(s) {
 }
 function findQuote(para, quote) {
   const P = normMap(para), Q = normMap(quote); const q = Q.n.trim(); if (q.length < 8) return null;
-  const toRange = (a, b) => { const s = P.map[a], e = P.map[Math.min(b, P.map.length) - 1]; return s === undefined || e === undefined ? null : [s, e + 1]; };
+  const toRange = (a, b) => {
+    let s = P.map[a], e = P.map[Math.min(b, P.map.length) - 1]; if (s === undefined || e === undefined) return null; e++;
+    for (let k = 0; k < 3 && e < para.length && /[)\]”"’'.,;:!?%]/.test(para[e]); k++) e++;
+    if (s > 0 && /[(“"‘]/.test(para[s - 1])) s--;
+    return [s, e];
+  };
   let k = P.n.indexOf(q); if (k >= 0) return { r: toRange(k, k + q.length), exact: true };
   const w = q.split(' '); if (w.length < 8) return null;
   const head = w.slice(0, 5).join(' '), tail = w.slice(-5).join(' ');
