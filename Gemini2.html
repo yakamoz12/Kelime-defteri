@@ -453,6 +453,7 @@ details.setup li{margin-bottom:6px}
     <span class="grow"></span>
     <button class="nv" id="bSet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Ayarlar</button>
     <input type="file" id="file" class="vh" accept="application/pdf,.pdf">
+    <input type="file" id="pdfAttach" class="vh" accept="application/pdf,.pdf">
   </nav>
   <div class="work" id="readView">
     <div class="main">
@@ -858,6 +859,8 @@ function errMsg(e) {
   if (/API key not valid|API_KEY_INVALID|API key expired/i.test(m)) return 'API anahtarı geçersiz. Ayarlar’dan kontrol et.';
   if (m === 'DAILY_QUOTA') return 'Gemini’nin günlük ücretsiz kotası doldu. Yarın tekrar dene ya da Ayarlar’dan “Flash-Lite” modelini seç.';
   if (/429|quota|RESOURCE_EXHAUSTED|rate/i.test(m)) return 'Ücretsiz kullanım sınırına ulaşıldı. Bir dakika bekleyip tekrar dene.';
+  if (m === 'DRIVE_AUTH') return 'Drive oturumu sona erdi. Ayarlar’dan tekrar bağlan.';
+  if (/^Drive/.test(m)) return m.replace(/^Drive: /, 'Drive hatası: ');
   if (/not found|is not supported|404/i.test(m)) return 'Model bulunamadı. Ayarlar’dan başka bir model seç.';
   if (/Failed to fetch|NetworkError|Load failed|network/i.test(m)) return 'Bağlantı kurulamadı. İnternetini kontrol et.';
   return 'Hata: ' + m;
@@ -1581,22 +1584,203 @@ function bindMetaPreview(box, base, sm) {
 }
 function openMeta(pid, fresh) {
   const p = S.papers[pid]; if (!p) return;
+  const file = fresh ? S.pendingFiles[pid] : null;
   modal(`<h3>Künye</h3>
     <p class="hint">${fresh ? 'Gemini’nin bulduğu bilgileri kontrol et. ' : ''}Kaynakça bu bilgilerle APA 7’ye göre yazılır. Her satıra bir yazar, <b>Soyadı, Adı</b> biçiminde.</p>
     ${metaForm(p.meta, p.keywords)}
-    ${fresh ? '<p class="hint">Kaydettiğinde makale tez planına göre otomatik taranır.</p>' : ''}
+    ${fresh ? `<p class="hint">Kaydettiğinde ${file && Drive.ok() ? 'PDF Drive’a yüklenir ve ' : ''}makale tez planına göre otomatik taranır.${file && !Drive.ok() && S.settings.clientId ? ' Drive bağlı olmadığı için PDF yüklenmeyecek; sonra Makaleler’den ekleyebilirsin.' : ''}</p>` : ''}
     <div class="mact"><button data-close>Vazgeç</button><button class="primary" id="mSave">${fresh ? 'Kaydet ve tara' : 'Kaydet'}</button></div>`, box => {
     bindMetaPreview(box, p);
     $('#mSave').onclick = async () => {
       const { meta, keywords } = readMetaForm();
       p.meta = meta; p.keywords = keywords; savePaper(p); closeModal(); renderHeader(); renderNotes(); refreshMap();
       delete S.pendingFiles[pid];
+      if (fresh && file && Drive.ok()) { busy('PDF Drive’a yükleniyor…'); await uploadPdf(p, file); busy(false); }
       if (fresh && S.settings.key) { setPane('sug'); await scanWithUi(p); } else toast('Künye kaydedildi.');
     };
   });
 }
 
 $('#bArc').onclick = () => openPlan();
+
+/* ---------- Google Drive ---------- */
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const FOLDER_NAME = 'Tez Haritası', BACKUP_NAME = 'tez-haritasi-yedek.json';
+const Drive = {
+  tok: LS.get('th:dtok', null), folder: LS.get('th:dfolder', null), indexId: LS.get('th:dindex', null),
+  ok() { return !!(this.tok && this.tok.t && this.tok.exp > Date.now() + 60000); },
+  web() { return /^https?:$/.test(location.protocol); },
+  redirectUri() { return location.origin + location.pathname; },
+  minsLeft() { return this.ok() ? Math.max(1, Math.round((this.tok.exp - Date.now()) / 60000)) : 0; },
+  async connect(after) {
+    if (!this.web()) { toast('Drive bağlantısı için uygulamanın bir https adresinden açılması gerekiyor. Ayarlar’daki kurulum adımlarına bak.', 'err'); return; }
+    if (!S.settings.clientId) { openSettings('drive'); toast('Önce Google Client ID’yi ekle.'); return; }
+    busy('Google’a yönlendiriliyor…');
+    await flushSaves();
+    const state = uid(); LS.set('th:dstate', state); LS.set('th:after', after || 'connected');
+    const q = new URLSearchParams({ client_id: S.settings.clientId, redirect_uri: this.redirectUri(), response_type: 'token', scope: DRIVE_SCOPE, include_granted_scopes: 'true', state });
+    location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + q.toString();
+  },
+  handleRedirect() {
+    const raw = location.hash.slice(1);
+    if (!/(^|&)(access_token|error)=/.test(raw)) return null;
+    const h = new URLSearchParams(raw);
+    history.replaceState(null, '', location.pathname + location.search);
+    const st = LS.get('th:dstate', null); LS.set('th:dstate', null);
+    const after = LS.get('th:after', null); LS.set('th:after', null);
+    if (h.get('error')) { setTimeout(() => toast(h.get('error') === 'access_denied' ? 'Drive izni verilmedi.' : 'Drive bağlantısı kurulamadı: ' + h.get('error'), 'err'), 300); return null; }
+    if (!st || h.get('state') !== st) { setTimeout(() => toast('Drive bağlantısı doğrulanamadı. Tekrar dene.', 'err'), 300); return null; }
+    this.tok = { t: h.get('access_token'), exp: Date.now() + (parseInt(h.get('expires_in'), 10) || 3600) * 1000 };
+    LS.set('th:dtok', this.tok);
+    return after || 'connected';
+  },
+  disconnect() {
+    if (this.tok && this.tok.t) fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(this.tok.t), { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).catch(() => {});
+    this.tok = null; LS.set('th:dtok', null);
+  },
+  async api(url, opts = {}) {
+    if (!this.ok()) throw new Error('DRIVE_AUTH');
+    const r = await fetch(/^https:/.test(url) ? url : 'https://www.googleapis.com/drive/v3/' + url, Object.assign({}, opts, { headers: Object.assign({ Authorization: 'Bearer ' + this.tok.t }, opts.headers || {}) }));
+    if (r.status === 401) { this.tok = null; LS.set('th:dtok', null); throw new Error('DRIVE_AUTH'); }
+    if (!r.ok) { const d = await r.json().catch(() => ({})); const e = new Error('Drive: ' + ((d.error && d.error.message) || ('HTTP ' + r.status))); e.status = r.status; throw e; }
+    return r;
+  },
+  async json(url, opts) { return (await this.api(url, opts)).json(); },
+  qs: s => encodeURIComponent(s),
+  async ensureFolder() {
+    if (this.folder) {
+      try { const f = await this.json(`files/${this.folder}?fields=id,trashed`); if (!f.trashed) return this.folder; }
+      catch (e) { if (e.message === 'DRIVE_AUTH') throw e; }
+    }
+    const res = await this.json(`files?q=${this.qs(`name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`)}&fields=files(id)&spaces=drive`);
+    let id = res.files && res.files[0] && res.files[0].id;
+    if (!id) id = (await this.json('files?fields=id', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' }) })).id;
+    this.folder = id; LS.set('th:dfolder', id); return id;
+  },
+  async findFile(name) {
+    const folder = await this.ensureFolder();
+    const res = await this.json(`files?q=${this.qs(`name='${name}' and '${folder}' in parents and trashed=false`)}&fields=files(id)&spaces=drive`);
+    return (res.files && res.files[0]) || null;
+  },
+  async upload(blob, meta, fileId) {
+    const type = blob.type || 'application/octet-stream';
+    const base = 'https://www.googleapis.com/upload/drive/v3/files' + (fileId ? '/' + fileId : '');
+    const r = await this.api(base + '?uploadType=resumable&fields=id,name', { method: fileId ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json; charset=UTF-8', 'X-Upload-Content-Type': type }, body: JSON.stringify(meta || {}) });
+    const loc = r.headers.get('Location');
+    if (loc) {
+      const u = await fetch(loc, { method: 'PUT', headers: { 'Content-Type': type }, body: blob });
+      if (!u.ok) throw new Error('Drive yüklemesi başarısız (HTTP ' + u.status + ').');
+      return u.json();
+    }
+    if (fileId) return this.json(base + '?uploadType=media&fields=id,name', { method: 'PATCH', headers: { 'Content-Type': type }, body: blob });
+    const b = 'mo' + uid();
+    const body = new Blob([`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta || {})}\r\n--${b}\r\nContent-Type: ${type}\r\n\r\n`, blob, `\r\n--${b}--`]);
+    return this.json(base + '?uploadType=multipart&fields=id,name', { method: 'POST', headers: { 'Content-Type': `multipart/related; boundary=${b}` }, body });
+  },
+  async validId(idKey) {
+    const id = this[idKey]; if (!id) return null;
+    try { const f = await this.json(`files/${id}?fields=id,trashed`); if (!f.trashed) return id; }
+    catch (e) { if (e.message === 'DRIVE_AUTH') throw e; }
+    this[idKey] = null; LS.set('th:dindex', null); return null;
+  },
+  async putJson(name, data, idKey) {
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    let id = idKey ? await this.validId(idKey) : null;
+    if (!id) { const f = await this.findFile(name); id = f && f.id; }
+    if (id) {
+      try { await this.upload(blob, {}, id); return id; }
+      catch (e) { if (e.status !== 404) throw e; }
+    }
+    const r = await this.upload(blob, { name, parents: [await this.ensureFolder()], mimeType: 'application/json' });
+    if (idKey) { this[idKey] = r.id; LS.set('th:dindex', r.id); }
+    return r.id;
+  },
+  async getJson(name, idKey) {
+    const id = idKey ? await this.validId(idKey) : null;
+    if (id) return (await this.api(`files/${id}?alt=media`)).json().catch(() => null);
+    const f = await this.findFile(name); if (!f) return null;
+    if (idKey) { this[idKey] = f.id; LS.set('th:dindex', f.id); }
+    return (await this.api(`files/${f.id}?alt=media`)).json().catch(() => null);
+  }
+};
+
+
+/* ---------- Drive: this app’s own folder, PDFs + automatic backup ---------- */
+async function flushSaves() {
+  clearTimeout(timers.notes);
+  const jobs = [DB.set('notes', S.notes), DB.set('cats', S.cats)];
+  const p = curPaper(); if (p) { clearTimeout(timers[p.id]); jobs.push(DB.set('paper:' + p.id, p)); }
+  await Promise.all(jobs).catch(() => {});
+}
+const pdfName = n => { n = String(n || '').trim().replace(/[\\/:*?"<>|]+/g, '-') || 'makale'; return /\.pdf$/i.test(n) ? n : n + '.pdf'; };
+const DSync = {
+  dirty: LS.get('th:ddirty', false), last: LS.get('th:dlast', 0), t: null, busy: false, warned: false,
+  mark() {
+    this.dirty = true; LS.set('th:ddirty', true); clearTimeout(this.t);
+    if (Drive.ok()) this.t = setTimeout(() => this.push(true), 8000);
+    else if (S.settings.clientId && !this.warned && !S.booting) { this.warned = true; toast('Drive oturumu kapalı, değişiklikler Drive’a yedeklenmiyor.', '', { label: 'Bağlan', fn: () => Drive.connect('settings') }); }
+  },
+  async push(quiet) {
+    if (!Drive.ok() || this.busy) return false;
+    if (!Object.keys(S.papers).length && !S.notes.length) return false; // never overwrite a Drive backup with an empty app
+    this.busy = true;
+    try {
+      await Drive.putJson(BACKUP_NAME, backupData(), 'indexId');
+      this.dirty = false; LS.set('th:ddirty', false); this.last = Date.now(); LS.set('th:dlast', this.last);
+      if (!quiet) toast('Yedek Drive’a kaydedildi.');
+      return true;
+    } catch (e) { if (!quiet) toast(errMsg(e), 'err'); return false; }
+    finally { this.busy = false; }
+  }
+};
+/* every saved change schedules a backup */
+const _dbSet = DB.set.bind(DB), _dbDel = DB.del.bind(DB);
+DB.set = (k, v) => _dbSet(k, v).then(r => { DSync.mark(); return r; });
+DB.del = k => _dbDel(k).then(r => { DSync.mark(); return r; });
+async function uploadPdf(p, file) {
+  try {
+    const folder = await Drive.ensureFolder();
+    const r = await Drive.upload(file, { name: pdfName(file.name), parents: [folder], mimeType: 'application/pdf', description: refParts(p, {}).map(x => x[0]).join('') });
+    p.driveId = r.id; savePaper(p); return true;
+  } catch (e) { toast('PDF Drive’a yüklenemedi: ' + errMsg(e), 'err'); return false; }
+}
+$('#pdfAttach').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = '';
+  const p = S.papers[S.attachFor]; S.attachFor = null; if (!f || !p) return;
+  busy('PDF Drive’a yükleniyor…'); const ok = await uploadPdf(p, f); busy(false);
+  if (ok) toast('PDF Drive’daki “' + FOLDER_NAME + '” klasörüne yüklendi.');
+  if ($('#lList')) openLib();
+});
+function driveSettingsHTML() {
+  const web = Drive.web(); const last = DSync.last ? `Son yedek: ${new Date(DSync.last).toLocaleString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'Henüz yedeklenmedi';
+  return `<div class="field" id="sDrive"><div class="flabel">Google Drive</div>
+    <div class="status"><span class="dot ${Drive.ok() ? 'on' : ''}"></span><span>${Drive.ok() ? `Bağlı. ${last}${DSync.dirty ? ', bekleyen değişiklik var' : ''}.` : `Bağlı değil. ${last}.`}</span></div>
+    <p class="hint">PDF’ler ve uygulamanın tüm verisi Drive’ındaki “${FOLDER_NAME}” klasörüne yedeklenir; değişiklikler birkaç saniye içinde kendiliğinden kaydedilir. Uygulama yalnızca kendi oluşturduğu dosyaları görür.</p>
+    ${web ? '' : '<p class="hint warn">Bu sayfa bir dosyadan açılmış. Drive yalnızca uygulama https adresinde yayındayken çalışır.</p>'}
+    <label>OAuth Client ID<input id="sCid" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="…apps.googleusercontent.com" value="${esc(S.settings.clientId || '')}"></label>
+    <div class="row wrap" style="margin-top:10px">${Drive.ok() ? '<button id="sDisc">Bağlantıyı kes</button><button class="primary" id="sPush">Şimdi yedekle</button>' : '<button class="primary" id="sConn">Drive’a bağlan</button>'}<button id="sPull">Drive’dan geri yükle</button></div>
+    <details class="setup"><summary>Kurulum (Makale Okuyucu’daki Client ID kullanılabilir)</summary><ol>
+      <li>console.cloud.google.com/auth/clients adresinde Client’ını aç.</li>
+      <li><b>Authorized redirect URIs</b> kısmına aşağıdaki adresi ekle ve <b>Save</b>’e dokun.</li>
+      <li>Client ID’yi yukarıya yapıştır, <b>Kaydet</b>, sonra <b>Drive’a bağlan</b>.</li></ol>
+      ${web ? `<span class="code">${esc(Drive.redirectUri())}</span><div class="row"><button id="sCopy">Adresi kopyala</button></div>` : ''}</details></div>`;
+}
+function bindDriveSettings(apply) {
+  if ($('#sConn')) $('#sConn').onclick = () => { apply(); Drive.connect('settings'); };
+  if ($('#sDisc')) $('#sDisc').onclick = () => { Drive.disconnect(); apply(); openSettings(); toast('Drive bağlantısı kesildi.'); };
+  if ($('#sPush')) $('#sPush').onclick = async () => { busy('Yedek Drive’a kaydediliyor…'); await DSync.push(false); busy(false); openSettings(); };
+  if ($('#sCopy')) $('#sCopy').onclick = async () => { try { await navigator.clipboard.writeText(Drive.redirectUri()); toast('Adres kopyalandı.'); } catch { toast('Kopyalanamadı.', 'err'); } };
+  $('#sPull').onclick = async () => {
+    if (!Drive.ok()) { apply(); if (S.settings.clientId) Drive.connect('settings'); else toast('Önce Client ID’yi gir.', 'err'); return; }
+    busy('Yedek Drive’dan alınıyor…');
+    try {
+      const d = await Drive.getJson(BACKUP_NAME, 'indexId'); busy(false);
+      if (!d) { toast('Drive’da yedek bulunamadı.'); return; }
+      if (!confirm(`Drive’daki yedekte ${Object.keys(d.papers || {}).length} makale var. Bu cihazdaki verilere eklenecek. Devam edilsin mi?`)) return;
+      await restoreData(d); closeModal(); renderAll(); refreshMap(); toast('Yedek Drive’dan geri yüklendi.');
+    } catch (e) { busy(false); toast(errMsg(e), 'err'); }
+  };
+}
 
 /* ---------- ask the paper ---------- */
 const ASK_SUGGEST = ['Makalenin amacı ve ana bulguları neler?', 'Yöntemi ve örneklemi anlatan cümleler', 'Sınırlılıklar ve öneriler neler?', 'Hangi kuramlara ve kavramlara dayanıyor?'];
@@ -2258,7 +2442,7 @@ function openLib() {
         const sc = S.scans[p.id]; const ss = S.sugs.filter(s => s.paperId === p.id);
         const st = !sc ? '<b class="lunread">Taranmadı</b>' : needsScan(p) ? '<b class="swarnt">Plan değişti, yeniden tara</b>' : `<b class="lread">Tarandı</b>: ${ss.filter(s => s.status === 'pending').length} öneri bekliyor, ${ss.filter(s => s.status === 'added').length} eklendi`;
         return `<div class="libitem"><p class="refp">${refHTML(p, sm)}</p><div class="libmeta">${st}</div>
-          <div class="libact"><button class="primary" data-open="${p.id}">Aç</button><button data-scanp="${p.id}">${sc ? 'Yeniden tara' : 'Planıma göre tara'}</button><button data-meta="${p.id}">Künye</button><button class="danger" data-delp="${p.id}">Sil</button></div></div>`;
+          <div class="libact"><button class="primary" data-open="${p.id}">Aç</button><button data-scanp="${p.id}">${sc ? 'Yeniden tara' : 'Planıma göre tara'}</button><button data-meta="${p.id}">Künye</button>${p.driveId ? `<button data-pdf="${p.id}">PDF’i aç</button>` : (S.settings.clientId ? `<button data-attach="${p.id}">PDF’i Drive’a yükle</button>` : '')}<button class="danger" data-delp="${p.id}">Sil</button></div></div>`;
       }).join('') : '<p class="hint">Henüz makale yok. <b>Makale ekle</b> ile bir PDF seç; Gemini okur, künyesini çıkarır ve tez planına göre tarar.</p>';
     };
     render();
@@ -2267,9 +2451,16 @@ function openLib() {
       if (o) { closeModal(); S.view = 'orig'; openPaper(o.dataset.open); setPane('sug'); }
       else if (sc) { await scanWithUi(S.papers[sc.dataset.scanp]); render(); }
       else if (m) openMeta(m.dataset.meta);
+      else if (e.target.closest('[data-pdf]')) window.open(`https://drive.google.com/file/d/${encodeURIComponent(S.papers[e.target.closest('[data-pdf]').dataset.pdf].driveId)}/view`, '_blank', 'noopener');
+      else if (e.target.closest('[data-attach]')) {
+        if (!Drive.ok()) { toast('Önce Drive’a bağlan.', '', { label: 'Bağlan', fn: () => Drive.connect('settings') }); return; }
+        S.attachFor = e.target.closest('[data-attach]').dataset.attach; $('#pdfAttach').click();
+      }
       else if (d) {
         const id = d.dataset.delp; const nn = S.notes.filter(n => n.paperId === id).length;
         if (!confirm(nn ? `Makale, önerileri ve ondan eklediğin ${nn} alıntı silinecek. Emin misin?` : 'Makale ve önerileri silinecek. Emin misin?')) return;
+        const did = S.papers[id] && S.papers[id].driveId;
+        if (did && Drive.ok()) Drive.api(`files/${did}?fields=id`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trashed: true }) }).catch(() => {});
         delete S.papers[id]; DB.del('paper:' + id);
         S.notes = S.notes.filter(n => n.paperId !== id); saveNotes();
         S.sugs = S.sugs.filter(x => x.paperId !== id); saveSugs(); delete S.scans[id]; saveScans();
@@ -2292,8 +2483,9 @@ function openSettings(focus) {
     <div class="field"><div class="flabel">Atıf dili (APA 7)</div><div class="seg wide" id="sStyle">
       <button data-style="en" class="${style === 'en' ? 'on' : ''}">İngilizce: “&amp;”, “et al.”</button>
       <button data-style="tr" class="${style === 'tr' ? 'on' : ''}">Türkçe: “ve”, “vd.”</button></div></div>
-    <div class="field"><div class="flabel">Yedek</div>
-      <p class="hint">Makaleler, notlar ve kategoriler bu cihazın tarayıcısında saklanır. Ara sıra yedek al.</p>
+    ${driveSettingsHTML()}
+    <div class="field"><div class="flabel">Yedek dosyası</div>
+      <p class="hint">Drive’a ek olarak, istersen yedeği dosya olarak da indirebilirsin.</p>
       <div class="row"><button id="sBk">Yedeği indir</button><label class="btn" for="bkIn">Yedeği yükle</label><input type="file" id="bkIn" class="vh" accept="application/json,.json"></div></div>
     <div class="mact"><button id="sTest">Anahtarı test et</button><button class="primary" id="sSave">Kaydet</button></div>`, box => {
     const fill = (list, cur) => {
@@ -2319,7 +2511,9 @@ function openSettings(focus) {
     $('#sRefresh').onclick = load;
     $('#sShow').onclick = () => { const k = $('#sKey'); k.type = k.type === 'password' ? 'text' : 'password'; $('#sShow').textContent = k.type === 'password' ? 'Göster' : 'Gizle'; };
     $('#sStyle').onclick = e => { const b = e.target.closest('[data-style]'); if (!b) return; style = b.dataset.style; $$('#sStyle button').forEach(x => x.classList.toggle('on', x === b)); };
-    const apply = () => { S.settings.key = $('#sKey').value.trim(); S.settings.model = $('#sModel').value || 'gemini-2.5-flash'; S.settings.style = style; saveSettings(); };
+    const apply = () => { S.settings.key = $('#sKey').value.trim(); S.settings.model = $('#sModel').value || 'gemini-2.5-flash'; S.settings.style = style; S.settings.clientId = $('#sCid').value.trim(); saveSettings(); };
+    bindDriveSettings(apply);
+    if (focus === 'drive') setTimeout(() => $('#sDrive').scrollIntoView({ block: 'start', behavior: 'smooth' }), 50);
     $('#sTest').onclick = async () => {
       apply(); const b = $('#sTest'); b.disabled = true; b.textContent = 'Deneniyor…';
       try { await gemini('Sadece "tamam" yaz.', { json: false }); toast(`Anahtar çalışıyor (${S.settings.model}).`); }
@@ -2445,6 +2639,8 @@ function openExport() {
 /* ---------- init ---------- */
 async function init() {
   if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  S.booting = true;
+  const after = Drive.handleRedirect();
   try {
     await DB.open();
     for (const k of await DB.keys()) {
@@ -2482,6 +2678,18 @@ async function init() {
   resizeOv();
   const last = LS.get('th:last', null);
   if (last && S.papers[last]) openPaper(last); else renderAll();
+  S.booting = false;
+  if (after) {
+    toast('Drive bağlandı.');
+    if (!Object.keys(S.papers).length) {
+      try {
+        const d = await Drive.getJson(BACKUP_NAME, 'indexId');
+        if (d && Object.keys(d.papers || {}).length && confirm(`Drive’da ${Object.keys(d.papers).length} makalelik bir Tez Haritası yedeği bulundu. Geri yüklensin mi?`)) { await restoreData(d); renderAll(); refreshMap(); toast('Yedek Drive’dan geri yüklendi.'); }
+      } catch (e) { toast(errMsg(e), 'err'); }
+    }
+    await DSync.push(true);
+    if (after === 'settings') openSettings('drive');
+  } else if (Drive.ok() && DSync.dirty) DSync.push(true);
 }
 init();
 })();
