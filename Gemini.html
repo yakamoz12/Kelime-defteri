@@ -2613,6 +2613,18 @@ function pageWords(pg) {
   return Math.round(n * 300);
 }
 const wordCount = t => (String(t || '').trim().match(/\S+/g) || []).length;
+/* Notes added by hand (+, fosforlu, Sor) carry only a category. Give them a place on the desk:
+   a section with one skeleton paragraph takes them directly; for 1.1 / 1.2 you choose the paragraph. */
+function autoAssign() {
+  let ch = false;
+  for (const n of S.notes) {
+    if (n.plan || !/^pc-/.test(n.cat || '')) continue;
+    const node = planNode(n.cat.slice(3));
+    if (node && (node.paras || []).length === 1) { n.plan = { target: `${node.code}#1`, point: 0 }; ch = true; }
+  }
+  if (ch) saveNotes();
+}
+const unassignedFor = node => S.notes.filter(n => !n.plan && n.cat === 'pc-' + node.code && hasText(n));
 function targetNotes(key) {
   const ns = S.notes.filter(n => n.plan && n.plan.target === key && hasText(n));
   const ord = S.orders[key];
@@ -2661,6 +2673,7 @@ function quoteHTML(n, idx, draft, sortedView) {
 }
 function renderDeskMain() {
   const M = $('#deskMain'); if (!M) return;
+  autoAssign();
   const t = targetOf(S.deskSel) || deskTargets()[0]; if (!t) { M.innerHTML = ''; return; }
   S.deskSel = t.key;
   const draft = S.drafts[t.key] || ''; const ns = targetNotes(t.key); const ord = S.orders[t.key];
@@ -2690,6 +2703,9 @@ function renderDeskMain() {
     if (rest.length) h += `<section class="dpt"><div class="dph"><span class="pdot cx"></span><span>Diğer alıntılar</span><small>${rest.length}</small></div>${rest.map((n, k) => quoteHTML(n, k, draft, false)).join('')}</section>`;
     if (!src) h += '<p class="hint">Bu bölüme makaleden kaynak önerilmez; burayı kendi cümlelerinle yaz.</p>';
   }
+  const un = (t.node.paras || []).length > 1 ? unassignedFor(t.node) : [];
+  if (un.length) h += `<section class="dpt"><div class="dph"><span class="pdot cx"></span><span>${esc(t.node.code)} için eklediğin ama paragrafı belirlenmemiş alıntılar</span><small>${un.length}</small></div>
+    ${un.map(n => `<div class="dq" data-nid="${esc(n.id)}"><div class="dqm"><p>${esc(n.text)}</p><small>${esc(citeOf(n))}</small></div><div class="dqa"><button class="primary" data-take>Bu paragrafa al</button></div></div>`).join('')}</section>`;
   M.innerHTML = h;
   const ta = $('#deskText'); if (ta && document.activeElement !== ta) ta.value = draft;
   updateDeskCount();
@@ -2727,6 +2743,7 @@ function openDesk() {
     const kw = tg.closest('[data-kw2]'); if (kw) { deskTerms(S.deskSel, +kw.dataset.kw2, kw); return; }
     const q = tg.closest('[data-nid]'); if (!q) return;
     const n = S.notes.find(x => x.id === q.dataset.nid); if (!n) return;
+    if (tg.closest('[data-take]')) { n.plan = { target: S.deskSel, point: 0 }; saveNotes(); renderDeskMain(); renderDeskTree(); toast('Alıntı bu paragrafa alındı.'); return; }
     if (tg.closest('[data-cite]')) {
       const c = citeOf(n); const pos = typeof ta.selectionStart === 'number' ? ta.selectionStart : ta.value.length;
       const before = ta.value.slice(0, pos).replace(/\s+$/, ''); const after = ta.value.slice(pos);
