@@ -375,6 +375,11 @@ mark.qm{background:rgba(36,80,143,.10);color:inherit;text-decoration:underline;t
 .pcount.c0{background:#d9534f}.pcount.c1{background:#b88400}.pcount.c2{background:#1f7a4a}
 .pskel ul{margin:8px 0 12px;padding-left:20px;color:var(--muted);font-size:13.5px;line-height:1.5}
 .kwsout .kw{margin-top:8px}
+.strq{margin:6px 0;padding:8px 10px;border-radius:10px;background:var(--accent-soft);font-family:var(--serif);font-size:15px;line-height:1.5}
+.strq span{display:block;font:700 11.5px var(--sans);color:var(--accent);margin-bottom:2px}
+.sstr{background:#fff4d6;color:#8a5a00;border-radius:999px;padding:3px 9px;font-weight:700}
+.scard.weak{border-style:dashed}
+.norig{font-size:12.5px;color:var(--muted);margin-top:4px;font-style:italic}
 .scites{display:flex;flex-direction:column;gap:8px;margin:8px 0}
 .scite{background:var(--surface2);border-radius:10px;padding:9px 11px;font-size:13px}
 .sch b{color:var(--ink)}
@@ -820,13 +825,14 @@ function parseJSON(txt) {
   throw new Error('Gemini yanıtı okunamadı.');
 }
 let gemNext = 0, gemGap = 0, gemWaitCb = null;
-async function gemini(prompt, { json = true, temperature = 0.2 } = {}) {
+async function gemini(prompt, { json = true, temperature = 0.2, think = false } = {}) {
   const parts = Array.isArray(prompt) ? prompt : [{ text: prompt }];
   const key = String(S.settings.key || '').trim(); if (!key) throw new Error('NOKEY');
   const model = String(S.settings.model || '').trim() || 'gemini-2.5-flash';
   const gc = { temperature };
   if (json) gc.responseMimeType = 'application/json';
-  if (/2\.5-flash/.test(model)) gc.thinkingConfig = { thinkingBudget: 0 };
+  if (think) { if (/2\.5/.test(model)) gc.thinkingConfig = { thinkingBudget: /pro/.test(model) ? 12288 : 8192 }; }
+  else if (/2\.5-flash/.test(model)) gc.thinkingConfig = { thinkingBudget: 0 };
   let last = null;
   for (let attempt = 0; attempt < 5; attempt++) {
     const wait = gemNext - Date.now(); if (wait > 0) await sleep(wait);
@@ -851,7 +857,7 @@ async function gemini(prompt, { json = true, temperature = 0.2 } = {}) {
     }
     if (!r.ok) throw new Error((data.error && data.error.message) || ('HTTP ' + r.status));
     const c = data.candidates && data.candidates[0];
-    const txt = ((c && c.content && c.content.parts) || []).map(p => p.text || '').join('');
+    const txt = ((c && c.content && c.content.parts) || []).filter(p => !p.thought).map(p => p.text || '').join('');
     if (!txt) throw new Error('Gemini boş yanıt döndürdü' + (c && c.finishReason ? ` (${c.finishReason})` : '') + '.');
     return json ? parseJSON(txt) : txt;
   }
@@ -1218,7 +1224,7 @@ function renderNotes() {
       const src = p ? `<button class="src" data-jump>${esc(inText(p, sm))}${n.secTitle ? ', ' + esc(n.secTitle) : ''}${n.lang === 't' ? ' (çeviri)' : ''}</button>` : '<span class="src free">Kendi notum</span>';
       return `<div class="note" data-id="${esc(n.id)}"><div class="note-top"><span class="num">${k + 1}</span>${src}
         <span class="nact"><button data-up aria-label="Yukarı taşı">↑</button><button data-down aria-label="Aşağı taşı">↓</button><button data-del aria-label="Sil">✕</button></span></div>
-        <textarea data-edit rows="2" placeholder="Notunu yaz. Apple Pencil ile elle de yazabilirsin.">${esc(n.text)}</textarea>
+        <textarea data-edit rows="2" placeholder="Notunu yaz. Apple Pencil ile elle de yazabilirsin.">${esc(n.text)}</textarea>${n.orig ? `<div class="norig">Orijinali: ${esc(n.orig)}</div>` : ''}
         <div class="nfoot">${p ? `<div class="cite">Atıf: ${esc(citeStr(n, p, sm))}${n.plan ? ` · ${esc(shortTarget(n.plan.target))}` : ''}${n.cites && n.cites.length ? `${n.cites.filter(c => c.ref).map(c => `<div class="nref">Asıl kaynak: ${esc(c.ref)}</div>`).join('')}<div><button class="link" data-direct>${n.direct ? 'Yeniden “akt.” kullan' : 'Asıl kaynağı okudum, doğrudan atıf yap'}</button></div>` : ''}</div>` : ''}<button class="cattag" data-move title="Kategoriyi değiştir">${esc(catName(n.cat))}</button></div></div>`;
     }).join('');
     $$('textarea', L).forEach(autosize);
@@ -2037,61 +2043,113 @@ function syncPlanCats() {
 const catForTarget = t => t.node.level === 1 ? 'pc-' + t.node.code : 'pc-' + t.node.code;
 
 /* ---------- scanning an article against the plan ---------- */
-function planPrompt() {
-  return planTargets().map(t => `[${t.key}] ${t.node.code} ${t.node.title} › ${t.para.title}\n${(t.para.points || []).map((x, i) => `   (${i + 1}) ${x}`).join('\n')}`).join('\n');
+/* ---------- sentence index of an article (the model answers with ids, never copies text) ---------- */
+const NO_SPLIT = /(?:\b(?:vd|ark|al|Dr|Prof|Doç|Yrd|Uzm|Hem|e\.g|i\.e|vs|bkz|akt|No|no|Vol|vol|pp|ss|s|ör|yy|Fig|Tab|Ed|eds|Inc|Ltd|St|Jr|Sr|vb|vd)\.|\b\p{Lu}\.)$/u;
+function sentenceSpans(t) {
+  const out = []; let start = 0; const re = /[.!?…]["”’)]*\s+(?=["“(]?[\p{Lu}0-9])/gu; let m;
+  while ((m = re.exec(t))) {
+    const end = m.index + m[0].trimEnd().length;
+    const head = t.slice(start, end);
+    if (NO_SPLIT.test(head.replace(/["”’)]+$/, '')) || /\d\.$/.test(head) && /^\d/.test(t.slice(re.lastIndex))) continue;
+    if (end - start >= 2) out.push([start, end]);
+    start = re.lastIndex;
+  }
+  if (t.length - start >= 2) out.push([start, t.length]);
+  return out;
 }
-async function scanPaper(p, { quiet = false } = {}) {
-  if (!S.settings.key) throw new Error('NOKEY');
-  const sk = new Set(p.skip || []); const lines = [];
-  p.sections.forEach((s, k) => {
+function sentenceIndex(p) {
+  const sk = new Set(p.skip || []); const idx = {}; const lines = [];
+  p.sections.forEach(s => {
     if (isNoTr(s) && !/başlık ve künye/i.test(s.title)) return;
-    for (let i = s.start; i <= s.end; i++) if (!sk.has(i) && wordy(p.paras[i].t)) lines.push(`[${i}] (${s.title}) ${p.paras[i].t}`);
+    for (let i = s.start; i <= s.end; i++) {
+      if (sk.has(i) || !wordy(p.paras[i].t)) continue;
+      const t = p.paras[i].t; const spans = sentenceSpans(t);
+      lines.push(`¶${i} (${s.title})`);
+      spans.forEach((r, j) => { const id = `${i}.${j + 1}`; idx[id] = { para: i, r }; lines.push(`[${id}] ${t.slice(r[0], r[1])}`); });
+    }
   });
-  let body = lines.join('\n'); if (body.length > 400000) body = body.slice(0, 400000);
-  const prompt = `Sen bir hemşirelik doktora tezi danışmanı gibi çalışan akademik asistansın. Aşağıda öğrencinin TEZ KONUSU, tez planındaki başlıklar ve her başlığın paragraf iskeleti (maddeler) var. Ardından bir makalenin numaralandırılmış paragrafları var.
-Görevin: Bu makalede, tezin belirli bir paragrafında kaynak olarak kullanılabilecek cümleleri bulmak.
+  return { idx, text: lines.join('\n') };
+}
+
+/* ---------- scanning in three thoughtful passes ---------- */
+const SCAN_PARTS = [
+  { label: 'Giriş', test: c => c.startsWith('1.') },
+  { label: '2.1–2.3', test: c => /^2\.[1-3](\.|$)/.test(c) },
+  { label: '2.4–2.7', test: c => /^2\.[4-7](\.|$)/.test(c) }
+];
+function planPrompt(test) {
+  return planTargets().filter(t => !test || test(t.node.code)).map(t => `[${t.key}] ${t.node.code} ${t.node.title} › ${t.para.title}${t.para.pages ? ' (' + t.para.pages + ')' : ''}\n${(t.para.points || []).map((x, i) => `   (${i + 1}) ${x}${/^Kapanış/i.test(x) ? '  ← yazarın kendi geçiş cümlesi, kaynak ÖNERME' : ''}`).join('\n')}`).join('\n');
+}
+function scanPrompt(p, part, sents, foreign) {
+  return `Sen hemşirelik alanında deneyimli bir doktora tezi danışmanısın. Öğrencinin tez planı ve bir makale aşağıda. Acele etme: önce makaleyi baştan sona dikkatle oku, sonra plandaki HER maddeyi tek tek ele al ve makalede o maddeye kanıt olabilecek cümleleri ara. Yalnızca bariz eşleşmelerle yetinme; bir maddeyi dolaylı ama gerçekten destekleyen cümleleri de bul.
+
+Görev: Makaledeki cümleleri, tezin şu kısmındaki iskelet maddeleriyle eşleştir: ${part.label}.
 Kurallar:
-- Her öneri için: "p" makale paragraf numarası; "quote" makaleden HARFİ HARFİNE cümle(ler) (tek paragraftan, kelime değiştirme, kısaltma ya da çeviri yok); "target" önerinin gideceği iskelet kimliği (köşeli parantezdeki, ör. "2.3.2#1"); "point" o iskeletteki uygun madde numarası (yoksa 0); "role" şunlardan biri: ${ROLES.join(', ')}; "reason" en fazla 20 kelimelik Türkçe gerekçe; "cites" cümle başka bir kaynağa atıf yapıyorsa o kaynak(lar) APA metin içi biçimde (ör. ["Hayes vd., 2006"]), makalenin kendi ifadesi ya da bulgusuysa boş liste.
-- Makalenin KENDİ bulgularını, tanımlarını ve sonuçlarını tercih et. Makalenin başka çalışmalardan aktardığı cümleleri ancak çok değerliyse öner ve "cites" alanını mutlaka doldur.
-- İstatistik ve yaygınlık verilerinde yılı ve ülkeyi içeren cümleleri seç.
-- Yalnızca güçlü ve doğrudan işe yarayacak eşleşmeleri öner; zayıf ya da genel bağlantıları ekleme. Aynı cümle en fazla iki farklı hedefe önerilebilir (ör. Giriş’te kısa, Genel Bilgiler’de ayrıntılı kullanım). En fazla 30 öneri.
-- Özet (Abstract) bölümündeki cümleler yerine, aynı bilgiyi veren gövde cümlelerini tercih et.
-Yalnızca şu yapıda JSON döndür: {"items":[{"p":0,"quote":"","target":"","point":0,"role":"","reason":"","cites":[]}]}
+- Cümleleri metni KOPYALAMADAN, yalnızca köşeli parantezdeki kimlikleriyle belirt ("ids", ör. ["12.3"] ya da aynı paragraftan ardışık ["12.3","12.4"]).
+- "target": iskelet kimliği (ör. "2.3.2#1"); "point": o iskeletteki madde numarası (1, 2, …).
+- "strength": "güçlü" (maddeyi doğrudan ve açıkça destekliyor) ya da "olası" (ilgili ama dolaylı; öğrenci değerlendirmeli).
+- "role": şunlardan biri: ${ROLES.join(', ')}.
+- "reason": bu cümlenin bu maddeye neden uyduğunu açıklayan en fazla 20 kelimelik Türkçe gerekçe.
+- "cites": cümle başka bir çalışmaya atıf yapıyorsa o kaynak(lar) APA metin içi biçimde (ör. ["Hayes vd., 2006"]); makalenin kendi bulgusuysa boş liste.${foreign ? `
+- "tr": seçilen cümle(ler)in akademik Türkçeye sadık ve akıcı çevirisi (atıflar parantez içinde aynen kalsın, "et al." → "vd.").` : ''}
+- Makalenin KENDİ bulgularını, tanımlarını ve verilerini önceliklendir; başka çalışmalardan aktarılan cümleleri de değerliyse öner ama "cites" alanını doldur.
+- İstatistik ve yaygınlık için yıl ve ülke içeren cümleleri seç. Özet (Abstract) yerine aynı bilgiyi veren gövde cümlelerini tercih et.
+- "Kapanış" maddelerine ve yöntem/bulgu ayrıntılarıyla ilgisiz cümlelere öneri yapma.
+- Aynı cümle bu kısımda en fazla iki farklı maddeye gidebilir. Bu kısım için en fazla 25 öneri.
+- Bu kısımda hiç uygun cümle yoksa boş liste döndür; zorlama.
+Yalnızca şu yapıda JSON döndür: {"items":[{"ids":["0.1"],"target":"","point":1,"strength":"güçlü","role":"","reason":"","cites":[]${foreign ? ',"tr":""' : ''}}]}
 
 TEZ KONUSU: ${S.plan.topic}
 TASARIM: ${S.plan.design || ''}
-TEZ PLANI (kaynak alabilecek iskeletler):
-${planPrompt()}
+TEZİN BU KISMININ İSKELETİ:
+${planPrompt(part.test)}
 
 MAKALE: ${p.meta.title || p.name} (${inText(p)})
-PARAGRAFLAR:
-${body}`;
-  const res = await gemini(prompt, { temperature: 0.1 });
-  const now = Date.now(); let added = 0;
+CÜMLELER:
+${sents.text}`;
+}
+async function scanPaper(p, { onStage } = {}) {
+  if (!S.settings.key) throw new Error('NOKEY');
+  const sents = sentenceIndex(p); const foreign = p.lang !== 'tr';
+  const now = Date.now(); let added = 0; let lost = 0; let done = 0;
   const keep = S.sugs.filter(s => s.paperId !== p.id || s.status !== 'pending');
-  const items = res && Array.isArray(res.items) ? res.items : [];
-  for (const it of items) {
-    const t = targetOf(str(it && it.target)); const n = parseInt(it && it.p, 10); const quote = str(it && it.quote);
-    if (!t || !p.paras[n] || !quote) continue;
-    let f = findQuote(p.paras[n].t, quote); let pi = n;
-    if (!f) for (let i = Math.max(0, n - 3); i <= Math.min(p.paras.length - 1, n + 3) && !f; i++) { if (i === n) continue; const g = findQuote(p.paras[i].t, quote); if (g) { f = g; pi = i; } }
-    if (!f) continue;
-    const exact = p.paras[pi].t.slice(f.r[0], f.r[1]);
-    if (keep.some(s => s.paperId === p.id && s.target === t.key && s.para === pi && Math.abs(s.r[0] - f.r[0]) < 20)) continue;
-    const role = ROLES.includes(str(it.role)) ? str(it.role) : 'sonuç/etki';
-    keep.push({ id: 's' + uid(), paperId: p.id, para: pi, r: f.r, quote: exact, target: t.key, point: Math.max(0, parseInt(it.point, 10) || 0), role, reason: str(it.reason).slice(0, 220),
-      cites: (Array.isArray(it.cites) ? it.cites : []).map(str).filter(Boolean).slice(0, 4), status: 'pending', at: now });
-    added++;
+  gemGap = Math.max(gemGap, 4500); // pace requests so the free tier never trips its per-minute limit
+  for (const part of SCAN_PARTS) {
+    if (!planTargets().some(t => part.test(t.node.code))) { done++; continue; }
+    if (onStage) onStage(`${part.label} için düşünülüyor (${done + 1}/${SCAN_PARTS.length})…`);
+    let res;
+    try { res = await gemini(scanPrompt(p, part, sents, foreign), { temperature: 0.2, think: true }); }
+    catch (e) { if (e.message === 'DAILY_QUOTA' || e.message === 'NOKEY' || !added) { S.sugs = keep; saveSugs(); throw e; } lost++; continue; }
+    done++;
+    for (const it of (res && Array.isArray(res.items) ? res.items : [])) {
+      const t = targetOf(str(it && it.target)); if (!t || !part.test(t.node.code)) { lost++; continue; }
+      const ids = (Array.isArray(it.ids) ? it.ids : [it.ids]).map(x => String(x).replace(/[\[\]\s]/g, '')).filter(x => sents.idx[x]);
+      if (!ids.length) { lost++; continue; }
+      const para = sents.idx[ids[0]].para; const same = ids.filter(x => sents.idx[x].para === para);
+      const r = [Math.min(...same.map(x => sents.idx[x].r[0])), Math.max(...same.map(x => sents.idx[x].r[1]))];
+      if (keep.some(s => s.paperId === p.id && s.target === t.key && s.para === para && s.r[0] === r[0])) continue;
+      const pt = Math.max(0, parseInt(it.point, 10) || 0);
+      keep.push({ id: 's' + uid(), paperId: p.id, para, r, quote: p.paras[para].t.slice(r[0], r[1]), target: t.key, point: pt <= t.para.points.length ? pt : 0,
+        strength: /olası/i.test(str(it.strength)) ? 'olası' : 'güçlü', role: ROLES.includes(str(it.role)) ? str(it.role) : 'sonuç/etki', reason: str(it.reason).slice(0, 220),
+        cites: (Array.isArray(it.cites) ? it.cites : []).map(str).filter(Boolean).slice(0, 4), tr: foreign ? str(it.tr) : '', status: 'pending', at: now });
+      added++;
+    }
   }
   S.sugs = keep; saveSugs();
-  S.scans[p.id] = { at: now, ver: S.plan.ver || 1, n: added }; saveScans();
+  S.scans[p.id] = { at: now, ver: S.plan.ver || 1, n: added, partial: lost > 0 && done < SCAN_PARTS.length }; saveScans();
   return added;
+}
+/* Turkish version of a suggestion from a foreign-language article (for older suggestions without one) */
+async function ensureTr(s) {
+  const p = S.papers[s.paperId]; if (!p || p.lang === 'tr' || s.tr) return s.tr || '';
+  const r = await gemini(`Aşağıdaki akademik cümle(ler)i akademik Türkçeye sadık ve akıcı biçimde çevir. Atıfları parantez içinde aynen koru, "et al." ifadesini "vd." yap. Yalnızca JSON: {"tr":""}\n\n${s.quote}`, { temperature: 0.1 });
+  s.tr = str(r && r.tr); saveSugs(); return s.tr;
 }
 async function scanWithUi(p) {
   if (!p) return;
   if (!S.settings.key) { openSettings(); toast('Önce Gemini API anahtarını ekle.', 'err'); return; }
   busy(`“${(p.meta.title || p.name).slice(0, 60)}” tez planına göre taranıyor…`);
-  try { const n = await scanPaper(p); busy(false); toast(n ? `${n} öneri bulundu. Öneriler sekmesinden ya da metindeki etiketlerden incele.` : 'Bu makalede planına uyan güçlü bir eşleşme bulunamadı.'); }
+  try { const n = await scanPaper(p, { onStage: t => busy(t) }); busy(false); toast(n ? `${n} öneri bulundu. Öneriler sekmesinden ya da metindeki etiketlerden incele.` : 'Bu makalede planına uyan güçlü bir eşleşme bulunamadı.'); }
   catch (e) { busy(false); toast(errMsg(e), 'err'); }
   refreshMap();
 }
@@ -2102,7 +2160,7 @@ async function scanMany(ids) {
   for (let i = 0; i < ids.length; i++) {
     const p = S.papers[ids[i]]; if (!p) continue;
     busy(`Taranıyor ${i + 1}/${ids.length}: ${(p.meta.title || p.name).slice(0, 50)}`);
-    try { tot += await scanPaper(p); ok++; }
+    try { tot += await scanPaper(p, { onStage: t => busy(`${i + 1}/${ids.length}: ${t}`) }); ok++; }
     catch (e) { if (e.message === 'DAILY_QUOTA' || e.message === 'NOKEY') { fail.push('…'); toast(errMsg(e), 'err'); break; } fail.push(p.meta.title || p.name); }
   }
   busy(false); refreshMap();
@@ -2111,11 +2169,12 @@ async function scanMany(ids) {
 const needsScan = p => !S.scans[p.id] || (S.scans[p.id].ver || 1) !== (S.plan.ver || 1);
 
 /* ---------- accept / reject ---------- */
-function acceptSug(s) {
+async function acceptSug(s) {
   const p = S.papers[s.paperId]; const t = targetOf(s.target); if (!p || !t) return;
+  if (p.lang !== 'tr' && !s.tr) { busy('Türkçeye çevriliyor…'); try { await ensureTr(s); } catch (e) { toast(errMsg(e) + ' Not orijinal diliyle eklendi.', 'err'); } busy(false); }
   syncPlanCats();
   const sec = secOf(p, s.para);
-  const n = { id: uid(), paperId: p.id, para: s.para, lang: 'o', secTitle: sec ? sec.title : '', text: s.quote, partial: true, cat: catForTarget(t), created: Date.now(), plan: { target: s.target, point: s.point, role: s.role } };
+  const n = { id: uid(), paperId: p.id, para: s.para, lang: 'o', secTitle: sec ? sec.title : '', text: s.tr || s.quote, orig: s.tr ? s.quote : undefined, partial: true, cat: catForTarget(t), created: Date.now(), plan: { target: s.target, point: s.point, role: s.role } };
   const cs = sugCites(s); if (cs.length) { n.cites = cs.map(c => ({ intext: c.intext, ref: c.ref })); n.direct = false; }
   S.notes.push(n); s.status = 'added'; s.noteId = n.id; saveSugs(); notesChanged(); pulseNotes();
   toast(`Eklendi: ${t.node.code} ${t.para.title !== 'İçerik' ? t.para.title : t.node.title}`, '', { label: 'Geri al', fn: () => undoSug(s) });
@@ -2200,12 +2259,13 @@ function sugTags(p, i) {
 function sugCard(s, { showSource = false, compact = false } = {}) {
   const t = targetOf(s.target); const p = S.papers[s.paperId]; const pt = t && s.point && t.para.points[s.point - 1];
   const warns = sugWarnings(s);
-  return `<div class="scard ${s.status}" data-sid="${s.id}">
+  return `<div class="scard ${s.status}${s.strength === 'olası' ? ' weak' : ''}" data-sid="${s.id}">
     <div class="starget">${s.status === 'added' ? '<b class="sok">Eklendi ✓</b> ' : ''}${esc(targetLabel(t))}</div>
     ${pt && !compact ? `<div class="spoint">Madde: ${esc(pt)}</div>` : ''}
     <blockquote>“${esc(s.quote)}”</blockquote>
+    ${s.tr ? `<div class="strq"><span>Türkçesi</span>${esc(s.tr)}</div>` : ''}
     ${citeBlock(s)}
-    <div class="smeta">${showSource && p ? `<b>${esc(inText(p))}</b>` : ''}<button class="pref" data-goto="${s.id}" aria-label="Metinde oku">¶${s.para + 1} Metinde oku</button><span class="srole">${esc(s.role)}</span></div>
+    <div class="smeta">${showSource && p ? `<b>${esc(inText(p))}</b>` : ''}<button class="pref" data-goto="${s.id}" aria-label="Metinde oku">¶${s.para + 1} Metinde oku</button><span class="srole">${esc(s.role)}</span>${s.strength === 'olası' ? '<span class="sstr">olası</span>' : ''}</div>
     ${s.reason ? `<div class="sreason">${esc(s.reason)}</div>` : ''}
     ${warns.map(x => `<div class="swarn">${esc(x)}</div>`).join('')}
     <div class="sact">${s.status === 'pending' ? '<button class="primary" data-acc>Ekle</button><button data-rej>Reddet</button>' : `<button data-undo>${s.status === 'added' ? 'Eklemeyi geri al' : 'Geri al'}</button>`}</div>
@@ -2250,7 +2310,7 @@ function renderSugPane() {
   let h = `<div class="scanbox">${sc ? `<span>${needsScan(p) ? '<b class="swarnt">Plan değişti, yeniden tara.</b>' : `Tarandı: ${fmtDay(sc.at)}`}</span><button data-scan>${needsScan(p) ? 'Yeniden tara' : 'Tekrar tara'}</button>`
     : `<span>Bu makale henüz tez planına göre taranmadı.</span><button class="primary" data-scan>Planıma göre tara</button>`}</div>`;
   if (all.length) h += `<div class="seg wide sfilt">${[['pending', 'Bekleyen'], ['added', 'Eklenen'], ['rejected', 'Reddedilen']].map(([k, l]) => `<button data-sf="${k}" class="${S.sugFilter === k ? 'on' : ''}">${l} (${cnt(k)})</button>`).join('')}</div>`;
-  const list = all.filter(s => s.status === S.sugFilter).sort((a, b) => a.target.localeCompare(b.target, 'tr', { numeric: true }) || a.para - b.para);
+  const list = all.filter(s => s.status === S.sugFilter).sort((a, b) => ((a.strength === 'olası') - (b.strength === 'olası')) || a.target.localeCompare(b.target, 'tr', { numeric: true }) || a.para - b.para);
   h += list.length ? list.map(s => sugCard(s, { compact: true })).join('') : (all.length ? `<p class="hint">Bu grupta öneri yok.</p>` : '');
   L.innerHTML = h;
 }
