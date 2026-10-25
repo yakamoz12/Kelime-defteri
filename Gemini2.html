@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Makale Okuyucu">
+<meta name="apple-mobile-web-app-title" content="Tez Haritası">
 <title>Tez Haritası</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📑</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -316,7 +316,7 @@ mark.qm{background:rgba(36,80,143,.10);color:inherit;text-decoration:underline;t
 .readtog{flex:none;min-height:44px;padding:6px 14px 6px 10px;border-radius:12px;gap:6px;font-weight:600;color:var(--muted)}
 .readtog[hidden]{display:none}
 .trnote{color:var(--muted);font-size:13.5px;font-weight:600}
-#sDrive,#toolbar,#bRead,.notice,[data-act="translate"],[data-act="forcetr"],.ctrls .trnote{display:none!important}
+#toolbar,#bRead{display:none!important}
 .stags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .stag{min-height:30px;padding:2px 10px;border-radius:999px;font:700 12px var(--sans);border:1px solid var(--accent);background:var(--surface);color:var(--accent)}
 .stag.added{background:#1f7a4a;border-color:#1f7a4a;color:#fff}
@@ -446,15 +446,13 @@ details.setup li{margin-bottom:6px}
   <nav class="rail" aria-label="Ana menü">
     <div class="mark" aria-hidden="true">H</div>
     <button class="nv on" id="nRead"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg>Oku</button>
-    <button class="nv" id="bLib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h7"/></svg>Kütüphane</button>
+    <button class="nv" id="bLib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h7"/></svg>Makaleler</button>
     <button class="nv" id="bArc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9"/><path d="M10 13h4"/></svg>Harita</button>
-    <a class="nv" href="Gemini.html" target="_blank" rel="noopener" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/><path d="M15 3h6v6"/></svg>Makale ekle</a>
+    <label class="nv" for="file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Makale ekle</label>
     <button class="nv nvNotes" id="bNotes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Notlar<span class="badge" id="noteCount">0</span></button>
     <span class="grow"></span>
     <button class="nv" id="bSet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Ayarlar</button>
     <input type="file" id="file" class="vh" accept="application/pdf,.pdf">
-    <input type="file" id="arcFile" class="vh" accept="application/pdf,.pdf" multiple>
-    <input type="file" id="arcAttach" class="vh" accept="application/pdf,.pdf">
   </nav>
   <div class="work" id="readView">
     <div class="main">
@@ -538,15 +536,13 @@ const DB = {
 const S = {
   settings: Object.assign({ key: '', model: 'gemini-2.5-flash', style: 'en', clientId: '' }, LS.get('th:settings', {})),
   cats: [], catView: LS.get('th:catView', 'all'), pendingFiles: {}, attachFor: null,
-  arcFolder: LS.get('th:arcFolder', 'all'), arcTarget: null,
   papers: {}, notes: [], cur: null, sec: 0, view: 'orig', tool: 'select', color: '#d9342b',
   undo: [], translating: false, trText: '', showSkipped: false, hinted: {}
 };
 const curPaper = () => S.papers[S.cur] || null;
 
 const timers = {};
-function savePaper(p, delay = 0) { return; }
-function savePaperDisabled(p, delay = 0) {
+function savePaper(p, delay = 0) {
   clearTimeout(timers[p.id]);
   timers[p.id] = setTimeout(() => { DB.set('paper:' + p.id, p).catch(() => toast('Kaydedilemedi. Depolama dolu olabilir.', 'err')); }, delay);
 }
@@ -554,30 +550,8 @@ function saveNotes() {
   clearTimeout(timers.notes);
   timers.notes = setTimeout(() => { DB.set('notes', S.notes).catch(() => toast('Notlar kaydedilemedi.', 'err')); }, 250);
 }
-if (!S.settings.key) { try { const mo = JSON.parse(localStorage.getItem('mo:settings') || 'null'); if (mo && mo.key) { S.settings.key = mo.key; if (mo.model) S.settings.model = mo.model; if (mo.style) S.settings.style = mo.style; } } catch {} }
-/* Articles live in the Makale Okuyucu library; this app only reads them. */
-function loadArticleLibrary() {
-  return new Promise(res => {
-    let r; try { r = indexedDB.open('makale-okuyucu', 1); } catch { res([]); return; }
-    r.onupgradeneeded = () => r.result.createObjectStore('kv');
-    r.onerror = () => res([]);
-    r.onsuccess = () => {
-      const db = r.result; let st; try { st = db.transaction('kv', 'readonly').objectStore('kv'); } catch { res([]); return; }
-      const q = st.getAll(); const k = st.getAllKeys();
-      let vals = null, keys = null; const done = () => { if (vals && keys) res(keys.map((x, i) => [x, vals[i]]).filter(([x, v]) => String(x).startsWith('paper:') && v && v.id).map(([, v]) => v)); };
-      q.onsuccess = () => { vals = q.result; done(); }; k.onsuccess = () => { keys = k.result; done(); };
-      q.onerror = k.onerror = () => res([]);
-    };
-  });
-}
 function saveSettings() { LS.set('th:settings', S.settings); }
 function saveCats() { DB.set('cats', S.cats).catch(() => toast('Kategoriler kaydedilemedi.', 'err')); }
-async function flushSaves() {
-  clearTimeout(timers.notes);
-  const jobs = [DB.set('notes', S.notes), DB.set('cats', S.cats), DB.set('archive', ARC.items)];
-  const p = curPaper(); if (p) { clearTimeout(timers[p.id]); jobs.push(DB.set('paper:' + p.id, p)); }
-  await Promise.all(jobs).catch(() => {});
-}
 
 /* ---------- UI helpers ---------- */
 let toastT;
@@ -884,8 +858,6 @@ function errMsg(e) {
   if (/API key not valid|API_KEY_INVALID|API key expired/i.test(m)) return 'API anahtarı geçersiz. Ayarlar’dan kontrol et.';
   if (m === 'DAILY_QUOTA') return 'Gemini’nin günlük ücretsiz kotası doldu. Yarın tekrar dene ya da Ayarlar’dan “Flash-Lite” modelini seç.';
   if (/429|quota|RESOURCE_EXHAUSTED|rate/i.test(m)) return 'Ücretsiz kullanım sınırına ulaşıldı. Bir dakika bekleyip tekrar dene.';
-  if (m === 'DRIVE_AUTH') return 'Drive oturumu sona erdi. Arşiv’den ya da Ayarlar’dan tekrar bağlan.';
-  if (/^Drive/.test(m)) return m.replace(/^Drive: /, 'Drive hatası: ');
   if (/not found|is not supported|404/i.test(m)) return 'Model bulunamadı. Ayarlar’dan başka bir model seç.';
   if (/Failed to fetch|NetworkError|Load failed|network/i.test(m)) return 'Bağlantı kurulamadı. İnternetini kontrol et.';
   return 'Hata: ' + m;
@@ -922,31 +894,7 @@ function normKw(k) {
   const seen = new Set();
   return arr.filter(x => { const f = x.toLocaleLowerCase('tr'); if (seen.has(f)) return false; seen.add(f); return true; }).slice(0, 25);
 }
-const META_JSON = '{"meta":{"authors":[{"family":"Soyadı","given":"Adı"}],"year":"","title":"","journal":"","volume":"","issue":"","pages":"","doi":""},"keywords":["..."]}';
 const KW_RULE = 'Anahtar kelimeler TÜRKÇE olmalı: Yayında "Keywords" ya da "Anahtar kelimeler" listesi varsa her birini akademik Türkçeye çevir (zaten Türkçeyse aynen al); liste yoksa 5-8 Türkçe anahtar kelime öner. Kısaltmalar ve özel adlar (ör. PISA, COVID-19) olduğu gibi kalabilir. Özel adlar dışında küçük harfle yaz.';
-function metaPrompt(src) {
-  return `Aşağıda bir akademik yayının ${src}. Görevin APA 7 kaynakçası için künye bilgilerini ve anahtar kelimeleri çıkarmak.
-Kurallar: Yazar adlarını yayındaki gibi tam yaz. Başlığı özgün dilinde ve büyük-küçük harf düzenini koruyarak yaz. pages "45-60" biçiminde, doi yalnızca "10." ile başlayan kısım olsun. Bilinmeyen alanları boş bırak.
-${KW_RULE}
-Yalnızca şu yapıda JSON döndür:
-${META_JSON}`;
-}
-function toB64(file) {
-  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = () => rej(new Error('Dosya okunamadı.')); r.readAsDataURL(file); });
-}
-async function metaFromPdf(f, onStage) {
-  let paras = [];
-  try { paras = await extractPdf(f, () => {}, 3); } catch {}
-  const text = paras.map(x => x.t).join('\n').slice(0, 14000);
-  let res;
-  if (text.length >= 300) res = await gemini(metaPrompt('ilk sayfalarından çıkarılmış metin var') + '\n\nMETİN:\n' + text);
-  else {
-    if (f.size > 18 * 1024 * 1024) throw new Error('Bu PDF taranmış görünüyor ve Gemini’ye gönderilemeyecek kadar büyük.');
-    if (onStage) onStage('Taranmış PDF, Gemini sayfaları okuyor…');
-    res = await gemini([{ inlineData: { mimeType: 'application/pdf', data: await toB64(f) } }, { text: metaPrompt('PDF dosyası ekte') }]);
-  }
-  return { meta: normMeta(res && res.meta), keywords: normKw(res && res.keywords) };
-}
 async function analyze(p) {
   const list = p.paras.map((x, i) => `[${i}] ${i < 25 ? x.t.slice(0, 1500) : x.t.slice(0, 280)}`).join('\n');
   const prompt = `Aşağıda bir akademik makalenin PDF’ten çıkarılmış, numaralandırılmış paragrafları var (uzun paragraflar kısaltıldı).
@@ -1062,21 +1010,22 @@ function blk(p, i, l, text, skipped) {
     + `<p>${l === 'o' ? markText(text, (activeMarks(p) || {})[i]) : esc(text)}</p>${l === 'o' ? sugTags(p, i) : ''}<svg class="ink" viewBox="0 0 1000 1000" preserveAspectRatio="none">${inkPaths(p, i + ':' + l)}</svg></div>`;
 }
 function emptyState() {
-  const hasKey = !!S.settings.key; const n = Object.keys(S.papers).length; const un = Object.values(S.papers).filter(needsScan).length;
+  const hasKey = !!S.settings.key; const n = Object.keys(S.papers).length;
   return `<div class="empty">
     <h2>Tez haritası</h2>
-    <p class="lead">Makalelerini tez planına göre tarar: “bu cümle 2.3.2’ye, şu cümle 1.1’in 3. paragrafına olur” diye önerir. Sen metinde okur, beğendiğini eklersin.</p>
+    <p class="lead">Makaleni ekle; Gemini okur ve “bu cümle 2.3.2’ye, şu cümle 1.1’in 3. paragrafına olur” diye önerir. Sen metinde okur, beğendiğini eklersin.</p>
     <div class="acts">
       ${hasKey ? '' : '<button class="primary big" data-act="settings">Gemini API anahtarını ekle</button>'}
-      ${n ? `<button class="big ${hasKey ? 'primary' : ''}" data-act="lib">Makaleleri aç (${n})</button>` : '<a class="btn big" href="Gemini.html" target="_blank" rel="noopener">Makale Okuyucu’da makale ekle</a>'}
-      <button class="big" data-act="plan">Tez haritasını aç</button>
+      <label class="btn big ${hasKey ? 'primary' : ''}" for="file">Makale ekle (PDF)</label>
+      ${n ? `<button class="big" data-act="lib">Makaleler (${n})</button>` : ''}
+      <button class="big" data-act="plan">Tez haritası</button>
     </div>
     <ol class="steps">
-      <li><span>1</span><div>Makaleleri <b>Makale Okuyucu</b>’ya (Gemini.html) eklemeye devam et. Burada otomatik görünürler${n ? `; şu an ${n} makale var${un ? `, ${un} tanesi henüz taranmadı` : ''}` : ''}.</div></li>
-      <li><span>2</span><div>Bir makaleyi aç ve sağdaki <b>Öneriler</b> sekmesinde <b>Planıma göre tara</b>’ya dokun. Ya da Harita’da hepsini birden tara.</div></li>
-      <li><span>3</span><div>Metinde altı çizili cümlelerin yanında <b>→ 2.3.2</b> gibi etiketler çıkar. Dokun, oku, beğenirsen <b>Ekle</b>, beğenmezsen <b>Reddet</b>.</div></li>
-      <li><span>4</span><div><b>Harita</b>’da her başlığın ne kadar kaynakla dolduğunu renklerle gör: kırmızı boş, sarı az, yeşil yeterli.</div></li>
-      <li><span>5</span><div><b>Taslağı Word’e aktar</b> ile başlıkları, iskelet maddelerini ve eklediğin alıntıları atıflarıyla tek dosyada al.</div></li>
+      <li><span>1</span><div><b>Makale ekle</b> ile PDF’i seç. Gemini bölümleri ve künyeyi çıkarır; künyeyi onaylayınca makale tez planına göre taranır.</div></li>
+      <li><span>2</span><div>Metinde altı çizili cümlelerin yanında <b>→ 2.3.2</b> gibi etiketler çıkar. Dokun, oku; beğenirsen <b>Ekle</b>, beğenmezsen <b>Reddet</b>.</div></li>
+      <li><span>3</span><div>Cümle başka bir çalışmaya atıf yapıyorsa, o çalışmanın makalenin kaynakçasındaki künyesi de gösterilir.</div></li>
+      <li><span>4</span><div><b>Harita</b>’da her başlığın ne kadar dolduğunu gör: kırmızı boş, sarı az, yeşil yeterli.</div></li>
+      <li><span>5</span><div><b>Taslağı Word’e aktar</b> ile başlıkları, iskelet maddelerini ve eklediğin alıntıları atıflarıyla al.</div></li>
     </ol>
   </div>`;
 }
@@ -1116,7 +1065,7 @@ function renderHeader() {
   const r = $('#bRead');
   if (!p) { b.innerHTML = '<b>Tez Haritası</b><small>Makale seçilmedi</small>'; r.hidden = true; }
   else {
-    b.innerHTML = `<b>${esc(p.meta.title || p.name)}</b><small>${esc(inText(p))}</small>`;
+    b.innerHTML = `<b>${esc(p.meta.title || p.name)}</b><small>${esc(inText(p))}. Künyeyi düzenlemek için dokun</small>`;
     r.hidden = false; r.classList.toggle('on', !!p.read); r.setAttribute('aria-pressed', p.read ? 'true' : 'false');
     r.innerHTML = CHECK_SVG + (p.read ? 'Okundu' : 'Okudum');
   }
@@ -1380,7 +1329,7 @@ $('#secbar').addEventListener('click', e => {
   else if (v) { S.view = v.dataset.view; renderSectionBar(); renderReader(true); }
   else if (a) handleAct(a.dataset.act);
 });
-$('#pname').onclick = () => { if (S.cur) toast('Künyeyi Makale Okuyucu’da (Gemini.html) düzenleyebilirsin.'); };
+$('#pname').onclick = () => { if (S.cur) openMeta(S.cur); };
 $('#bRead').onclick = () => { const p = curPaper(); if (!p) return; setRead(p, !p.read); toast(p.read ? 'Okundu olarak işaretlendi. Kütüphanede tikli görünecek.' : 'Okunmadı olarak işaretlendi.'); };
 $('#viewSeg').addEventListener('click', e => {
   const v = e.target.closest('[data-view]'); if (!v || !curPaper()) return;
@@ -1390,7 +1339,6 @@ function showScreen(s) {
   S.screen = s;
   $('#readView').hidden = s !== 'read'; $('#arcView').hidden = s !== 'arc';
   $('#nRead').classList.toggle('on', s === 'read'); $('#bArc').classList.toggle('on', s === 'arc');
-  if (s !== 'arc') ARC.onChange = null;
 }
 $('#nRead').onclick = () => { closeModal(); showScreen('read'); };
 $('#bLib').onclick = openLib;
@@ -1633,533 +1581,21 @@ function bindMetaPreview(box, base, sm) {
 }
 function openMeta(pid, fresh) {
   const p = S.papers[pid]; if (!p) return;
-  const file = fresh ? S.pendingFiles[pid] : null;
-  const arcItem = p.arcId ? ARC.get(p.arcId) : null;
-  const arcOpt = arcItem
-    ? '<p class="hint">Bu makale arşivde. Künyedeki değişiklikler arşive de yansır.</p>'
-    : `<label class="check"><input type="checkbox" id="mArc" ${fresh ? 'checked' : ''}><span>Arşive ekle${file ? (Drive.ok() ? ' ve PDF’i Drive’a yükle' : '. Drive bağlı değil, yalnızca künye kaydedilir.') : ''}</span></label>
-      <label>Arşiv klasörü<select id="mFolder">${folderOptions(S.arcFolder !== 'all' && ARC.folder(S.arcFolder) ? S.arcFolder : GENEL)}</select></label>`;
   modal(`<h3>Künye</h3>
     <p class="hint">${fresh ? 'Gemini’nin bulduğu bilgileri kontrol et. ' : ''}Kaynakça bu bilgilerle APA 7’ye göre yazılır. Her satıra bir yazar, <b>Soyadı, Adı</b> biçiminde.</p>
-    ${metaForm(p.meta, p.keywords)}${arcOpt}
-    <div class="mact"><button data-close>Vazgeç</button><button class="primary" id="mSave">Kaydet</button></div>`, box => {
+    ${metaForm(p.meta, p.keywords)}
+    ${fresh ? '<p class="hint">Kaydettiğinde makale tez planına göre otomatik taranır.</p>' : ''}
+    <div class="mact"><button data-close>Vazgeç</button><button class="primary" id="mSave">${fresh ? 'Kaydet ve tara' : 'Kaydet'}</button></div>`, box => {
     bindMetaPreview(box, p);
-    if ($('#mFolder')) bindFolderSelect($('#mFolder'));
     $('#mSave').onclick = async () => {
-      const { meta, keywords } = readMetaForm(); const toArc = !!($('#mArc') && $('#mArc').checked);
-      const folderId = $('#mFolder') ? $('#mFolder').value : null;
-      p.meta = meta; p.keywords = keywords; savePaper(p); closeModal(); renderHeader(); renderNotes();
+      const { meta, keywords } = readMetaForm();
+      p.meta = meta; p.keywords = keywords; savePaper(p); closeModal(); renderHeader(); renderNotes(); refreshMap();
       delete S.pendingFiles[pid];
-      if (arcItem) { await saveArcItem({ item: arcItem, meta, keywords }); toast('Künye kaydedildi.'); return; }
-      if (!toArc) { toast('Künye kaydedildi.'); return; }
-      const up = !!(file && Drive.ok());
-      busy(up ? 'PDF Drive’a yükleniyor…' : 'Arşive ekleniyor…');
-      const r = await saveArcItem({ meta, keywords, file: up ? file : null, readId: p.id, folderId, fileName: file ? file.name : null });
-      busy(false); p.arcId = r.item.id; savePaper(p);
-      if (r.upErr) toast('Künye arşive eklendi ama PDF yüklenemedi. ' + errMsg(r.upErr), 'err');
-      else toast(up ? 'Künye kaydedildi, PDF Drive arşivine yüklendi.' : 'Künye kaydedildi ve arşive eklendi.');
+      if (fresh && S.settings.key) { setPane('sug'); await scanWithUi(p); } else toast('Künye kaydedildi.');
     };
   });
 }
 
-/* ---------- Google Drive ---------- */
-const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
-const FOLDER_NAME = 'Makale Arşivi', INDEX_NAME = 'arsiv-dizini.json', BACKUP_NAME = 'tez-haritasi-yedek.json';
-const Drive = {
-  tok: LS.get('th:dtok', null), folder: LS.get('th:dfolder', null), indexId: LS.get('th:dindex', null),
-  ok() { return !!(this.tok && this.tok.t && this.tok.exp > Date.now() + 60000); },
-  web() { return /^https?:$/.test(location.protocol); },
-  redirectUri() { return location.origin + location.pathname; },
-  minsLeft() { return this.ok() ? Math.max(1, Math.round((this.tok.exp - Date.now()) / 60000)) : 0; },
-  async connect(after) {
-    if (!this.web()) { toast('Drive bağlantısı için uygulamanın bir https adresinden açılması gerekiyor. Ayarlar’daki kurulum adımlarına bak.', 'err'); return; }
-    if (!S.settings.clientId) { openSettings('drive'); toast('Önce Google Client ID’yi ekle.'); return; }
-    busy('Google’a yönlendiriliyor…');
-    await flushSaves();
-    const state = uid(); LS.set('th:dstate', state); LS.set('th:after', after || 'connected');
-    const q = new URLSearchParams({ client_id: S.settings.clientId, redirect_uri: this.redirectUri(), response_type: 'token', scope: DRIVE_SCOPE, include_granted_scopes: 'true', state });
-    location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + q.toString();
-  },
-  handleRedirect() {
-    const raw = location.hash.slice(1);
-    if (!/(^|&)(access_token|error)=/.test(raw)) return null;
-    const h = new URLSearchParams(raw);
-    history.replaceState(null, '', location.pathname + location.search);
-    const st = LS.get('th:dstate', null); LS.set('th:dstate', null);
-    const after = LS.get('th:after', null); LS.set('th:after', null);
-    if (h.get('error')) { setTimeout(() => toast(h.get('error') === 'access_denied' ? 'Drive izni verilmedi.' : 'Drive bağlantısı kurulamadı: ' + h.get('error'), 'err'), 300); return null; }
-    if (!st || h.get('state') !== st) { setTimeout(() => toast('Drive bağlantısı doğrulanamadı. Tekrar dene.', 'err'), 300); return null; }
-    this.tok = { t: h.get('access_token'), exp: Date.now() + (parseInt(h.get('expires_in'), 10) || 3600) * 1000 };
-    LS.set('th:dtok', this.tok);
-    return after || 'connected';
-  },
-  disconnect() {
-    if (this.tok && this.tok.t) fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(this.tok.t), { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).catch(() => {});
-    this.tok = null; LS.set('th:dtok', null);
-  },
-  async api(url, opts = {}) {
-    if (!this.ok()) throw new Error('DRIVE_AUTH');
-    const r = await fetch(/^https:/.test(url) ? url : 'https://www.googleapis.com/drive/v3/' + url, Object.assign({}, opts, { headers: Object.assign({ Authorization: 'Bearer ' + this.tok.t }, opts.headers || {}) }));
-    if (r.status === 401) { this.tok = null; LS.set('th:dtok', null); throw new Error('DRIVE_AUTH'); }
-    if (!r.ok) { const d = await r.json().catch(() => ({})); const e = new Error('Drive: ' + ((d.error && d.error.message) || ('HTTP ' + r.status))); e.status = r.status; throw e; }
-    return r;
-  },
-  async json(url, opts) { return (await this.api(url, opts)).json(); },
-  qs: s => encodeURIComponent(s),
-  async ensureFolder() {
-    if (this.folder) {
-      try { const f = await this.json(`files/${this.folder}?fields=id,trashed`); if (!f.trashed) return this.folder; }
-      catch (e) { if (e.message === 'DRIVE_AUTH') throw e; }
-    }
-    const res = await this.json(`files?q=${this.qs(`name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`)}&fields=files(id)&spaces=drive`);
-    let id = res.files && res.files[0] && res.files[0].id;
-    if (!id) id = (await this.json('files?fields=id', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' }) })).id;
-    this.folder = id; LS.set('th:dfolder', id); return id;
-  },
-  async findFile(name) {
-    const folder = await this.ensureFolder();
-    const res = await this.json(`files?q=${this.qs(`name='${name}' and '${folder}' in parents and trashed=false`)}&fields=files(id)&spaces=drive`);
-    return (res.files && res.files[0]) || null;
-  },
-  async upload(blob, meta, fileId) {
-    const type = blob.type || 'application/octet-stream';
-    const base = 'https://www.googleapis.com/upload/drive/v3/files' + (fileId ? '/' + fileId : '');
-    const r = await this.api(base + '?uploadType=resumable&fields=id,name', { method: fileId ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json; charset=UTF-8', 'X-Upload-Content-Type': type }, body: JSON.stringify(meta || {}) });
-    const loc = r.headers.get('Location');
-    if (loc) {
-      const u = await fetch(loc, { method: 'PUT', headers: { 'Content-Type': type }, body: blob });
-      if (!u.ok) throw new Error('Drive yüklemesi başarısız (HTTP ' + u.status + ').');
-      return u.json();
-    }
-    if (fileId) return this.json(base + '?uploadType=media&fields=id,name', { method: 'PATCH', headers: { 'Content-Type': type }, body: blob });
-    const b = 'mo' + uid();
-    const body = new Blob([`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta || {})}\r\n--${b}\r\nContent-Type: ${type}\r\n\r\n`, blob, `\r\n--${b}--`]);
-    return this.json(base + '?uploadType=multipart&fields=id,name', { method: 'POST', headers: { 'Content-Type': `multipart/related; boundary=${b}` }, body });
-  },
-  async validId(idKey) {
-    const id = this[idKey]; if (!id) return null;
-    try { const f = await this.json(`files/${id}?fields=id,trashed`); if (!f.trashed) return id; }
-    catch (e) { if (e.message === 'DRIVE_AUTH') throw e; }
-    this[idKey] = null; LS.set('th:dindex', null); return null;
-  },
-  async putJson(name, data, idKey) {
-    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-    let id = idKey ? await this.validId(idKey) : null;
-    if (!id) { const f = await this.findFile(name); id = f && f.id; }
-    if (id) {
-      try { await this.upload(blob, {}, id); return id; }
-      catch (e) { if (e.status !== 404) throw e; }
-    }
-    const r = await this.upload(blob, { name, parents: [await this.ensureFolder()], mimeType: 'application/json' });
-    if (idKey) { this[idKey] = r.id; LS.set('th:dindex', r.id); }
-    return r.id;
-  },
-  async getJson(name, idKey) {
-    const id = idKey ? await this.validId(idKey) : null;
-    if (id) return (await this.api(`files/${id}?alt=media`)).json().catch(() => null);
-    const f = await this.findFile(name); if (!f) return null;
-    if (idKey) { this[idKey] = f.id; LS.set('th:dindex', f.id); }
-    return (await this.api(`files/${f.id}?alt=media`)).json().catch(() => null);
-  }
-};
-
-/* ---------- archive ---------- */
-const GENEL = 'f-genel';
-const ARC = {
-  items: [], folders: [], ver: 0, dirty: LS.get('th:arcDirty', false), busy: null, again: false,
-  live() { return this.items.filter(x => !x.deleted); },
-  get(id) { return this.items.find(x => x.id === id && !x.deleted) || null; },
-  liveFolders() { return this.folders.filter(f => !f.deleted); },
-  folder(id) { return this.folders.find(f => f.id === id && !f.deleted) || null; },
-  fix() {
-    if (!this.folders.some(f => f.id === GENEL)) this.folders.unshift({ id: GENEL, name: 'Genel', updated: 0 });
-    const g = this.folders.find(f => f.id === GENEL); if (g.deleted) { delete g.deleted; g.updated = Date.now(); }
-    for (const x of this.items) if (!x.deleted && !this.folder(x.folderId)) x.folderId = GENEL;
-  },
-  save() { return Promise.all([DB.set('archive', this.items), DB.set('arcFolders', this.folders)]).catch(() => toast('Arşiv kaydedilemedi.', 'err')); },
-  touch() { this.ver++; this.save(); this.dirty = true; LS.set('th:arcDirty', true); clearTimeout(this.t); this.t = setTimeout(() => this.sync(true), 1200); },
-  merge(remote) {
-    const mix = (local, rem) => {
-      const m = new Map(local.map(x => [x.id, x]));
-      for (const r of (rem || [])) { const l = m.get(r && r.id); if (r && r.id && (!l || (r.updated || 0) > (l.updated || 0))) m.set(r.id, r); }
-      return [...m.values()];
-    };
-    this.items = mix(this.items, remote && remote.items);
-    this.folders = mix(this.folders, remote && remote.folders);
-    this.fix();
-  },
-  async sync(quiet) {
-    if (!Drive.ok()) return false;
-    if (this.busy) { this.again = true; return this.busy; }
-    this.busy = (async () => {
-      try {
-        const remote = await Drive.getJson(INDEX_NAME, 'indexId');
-        this.merge(remote); const v = this.ver; await this.save();
-        await Drive.putJson(INDEX_NAME, { app: 'makale-arsivi', v: 2, updated: Date.now(), items: this.items, folders: this.folders }, 'indexId');
-        if (v === this.ver) { this.dirty = false; LS.set('th:arcDirty', false); }
-        if (this.onChange) this.onChange();
-        return true;
-      } catch (e) { if (!quiet) toast(errMsg(e), 'err'); return false; }
-    })();
-    const r = await this.busy; this.busy = null;
-    if (this.again) { this.again = false; return this.sync(quiet); }
-    return r;
-  }
-};
-const fold = s => String(s || '').toLocaleLowerCase('tr');
-const asPaper = x => ({ id: x.id, name: x.fileName || '', meta: x.meta || {} });
-const folderName = id => (ARC.folder(id) || { name: 'Genel' }).name;
-const pdfName = n => { n = String(n || '').trim().replace(/[\\/:*?"<>|]+/g, '-') || 'makale'; return /\.pdf$/i.test(n) ? n : n + '.pdf'; };
-const dispName = x => x.fileName || (x.meta && x.meta.title) || 'Adsız kayıt';
-function arcDesc(x) {
-  return refParts(asPaper(x), {}).map(r => r[0]).join('') + ((x.keywords || []).length ? '\n\nAnahtar kelimeler: ' + x.keywords.join(', ') : '');
-}
-function newFolder(name) { const f = { id: 'f' + uid(), name: name.trim(), updated: Date.now() }; ARC.folders.push(f); ARC.touch(); return f; }
-const qEsc = s => String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-Object.assign(Drive, {
-  async ensureSub(fid) {
-    const root = await this.ensureFolder();
-    const f = ARC.folder(fid); if (!f || f.id === GENEL) return root;
-    if (f.driveId) {
-      try { const r = await this.json(`files/${f.driveId}?fields=id,trashed`); if (!r.trashed) return f.driveId; }
-      catch (e) { if (e.message === 'DRIVE_AUTH') throw e; }
-    }
-    const q = await this.json(`files?q=${this.qs(`name='${qEsc(f.name)}' and mimeType='application/vnd.google-apps.folder' and '${root}' in parents and trashed=false`)}&fields=files(id)&spaces=drive`);
-    let id = q.files && q.files[0] && q.files[0].id;
-    if (!id) id = (await this.json('files?fields=id', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: f.name, mimeType: 'application/vnd.google-apps.folder', parents: [root] }) })).id;
-    f.driveId = id; f.updated = Date.now(); ARC.touch(); return id;
-  },
-  async moveFile(fileId, to) {
-    const r = await this.json(`files/${fileId}?fields=parents`);
-    const rm = (r.parents || []).filter(p => p !== to).join(',');
-    await this.api(`files/${fileId}?addParents=${to}${rm ? '&removeParents=' + rm : ''}&fields=id`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: '{}' });
-  },
-  async patch(id, body) { return this.api(`files/${id}?fields=id`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); }
-});
-
-async function saveArcItem({ item = null, meta, keywords, file = null, readId = null, folderId = null, fileName = null }) {
-  const now = Date.now(); let upErr = null;
-  if (!item) { item = { id: 'a' + uid(), added: now, fileId: null, fileName: '', folderId: GENEL }; if (readId) item.readId = readId; }
-  const oldFolder = item.folderId || GENEL, oldName = item.fileName;
-  Object.assign(item, { meta, keywords, updated: now });
-  if (folderId && ARC.folder(folderId)) item.folderId = folderId;
-  if (file) item.fileName = pdfName(fileName || file.name);
-  else if (fileName) item.fileName = pdfName(fileName);
-  try {
-    if (file) {
-      const parent = await Drive.ensureSub(item.folderId);
-      const r = await Drive.upload(file, { name: item.fileName, parents: [parent], mimeType: 'application/pdf', description: arcDesc(item), appProperties: { arsivId: item.id } });
-      item.fileId = r.id;
-    } else if (item.fileId) {
-      if (!Drive.ok()) { if (item.folderId !== oldFolder || item.fileName !== oldName) throw new Error('DRIVE_AUTH'); }
-      else {
-        await Drive.patch(item.fileId, { name: item.fileName, description: arcDesc(item) });
-        if (item.folderId !== oldFolder) await Drive.moveFile(item.fileId, await Drive.ensureSub(item.folderId));
-      }
-    }
-  } catch (e) { upErr = e; }
-  const k = ARC.items.findIndex(x => x.id === item.id);
-  if (k >= 0) ARC.items[k] = item; else ARC.items.push(item);
-  ARC.touch();
-  return { item, upErr };
-}
-async function copyRef(x) {
-  const p = asPaper(x); const html = refHTML(p, {}); const text = refParts(p, {}).map(r => r[0]).join('');
-  try {
-    if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([text], { type: 'text/plain' }) })]);
-    else await navigator.clipboard.writeText(text);
-    toast('Kaynak APA 7 biçiminde kopyalandı.');
-  } catch { try { await navigator.clipboard.writeText(text); toast('Kaynak kopyalandı.'); } catch { toast('Kopyalanamadı.', 'err'); } }
-}
-function folderOptions(sel) {
-  return ARC.liveFolders().map(f => `<option value="${f.id}" ${f.id === sel ? 'selected' : ''}>${esc(f.name)}</option>`).join('') + '<option value="__new">+ Yeni klasör…</option>';
-}
-function bindFolderSelect(el) {
-  let prev = el.value;
-  el.addEventListener('change', () => {
-    if (el.value !== '__new') { prev = el.value; return; }
-    const n = (prompt('Yeni klasörün adı (ör. Doktora makaleleri)') || '').trim();
-    if (!n) { el.value = prev; return; }
-    const f = newFolder(n); el.innerHTML = folderOptions(f.id); prev = f.id;
-  });
-}
-function openArcEditor({ item = null, meta = {}, keywords = [], file = null, folderId = null } = {}) {
-  const fid = item ? item.folderId : (folderId || (S.arcFolder !== 'all' && ARC.folder(S.arcFolder) ? S.arcFolder : GENEL));
-  const showName = !!(file || (item && (item.fileId || item.fileName)));
-  const nameVal = file ? file.name : (item ? item.fileName : '');
-  const up = file ? (Drive.ok() ? '<label class="check"><input type="checkbox" id="aUp" checked><span>PDF’i Drive’a yükle</span></label>' : '<p class="hint">Drive bağlı olmadığı için PDF yüklenmeyecek, yalnızca künye kaydedilecek.</p>') : '';
-  modal(`<h3>${item ? 'Kaydı düzenle' : 'Arşive ekle'}</h3>
-    <label>Klasör<select id="aFolder">${folderOptions(fid)}</select></label>
-    ${showName ? `<label>Dosya adı<input id="aName" value="${esc(nameVal)}" autocapitalize="off" autocomplete="off" spellcheck="false"></label>` : ''}
-    <p class="hint">${file ? 'Gemini’nin bulduğu künyeyi kontrol et. ' : ''}Her satıra bir yazar, <b>Soyadı, Adı</b> biçiminde.</p>
-    ${metaForm(meta, keywords)}${up}
-    <div class="mact"><button id="aBack">Vazgeç</button><button class="primary" id="mSave">Arşive kaydet</button></div>`, box => {
-    bindFolderSelect($('#aFolder'));
-    bindMetaPreview(box, { id: item ? item.id : '_new', name: nameVal.replace(/\.pdf$/i, '') }, {});
-    $('#aBack').onclick = () => openArchive();
-    $('#mSave').onclick = async () => {
-      const r0 = readMetaForm(); const doUp = !!($('#aUp') && $('#aUp').checked);
-      const folder = $('#aFolder').value; const fname = $('#aName') ? $('#aName').value.trim() : null;
-      closeModal(); busy(doUp ? 'PDF Drive’a yükleniyor…' : 'Kaydediliyor…');
-      const r = await saveArcItem({ item, meta: r0.meta, keywords: r0.keywords, file: doUp ? file : null, folderId: folder, fileName: fname });
-      busy(false); arcSel = r.item.id;
-      for (const p of Object.values(S.papers)) if (p.arcId === r.item.id) { p.meta = JSON.parse(JSON.stringify(r0.meta)); p.keywords = r0.keywords.slice(); savePaper(p); }
-      renderHeader(); renderNotes();
-      if (r.upErr) toast('Kaydedildi ama Drive’daki dosya güncellenemedi. ' + errMsg(r.upErr), 'err'); else toast(`“${folderName(r.item.folderId)}” klasörüne kaydedildi.`);
-      openArchive();
-    };
-  });
-}
-function pickFolder({ title, current = null, sub = '' }, done) {
-  const cnt = id => ARC.live().filter(x => x.folderId === id).length;
-  modal(`<h3>${esc(title)}</h3>${sub ? `<p class="hint">${esc(sub)}</p>` : ''}
-    <div class="picklist">${ARC.liveFolders().map(f => `<button data-pf="${f.id}" ${f.id === current ? 'disabled' : ''}><span>${esc(f.name)}</span><small>${f.id === current ? 'Şu an burada' : cnt(f.id) + ' kayıt'}</small></button>`).join('')}</div>
-    <div class="newcat"><input id="pfNew" placeholder="Yeni klasör adı" autocomplete="off"><button id="pfAdd">Oluştur</button></div>
-    <div class="mact"><button id="pfBack">Vazgeç</button></div>`, box => {
-    box.querySelector('.picklist').onclick = e => { const b = e.target.closest('[data-pf]'); if (b && !b.disabled) done(b.dataset.pf); };
-    const add = () => { const v = $('#pfNew').value.trim(); if (!v) { $('#pfNew').focus(); return; } done(newFolder(v).id); };
-    $('#pfAdd').onclick = add; $('#pfNew').onkeydown = e => { if (e.key === 'Enter') add(); };
-    $('#pfBack').onclick = () => openArchive();
-  });
-}
-function editFolder(id) {
-  const f = ARC.folder(id); if (!f) return;
-  const items = ARC.live().filter(x => x.folderId === id);
-  modal(`<h3>Klasörü düzenle</h3><label>Klasör adı<input id="fName" value="${esc(f.name)}" autocomplete="off"></label>
-    ${id === GENEL ? '<p class="hint">“Genel” klasörü silinemez. Drive’da doğrudan “Makale Arşivi” klasörüne karşılık gelir.</p>' : `<p class="hint">Klasörü silersen içindeki ${items.length} kayıt “Genel” klasörüne taşınır.</p>`}
-    <div class="mact">${id === GENEL ? '' : '<button class="danger" id="fDel">Klasörü sil</button>'}<button id="fBack">Vazgeç</button><button class="primary" id="fOk">Kaydet</button></div>`, () => {
-    $('#fBack').onclick = () => openArchive();
-    $('#fOk').onclick = async () => {
-      const v = $('#fName').value.trim(); if (!v) return;
-      f.name = v; f.updated = Date.now(); ARC.touch();
-      if (f.driveId && Drive.ok()) { try { await Drive.patch(f.driveId, { name: v }); } catch (e) { toast(errMsg(e), 'err'); } }
-      openArchive(); toast('Klasör adı değişti.');
-    };
-    if (id === GENEL) return;
-    $('#fDel').onclick = async () => {
-      const withPdf = items.filter(x => x.fileId);
-      if (withPdf.length && !Drive.ok()) { toast('Bu klasörde Drive’da PDF var. Silmeden önce Drive’a bağlan.', 'err'); return; }
-      if (!confirm(`“${f.name}” klasörü silinecek, içindeki ${items.length} kayıt “Genel”e taşınacak. Emin misin?`)) return;
-      busy('Klasör siliniyor…');
-      try {
-        if (withPdf.length) { const root = await Drive.ensureFolder(); for (const x of withPdf) await Drive.moveFile(x.fileId, root); }
-        if (f.driveId && Drive.ok()) await Drive.patch(f.driveId, { trashed: true }).catch(() => {});
-        const now = Date.now(); for (const x of items) { x.folderId = GENEL; x.updated = now; }
-        f.deleted = true; f.updated = now; ARC.touch();
-        if (S.arcFolder === id) { S.arcFolder = 'all'; LS.set('th:arcFolder', 'all'); }
-        toast('Klasör silindi.');
-      } catch (e) { toast(errMsg(e), 'err'); }
-      finally { busy(false); openArchive(); }
-    };
-  });
-}
-let arcQ = ''; let arcSel = null;
-const ICO = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
-const FOLDER_SVG = `<svg ${ICO}><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`;
-function openArchive() {
-  closeModal(); showScreen('arc');
-  if (S.arcFolder !== 'all' && !ARC.folder(S.arcFolder)) S.arcFolder = 'all';
-  const old = $('#arcView'); const box = old.cloneNode(false); old.replaceWith(box); box.hidden = false;
-  box.innerHTML = `<div class="arc">
-    <section class="afold" aria-label="Klasörler"><h2>Arşiv</h2><div id="aFolders"></div><span style="flex:1"></span><div class="astat" id="aStat"></div></section>
-    <div class="amain">
-      <div class="atop">
-        <label class="asearch"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-          <input id="aSearch" type="search" aria-label="Arşivde ara" placeholder="Anahtar kelime, dosya adı, yazar…" value="${esc(arcQ)}" autocapitalize="off" autocomplete="off" spellcheck="false"></label>
-        <button class="primary" id="aAdd">+ PDF ekle</button>
-        <button id="aManual">Elle künye gir</button>
-      </div>
-      <div class="afbar" id="aFbar"></div>
-      <div class="kw" id="aSug" style="margin:12px 0 4px"></div>
-      <p class="count" id="aCount" style="margin:6px 4px 10px"></p>
-      <div class="alist" id="aList"></div>
-    </div>
-    <aside class="adetail" id="aDetail" aria-label="Seçili makale"></aside>
-  </div>`;
-  const cnt = id => ARC.live().filter(x => x.folderId === id).length;
-  const statHTML = () => Drive.ok()
-    ? `<span class="dot on"></span><span><b>Drive bağlı</b><small>Klasörler Drive ile eşit</small></span><button id="aSync">Eşitle</button>`
-    : (S.settings.clientId && Drive.web()
-      ? `<span class="dot"></span><span><b>Drive bağlı değil</b></span><button class="primary" id="aConn">Bağlan</button>`
-      : `<span class="dot"></span><span><b>Drive kurulmadı</b></span><button id="aSet">Kur</button>`);
-  const stat = () => { $('#aStat').innerHTML = statHTML(); };
-  const folders = () => {
-    $('#aFolders').innerHTML = `<button class="fd${S.arcFolder === 'all' ? ' on' : ''}" data-fv="all"><svg ${ICO}><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9"/></svg><span>Tümü</span><small>${ARC.live().length}</small></button>`
-      + ARC.liveFolders().map(f => `<button class="fd${S.arcFolder === f.id ? ' on' : ''}" data-fv="${f.id}">${FOLDER_SVG}<span>${esc(f.name)}</span><small>${cnt(f.id)}</small></button>`).join('')
-      + `<button class="fd ghost" data-fnew><svg ${ICO}><path d="M12 5v14M5 12h14"/></svg><span>Yeni klasör</span></button>`
-      + `<button class="fd ghost" data-kwtr><svg ${ICO}><path d="M4 5h8M8 3v2M6 5c0 4 3 7 6 8M10 5c-1 4-4 7-6 8"/><path d="M13 21l4-9 4 9M14.5 18h5"/></svg><span>Etiketleri Türkçeleştir</span></button>`
-      + (S.arcFolder !== 'all' ? `<button class="fd ghost" data-fedit><svg ${ICO}><path d="M17 3l4 4L8 20H4v-4z"/></svg><span>Klasörü düzenle</span></button>` : '');
-    $('#aFbar').innerHTML = `<button class="chip${S.arcFolder === 'all' ? ' on' : ''}" data-fv="all">Tümü<small>${ARC.live().length}</small></button>`
-      + ARC.liveFolders().map(f => `<button class="chip${S.arcFolder === f.id ? ' on' : ''}" data-fv="${f.id}">${esc(f.name)}<small>${cnt(f.id)}</small></button>`).join('')
-      + '<button class="chip ghost" data-fnew>+ Klasör</button>' + (S.arcFolder !== 'all' ? '<button class="chip ghost" data-fedit>Düzenle</button>' : '')
-      + '<button class="chip ghost" data-kwtr>Etiketleri Türkçeleştir</button>'
-      + `<div class="astat">${statHTML()}</div>`;
-  };
-  const detail = (open) => {
-    const D = $('#aDetail'); const x = arcSel ? ARC.get(arcSel) : null;
-    if (!x) { arcSel = null; D.classList.remove('open'); D.innerHTML = '<p class="aempty">Ayrıntılarını görmek için bir makaleye dokun.</p>'; return; }
-    const reading = Object.values(S.papers).some(p => p.arcId === x.id);
-    D.innerHTML = `<button class="adclose" data-aclose aria-label="Kapat">✕</button>
-      <div><h3>${esc(dispName(x))}</h3><p class="count" style="margin-top:4px">${esc(folderName(x.folderId))}${x.fileId ? '' : ', PDF yok'}${reading ? ', kütüphanende' : ''}</p></div>
-      <div><p class="lb">Künye (APA 7)</p><p class="refp">${refHTML(asPaper(x), {})}</p></div>
-      ${(x.keywords || []).length ? `<div><p class="lb">Anahtar kelimeler</p><div class="kw" style="margin:0">${x.keywords.map(k => `<button data-kw="${esc(k)}">${esc(k)}</button>`).join('')}</div></div>` : ''}
-      <div class="agrid" data-aid="${esc(x.id)}">${x.fileId ? '<button class="primary" data-aread>Okumaya aç</button><button data-aopen>PDF’i aç</button>' : '<button class="primary" data-aattach>PDF ekle</button>'}<button data-acopy>APA kopyala</button><button data-aedit>Düzenle</button></div>
-      <div class="arow2" data-aid="${esc(x.id)}"><button data-amove>Taşı</button><button class="danger" data-adel>Sil</button></div>`;
-    if (open) D.classList.add('open');
-  };
-  const list = () => {
-    const q = fold(arcQ).trim(); const toks = q.split(/\s+/).filter(Boolean);
-    const scope = ARC.live().filter(x => S.arcFolder === 'all' || x.folderId === S.arcFolder);
-    const hay = x => fold([x.fileName, x.meta.title, x.meta.journal, x.meta.year, x.meta.doi, ...(x.meta.authors || []).map(a => a.family + ' ' + a.given), ...(x.keywords || [])].join(' | '));
-    const kwHit = k => toks.length && toks.some(t => fold(k).includes(t));
-    const hits = x => (x.keywords || []).filter(kwHit).length;
-    const items = scope.filter(x => toks.every(t => hay(x).includes(t)))
-      .sort((a, b) => (hits(b) - hits(a)) || dispName(a).localeCompare(dispName(b), 'tr', { numeric: true }));
-    const freq = new Map(); for (const x of scope) for (const k of (x.keywords || [])) { const f = fold(k); const e = freq.get(f) || { k, n: 0 }; e.n++; freq.set(f, e); }
-    const sug = [...freq.values()].filter(e => !q || (fold(e.k).includes(q) && fold(e.k) !== q)).sort((a, b) => b.n - a.n).slice(0, q ? 12 : 14);
-    $('#aSug').innerHTML = sug.map(e => `<button data-kw="${esc(e.k)}">${esc(e.k)} (${e.n})</button>`).join('');
-    const where = S.arcFolder === 'all' ? 'Arşivde' : `“${folderName(S.arcFolder)}” içinde`;
-    $('#aCount').textContent = scope.length ? (q ? `${where} ${items.length} makale bulundu` : `${where} ${scope.length} makale`) : '';
-    $('#aList').innerHTML = items.length ? items.map(x => {
-      const m = x.meta || {};
-      const sub = [inText(asPaper(x), {}), m.journal, S.arcFolder === 'all' ? folderName(x.folderId) : ''].filter(Boolean).join(', ');
-      return `<div class="arow${x.id === arcSel ? ' on' : ''}" data-arow="${esc(x.id)}"><span class="ficon${x.fileId ? '' : ' none'}" aria-hidden="true">${x.fileId ? 'PDF' : 'YOK'}</span>
-        <div style="flex:1;min-width:0"><button class="arname" data-asel><b>${esc(dispName(x))}</b><small>${esc(sub)}</small></button>
-        <div class="kw">${(x.keywords || []).map(k => `<button data-kw="${esc(k)}" class="${kwHit(k) ? 'hit' : ''}">${esc(k)}</button>`).join('')}</div></div></div>`;
-    }).join('') : `<p class="hint" style="padding:0 4px">${scope.length ? 'Bu kelimeyle eşleşen makale yok.' : (ARC.live().length ? 'Bu klasör boş. PDF ekle ile başla.' : 'Arşiv boş. Eski makalelerinin PDF’lerini ekleyerek başla.')}</p>`;
-  };
-  const all = () => { stat(); folders(); list(); detail(false); };
-  all();
-  ARC.onChange = () => { if (S.screen === 'arc' && $('#aList')) all(); };
-  $('#aSearch').addEventListener('input', e => { arcQ = e.target.value; list(); });
-  box.addEventListener('click', async e => {
-    const t = e.target;
-    if (t.closest('#aConn')) { Drive.connect('archive'); return; }
-    if (t.closest('#aSet')) { openSettings('drive'); return; }
-    if (t.closest('#aSync')) { const b = t.closest('#aSync'); b.disabled = true; b.textContent = 'Eşitleniyor…'; const ok = await ARC.sync(false); if (ok) toast('Arşiv Drive ile eşitlendi.'); all(); return; }
-    if (t.closest('#aManual')) { openArcEditor({}); return; }
-    if (t.closest('[data-aclose]')) { $('#aDetail').classList.remove('open'); return; }
-    if (t.closest('#aAdd')) {
-      if (S.arcFolder !== 'all') { S.arcTarget = S.arcFolder; $('#arcFile').click(); return; }
-      modal(`<h3>PDF’ler hangi klasöre gitsin?</h3><div class="picklist">${ARC.liveFolders().map(f => `<label class="btn" for="arcFile" data-tg="${f.id}"><span>${esc(f.name)}</span></label>`).join('')}</div>
-        <div class="newcat"><input id="tgNew" placeholder="Yeni klasör adı" autocomplete="off"><button id="tgAdd">Oluştur</button></div>
-        <div class="mact"><button data-close>Vazgeç</button></div>`, b2 => {
-        b2.querySelector('.picklist').addEventListener('click', ev => { const l = ev.target.closest('[data-tg]'); if (l) S.arcTarget = l.dataset.tg; });
-        $('#tgAdd').onclick = () => { const v = $('#tgNew').value.trim(); if (!v) return; const f = newFolder(v); S.arcFolder = f.id; LS.set('th:arcFolder', f.id); openArchive(); toast(`“${f.name}” klasörü oluşturuldu. Şimdi PDF ekle’ye dokun.`); };
-      });
-      return;
-    }
-    const fv = t.closest('[data-fv]'); if (fv) { S.arcFolder = fv.dataset.fv; LS.set('th:arcFolder', S.arcFolder); folders(); list(); return; }
-    if (t.closest('[data-fnew]')) { const n = (prompt('Yeni klasörün adı (ör. Doktora makaleleri)') || '').trim(); if (n) { const f = newFolder(n); S.arcFolder = f.id; LS.set('th:arcFolder', f.id); folders(); list(); toast(`“${f.name}” klasörü oluşturuldu.`); } return; }
-    if (t.closest('[data-fedit]')) { editFolder(S.arcFolder); return; }
-    if (t.closest('[data-kwtr]')) { translateKeywords(); return; }
-    const kw = t.closest('[data-kw]'); if (kw) { arcQ = kw.dataset.kw; $('#aSearch').value = arcQ; list(); $('#aDetail').classList.remove('open'); return; }
-    const row = t.closest('[data-arow]'); if (row) { arcSel = row.dataset.arow; $$('.arow', box).forEach(r => r.classList.toggle('on', r === row)); detail(true); return; }
-    const card = t.closest('[data-aid]'); if (!card) return;
-    const x = ARC.get(card.dataset.aid); if (!x) return;
-    if (t.closest('[data-aopen]')) window.open(`https://drive.google.com/file/d/${encodeURIComponent(x.fileId)}/view`, '_blank', 'noopener');
-    else if (t.closest('[data-acopy]')) copyRef(x);
-    else if (t.closest('[data-aedit]')) openArcEditor({ item: x, meta: x.meta, keywords: x.keywords });
-    else if (t.closest('[data-aread]')) readFromArchive(x);
-    else if (t.closest('[data-amove]')) pickFolder({ title: 'Hangi klasöre taşınsın?', current: x.folderId, sub: dispName(x) }, async fid => {
-      closeModal(); busy('Taşınıyor…'); const r = await saveArcItem({ item: x, meta: x.meta, keywords: x.keywords, folderId: fid }); busy(false);
-      if (r.upErr) toast('Arşivde taşındı ama Drive’daki PDF taşınamadı. ' + errMsg(r.upErr), 'err'); else toast(`“${folderName(fid)}” klasörüne taşındı.`);
-      openArchive();
-    });
-    else if (t.closest('[data-aattach]')) {
-      if (!Drive.ok()) { toast('PDF eklemek için önce Drive’a bağlan.', '', S.settings.clientId ? { label: 'Bağlan', fn: () => Drive.connect('archive') } : null); return; }
-      S.attachFor = x.id; $('#arcAttach').click();
-    } else if (t.closest('[data-adel]')) {
-      if (!confirm(x.fileId ? 'Bu kayıt arşivden silinecek, PDF de Drive’da çöp kutusuna taşınacak. Emin misin?' : 'Bu kayıt arşivden silinecek. Emin misin?')) return;
-      if (x.fileId) {
-        if (Drive.ok()) { try { await Drive.patch(x.fileId, { trashed: true }); } catch { toast('PDF Drive’dan silinemedi, Drive’dan elle silebilirsin.', 'err'); } }
-        else toast('Drive bağlı değil. PDF Drive’da duruyor, oradan silebilirsin.');
-      }
-      const k = ARC.items.indexOf(x); ARC.items[k] = { id: x.id, deleted: true, updated: Date.now() }; ARC.touch();
-      for (const p of Object.values(S.papers)) if (p.arcId === x.id) { delete p.arcId; savePaper(p); }
-      arcSel = null; all();
-    }
-  });
-}
-async function translateKeywords() {
-  if (!S.settings.key) { openSettings(); toast('Bu işlem için Gemini API anahtarı gerekli.', 'err'); return; }
-  const live = ARC.live(); const papers = Object.values(S.papers);
-  const uniq = [...new Set([...live.flatMap(x => x.keywords || []), ...papers.flatMap(p => p.keywords || [])])];
-  if (!uniq.length) { toast('Çevrilecek etiket yok.'); return; }
-  if (!confirm(`Arşivdeki ${uniq.length} farklı etiket Türkçeye çevrilecek. Zaten Türkçe olanlar aynen kalır. Devam edilsin mi?`)) return;
-  const map = {};
-  try {
-    for (let i = 0; i < uniq.length; i += 120) {
-      const part = uniq.slice(i, i + 120);
-      busy(`Etiketler çevriliyor ${Math.min(i + 120, uniq.length)}/${uniq.length}`);
-      const res = await gemini(`Aşağıdaki akademik anahtar kelimeleri akademik Türkçeye çevir. Zaten Türkçe olanları aynen bırak. Kısaltmalar ve özel adlar (ör. PISA, COVID-19) olduğu gibi kalabilir. Özel adlar dışında küçük harf kullan.
-Yalnızca şu yapıda JSON döndür: {"map":{"orijinal ifade":"türkçe karşılığı"}}
-ANAHTAR KELİMELER:
-${JSON.stringify(part)}`);
-      Object.assign(map, (res && res.map) || {});
-    }
-  } catch (e) { busy(false); toast(errMsg(e), 'err'); return; }
-  const tr = list => normKw((list || []).map(k => str(map[k]) || k));
-  const same = (a, b) => JSON.stringify(a || []) === JSON.stringify(b || []);
-  const changed = live.filter(x => !same(x.keywords, tr(x.keywords)));
-  for (const p of papers) { const k = tr(p.keywords); if (!same(p.keywords, k)) { p.keywords = k; savePaper(p); } }
-  let i = 0, fail = 0;
-  for (const x of changed) {
-    i++; busy(`Arşiv güncelleniyor ${i}/${changed.length}`);
-    const r = await saveArcItem({ item: x, meta: x.meta, keywords: tr(x.keywords) });
-    if (r.upErr) fail++;
-  }
-  busy(false); arcQ = '';
-  if (S.screen === 'arc') openArchive();
-  toast(changed.length ? `${changed.length} kaydın etiketleri Türkçeleştirildi.${fail ? ` ${fail} PDF’in Drive açıklaması güncellenemedi.` : ''}` : 'Etiketlerin zaten Türkçe.');
-}
-async function readFromArchive(x) {
-  const ex = Object.values(S.papers).find(p => p.arcId === x.id);
-  if (ex) { closeModal(); S.view = 'orig'; openPaper(ex.id); return; }
-  if (!Drive.ok()) { toast('PDF’i indirmek için Drive’a bağlan.', '', S.settings.clientId ? { label: 'Bağlan', fn: () => Drive.connect('archive') } : null); return; }
-  busy('PDF Drive’dan indiriliyor…');
-  try {
-    const blob = await (await Drive.api(`files/${x.fileId}?alt=media`)).blob();
-    busy(false);
-    await importPdf(new File([blob], x.fileName || 'makale.pdf', { type: 'application/pdf' }), { arcItem: x });
-  } catch (e) { busy(false); toast(errMsg(e), 'err'); }
-}
-$('#arcFile').addEventListener('change', async e => {
-  const files = [...(e.target.files || [])]; e.target.value = ''; if (!files.length) return;
-  const target = ARC.folder(S.arcTarget) ? S.arcTarget : GENEL; S.arcTarget = null;
-  if (!window.pdfjsLib) { toast('PDF okuyucu yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.', 'err'); return; }
-  if (!S.settings.key) { openSettings(); toast('Künye çıkarmak için önce Gemini API anahtarını ekle.', 'err'); return; }
-  if (files.length === 1) {
-    const f = files[0]; closeModal();
-    try { busy('Künye çıkarılıyor…'); const r = await metaFromPdf(f, t => busy(t)); busy(false); openArcEditor({ meta: r.meta, keywords: r.keywords, file: f, folderId: target }); }
-    catch (err) { busy(false); toast(errMsg(err) + ' Künyeyi elle girebilirsin.', 'err'); openArcEditor({ meta: { title: f.name.replace(/\.pdf$/i, '') }, file: f, folderId: target }); }
-    return;
-  }
-  const up = Drive.ok();
-  if (!up && !confirm(`Drive bağlı değil. ${files.length} PDF yüklenmeden yalnızca künyeleri kaydedilsin mi?`)) return;
-  closeModal(); let ok = 0, upFail = 0; const fail = [];
-  for (let i = 0; i < files.length; i++) {
-    const f = files[i];
-    busy(`Künye çıkarılıyor ${i + 1}/${files.length}: ${f.name}`);
-    try {
-      const r = await metaFromPdf(f);
-      if (up) busy(`Drive’a yükleniyor ${i + 1}/${files.length}: ${f.name}`);
-      const s = await saveArcItem({ meta: r.meta, keywords: r.keywords, file: up ? f : null, folderId: target, fileName: up ? null : f.name }); ok++; if (s.upErr) upFail++;
-    } catch { fail.push(f.name); }
-  }
-  busy(false); arcQ = ''; S.arcFolder = target; LS.set('th:arcFolder', target); openArchive();
-  let msg = `${ok} makale “${folderName(target)}” klasörüne eklendi. Künyeleri kontrol etmeyi unutma.`;
-  if (upFail) msg += ` ${upFail} PDF Drive’a yüklenemedi.`;
-  if (fail.length) msg += ` Okunamayanlar: ${fail.join(', ')}`;
-  toast(msg, fail.length || upFail ? 'err' : '');
-});
-$('#arcAttach').addEventListener('change', async e => {
-  const f = e.target.files && e.target.files[0]; e.target.value = '';
-  const x = ARC.get(S.attachFor); S.attachFor = null; if (!f || !x) return;
-  busy('PDF Drive’a yükleniyor…');
-  const r = await saveArcItem({ item: x, meta: x.meta, keywords: x.keywords, file: f });
-  busy(false); toast(r.upErr ? 'PDF yüklenemedi: ' + errMsg(r.upErr) : 'PDF arşiv kaydına eklendi.', r.upErr ? 'err' : ''); openArchive();
-});
 $('#bArc').onclick = () => openPlan();
 
 /* ---------- ask the paper ---------- */
@@ -2796,7 +2232,7 @@ async function exportDraft() {
 }
 
 /* ---------- backup ---------- */
-function backupData() { return { app: 'tez-haritasi', v: 2, papers: S.papers, notes: S.notes, cats: S.cats, archive: ARC.items, plan: S.plan, sugs: S.sugs, scans: S.scans, style: S.settings.style }; }
+function backupData() { return { app: 'tez-haritasi', v: 3, papers: S.papers, notes: S.notes, cats: S.cats, plan: S.plan, sugs: S.sugs, scans: S.scans, style: S.settings.style }; }
 async function restoreData(d) {
   if (!d || d.app !== 'tez-haritasi') throw new Error('Bu dosya bir Tez Haritası yedeği değil.');
   for (const p of Object.values(d.papers || {})) { S.papers[p.id] = p; await DB.set('paper:' + p.id, p); }
@@ -2806,30 +2242,40 @@ async function restoreData(d) {
   if (d.plan && d.plan.nodes) { S.plan = d.plan; savePlan(); }
   if (Array.isArray(d.sugs)) { const k = new Set(S.sugs.map(x => x.id)); d.sugs.forEach(x => { if (!k.has(x.id)) S.sugs.push(x); }); saveSugs(); }
   if (d.scans) { S.scans = Object.assign({}, d.scans, S.scans); saveScans(); }
-  if (Array.isArray(d.archive)) { ARC.merge({ items: d.archive, folders: d.arcFolders || [] }); ARC.touch(); }
 }
 
 const fmtDay = t => new Date(t).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: new Date(t).getFullYear() === new Date().getFullYear() ? undefined : 'numeric' });
 function setRead(p, v) { p.read = v; p.readAt = v ? Date.now() : null; savePaper(p); renderHeader(); }
 const CHECK_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
 function openLib() {
-  modal(`<h3>Makaleler</h3><p class="hint">Makale Okuyucu’ya eklediğin makaleler burada görünür. Yeni makaleyi orada ekle, sonra buradan planına göre tara.</p><div id="lList"></div>
-    <div class="mact"><button id="lAll">Taranmamışları tara</button><button data-close>Kapat</button></div>`, box => {
+  modal(`<h3>Makaleler</h3><div id="lList"></div>
+    <div class="mact"><label class="btn" for="file">Makale ekle</label><button id="lAll">Taranmamışları tara</button><button data-close>Kapat</button></div>`, box => {
     const render = () => {
       const all = Object.values(S.papers).sort((a, b) => (b.opened || b.added) - (a.opened || a.added));
       const sm = suffixMap();
+      $('#lAll').hidden = !all.some(needsScan);
       $('#lList').innerHTML = all.length ? all.map(p => {
         const sc = S.scans[p.id]; const ss = S.sugs.filter(s => s.paperId === p.id);
         const st = !sc ? '<b class="lunread">Taranmadı</b>' : needsScan(p) ? '<b class="swarnt">Plan değişti, yeniden tara</b>' : `<b class="lread">Tarandı</b>: ${ss.filter(s => s.status === 'pending').length} öneri bekliyor, ${ss.filter(s => s.status === 'added').length} eklendi`;
         return `<div class="libitem"><p class="refp">${refHTML(p, sm)}</p><div class="libmeta">${st}</div>
-          <div class="libact"><button class="primary" data-open="${p.id}">Aç</button><button data-scanp="${p.id}">${sc ? 'Yeniden tara' : 'Planıma göre tara'}</button></div></div>`;
-      }).join('') : '<p class="hint">Henüz makale yok. Sol menüdeki “Makale ekle” ile Makale Okuyucu’yu açıp makale ekle, sonra bu sayfayı yenile.</p>';
+          <div class="libact"><button class="primary" data-open="${p.id}">Aç</button><button data-scanp="${p.id}">${sc ? 'Yeniden tara' : 'Planıma göre tara'}</button><button data-meta="${p.id}">Künye</button><button class="danger" data-delp="${p.id}">Sil</button></div></div>`;
+      }).join('') : '<p class="hint">Henüz makale yok. <b>Makale ekle</b> ile bir PDF seç; Gemini okur, künyesini çıkarır ve tez planına göre tarar.</p>';
     };
     render();
     box.addEventListener('click', async e => {
-      const o = e.target.closest('[data-open]'), sc = e.target.closest('[data-scanp]');
+      const o = e.target.closest('[data-open]'), sc = e.target.closest('[data-scanp]'), m = e.target.closest('[data-meta]'), d = e.target.closest('[data-delp]');
       if (o) { closeModal(); S.view = 'orig'; openPaper(o.dataset.open); setPane('sug'); }
       else if (sc) { await scanWithUi(S.papers[sc.dataset.scanp]); render(); }
+      else if (m) openMeta(m.dataset.meta);
+      else if (d) {
+        const id = d.dataset.delp; const nn = S.notes.filter(n => n.paperId === id).length;
+        if (!confirm(nn ? `Makale, önerileri ve ondan eklediğin ${nn} alıntı silinecek. Emin misin?` : 'Makale ve önerileri silinecek. Emin misin?')) return;
+        delete S.papers[id]; DB.del('paper:' + id);
+        S.notes = S.notes.filter(n => n.paperId !== id); saveNotes();
+        S.sugs = S.sugs.filter(x => x.paperId !== id); saveSugs(); delete S.scans[id]; saveScans();
+        if (S.cur === id) { S.cur = null; LS.set('th:last', null); }
+        renderAll(); refreshMap(); render();
+      }
       else if (e.target.closest('#lAll')) { await scanMany(Object.values(S.papers).filter(needsScan).map(p => p.id)); render(); }
     });
   });
@@ -2837,7 +2283,6 @@ function openLib() {
 function openSettings(focus) {
   let style = S.settings.style;
   const cached = LS.get('th:models', null);
-  const web = Drive.web();
   modal(`<h3>Ayarlar</h3>
     <label>Gemini API anahtarı<div class="row"><input id="sKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AIza…" value="${esc(S.settings.key)}"><button id="sShow">Göster</button></div></label>
     <p class="hint">Anahtar yalnızca bu cihazda saklanır ve sadece Google’a gönderilir.</p>
@@ -2847,20 +2292,6 @@ function openSettings(focus) {
     <div class="field"><div class="flabel">Atıf dili (APA 7)</div><div class="seg wide" id="sStyle">
       <button data-style="en" class="${style === 'en' ? 'on' : ''}">İngilizce: “&amp;”, “et al.”</button>
       <button data-style="tr" class="${style === 'tr' ? 'on' : ''}">Türkçe: “ve”, “vd.”</button></div></div>
-    <div class="field" id="sDrive"><div class="flabel">Google Drive</div>
-      <div class="status"><span class="dot ${Drive.ok() ? 'on' : ''}"></span><span>${Drive.ok() ? `Bağlı. Oturum ${Drive.minsLeft()} dakika daha geçerli.` : 'Bağlı değil'}</span></div>
-      ${web ? '' : '<p class="hint warn">Bu sayfa bir dosyadan açılmış. Drive bağlantısı yalnızca uygulama bir https adresinde yayındayken çalışır (ör. GitHub Pages).</p>'}
-      <label>OAuth Client ID<input id="sCid" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="…apps.googleusercontent.com" value="${esc(S.settings.clientId)}"></label>
-      <div class="row wrap" style="margin-top:10px">${Drive.ok() ? '<button id="sDisc">Bağlantıyı kes</button>' : '<button class="primary" id="sConn">Drive’a bağlan</button>'}<button id="sDBk">Yedeği Drive’a kaydet</button><button id="sDRs">Drive’daki yedeği yükle</button></div>
-      <details class="setup" ${focus === 'drive' ? 'open' : ''}><summary>Kurulum adımları (bir kere yapılır)</summary><ol>
-        <li>Uygulamayı bir https adresinde yayınla (ör. GitHub Pages) ve oradan aç.</li>
-        <li><b>console.cloud.google.com</b>’da AI Studio’nun kullandığı projeyi seç.</li>
-        <li><b>APIs &amp; Services → Library</b> bölümünde <b>Google Drive API</b>’yi bul ve <b>Enable</b>’a dokun.</li>
-        <li><b>OAuth consent screen</b> (Google Auth Platform) bölümünde uygulamaya bir ad ver, kullanıcı türünü <b>External</b> seç ve <b>Test users</b> kısmına kendi Gmail adresini ekle.</li>
-        <li><b>Credentials → Create credentials → OAuth client ID</b>, tür <b>Web application</b>. <b>Authorized JavaScript origins</b>’e ve <b>Authorized redirect URIs</b>’e aşağıdaki adresleri ekle.</li>
-        <li>Oluşan Client ID’yi yukarıya yapıştır, <b>Kaydet</b>’e dokun, sonra <b>Drive’a bağlan</b>.</li></ol>
-        ${web ? `<p class="hint">JavaScript origin:</p><span class="code">${esc(location.origin)}</span><p class="hint">Redirect URI:</p><span class="code" id="sRedir">${esc(Drive.redirectUri())}</span><div class="row"><button id="sCopy">Redirect URI’yi kopyala</button></div>` : ''}
-        <p class="hint">Uygulama yalnızca kendi oluşturduğu dosyalara erişir. Drive’ındaki diğer dosyaları göremez. Oturum bir saat geçerlidir, sonra tek dokunuşla tekrar bağlanırsın.</p></details></div>
     <div class="field"><div class="flabel">Yedek</div>
       <p class="hint">Makaleler, notlar ve kategoriler bu cihazın tarayıcısında saklanır. Ara sıra yedek al.</p>
       <div class="row"><button id="sBk">Yedeği indir</button><label class="btn" for="bkIn">Yedeği yükle</label><input type="file" id="bkIn" class="vh" accept="application/json,.json"></div></div>
@@ -2888,8 +2319,7 @@ function openSettings(focus) {
     $('#sRefresh').onclick = load;
     $('#sShow').onclick = () => { const k = $('#sKey'); k.type = k.type === 'password' ? 'text' : 'password'; $('#sShow').textContent = k.type === 'password' ? 'Göster' : 'Gizle'; };
     $('#sStyle').onclick = e => { const b = e.target.closest('[data-style]'); if (!b) return; style = b.dataset.style; $$('#sStyle button').forEach(x => x.classList.toggle('on', x === b)); };
-    const apply = () => { S.settings.key = $('#sKey').value.trim(); S.settings.model = $('#sModel').value || 'gemini-2.5-flash'; S.settings.style = style; S.settings.clientId = $('#sCid').value.trim(); saveSettings(); };
-    if (focus === 'drive') setTimeout(() => $('#sDrive').scrollIntoView({ block: 'start', behavior: 'smooth' }), 50);
+    const apply = () => { S.settings.key = $('#sKey').value.trim(); S.settings.model = $('#sModel').value || 'gemini-2.5-flash'; S.settings.style = style; saveSettings(); };
     $('#sTest').onclick = async () => {
       apply(); const b = $('#sTest'); b.disabled = true; b.textContent = 'Deneniyor…';
       try { await gemini('Sadece "tamam" yaz.', { json: false }); toast(`Anahtar çalışıyor (${S.settings.model}).`); }
@@ -2897,26 +2327,6 @@ function openSettings(focus) {
       finally { b.disabled = false; b.textContent = 'Anahtarı test et'; }
     };
     $('#sSave').onclick = () => { apply(); closeModal(); renderAll(true); toast('Ayarlar kaydedildi.'); };
-    if ($('#sConn')) $('#sConn').onclick = () => { apply(); Drive.connect('settings'); };
-    if ($('#sDisc')) $('#sDisc').onclick = () => { Drive.disconnect(); apply(); openSettings('drive'); toast('Drive bağlantısı kesildi.'); };
-    if ($('#sCopy')) $('#sCopy').onclick = async () => { try { await navigator.clipboard.writeText(Drive.redirectUri()); toast('Redirect URI kopyalandı.'); } catch { toast('Kopyalanamadı. Adresi elle seç.', 'err'); } };
-    const needDrive = () => { if (Drive.ok()) return true; apply(); toast('Önce Drive’a bağlan.', '', S.settings.clientId && Drive.web() ? { label: 'Bağlan', fn: () => Drive.connect('settings') } : null); return false; };
-    $('#sDBk').onclick = async () => {
-      if (!needDrive()) return;
-      busy('Yedek Drive’a kaydediliyor…');
-      try { await Drive.putJson(BACKUP_NAME, backupData()); toast('Yedek Drive’daki “' + FOLDER_NAME + '” klasörüne kaydedildi.'); }
-      catch (e) { toast(errMsg(e), 'err'); } finally { busy(false); }
-    };
-    $('#sDRs').onclick = async () => {
-      if (!needDrive()) return;
-      busy('Yedek Drive’dan alınıyor…');
-      try {
-        const d = await Drive.getJson(BACKUP_NAME); busy(false);
-        if (!d) { toast('Drive’da yedek bulunamadı.'); return; }
-        if (!confirm('Drive’daki yedekte bulunan makaleler, notlar ve kategoriler mevcut verilerine eklenecek. Devam edilsin mi?')) return;
-        await restoreData(d); closeModal(); renderAll(); toast('Yedek Drive’dan yüklendi.');
-      } catch (e) { busy(false); toast(errMsg(e), 'err'); }
-    };
     $('#sBk').onclick = () => {
       downloadBlob(new Blob([JSON.stringify(backupData())], { type: 'application/json' }), `tez-haritasi-yedek-${new Date().toISOString().slice(0, 10)}.json`);
     };
@@ -3035,18 +2445,17 @@ function openExport() {
 /* ---------- init ---------- */
 async function init() {
   if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  const after = Drive.handleRedirect();
   try {
     await DB.open();
-    for (const p of await loadArticleLibrary()) { p.strokes = p.strokes || {}; p.tr = p.tr || {}; S.papers[p.id] = p; }
+    for (const k of await DB.keys()) {
+      if (String(k).startsWith('paper:')) { const p = await DB.get(k); if (p && p.id) { p.strokes = p.strokes || {}; p.tr = p.tr || {}; S.papers[p.id] = p; } }
+    }
     S.notes = (await DB.get('notes')) || [];
-    for (const p of Object.values(S.papers)) repairPaper(p);
+    for (const p of Object.values(S.papers)) if (repairPaper(p)) await DB.set('paper:' + p.id, p);
     S.plan = (await DB.get('plan')) || null;
     S.sugs = (await DB.get('sugs')) || [];
     S.scans = (await DB.get('scans')) || {};
     S.cats = (await DB.get('cats')) || [];
-    ARC.items = (await DB.get('archive')) || [];
-    ARC.folders = (await DB.get('arcFolders')) || [];
   } catch (e) {
     DB.db = null; toast('Tarayıcı depolaması kullanılamıyor. Veriler kaydedilmeyecek.', 'err');
   }
@@ -3065,15 +2474,14 @@ async function init() {
     S.sugs = S.sugs.filter(x => topCode(x.target) !== '5' || x.status === 'added'); saveSugs();
     S.cats = S.cats.filter(c => !/^pc-5(\.|$)/.test(c.id) || S.notes.some(n => inCat(n, c.id)));
   }
-  fixNotes(); syncPlanCats(); ARC.fix(); S.pane = 'sug';
+  /* suggestions whose article is no longer in this app’s own library are dropped */
+  const orphan = x => !S.papers[x.paperId];
+  if (S.sugs.some(orphan)) { S.sugs = S.sugs.filter(x => !orphan(x)); saveSugs(); }
+  for (const id of Object.keys(S.scans)) if (!S.papers[id]) delete S.scans[id];
+  fixNotes(); syncPlanCats(); S.pane = 'sug';
   resizeOv();
   const last = LS.get('th:last', null);
   if (last && S.papers[last]) openPaper(last); else renderAll();
-  if (after) {
-    toast('Drive bağlandı. Arşiv eşitleniyor…');
-    await ARC.sync(false);
-    if (after === 'archive') openArchive(); else if (after === 'settings') openSettings('drive');
-  } else if (Drive.ok()) ARC.sync(true);
 }
 init();
 })();
