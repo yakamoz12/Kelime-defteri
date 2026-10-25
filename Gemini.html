@@ -686,9 +686,9 @@ function inlineCite(t, n, p, sm) {
     const y = (c.intext.match(/\d{4}[a-z]?/) || [])[0]; const sur = (c.intext.match(/\p{Lu}[\p{L}'’\-]+/u) || [])[0];
     if (!y || !sur) continue;
     const re = new RegExp(`\\(([^()]*${escRe(sur)}[^()]*${y}[^()]*)\\)`, 'u');
-    if (re.test(t)) { t = t.replace(re, (m, inner) => n.direct ? m : `(${inner.trim()}${akt})`); done++; continue; }
+    if (re.test(t)) { t = t.replace(re, (m, inner) => n.direct || /\b(akt\.|as cited in)/.test(inner) ? m : `(${inner.trim()}${akt})`); done++; continue; }
     const re2 = new RegExp(`(${escRe(sur)}[^()]{0,60}?)\\((${y}[^()]*)\\)`, 'u');
-    if (re2.test(t)) { t = t.replace(re2, (m, a, inner) => n.direct ? m : `${a}(${inner}${akt})`); done++; }
+    if (re2.test(t)) { t = t.replace(re2, (m, a, inner) => n.direct || /\b(akt\.|as cited in)/.test(inner) ? m : `${a}(${inner}${akt})`); done++; }
   }
   return done ? t : null;
 }
@@ -1535,12 +1535,26 @@ function undo() {
 }
 
 /* ---------- PDF upload ---------- */
+/* A paragraph that stops mid-sentence at a page break continues after the page header/number. */
+function mergeBroken(paras) {
+  const hdr = t => t.length < 110 && /\bdoi\b|\bsayı\s*:?\s*\d|\bvol\.?\s*\d|\bcilt\b|\bissn\b|\bjournal\b|dergisi/i.test(t);
+  const mark = () => { junk.clear(); boilerIdx({ paras }).forEach(k => junk.add(k)); paras.forEach((x, k) => { if (hdr(x.t)) junk.add(k); }); };
+  const junk = new Set(); mark();
+  for (let i = 0; i < paras.length - 1; i++) {
+    const a = paras[i].t.trim();
+    if (junk.has(i) || a.split(/\s+/).length < 8 || /[.!?:;…)\]”"’]$/.test(a)) continue;
+    let j = i + 1; while (j < paras.length && j - i <= 4 && (junk.has(j) || paras[j].t.trim().length < 4)) j++;
+    if (j >= paras.length || j - i > 4) continue;
+    if (/^[a-zçğıöşü(]/.test(paras[j].t.trim())) { paras[i].t = joinT(paras[i].t, paras[j].t); paras.splice(j, 1); mark(); i--; }
+  }
+  return paras;
+}
 async function importPdf(f, { arcItem = null } = {}) {
   if (!window.pdfjsLib) { toast('PDF okuyucu yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.', 'err'); return; }
   closeModal();
   try {
     busy('PDF okunuyor…');
-    const paras = await extractPdf(f, (i, n) => busy(`PDF okunuyor, sayfa ${i}/${n}`));
+    const paras = mergeBroken(await extractPdf(f, (i, n) => busy(`PDF okunuyor, sayfa ${i}/${n}`)));
     if (paras.reduce((a, x) => a + x.t.length, 0) < 300) throw new Error('SCAN');
     const p = { id: 'p' + uid(), name: f.name.replace(/\.pdf$/i, ''), added: Date.now(), paras, tr: {}, strokes: {}, sections: [], skip: [], meta: {}, keywords: [] };
     let res = null;
@@ -2057,14 +2071,31 @@ function sentenceSpans(t) {
   if (t.length - start >= 2) out.push([start, t.length]);
   return out;
 }
+/* Only the parts of an article that can feed Giriş and Genel Bilgiler are read:
+   introduction / literature, discussion and conclusion. Methods, results, abstract,
+   references and appendices are skipped (results optionally). */
+const SKIP_SEC = /yöntem|method|gereç|materyal|material|örneklem|sampl|participant|katılımcı|veri toplama|verilerin|data collection|araştırmanın (modeli|deseni|tasarımı|evreni)|research design|study design|çalışma grubu|evren|population|procedure|işlem yolu|ölçme araç|instrument|measure|analiz|analys|istatistik|statistic|etik|ethic|özet|abstract|öz$|^öz\b|başlık ve künye|kaynak|referen|bibliograph|ekler|appendi|teşekkür|acknowledg|çıkar çatışma|conflict|funding|finans|yazar katkı|author contrib|sınırlılık|limitation/i;
+const RESULT_SEC = /bulgu|result|finding/i;
+const readSec = s => { const k = `${s.title} ${s.original || ''}`; if (/tartışma|discussion|sonuç|conclusion/i.test(k)) return true; if (RESULT_SEC.test(k)) return !!S.settings.scanResults; return !SKIP_SEC.test(k); };
+const THESIS_VARS = ['pozitif yaşlanma', 'yalnızlık', 'geriatrik depresyon'];
+const GLOSSARY = 'acceptance and commitment therapy = kabul ve kararlılık terapisi (KKT); psychological flexibility = psikolojik esneklik; psychological inflexibility / rigidity = psikolojik katılık; experiential avoidance = deneyimsel kaçınma; cognitive fusion = bilişsel kaynaşma; cognitive defusion = bilişsel ayrışma; acceptance = kabul; contact with the present moment = şimdiki anla temas; self-as-context = bağlam olarak benlik; conceptualized self = kavramsallaştırılmış benlik; values = değerler; committed action = kararlı eylem; relational frame theory = İlişkisel Çerçeve Kuramı; functional contextualism = işlevsel bağlamsalcılık; thought suppression = düşünce bastırma; mindfulness = bilinçli farkındalık; loneliness = yalnızlık; social isolation = sosyal izolasyon; older adults / older people = yaşlı bireyler; late-life / geriatric depression = geriatrik depresyon; positive aging = pozitif yaşlanma; successful aging = başarılı yaşlanma; active aging = aktif yaşlanma; healthy aging = sağlıklı yaşlanma; well-being = iyi oluş; quality of life = yaşam kalitesi; randomized controlled trial = randomize kontrollü çalışma; systematic review = sistematik derleme; meta-analysis = meta-analiz; cognitive behavioral therapy = bilişsel davranışçı terapi (BDT); nurse-led = hemşire tarafından yürütülen.';
+const HEAD_WORDS_RE = /^(Giriş|Introduction|Background|Amaç|Aim|Yöntem|Methods?|Bulgular|Results|Tartışma|Discussion|Sonuç(lar)?|Conclusions?|Öneriler|Çalışma Grubu|Araştırmanın Modeli|Veri Toplama Araçları|Verilerin (Toplanması|Analizi)|Literatür|Kuramsal Çerçeve)\s+(?=["“(]?[\p{Lu}0-9])/u;
+function headingPrefix(t, p) {
+  for (const s of (p.sections || [])) for (const h of [s.original, s.title]) {
+    const x = String(h || '').trim(); if (x.length > 2 && x.length < 60 && t.startsWith(x + ' ') && /^["“(]?[\p{Lu}0-9]/u.test(t.slice(x.length + 1))) return x.length + 1;
+  }
+  const m = t.match(HEAD_WORDS_RE); return m ? m[0].length : 0;
+}
+const stripNumRefs = t => String(t || '').replace(/\s*\((?:\d{1,3}(?:\s*[–\-,]\s*\d{1,3})*)\)(?=[\s.,;:)]|$)/g, '').replace(/\s+([.,;:])/g, '$1');
 function sentenceIndex(p) {
   const sk = new Set(p.skip || []); const idx = {}; const lines = [];
-  p.sections.forEach(s => {
-    if (isNoTr(s) && !/başlık ve künye/i.test(s.title)) return;
+  const secs = p.sections.some(readSec) ? p.sections.filter(readSec) : p.sections.filter(s => !isNoTr(s));
+  secs.forEach(s => {
     for (let i = s.start; i <= s.end; i++) {
       if (sk.has(i) || !wordy(p.paras[i].t)) continue;
       const t = p.paras[i].t; const spans = sentenceSpans(t);
       lines.push(`¶${i} (${s.title})`);
+      if (spans.length) { const h = headingPrefix(t, p); if (h && spans[0][1] - h > 20) spans[0] = [h, spans[0][1]]; }
       spans.forEach((r, j) => { const id = `${i}.${j + 1}`; idx[id] = { para: i, r }; lines.push(`[${id}] ${t.slice(r[0], r[1])}`); });
     }
   });
@@ -2091,11 +2122,16 @@ Kurallar:
 - "role": şunlardan biri: ${ROLES.join(', ')}.
 - "reason": bu cümlenin bu maddeye neden uyduğunu açıklayan en fazla 20 kelimelik Türkçe gerekçe.
 - "cites": cümle başka bir çalışmaya atıf yapıyorsa o kaynak(lar) APA metin içi biçimde (ör. ["Hayes vd., 2006"]); makalenin kendi bulgusuysa boş liste.${foreign ? `
-- "tr": seçilen cümle(ler)in akademik Türkçeye sadık ve akıcı çevirisi (atıflar parantez içinde aynen kalsın, "et al." → "vd.").` : ''}
+- "tr": seçilen cümle(ler)in akademik Türkçeye sadık ve akıcı çevirisi (atıflar parantez içinde aynen kalsın, "et al." → "vd."; "(12)" gibi numaralı atıfları çeviriye alma). Terimleri MUTLAKA şu sözlüğe göre çevir: ${GLOSSARY}` : ''}
 - Makalenin KENDİ bulgularını, tanımlarını ve verilerini önceliklendir; başka çalışmalardan aktarılan cümleleri de değerliyse öner ama "cites" alanını doldur.
 - İstatistik ve yaygınlık için yıl ve ülke içeren cümleleri seç. Özet (Abstract) yerine aynı bilgiyi veren gövde cümlelerini tercih et.
 - "Kapanış" maddelerine ve yöntem/bulgu ayrıntılarıyla ilgisiz cümlelere öneri yapma.
 - Aynı cümle bu kısımda en fazla iki farklı maddeye gidebilir. Bu kısım için en fazla 25 öneri.
+- TEZİN DEĞİŞKENLERİ: ${(S.plan.vars || THESIS_VARS).join(', ')}; müdahale: KKT temelli hemşirelik müdahalesi. Anksiyete, stres, uyku vb. tezin değişkeni DEĞİLDİR: bunların yaygınlığını, risk faktörlerini ya da tedavisini yalnızlık, depresyon veya pozitif yaşlanma maddelerine KOYMA. Bu tür cümleler yalnızca KKT’nin genel etkinliği ve uygunluğu maddelerinde (ör. 2.6.4, 1.1#7) ve KKT’den açıkça söz ediyorsa kullanılabilir.
+- Değişkenleri karıştırma: YALNIZLIĞIN tanımı, yaygınlığı, risk faktörleri ve sonuçları 2.3.x maddelerine; DEPRESYONUN tanımı, yaygınlığı, risk faktörleri ve tedavisi 2.4.x maddelerine; ikisinin birbiriyle ya da pozitif yaşlanmayla İLİŞKİSİ 2.5’e ve 1.1#5’e gider. Risk faktörü maddesine, ancak o maddenin konusu olan değişkenin risk faktörünü koy.
+- Bir çalışmanın örneklem özellikleri (katılımcı sayısı, yaş ortalaması, yaşam düzeni dağılımı), dahil etme ve dışlama kriterleri, kullanılan ölçeklerin listesi ve analiz yöntemleri tanım, nüfus istatistiği ya da yaygınlık DEĞİLDİR; bunları önerme.
+- Tablo ya da şekil içeriği, başlık parçası, yarım kalmış cümle içeren kimlikleri önerme.
+- Son kontrol: listeyi döndürmeden önce her öneri için kendine sor: “Öğrenci bu cümleyi bu maddenin paragrafında kullansa jüri yerinde bulur mu? Cümle maddenin ANA konusu hakkında doğrudan bir şey söylüyor mu?” Cevap hayırsa öneriyi çıkar.
 - Bu kısımda hiç uygun cümle yoksa boş liste döndür; zorlama.
 Yalnızca şu yapıda JSON döndür: {"items":[{"ids":["0.1"],"target":"","point":1,"strength":"güçlü","role":"","reason":"","cites":[]${foreign ? ',"tr":""' : ''}}]}
 
@@ -2105,6 +2141,7 @@ TEZİN BU KISMININ İSKELETİ:
 ${planPrompt(part.test)}
 
 MAKALE: ${p.meta.title || p.name} (${inText(p)})
+(Yalnızca makalenin giriş/literatür, tartışma ve sonuç kısımları verildi.)
 CÜMLELER:
 ${sents.text}`;
 }
@@ -2113,6 +2150,7 @@ async function scanPaper(p, { onStage } = {}) {
   const sents = sentenceIndex(p); const foreign = p.lang !== 'tr';
   const now = Date.now(); let added = 0; let lost = 0; let done = 0;
   const keep = S.sugs.filter(s => s.paperId !== p.id || s.status !== 'pending');
+  const uses = new Map(); keep.filter(s => s.paperId === p.id).forEach(s => uses.set(`${s.para}:${s.r[0]}`, (uses.get(`${s.para}:${s.r[0]}`) || 0) + 1));
   gemGap = Math.max(gemGap, 4500); // pace requests so the free tier never trips its per-minute limit
   for (const part of SCAN_PARTS) {
     if (!planTargets().some(t => part.test(t.node.code))) { done++; continue; }
@@ -2128,6 +2166,7 @@ async function scanPaper(p, { onStage } = {}) {
       const para = sents.idx[ids[0]].para; const same = ids.filter(x => sents.idx[x].para === para);
       const r = [Math.min(...same.map(x => sents.idx[x].r[0])), Math.max(...same.map(x => sents.idx[x].r[1]))];
       if (keep.some(s => s.paperId === p.id && s.target === t.key && s.para === para && s.r[0] === r[0])) continue;
+      const uk = `${para}:${r[0]}`; if ((uses.get(uk) || 0) >= 2) continue; uses.set(uk, (uses.get(uk) || 0) + 1);
       const pt = Math.max(0, parseInt(it.point, 10) || 0);
       keep.push({ id: 's' + uid(), paperId: p.id, para, r, quote: p.paras[para].t.slice(r[0], r[1]), target: t.key, point: pt <= t.para.points.length ? pt : 0,
         strength: /olası/i.test(str(it.strength)) ? 'olası' : 'güçlü', role: ROLES.includes(str(it.role)) ? str(it.role) : 'sonuç/etki', reason: str(it.reason).slice(0, 220),
@@ -2142,7 +2181,7 @@ async function scanPaper(p, { onStage } = {}) {
 /* Turkish version of a suggestion from a foreign-language article (for older suggestions without one) */
 async function ensureTr(s) {
   const p = S.papers[s.paperId]; if (!p || p.lang === 'tr' || s.tr) return s.tr || '';
-  const r = await gemini(`Aşağıdaki akademik cümle(ler)i akademik Türkçeye sadık ve akıcı biçimde çevir. Atıfları parantez içinde aynen koru, "et al." ifadesini "vd." yap. Yalnızca JSON: {"tr":""}\n\n${s.quote}`, { temperature: 0.1 });
+  const r = await gemini(`Aşağıdaki akademik cümle(ler)i akademik Türkçeye sadık ve akıcı biçimde çevir. Atıfları parantez içinde aynen koru, "et al." ifadesini "vd." yap, "(12)" gibi numaralı atıfları çeviriye alma. Terimleri şu sözlüğe göre çevir: ${GLOSSARY} Yalnızca JSON: {"tr":""}\n\n${s.quote}`, { temperature: 0.1 });
   s.tr = str(r && r.tr); saveSugs(); return s.tr;
 }
 async function scanWithUi(p) {
@@ -2174,7 +2213,8 @@ async function acceptSug(s) {
   if (p.lang !== 'tr' && !s.tr) { busy('Türkçeye çevriliyor…'); try { await ensureTr(s); } catch (e) { toast(errMsg(e) + ' Not orijinal diliyle eklendi.', 'err'); } busy(false); }
   syncPlanCats();
   const sec = secOf(p, s.para);
-  const n = { id: uid(), paperId: p.id, para: s.para, lang: 'o', secTitle: sec ? sec.title : '', text: s.tr || s.quote, orig: s.tr ? s.quote : undefined, partial: true, cat: catForTarget(t), created: Date.now(), plan: { target: s.target, point: s.point, role: s.role } };
+  const clean = x => sugCites(s).length ? stripNumRefs(x) : x;
+  const n = { id: uid(), paperId: p.id, para: s.para, lang: 'o', secTitle: sec ? sec.title : '', text: clean(s.tr || s.quote), orig: s.tr ? s.quote : undefined, partial: true, cat: catForTarget(t), created: Date.now(), plan: { target: s.target, point: s.point, role: s.role } };
   const cs = sugCites(s); if (cs.length) { n.cites = cs.map(c => ({ intext: c.intext, ref: c.ref })); n.direct = false; }
   S.notes.push(n); s.status = 'added'; s.noteId = n.id; saveSugs(); notesChanged(); pulseNotes();
   toast(`Eklendi: ${t.node.code} ${t.para.title !== 'İçerik' ? t.para.title : t.node.title}`, '', { label: 'Geri al', fn: () => undoSug(s) });
@@ -2549,6 +2589,9 @@ function openSettings(focus) {
     <div class="field"><div class="flabel">Model</div>
       <div class="row"><select id="sModel" aria-label="Model"></select><button id="sRefresh">Yenile</button></div>
       <p class="hint" id="sMHint"></p></div>
+    <div class="field"><div class="flabel">Makalenin taranan bölümleri</div>
+      <p class="hint">Giriş/literatür, Tartışma ve Sonuç okunur; Yöntem, Özet, Kaynakça ve Ekler atlanır.</p>
+      <label class="check"><input type="checkbox" id="sRes" ${S.settings.scanResults ? 'checked' : ''}><span>Bulgular bölümünü de tara (yaygınlık ve risk faktörü verisi için, tarama biraz uzar)</span></label></div>
     <div class="field"><div class="flabel">Atıf dili (APA 7)</div><div class="seg wide" id="sStyle">
       <button data-style="en" class="${style === 'en' ? 'on' : ''}">İngilizce: “&amp;”, “et al.”</button>
       <button data-style="tr" class="${style === 'tr' ? 'on' : ''}">Türkçe: “ve”, “vd.”</button></div></div>
@@ -2580,7 +2623,7 @@ function openSettings(focus) {
     $('#sRefresh').onclick = load;
     $('#sShow').onclick = () => { const k = $('#sKey'); k.type = k.type === 'password' ? 'text' : 'password'; $('#sShow').textContent = k.type === 'password' ? 'Göster' : 'Gizle'; };
     $('#sStyle').onclick = e => { const b = e.target.closest('[data-style]'); if (!b) return; style = b.dataset.style; $$('#sStyle button').forEach(x => x.classList.toggle('on', x === b)); };
-    const apply = () => { S.settings.key = $('#sKey').value.trim(); S.settings.model = $('#sModel').value || 'gemini-2.5-flash'; S.settings.style = style; S.settings.clientId = $('#sCid').value.trim(); saveSettings(); };
+    const apply = () => { S.settings.key = $('#sKey').value.trim(); S.settings.model = $('#sModel').value || 'gemini-2.5-flash'; S.settings.style = style; S.settings.clientId = $('#sCid').value.trim(); S.settings.scanResults = $('#sRes').checked; saveSettings(); };
     bindDriveSettings(apply);
     if (focus === 'drive') setTimeout(() => $('#sDrive').scrollIntoView({ block: 'start', behavior: 'smooth' }), 50);
     $('#sTest').onclick = async () => {
@@ -2625,7 +2668,7 @@ async function buildDocx(set) {
   body += para(run(new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }), { color: '666666', sz: 20 }), { jc: 'center', after: 360 });
   if (set.custom) body += set.custom({ run, para, textRuns, sm });
   else for (const g of exportGroups(set)) {
-    if (g.name) body += para(run(g.name, { b: true, sz: g.level === 1 ? 28 : 24, i: g.level === 2 }), { before: g.level === 1 ? 320 : 200, after: 140, keep: true });
+    if (g.name) body += para(run(g.name, { b: true, sz: g.level === 1 ? 28 : g.level === 3 ? 22 : 24, i: g.level >= 2, color: g.level === 3 ? '24508F' : undefined }), { before: g.level === 1 ? 320 : g.level === 3 ? 140 : 200, after: g.level === 3 ? 80 : 140, keep: true });
     g.notes.forEach((n, k) => {
       body += para(run(`${k + 1}.`) + '<w:r><w:tab/></w:r>' + textRuns(noteWithCite(n, sm)), { ind: '<w:ind w:left="425" w:hanging="425"/>', after: 200 });
     });
@@ -2647,7 +2690,9 @@ async function buildDocx(set) {
 }
 const hasText = n => String(n.text || '').trim();
 function exportSet(sel) {
-  const notes = S.notes.filter(n => hasText(n) && (sel === 'all' || inCat(n, sel)));
+  const ord = new Map(planTargets(true).map((t, i) => [t.key, i]));
+  const rank = n => n.plan && ord.has(n.plan.target) ? ord.get(n.plan.target) * 100 + (n.plan.point || 0) : 1e9;
+  const notes = S.notes.filter(n => hasText(n) && (sel === 'all' || inCat(n, sel))).sort((a, b) => rank(a) - rank(b));
   return { notes, sel, title: sel === 'all' ? 'Notlarım' : catName(sel) };
 }
 function exportGroups(set) {
@@ -2670,7 +2715,16 @@ function exportGroups(set) {
     const c = catOf(set.sel);
     if (c && !c.parent) block(c, false); else out.push({ name: null, level: 0, notes: ns });
   }
-  return out.length ? out : [{ name: null, level: 0, notes: ns }];
+  const base = out.length ? out : [{ name: null, level: 0, notes: ns }];
+  const res = [];
+  for (const g of base) {
+    const by = new Map();
+    for (const n of g.notes) { const t = n.plan && targetOf(n.plan.target); const k = t && t.para.title !== 'İçerik' ? t.para.title : ''; if (!by.has(k)) by.set(k, []); by.get(k).push(n); }
+    if (!g.notes.length || (by.size === 1 && by.has(''))) { res.push(g); continue; }
+    res.push({ ...g, notes: by.get('') || [] });
+    for (const [k, list] of by) if (k) res.push({ name: k, level: 3, notes: list });
+  }
+  return res;
 }
 function openExport() {
   if (!S.notes.some(hasText)) { toast('Önce birkaç not ekle.'); return; }
@@ -2686,7 +2740,7 @@ function openExport() {
     let ready = null, blob = null;
     const build = () => {
       const set = exportSet(sel); const sm = suffixMap(set.notes); const refs = citedPapers(set.notes);
-      $('#xPrev').innerHTML = `<h4>${esc(set.title)}</h4>` + exportGroups(set).map(g => (g.name ? `<p style="font-weight:700;margin:${g.level === 1 ? '20px 0 8px;font-size:17px' : '12px 0 6px;font-style:italic'}">${esc(g.name)}</p>` : '') + g.notes.map((n, k) => `<p class="n">${k + 1}. ${esc(noteWithCite(n, sm))}</p>`).join('')).join('')
+      $('#xPrev').innerHTML = `<h4>${esc(set.title)}</h4>` + exportGroups(set).map(g => (g.name ? `<p style="font-weight:700;margin:${g.level === 1 ? '20px 0 8px;font-size:17px' : g.level === 3 ? '8px 0 4px;font-size:13.5px;color:var(--accent)' : '12px 0 6px;font-style:italic'}">${esc(g.name)}</p>` : '') + g.notes.map((n, k) => `<p class="n">${k + 1}. ${esc(noteWithCite(n, sm))}</p>`).join('')).join('')
         + (refs.length ? `<h4 style="margin-top:22px">Kaynakça</h4>${refs.map(p => `<p class="refp">${refHTML(p, sm)}</p>`).join('')}` : '');
       $('#xName').value = slug(set.title) + '-' + new Date().toISOString().slice(0, 10);
       blob = null; ready = buildDocx(set).then(b => { blob = b; return b; });
@@ -2743,6 +2797,11 @@ async function init() {
   const orphan = x => !S.papers[x.paperId];
   if (S.sugs.some(orphan)) { S.sugs = S.sugs.filter(x => !orphan(x)); saveSugs(); }
   for (const id of Object.keys(S.scans)) if (!S.papers[id]) delete S.scans[id];
+  if (!LS.get('th:clean1', false)) {
+    for (const n of S.notes) { if (!n.plan) continue; const p = S.papers[n.paperId]; let t = n.text; const h = p ? headingPrefix(t, p) : 0; if (h) t = t.slice(h); if (n.cites && n.cites.length) t = stripNumRefs(t); n.text = t; }
+    const seen = new Set(); S.notes = S.notes.filter(n => { if (!n.plan) return true; const k = `${n.paperId}|${n.cat}|${String(n.text).replace(/\s+/g, ' ').trim()}`; if (seen.has(k)) return false; seen.add(k); return true; });
+    saveNotes(); LS.set('th:clean1', true);
+  }
   fixNotes(); syncPlanCats(); S.pane = 'sug';
   resizeOv();
   const last = LS.get('th:last', null);
