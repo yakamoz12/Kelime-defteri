@@ -1370,7 +1370,14 @@ $('#bFree').onclick = () => {
   if (S.catView !== 'all') addFree(S.catView);
   else pickCategory({ title: 'Not hangi kategoriye yazılsın?' }, addFree);
 };
-$('#bNotes').onclick = () => document.body.classList.toggle('notes-open');
+/* The notes panel lives on the reading screen: from Masa or elsewhere, switch to it first, then open Notlar. */
+$('#bNotes').onclick = () => {
+  const away = S.screen !== 'read' || !$('#modal').hidden;
+  if (away) { closeModal(); showScreen('read'); }
+  const open = away || !document.body.classList.contains('notes-open');
+  document.body.classList.toggle('notes-open', open);
+  if (open) setPane('notes');
+};
 $('#bCloseNotes').onclick = () => document.body.classList.remove('notes-open');
 
 /* ---------- reader events ---------- */
