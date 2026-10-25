@@ -386,6 +386,10 @@ mark.qm{background:rgba(36,80,143,.10);color:inherit;text-decoration:underline;t
 .dnode.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
 .dt{flex:1}
 .dpen{font-size:13px;color:var(--accent)}
+.dcnt{flex:none;min-width:22px;padding:1px 7px;border-radius:999px;background:var(--surface2);font:700 11.5px var(--sans);color:var(--muted);text-align:center}
+.dnode.on .dcnt{background:var(--surface);color:var(--accent)}
+.warnbtn{background:#fff4d6;border-color:#e0b84d;color:#7a5200;font-weight:700}
+.warnbtn[hidden]{display:none}
 .dfoot{display:flex;flex-direction:column;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--surface)}
 .dfoot button{min-height:46px;border-radius:12px}
 .dmain{flex:1;min-width:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 22px 40px;display:flex;flex-direction:column;gap:12px}
@@ -2650,8 +2654,38 @@ function deskDot(t) {
   const n = S.notes.filter(x => x.plan && x.plan.target === t.key).length; const goal = targetGoal(t);
   return n === 0 ? 'c0' : n < goal ? 'c1' : 'c2';
 }
+const qCount = key => { const n = S.notes.filter(x => x.plan && x.plan.target === key && hasText(x)).length; return n ? `<span class="dcnt">${n}</span>` : ''; };
+/* every note that the desk cannot place anywhere, so none can get lost */
+const strayNotes = () => { autoAssign(); return S.notes.filter(n => hasText(n) && !(n.plan && targetOf(n.plan.target))); };
+function renderStrayBtn() {
+  const b = $('#dStray'); if (!b) return; const k = strayNotes().length;
+  b.hidden = !k; b.textContent = `Yerleşmemiş notlar (${k})`;
+}
+function openStray() {
+  const opts = planTargets(true).map(t => `<option value="${esc(t.key)}">${esc(targetLabel(t))}</option>`).join('');
+  const draw = box => {
+    const list = strayNotes();
+    box.querySelector('#stList').innerHTML = list.length ? list.map(n => { const p = S.papers[n.paperId];
+      return `<div class="dq" data-nid="${esc(n.id)}"><div class="dqm"><p>${esc(String(n.text).slice(0, 400))}</p><small>${p ? esc(citeOf(n)) + ' · ' : 'Kendi notun · '}${n.plan ? 'bağlı olduğu başlık artık planda yok' : 'kategori: ' + esc(catName(n.cat))}</small></div>
+        <div class="dqa" style="flex-wrap:wrap"><select aria-label="Paragraf seç" style="flex:1;min-width:200px">${opts}</select><button class="primary" data-place>Yerleştir</button><button class="link danger" data-del>Sil</button></div></div>`; }).join('')
+      : '<p class="hint">Bütün notların Masa’da bir paragrafa yerleşmiş.</p>';
+  };
+  modal(`<h3>Yerleşmemiş notlar</h3><p class="hint">Bu notlar Masa’da hiçbir paragrafa bağlı değil (elle eklenmiş, kendi kategorine konmuş ya da başlığı plandan çıkmış). Her biri için paragrafı seç ve <b>Yerleştir</b>’e dokun.</p><div id="stList" class="dlist"></div><div class="mact"><button data-close>Kapat</button></div>`, box => {
+    draw(box);
+    box.addEventListener('click', e => {
+      const q = e.target.closest('[data-nid]'); if (!q) return; const n = S.notes.find(x => x.id === q.dataset.nid); if (!n) return;
+      if (e.target.closest('[data-place]')) {
+        const key = q.querySelector('select').value; const t = targetOf(key); if (!t) return;
+        n.plan = { target: key, point: 0 }; n.cat = 'pc-' + t.node.code; syncPlanCats(); saveNotes(); draw(box); renderDeskTree(); renderDeskMain(); renderStrayBtn();
+        toast(`Not ${shortTarget(key)} paragrafına yerleşti.`);
+      } else if (e.target.closest('[data-del]')) {
+        if (!confirm('Bu not silinecek. Emin misin?')) return; S.notes = S.notes.filter(x => x !== n); notesChanged(); draw(box); renderDeskTree(); renderStrayBtn();
+      }
+    });
+  });
+}
 function renderDeskTree() {
-  const T = $('#deskTree'); if (!T) return;
+  const T = $('#deskTree'); if (!T) return; renderStrayBtn();
   let h = '';
   for (const n of S.plan.nodes) {
     if (n.level === 1) { h += `<div class="dsec">${esc(n.code)}. ${esc(n.title)}</div>`; continue; }
@@ -2659,13 +2693,13 @@ function renderDeskTree() {
     if (!paras.length) { h += `<div class="dsub">${esc(n.code)} ${esc(n.title)}</div>`; continue; }
     if (paras.length === 1) {
       const t = { key: `${n.code}#1`, node: n, para: paras[0], k: 0 };
-      h += `<button class="dnode l${n.level}${S.deskSel === t.key ? ' on' : ''}" data-dk="${t.key}"><span class="pdot ${deskDot(t)}"></span><span class="dt">${esc(n.code)} ${esc(n.title)}</span>${S.drafts[t.key] ? '<span class="dpen" aria-label="yazıldı">✎</span>' : ''}</button>`;
+      h += `<button class="dnode l${n.level}${S.deskSel === t.key ? ' on' : ''}" data-dk="${t.key}"><span class="pdot ${deskDot(t)}"></span><span class="dt">${esc(n.code)} ${esc(n.title)}</span>${qCount(t.key)}${S.drafts[t.key] ? '<span class="dpen" aria-label="yazıldı">✎</span>' : ''}</button>`;
       continue;
     }
     h += `<div class="dsub">${esc(n.code)} ${esc(n.title)}</div>`;
     paras.forEach((pa, k) => {
       const t = { key: `${n.code}#${k + 1}`, node: n, para: pa, k };
-      h += `<button class="dnode l3${S.deskSel === t.key ? ' on' : ''}" data-dk="${t.key}"><span class="pdot ${deskDot(t)}"></span><span class="dt">${esc(shortPara(t))}</span>${S.drafts[t.key] ? '<span class="dpen" aria-label="yazıldı">✎</span>' : ''}</button>`;
+      h += `<button class="dnode l3${S.deskSel === t.key ? ' on' : ''}" data-dk="${t.key}"><span class="pdot ${deskDot(t)}"></span><span class="dt">${esc(shortPara(t))}</span>${qCount(t.key)}${S.drafts[t.key] ? '<span class="dpen" aria-label="yazıldı">✎</span>' : ''}</button>`;
     });
   }
   T.innerHTML = h;
@@ -2728,7 +2762,7 @@ function openDesk() {
   const old = $('#arcView'); const box = old.cloneNode(false); old.replaceWith(box); box.hidden = false;
   box.innerHTML = `<div class="desk">
     <aside class="dtree" aria-label="Tez planı"><div class="dtitle">Yazı masası</div><div id="deskTree"></div>
-      <div class="dfoot"><button class="primary" id="dDocx">Word’e aktar</button><button id="dPlan">Planı düzenle</button></div></aside>
+      <div class="dfoot"><button id="dStray" class="warnbtn" hidden></button><button class="primary" id="dDocx">Word’e aktar</button><button id="dPlan">Planı düzenle</button></div></aside>
     <main class="dmain" id="deskMain"></main>
     <aside class="dwrite" aria-label="Senin paragrafın"><div class="lbx">SENİN PARAGRAFIN</div>
       <label for="deskText" class="hint">Alıntılara bakarak kendi cümlelerinle yaz. <b>Atıf ekle</b> atfı imlecin olduğu yere koyar.</label>
@@ -2742,6 +2776,7 @@ function openDesk() {
     const tg = e.target;
     const dk = tg.closest('[data-dk]'); if (dk) { S.deskSel = dk.dataset.dk; LS.set('th:deskSel', S.deskSel); renderDeskTree(); renderDeskMain(); ta.value = S.drafts[S.deskSel] || ''; $('#deskMain').scrollTop = 0; if (innerWidth <= 820) $('#deskMain').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     if (tg.closest('#dDocx')) { exportDesk(); return; }
+    if (tg.closest('#dStray')) { openStray(); return; }
     if (tg.closest('#dPlan')) { editPlan(); return; }
     if (tg.closest('[data-addfor]')) { S.pendingFocus = [targetOf(S.deskSel).node.code]; $('#file').click(); return; }
     if (tg.closest('[data-pend]')) { openPendingFor(S.deskSel); return; }
