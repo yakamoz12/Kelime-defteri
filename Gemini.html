@@ -375,6 +375,52 @@ mark.qm{background:rgba(36,80,143,.10);color:inherit;text-decoration:underline;t
 .pcount.c0{background:#d9534f}.pcount.c1{background:#b88400}.pcount.c2{background:#1f7a4a}
 .pskel ul{margin:8px 0 12px;padding-left:20px;color:var(--muted);font-size:13.5px;line-height:1.5}
 .kwsout .kw{margin-top:8px}
+.desk{flex:1;min-height:0;display:flex}
+.dtree{width:260px;flex:none;background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.dtitle{font-family:var(--serif);font-weight:600;font-size:22px;padding:18px 16px 8px}
+#deskTree{flex:1;min-height:0;overflow-y:auto;padding:0 8px 12px}
+.dsec{font:700 12px var(--sans);color:var(--muted);padding:14px 10px 4px;letter-spacing:.03em}
+.dsub{font:600 12.5px var(--sans);color:var(--ink);padding:10px 10px 2px}
+.dnode{display:flex;align-items:center;gap:8px;width:100%;min-height:42px;padding:6px 10px;border:0;border-radius:10px;background:transparent;text-align:left;white-space:normal;font-size:13.5px;color:var(--ink)}
+.dnode.l3{padding-left:18px}
+.dnode.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.dt{flex:1}
+.dpen{font-size:13px;color:var(--accent)}
+.dfoot{display:flex;flex-direction:column;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--surface)}
+.dfoot button{min-height:46px;border-radius:12px}
+.dmain{flex:1;min-width:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 22px 40px;display:flex;flex-direction:column;gap:12px}
+.dhead h2{margin:2px 0 0;font-family:var(--serif);font-size:26px;font-weight:600;line-height:1.25}
+.dtools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.dtools button{min-height:44px;border-radius:12px}
+.dpt{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.dph{display:flex;align-items:flex-start;gap:10px;font-weight:600;font-size:14.5px;line-height:1.4}
+.dph span:nth-child(2){flex:1}
+.dph small{font-size:12.5px;color:var(--muted);font-weight:600;flex:none}
+.dph .pdot{margin-top:5px}
+.dlist{display:flex;flex-direction:column;gap:10px}
+.dq{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.dq.used{border-color:#9fcdb4;background:#f1f8f4}
+.dqm p{margin:0;font-family:var(--serif);font-size:15.5px;line-height:1.55}
+.dqm small{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
+.dqm small b{color:#1f7a4a}
+.dflow{display:inline-block;font:700 11.5px var(--sans);color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 9px;margin-bottom:6px}
+.dqa{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dqa .primary{min-height:38px;padding:4px 14px;border-radius:10px;font-size:13.5px}
+.dmv{display:inline-flex;gap:4px}
+.dmv button{min-height:36px;width:36px;padding:0;border-radius:9px}
+.dqa .link{min-height:36px}
+.dwrite{width:350px;flex:none;background:var(--surface);border-left:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:8px;min-height:0}
+.lbx{font:700 12px var(--sans);color:var(--muted);letter-spacing:.03em}
+#deskText{flex:1;min-height:200px;resize:none;border:1px solid var(--line);border-radius:14px;padding:14px;font-family:var(--serif);font-size:16.5px;line-height:1.65;background:var(--bg2);color:var(--ink)}
+.dcount{display:flex;justify-content:space-between;font:600 12.5px var(--sans);color:var(--muted)}
+.fpick{display:flex;flex-direction:column;gap:8px;margin-top:8px;max-height:260px;overflow-y:auto;padding:2px}
+.fgrp{display:flex;flex-direction:column;gap:6px}
+.fkids{display:flex;flex-wrap:wrap;gap:6px;padding-left:14px}
+.fchip{justify-content:flex-start;text-align:left;white-space:normal;min-height:40px;padding:6px 12px;border-radius:12px;font-size:14px}
+.fchip.sm{min-height:34px;font-size:13px;border-radius:10px}
+.fchip.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+@media (max-width:1100px){.dwrite{width:300px}.dtree{width:220px}}
+@media (max-width:820px){.desk{flex-direction:column;overflow-y:auto}.dtree,.dwrite{width:auto}.dtree{max-height:220px}.dmain{overflow:visible}#deskText{min-height:260px}}
 .strq{margin:6px 0;padding:8px 10px;border-radius:10px;background:var(--accent-soft);font-family:var(--serif);font-size:15px;line-height:1.5}
 .strq span{display:block;font:700 11.5px var(--sans);color:var(--accent);margin-bottom:2px}
 .sstr{background:#fff4d6;color:#8a5a00;border-radius:999px;padding:3px 9px;font-weight:700}
@@ -456,7 +502,7 @@ details.setup li{margin-bottom:6px}
     <div class="mark" aria-hidden="true">H</div>
     <button class="nv on" id="nRead"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg>Oku</button>
     <button class="nv" id="bLib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h7"/></svg>Makaleler</button>
-    <button class="nv" id="bArc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9"/><path d="M10 13h4"/></svg>Harita</button>
+    <button class="nv" id="bArc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Masa</button>
     <label class="nv" for="file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Makale ekle</label>
     <button class="nv nvNotes" id="bNotes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Notlar<span class="badge" id="noteCount">0</span></button>
     <span class="grow"></span>
@@ -1031,14 +1077,14 @@ function emptyState() {
       ${hasKey ? '' : '<button class="primary big" data-act="settings">Gemini API anahtarını ekle</button>'}
       <label class="btn big ${hasKey ? 'primary' : ''}" for="file">Makale ekle (PDF)</label>
       ${n ? `<button class="big" data-act="lib">Makaleler (${n})</button>` : ''}
-      <button class="big" data-act="plan">Tez haritası</button>
+      <button class="big" data-act="plan">Yazı masası</button>
     </div>
     <ol class="steps">
       <li><span>1</span><div><b>Makale ekle</b> ile PDF’i seç. Gemini bölümleri ve künyeyi çıkarır; künyeyi onaylayınca makale tez planına göre taranır.</div></li>
       <li><span>2</span><div>Metinde altı çizili cümlelerin yanında <b>→ 2.3.2</b> gibi etiketler çıkar. Dokun, oku; beğenirsen <b>Ekle</b>, beğenmezsen <b>Reddet</b>.</div></li>
       <li><span>3</span><div>Cümle başka bir çalışmaya atıf yapıyorsa, o çalışmanın makalenin kaynakçasındaki künyesi de gösterilir.</div></li>
-      <li><span>4</span><div><b>Harita</b>’da her başlığın ne kadar dolduğunu gör: kırmızı boş, sarı az, yeşil yeterli.</div></li>
-      <li><span>5</span><div><b>Taslağı Word’e aktar</b> ile başlıkları, iskelet maddelerini ve eklediğin alıntıları atıflarıyla al.</div></li>
+      <li><span>4</span><div><b>Masa</b>’da paragrafını seç: alıntılar maddelerin altında durur. <b>Genelden özele sırala</b>, sonra yanda kendi cümlelerinle yaz.</div></li>
+      <li><span>5</span><div><b>Word’e aktar</b> ile başlıkları, yazdığın paragrafları, altlarında alıntıları ve kaynakçayı al.</div></li>
     </ol>
   </div>`;
 }
@@ -1332,7 +1378,7 @@ function handleAct(a) {
   if (a === 'forcetr') { const p = curPaper(); const s = p && p.sections[S.sec]; if (s) { s.forceTr = true; savePaper(p); renderSectionBar(); translateCurrent(); } }
   else if (a === 'settings') openSettings();
   else if (a === 'lib') openLib();
-  else if (a === 'arc' || a === 'plan') openPlan();
+  else if (a === 'arc' || a === 'plan') openDesk();
   else if (a === 'toggleskip') { S.showSkipped = !S.showSkipped; renderReader(true); }
 }
 $('#secbar').addEventListener('click', e => {
@@ -1612,12 +1658,19 @@ function openMeta(pid, fresh) {
   modal(`<h3>Künye</h3>
     <p class="hint">${fresh ? 'Gemini’nin bulduğu bilgileri kontrol et. ' : ''}Kaynakça bu bilgilerle APA 7’ye göre yazılır. Her satıra bir yazar, <b>Soyadı, Adı</b> biçiminde.</p>
     ${metaForm(p.meta, p.keywords)}
+    <div class="field"><div class="flabel">Bu makaleyi hangi başlık(lar) için ekliyorsun?</div>
+      <p class="hint">Seçtiğin başlıklar için derinlemesine okunur; tarama hem daha hızlı hem daha isabetli olur.</p>
+      ${focusPickerHTML(fresh ? (S.pendingFocus || p.focus) : p.focus)}
+      <label class="check"><input type="checkbox" id="fAll" ${(fresh ? (S.pendingFocus || p.focus) : p.focus) && (fresh ? (S.pendingFocus || p.focus) : p.focus).length ? '' : 'checked'}><span>Tüm plan için tara (daha uzun sürer)</span></label></div>
     ${fresh ? `<p class="hint">Kaydettiğinde ${file && Drive.ok() ? 'PDF Drive’a yüklenir ve ' : ''}makale tez planına göre otomatik taranır.${file && !Drive.ok() && S.settings.clientId ? ' Drive bağlı olmadığı için PDF yüklenmeyecek; sonra Makaleler’den ekleyebilirsin.' : ''}</p>` : ''}
     <div class="mact"><button data-close>Vazgeç</button><button class="primary" id="mSave">${fresh ? 'Kaydet ve tara' : 'Kaydet'}</button></div>`, box => {
     bindMetaPreview(box, p);
+    const getFocus = bindFocusPicker(box, fresh ? (S.pendingFocus || p.focus) : p.focus);
     $('#mSave').onclick = async () => {
       const { meta, keywords } = readMetaForm();
-      p.meta = meta; p.keywords = keywords; savePaper(p); closeModal(); renderHeader(); renderNotes(); refreshMap();
+      const fs = $('#fAll').checked ? [] : getFocus(); const changed = focusKey(p) !== focusKey({ focus: fs });
+      p.meta = meta; p.keywords = keywords; p.focus = fs.length ? fs : null; S.pendingFocus = null; savePaper(p);
+      if (!fresh && changed && S.scans[p.id]) toast('Başlık seçimi değişti. Makaleler’den “Yeniden tara” ile yeni başlıklar için tarayabilirsin.'); closeModal(); renderHeader(); renderNotes(); refreshMap();
       delete S.pendingFiles[pid];
       if (fresh && file && Drive.ok()) { busy('PDF Drive’a yükleniyor…'); await uploadPdf(p, file); busy(false); }
       if (fresh && S.settings.key) { setPane('sug'); await scanWithUi(p); } else toast('Künye kaydedildi.');
@@ -1625,7 +1678,7 @@ function openMeta(pid, fresh) {
   });
 }
 
-$('#bArc').onclick = () => openPlan();
+$('#bArc').onclick = () => openDesk();
 
 /* ---------- Google Drive ---------- */
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
@@ -2114,7 +2167,8 @@ function planPrompt(test) {
 function scanPrompt(p, part, sents, foreign) {
   return `Sen hemşirelik alanında deneyimli bir doktora tezi danışmanısın. Öğrencinin tez planı ve bir makale aşağıda. Acele etme: önce makaleyi baştan sona dikkatle oku, sonra plandaki HER maddeyi tek tek ele al ve makalede o maddeye kanıt olabilecek cümleleri ara. Yalnızca bariz eşleşmelerle yetinme; bir maddeyi dolaylı ama gerçekten destekleyen cümleleri de bul.
 
-Görev: Makaledeki cümleleri, tezin şu kısmındaki iskelet maddeleriyle eşleştir: ${part.label}.
+Görev: Makaledeki cümleleri, tezin şu kısmındaki iskelet maddeleriyle eşleştir: ${part.label}.${part.focused ? `
+Öğrenci bu makaleyi YALNIZCA bu başlık(lar) için ekledi. Makaleyi bu başlıkların gözüyle, derinlemesine oku: her maddeye kanıt olabilecek tüm güçlü cümleleri bul (en fazla 30). Başka başlıklara öneri yapma.` : ''}
 Kurallar:
 - Cümleleri metni KOPYALAMADAN, yalnızca köşeli parantezdeki kimlikleriyle belirt ("ids", ör. ["12.3"] ya da aynı paragraftan ardışık ["12.3","12.4"]).
 - "target": iskelet kimliği (ör. "2.3.2#1"); "point": o iskeletteki madde numarası (1, 2, …).
@@ -2152,9 +2206,10 @@ async function scanPaper(p, { onStage } = {}) {
   const keep = S.sugs.filter(s => s.paperId !== p.id || s.status !== 'pending');
   const uses = new Map(); keep.filter(s => s.paperId === p.id).forEach(s => uses.set(`${s.para}:${s.r[0]}`, (uses.get(`${s.para}:${s.r[0]}`) || 0) + 1));
   gemGap = Math.max(gemGap, 4500); // pace requests so the free tier never trips its per-minute limit
-  for (const part of SCAN_PARTS) {
+  const parts = p.focus && p.focus.length ? [{ label: focusLabel(p), focused: true, test: c => p.focus.some(f => c === f || c.startsWith(f + '.')) }] : SCAN_PARTS;
+  for (const part of parts) {
     if (!planTargets().some(t => part.test(t.node.code))) { done++; continue; }
-    if (onStage) onStage(`${part.label} için düşünülüyor (${done + 1}/${SCAN_PARTS.length})…`);
+    if (onStage) onStage(parts.length > 1 ? `${part.label} için düşünülüyor (${done + 1}/${parts.length})…` : `${part.label} için derinlemesine okunuyor…`);
     let res;
     try { res = await gemini(scanPrompt(p, part, sents, foreign), { temperature: 0.2, think: true }); }
     catch (e) { if (e.message === 'DAILY_QUOTA' || e.message === 'NOKEY' || !added) { S.sugs = keep; saveSugs(); throw e; } lost++; continue; }
@@ -2175,7 +2230,7 @@ async function scanPaper(p, { onStage } = {}) {
     }
   }
   S.sugs = keep; saveSugs();
-  S.scans[p.id] = { at: now, ver: S.plan.ver || 1, n: added, partial: lost > 0 && done < SCAN_PARTS.length }; saveScans();
+  S.scans[p.id] = { at: now, ver: S.plan.ver || 1, n: added, focus: focusKey(p), partial: lost > 0 && done < parts.length }; saveScans();
   return added;
 }
 /* Turkish version of a suggestion from a foreign-language article (for older suggestions without one) */
@@ -2205,7 +2260,7 @@ async function scanMany(ids) {
   busy(false); refreshMap();
   toast(`${ok} makale tarandı, ${tot} öneri bulundu.${fail.length ? ' Taranamayan: ' + fail.length : ''}`, fail.length ? 'err' : '');
 }
-const needsScan = p => !S.scans[p.id] || (S.scans[p.id].ver || 1) !== (S.plan.ver || 1);
+const needsScan = p => !S.scans[p.id] || (S.scans[p.id].ver || 1) !== (S.plan.ver || 1) || (S.scans[p.id].focus || 'all') !== focusKey(p);
 
 /* ---------- accept / reject ---------- */
 async function acceptSug(s) {
@@ -2229,6 +2284,7 @@ function refreshMap() {
   if (curPaper()) { renderReader(true); renderSectionBar(); }
   if (S.pane === 'sug') renderSugPane();
   if (S.screen === 'arc' && $('#mapMain')) renderPlanMain();
+  if (S.screen === 'arc' && $('#deskMain')) { renderDeskTree(); renderDeskMain(); }
   if ($('#planTree')) renderPlanTree();
 }
 
@@ -2524,8 +2580,273 @@ async function exportDraft() {
   toast('Taslak indirildi: başlıklar, iskelet maddeleri ve eklediğin alıntılar atıflarıyla.');
 }
 
+/* ---------- writing desk: one thesis paragraph at a time ---------- */
+S.drafts = {}; S.orders = {}; S.deskSel = LS.get('th:deskSel', '1.1#1'); S.pendingFocus = null;
+const saveDrafts = () => DB.set('drafts', S.drafts).catch(() => toast('Yazın kaydedilemedi.', 'err'));
+const saveOrders = () => DB.set('orders', S.orders).catch(() => {});
+const shortPara = t => t.para.title.replace(/^Paragraf (\d+):\s*/, 'P$1 ').replace(/^Adım (\d+):\s*/, 'A$1 ');
+function deskTargets() { return planTargets(true); }
+function pageWords(pg) {
+  const m = String(pg || '').replace(',', '.').match(/(\d+(?:\.\d+)?)?\s*([½¼¾])|(\d+(?:\.\d+)?)/); if (!m) return 0;
+  const frac = { '½': 0.5, '¼': 0.25, '¾': 0.75 }[m[2]] || 0; const n = (parseFloat(m[1] || m[3]) || 0) + frac;
+  return Math.round(n * 300);
+}
+const wordCount = t => (String(t || '').trim().match(/\S+/g) || []).length;
+function targetNotes(key) {
+  const ns = S.notes.filter(n => n.plan && n.plan.target === key && hasText(n));
+  const ord = S.orders[key];
+  if (ord && ord.ids) { const ix = new Map(ord.ids.map((id, i) => [id, i])); ns.sort((a, b) => (ix.has(a.id) ? ix.get(a.id) : 1e6) - (ix.has(b.id) ? ix.get(b.id) : 1e6)); }
+  return ns;
+}
+const citeOf = n => { const p = S.papers[n.paperId]; return p ? citeStr(n, p, suffixMap()) : ''; };
+/* a quote counts as used once its citation was inserted with “Atıf ekle” and is still in the text */
+function usedInDraft(n, draft) {
+  if (!draft || !n.citedIn || n.citedIn !== (n.plan && n.plan.target)) return false;
+  const c = citeOf(n).replace(/^\(|\)$/g, ''); const p = S.papers[n.paperId];
+  return !!c && (draft.includes(c) || !!(p && draft.includes(inText(p))));
+}
+function deskDot(t) {
+  if (!t.node.src || t.para.src === false) return S.drafts[t.key] ? 'c2' : 'cx';
+  const n = S.notes.filter(x => x.plan && x.plan.target === t.key).length; const goal = targetGoal(t);
+  return n === 0 ? 'c0' : n < goal ? 'c1' : 'c2';
+}
+function renderDeskTree() {
+  const T = $('#deskTree'); if (!T) return;
+  let h = '';
+  for (const n of S.plan.nodes) {
+    if (n.level === 1) { h += `<div class="dsec">${esc(n.code)}. ${esc(n.title)}</div>`; continue; }
+    const paras = n.paras || [];
+    if (!paras.length) { h += `<div class="dsub">${esc(n.code)} ${esc(n.title)}</div>`; continue; }
+    if (paras.length === 1) {
+      const t = { key: `${n.code}#1`, node: n, para: paras[0], k: 0 };
+      h += `<button class="dnode l${n.level}${S.deskSel === t.key ? ' on' : ''}" data-dk="${t.key}"><span class="pdot ${deskDot(t)}"></span><span class="dt">${esc(n.code)} ${esc(n.title)}</span>${S.drafts[t.key] ? '<span class="dpen" aria-label="yazıldı">✎</span>' : ''}</button>`;
+      continue;
+    }
+    h += `<div class="dsub">${esc(n.code)} ${esc(n.title)}</div>`;
+    paras.forEach((pa, k) => {
+      const t = { key: `${n.code}#${k + 1}`, node: n, para: pa, k };
+      h += `<button class="dnode l3${S.deskSel === t.key ? ' on' : ''}" data-dk="${t.key}"><span class="pdot ${deskDot(t)}"></span><span class="dt">${esc(shortPara(t))}</span>${S.drafts[t.key] ? '<span class="dpen" aria-label="yazıldı">✎</span>' : ''}</button>`;
+    });
+  }
+  T.innerHTML = h;
+  const on = T.querySelector('.dnode.on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest' });
+}
+function quoteHTML(n, idx, draft, sortedView) {
+  const p = S.papers[n.paperId]; const used = usedInDraft(n, draft);
+  return `<div class="dq${used ? ' used' : ''}" data-nid="${esc(n.id)}">
+    <div class="dqm">${sortedView && n.flow ? `<span class="dflow">${idx + 1}. ${esc(n.flow)}</span>` : ''}<p>${esc(n.text)}</p><small>${esc(citeOf(n))}${p ? ` · ${esc(p.meta.title || p.name).slice(0, 70)}` : ''}${used ? ' · <b>metinde atıf var ✓</b>' : ''}</small></div>
+    <div class="dqa"><button class="primary" data-cite>Atıf ekle</button><span class="dmv"><button data-up aria-label="Yukarı">↑</button><button data-down aria-label="Aşağı">↓</button></span><button class="link" data-goto-note>Makalede</button><button class="link danger" data-rm>Kaldır</button></div>
+  </div>`;
+}
+function renderDeskMain() {
+  const M = $('#deskMain'); if (!M) return;
+  const t = targetOf(S.deskSel) || deskTargets()[0]; if (!t) { M.innerHTML = ''; return; }
+  S.deskSel = t.key;
+  const draft = S.drafts[t.key] || ''; const ns = targetNotes(t.key); const ord = S.orders[t.key];
+  const sorted = !!(ord && ord.ids && ord.ids.length);
+  const pend = S.sugs.filter(s => s.target === t.key && s.status === 'pending').length;
+  const src = t.node.src && t.para.src !== false;
+  const top = planNode(topCode(t.node.code));
+  let h = `<div class="dhead"><div class="pcrumb">${top ? esc(top.code + '. ' + top.title) : ''}${t.node.level > 1 ? ' › ' + esc(t.node.code + ' ' + t.node.title) : ''}${t.para.pages || t.node.pages ? ' · ' + esc(t.para.pages || t.node.pages) : ''}</div>
+    <h2>${esc(t.para.title === 'İçerik' ? t.node.code + ' ' + t.node.title : t.para.title)}</h2></div>`;
+  if (t.node.tip) h += `<div class="ptip"><b>Planındaki not:</b> ${esc(t.node.tip)}</div>`;
+  h += `<div class="dtools">
+    ${src ? `<button class="primary" data-addfor>+ Bu başlık için makale ekle</button>` : ''}
+    ${pend ? `<button data-pend>${pend} öneri bekliyor</button>` : ''}
+    ${ns.length > 1 ? `<button data-funnel>${sorted ? 'Yeniden genelden özele sırala' : 'Genelden özele sırala'}</button>` : ''}
+    ${sorted ? '<button class="link" data-unsort>Maddelere göre göster</button>' : ''}</div>`;
+  if (sorted) {
+    if (ord.note) h += `<div class="ptip"><b>Akış önerisi:</b> ${esc(ord.note)}</div>`;
+    h += `<div class="dlist">${ns.map((n, i) => quoteHTML(n, i, draft, true)).join('') || '<p class="hint">Henüz alıntı yok.</p>'}</div>`;
+  } else {
+    (t.para.points || []).forEach((x, i) => {
+      const list = ns.filter(n => (n.plan.point || 0) === i + 1);
+      const cls = !src ? 'cx' : list.length ? (list.length >= 2 ? 'c2' : 'c1') : 'c0';
+      h += `<section class="dpt"><div class="dph"><span class="pdot ${cls}"></span><span>${esc(x)}</span><small>${list.length} alıntı</small></div>${list.map((n, k) => quoteHTML(n, k, draft, false)).join('')}
+        ${src && !list.length && !/^Kapanış/i.test(x) ? `<button class="link" data-kw2="${i + 1}">Bu madde için hangi kelimelerle makale aramalıyım?</button><div class="kwsout" id="dkw-${i + 1}"></div>` : ''}</section>`;
+    });
+    const rest = ns.filter(n => !(n.plan.point > 0 && n.plan.point <= (t.para.points || []).length));
+    if (rest.length) h += `<section class="dpt"><div class="dph"><span class="pdot cx"></span><span>Diğer alıntılar</span><small>${rest.length}</small></div>${rest.map((n, k) => quoteHTML(n, k, draft, false)).join('')}</section>`;
+    if (!src) h += '<p class="hint">Bu bölüme makaleden kaynak önerilmez; burayı kendi cümlelerinle yaz.</p>';
+  }
+  M.innerHTML = h;
+  const ta = $('#deskText'); if (ta && document.activeElement !== ta) ta.value = draft;
+  updateDeskCount();
+}
+function updateDeskCount() {
+  const t = targetOf(S.deskSel); const el = $('#deskCount'); if (!t || !el) return;
+  const goal = pageWords(t.para.pages || ((t.node.paras || []).length === 1 ? t.node.pages : ''));
+  const d = S.drafts[t.key] || ''; const used = targetNotes(t.key).filter(n => usedInDraft(n, d)).length;
+  el.innerHTML = `<span>${wordCount(d)}${goal ? ' / ~' + goal : ''} kelime</span><span>${used} atıf kullanıldı</span>`;
+}
+function openDesk() {
+  closeModal(); showScreen('arc');
+  const old = $('#arcView'); const box = old.cloneNode(false); old.replaceWith(box); box.hidden = false;
+  box.innerHTML = `<div class="desk">
+    <aside class="dtree" aria-label="Tez planı"><div class="dtitle">Yazı masası</div><div id="deskTree"></div>
+      <div class="dfoot"><button class="primary" id="dDocx">Word’e aktar</button><button id="dPlan">Planı düzenle</button></div></aside>
+    <main class="dmain" id="deskMain"></main>
+    <aside class="dwrite" aria-label="Senin paragrafın"><div class="lbx">SENİN PARAGRAFIN</div>
+      <label for="deskText" class="hint">Alıntılara bakarak kendi cümlelerinle yaz. <b>Atıf ekle</b> atfı imlecin olduğu yere koyar.</label>
+      <textarea id="deskText" placeholder="Paragrafını buraya yaz…"></textarea>
+      <div class="dcount" id="deskCount"></div></aside></div>`;
+  renderDeskTree(); renderDeskMain();
+  const ta = $('#deskText'); ta.value = S.drafts[S.deskSel] || '';
+  let tmr = null;
+  ta.addEventListener('input', () => { S.drafts[S.deskSel] = ta.value; updateDeskCount(); clearTimeout(tmr); tmr = setTimeout(() => { if (!S.drafts[S.deskSel]) delete S.drafts[S.deskSel]; saveDrafts(); renderDeskTree(); renderDeskMain(); }, 900); });
+  box.addEventListener('click', async e => {
+    const tg = e.target;
+    const dk = tg.closest('[data-dk]'); if (dk) { S.deskSel = dk.dataset.dk; LS.set('th:deskSel', S.deskSel); renderDeskTree(); renderDeskMain(); ta.value = S.drafts[S.deskSel] || ''; $('#deskMain').scrollTop = 0; return; }
+    if (tg.closest('#dDocx')) { exportDesk(); return; }
+    if (tg.closest('#dPlan')) { editPlan(); return; }
+    if (tg.closest('[data-addfor]')) { S.pendingFocus = [targetOf(S.deskSel).node.code]; $('#file').click(); return; }
+    if (tg.closest('[data-pend]')) { openPendingFor(S.deskSel); return; }
+    if (tg.closest('[data-funnel]')) { funnelSort(S.deskSel, tg.closest('[data-funnel]')); return; }
+    if (tg.closest('[data-unsort]')) { delete S.orders[S.deskSel]; saveOrders(); renderDeskMain(); return; }
+    const kw = tg.closest('[data-kw2]'); if (kw) { deskTerms(S.deskSel, +kw.dataset.kw2, kw); return; }
+    const q = tg.closest('[data-nid]'); if (!q) return;
+    const n = S.notes.find(x => x.id === q.dataset.nid); if (!n) return;
+    if (tg.closest('[data-cite]')) {
+      const c = citeOf(n); const pos = typeof ta.selectionStart === 'number' ? ta.selectionStart : ta.value.length;
+      const before = ta.value.slice(0, pos).replace(/\s+$/, ''); const after = ta.value.slice(pos);
+      const ins = (before ? ' ' : '') + c; ta.value = before + ins + (after && !/^[\s.,;:]/.test(after) ? ' ' : '') + after;
+      S.drafts[S.deskSel] = ta.value; n.citedIn = S.deskSel; saveDrafts(); saveNotes(); ta.focus(); const np = (before + ins).length; ta.setSelectionRange(np, np);
+      renderDeskMain(); renderDeskTree(); toast('Atıf eklendi.');
+    } else if (tg.closest('[data-up]') || tg.closest('[data-down]')) {
+      const ids = targetNotes(S.deskSel).map(x => x.id); const i = ids.indexOf(n.id); const j = i + (tg.closest('[data-up]') ? -1 : 1);
+      if (j < 0 || j >= ids.length) return; [ids[i], ids[j]] = [ids[j], ids[i]];
+      S.orders[S.deskSel] = Object.assign({}, S.orders[S.deskSel] || {}, { ids }); saveOrders(); renderDeskMain();
+    } else if (tg.closest('[data-goto-note]')) jumpTo(n);
+    else if (tg.closest('[data-rm]')) {
+      if (!confirm('Bu alıntı paragraftan ve notlardan kaldırılacak. Emin misin?')) return;
+      S.notes = S.notes.filter(x => x !== n); const s = S.sugs.find(x => x.noteId === n.id); if (s) { s.status = 'rejected'; delete s.noteId; saveSugs(); }
+      notesChanged(); renderDeskMain(); renderDeskTree();
+    }
+  });
+}
+function openPendingFor(key) {
+  const t = targetOf(key);
+  const draw = box => {
+    const list = S.sugs.filter(s => s.target === key && s.status === 'pending');
+    box.querySelector('#pdList').innerHTML = list.length ? list.map(s => sugCard(s, { showSource: true })).join('') : '<p class="hint">Bekleyen öneri kalmadı.</p>';
+  };
+  modal(`<h3>${esc(targetLabel(t))}</h3><p class="hint">Bu paragraf için bekleyen öneriler. Ekledikçe yazı masasında maddelerin altına düşer.</p><div id="pdList"></div><div class="mact"><button data-close>Kapat</button></div>`, box => {
+    draw(box);
+    box.addEventListener('click', async e => {
+      const card = e.target.closest('[data-sid]'); const g = e.target.closest('[data-goto]');
+      const s = S.sugs.find(x => x.id === (g ? g.dataset.goto : card && card.dataset.sid)); if (!s) return;
+      if (g) { gotoSug(s); return; }
+      if (e.target.closest('[data-acc]')) { await acceptSug(s); draw(box); }
+      else if (e.target.closest('[data-rej]')) { rejectSug(s); draw(box); }
+      else if (e.target.closest('[data-undo]')) { undoSug(s); draw(box); }
+    });
+  });
+}
+async function funnelSort(key, btn) {
+  const t = targetOf(key); const ns = targetNotes(key);
+  if (ns.length < 2) return;
+  if (!S.settings.key) { openSettings(); toast('Önce Gemini API anahtarını ekle.', 'err'); return; }
+  btn.disabled = true; btn.textContent = 'Düşünülüyor…';
+  try {
+    const items = ns.map((n, i) => `[${i + 1}] ${n.text} ${citeOf(n)}`).join('\n');
+    const r = await gemini(`Sen hemşirelik alanında deneyimli bir doktora tezi danışmanısın. Öğrenci tezinin aşağıdaki paragrafını yazacak; bunun için makalelerden alıntılar topladı.
+Görevin: Alıntıları akademik yazımın GENELDEN ÖZELE (huni) mantığına göre sırala. Genel bağlam ve tanımlar → dünya ölçeği → Türkiye → tezin özel konusuna (yaşlılar, yalnızlık, depresyon, KKT, hemşirelik) yaklaşan bulgular → paragrafı bir sonraki konuya bağlayan cümleler. Paragraf iskeletindeki maddelerin sırasını da gözet. Birbirini tekrar eden alıntıları yan yana koy.
+Her alıntı için akıştaki yerini anlatan en fazla 5 kelimelik Türkçe bir etiket yaz (ör. "Genel bağlam", "Dünya verisi", "Türkiye verisi", "Risk faktörü", "Özel bulgu", "Geçiş"). Alıntıların metnini değiştirme, yeni bilgi ekleme, paragrafı yazma.
+"note": öğrencinin bu sırayla nasıl bir akış kurabileceğini anlatan en fazla 2 cümlelik Türkçe öneri (paragrafı yazmadan).
+Yalnızca JSON: {"order":[3,1,2],"labels":{"1":"…"},"note":"…"}
+
+PARAGRAF: ${t.node.code} ${t.node.title} › ${t.para.title}
+İSKELET MADDELERİ:
+${(t.para.points || []).map((x, i) => `${i + 1}) ${x}`).join('\n')}
+
+ALINTILAR:
+${items}`, { temperature: 0.2, think: true });
+    const order = (Array.isArray(r && r.order) ? r.order : []).map(x => parseInt(x, 10) - 1).filter(i => ns[i]);
+    const seen = new Set(order); ns.forEach((n, i) => { if (!seen.has(i)) order.push(i); });
+    const labels = (r && r.labels) || {};
+    ns.forEach((n, i) => { const l = str(labels[i + 1] || labels[String(i + 1)]); if (l) n.flow = l.slice(0, 40); });
+    S.orders[key] = { ids: [...new Set(order)].map(i => ns[i].id), note: str(r && r.note).slice(0, 400), at: Date.now() };
+    saveNotes(); saveOrders(); renderDeskMain(); toast('Alıntılar genelden özele sıralandı.');
+  } catch (e) { toast(errMsg(e), 'err'); btn.disabled = false; btn.textContent = 'Genelden özele sırala'; }
+}
+async function deskTerms(key, point, btn) {
+  const t = targetOf(key); if (!t || !S.settings.key) { if (!S.settings.key) openSettings(); return; }
+  const out = $('#dkw-' + point); btn.disabled = true; btn.textContent = 'Düşünüyorum…';
+  try {
+    const r = await gemini(`Hemşirelik doktora tezi konusu: "${S.plan.topic}". Şu maddeye kaynak makale arıyorum: ${t.node.code} ${t.node.title} › ${t.para.title} › ${t.para.points[point - 1]}
+Google Scholar, PubMed ve TR Dizin / DergiPark için arama ifadeleri öner: 4 Türkçe, 4 İngilizce (MeSH terimleri ve tırnaklı ifadeler kullanabilirsin). Yalnızca JSON: {"tr":[""],"en":[""]}`, { temperature: 0.3 });
+    const all = [...(r.tr || []), ...(r.en || [])].map(str).filter(Boolean);
+    out.innerHTML = `<div class="kw">${all.map(x => `<button data-copy="${esc(x)}">${esc(x)}</button>`).join('')}</div><p class="hint">Bir ifadeye dokununca kopyalanır.</p>`;
+    out.onclick = async ev => { const c = ev.target.closest('[data-copy]'); if (c) { try { await navigator.clipboard.writeText(c.dataset.copy); toast('Arama ifadesi kopyalandı.'); } catch {} } };
+    btn.remove();
+  } catch (e) { btn.disabled = false; btn.textContent = 'Tekrar dene'; toast(errMsg(e), 'err'); }
+}
+/* Word: headings in plan order, your paragraphs, then the quotes behind each paragraph, then the reference list */
+async function exportDesk() {
+  if (!window.JSZip) { toast('Word oluşturucu yüklenemedi. İnternet bağlantını kontrol et.', 'err'); return; }
+  const included = [];
+  const blocks = [];
+  for (const n of S.plan.nodes) {
+    const paras = n.paras || [];
+    const items = paras.map((pa, k) => {
+      const key = `${n.code}#${k + 1}`; const draft = (S.drafts[key] || '').trim(); const ns = targetNotes(key);
+      const used = ns.filter(x => usedInDraft(x, draft)); const qs = used.length ? used : ns;
+      qs.forEach(x => included.push(x));
+      return { pa, draft, qs, usedOnly: !!used.length };
+    });
+    blocks.push({ n, items });
+  }
+  if (!included.length && !Object.values(S.drafts).some(Boolean)) { toast('Henüz yazdığın bir paragraf ya da eklediğin alıntı yok.'); return; }
+  const blob = await buildDocx({ notes: included, title: 'Tez Metni', custom: ({ run, para, textRuns, sm }) => {
+    let b = para(run(S.plan.topic, { i: true, color: '444444' }), { jc: 'center', after: 360 });
+    for (const { n, items } of blocks) {
+      const head = `${n.code}${n.level === 1 ? '.' : ''} ${n.title}`;
+      b += para(run(head, { b: true, sz: n.level === 1 ? 30 : n.level === 2 ? 26 : 24 }), { before: n.level === 1 ? 400 : 240, after: 120, keep: true });
+      for (const it of items) {
+        if (items.length > 1) b += para(run(it.pa.title, { b: true, sz: 22, color: '24508F' }), { before: 120, after: 60, keep: true });
+        if (it.draft) for (const chunk of it.draft.split(/\n\s*\n/)) b += para(textRuns(chunk.trim()), { jc: 'both', ind: '<w:ind w:firstLine="709"/>', line: 360, after: 120 });
+        if (it.qs.length) {
+          b += para(run(it.usedOnly ? 'Kullandığım alıntılar' : 'Bu paragraf için toplanan alıntılar', { b: true, sz: 19, color: '666666' }), { before: 80, after: 40, keep: true });
+          it.qs.forEach((x, j) => { b += para(run(`${j + 1}.`, { sz: 19, color: '555555' }) + '<w:r><w:tab/></w:r>' + run(noteWithCite(x, sm), { sz: 19, color: '555555' }), { ind: '<w:ind w:left="425" w:hanging="425"/>', after: 60, line: 276 }); });
+        }
+      }
+    }
+    return b;
+  } });
+  downloadBlob(blob, `tez-metni-${new Date().toISOString().slice(0, 10)}.docx`);
+  toast('Word indirildi: başlıklar, yazdığın paragraflar, altlarında alıntılar ve kaynakça.');
+}
+
+/* ---------- which headings an article is added for ---------- */
+const focusKey = p => (p.focus && p.focus.length ? p.focus.slice().sort().join(',') : 'all');
+function focusPickerHTML(sel) {
+  const nodes = S.plan.nodes.filter(n => n.level >= 2 && n.src);
+  const on = c => sel && sel.includes(c);
+  let h = '<div class="fpick" id="fPick">';
+  for (const n of nodes.filter(n => n.level === 2)) {
+    const kids = nodes.filter(k => k.level === 3 && k.code.startsWith(n.code + '.'));
+    h += `<div class="fgrp"><button type="button" class="fchip${on(n.code) ? ' on' : ''}" data-fc="${n.code}" aria-pressed="${on(n.code)}">${esc(n.code)} ${esc(n.title)}</button>`;
+    if (kids.length) h += `<div class="fkids">${kids.map(k => `<button type="button" class="fchip sm${on(k.code) ? ' on' : ''}" data-fc="${k.code}" aria-pressed="${on(k.code)}">${esc(k.code)} ${esc(k.title)}</button>`).join('')}</div>`;
+    h += '</div>';
+  }
+  return h + '</div>';
+}
+function bindFocusPicker(root, sel) {
+  const set = new Set(sel || []);
+  root.querySelector('#fPick').addEventListener('click', e => {
+    const b = e.target.closest('[data-fc]'); if (!b) return; const c = b.dataset.fc;
+    if (set.has(c)) set.delete(c); else { set.add(c); for (const x of [...set]) if (x !== c && (x.startsWith(c + '.') || c.startsWith(x + '.'))) set.delete(x); }
+    root.querySelectorAll('[data-fc]').forEach(x => { const o = set.has(x.dataset.fc); x.classList.toggle('on', o); x.setAttribute('aria-pressed', o); });
+    const all = root.querySelector('#fAll'); if (all) all.checked = !set.size;
+  });
+  const all = root.querySelector('#fAll');
+  if (all) all.addEventListener('change', () => { if (all.checked) { set.clear(); root.querySelectorAll('[data-fc]').forEach(x => { x.classList.remove('on'); x.setAttribute('aria-pressed', false); }); } });
+  return () => [...set];
+}
+const focusLabel = p => p.focus && p.focus.length ? p.focus.map(c => { const n = planNode(c); return n ? `${c} ${n.title}` : c; }).join(', ') : 'Tüm plan';
+
 /* ---------- backup ---------- */
-function backupData() { return { app: 'tez-haritasi', v: 3, papers: S.papers, notes: S.notes, cats: S.cats, plan: S.plan, sugs: S.sugs, scans: S.scans, style: S.settings.style }; }
+function backupData() { return { app: 'tez-haritasi', v: 3, papers: S.papers, notes: S.notes, cats: S.cats, plan: S.plan, sugs: S.sugs, scans: S.scans, drafts: S.drafts, orders: S.orders, style: S.settings.style }; }
 async function restoreData(d) {
   if (!d || d.app !== 'tez-haritasi') throw new Error('Bu dosya bir Tez Haritası yedeği değil.');
   for (const p of Object.values(d.papers || {})) { S.papers[p.id] = p; await DB.set('paper:' + p.id, p); }
@@ -2535,6 +2856,8 @@ async function restoreData(d) {
   if (d.plan && d.plan.nodes) { S.plan = d.plan; savePlan(); }
   if (Array.isArray(d.sugs)) { const k = new Set(S.sugs.map(x => x.id)); d.sugs.forEach(x => { if (!k.has(x.id)) S.sugs.push(x); }); saveSugs(); }
   if (d.scans) { S.scans = Object.assign({}, d.scans, S.scans); saveScans(); }
+  if (d.drafts) { for (const [k, v] of Object.entries(d.drafts)) if (!S.drafts[k]) S.drafts[k] = v; saveDrafts(); }
+  if (d.orders) { S.orders = Object.assign({}, d.orders, S.orders); saveOrders(); }
 }
 
 const fmtDay = t => new Date(t).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: new Date(t).getFullYear() === new Date().getFullYear() ? undefined : 'numeric' });
@@ -2549,8 +2872,8 @@ function openLib() {
       $('#lAll').hidden = !all.some(needsScan);
       $('#lList').innerHTML = all.length ? all.map(p => {
         const sc = S.scans[p.id]; const ss = S.sugs.filter(s => s.paperId === p.id);
-        const st = !sc ? '<b class="lunread">Taranmadı</b>' : needsScan(p) ? '<b class="swarnt">Plan değişti, yeniden tara</b>' : `<b class="lread">Tarandı</b>: ${ss.filter(s => s.status === 'pending').length} öneri bekliyor, ${ss.filter(s => s.status === 'added').length} eklendi`;
-        return `<div class="libitem"><p class="refp">${refHTML(p, sm)}</p><div class="libmeta">${st}</div>
+        const st = !sc ? '<b class="lunread">Taranmadı</b>' : needsScan(p) ? '<b class="swarnt">Plan ya da başlık seçimi değişti, yeniden tara</b>' : `<b class="lread">Tarandı</b>: ${ss.filter(s => s.status === 'pending').length} öneri bekliyor, ${ss.filter(s => s.status === 'added').length} eklendi`;
+        return `<div class="libitem"><p class="refp">${refHTML(p, sm)}</p><div class="libmeta">${st}</div><div class="libmeta">Başlık: ${esc(focusLabel(p))}</div>
           <div class="libact"><button class="primary" data-open="${p.id}">Aç</button><button data-scanp="${p.id}">${sc ? 'Yeniden tara' : 'Planıma göre tara'}</button><button data-meta="${p.id}">Künye</button>${p.driveId ? `<button data-pdf="${p.id}">PDF’i aç</button>` : (S.settings.clientId ? `<button data-attach="${p.id}">PDF’i Drive’a yükle</button>` : '')}<button class="danger" data-delp="${p.id}">Sil</button></div></div>`;
       }).join('') : '<p class="hint">Henüz makale yok. <b>Makale ekle</b> ile bir PDF seç; Gemini okur, künyesini çıkarır ve tez planına göre tarar.</p>';
     };
@@ -2774,6 +3097,8 @@ async function init() {
     S.plan = (await DB.get('plan')) || null;
     S.sugs = (await DB.get('sugs')) || [];
     S.scans = (await DB.get('scans')) || {};
+    S.drafts = (await DB.get('drafts')) || {};
+    S.orders = (await DB.get('orders')) || {};
     S.cats = (await DB.get('cats')) || [];
   } catch (e) {
     DB.db = null; toast('Tarayıcı depolaması kullanılamıyor. Veriler kaydedilmeyecek.', 'err');
@@ -2806,6 +3131,7 @@ async function init() {
   resizeOv();
   const last = LS.get('th:last', null);
   if (last && S.papers[last]) openPaper(last); else renderAll();
+  openDesk();
   S.booting = false;
   if (after) {
     toast('Drive bağlandı.');
