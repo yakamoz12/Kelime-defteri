@@ -6,8 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Makale Okuyucu">
-<title>Makale Okuyucu</title>
+<meta name="apple-mobile-web-app-title" content="Tez Haritası">
+<title>Tez Haritası</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📑</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -169,6 +169,10 @@ svg.ink{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointe
 .dots{display:inline-flex;gap:4px}
 .dots i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:dot 1s infinite ease-in-out}
 .dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+mark.qm.qpend{background:rgba(36,80,143,.16);text-decoration-color:var(--accent);cursor:pointer}
+mark.qm.qadd{background:rgba(31,122,74,.16);text-decoration-color:#1f7a4a;cursor:pointer}
+mark.qm.qfocus{animation:qf 2.6s ease-out}
+@keyframes qf{0%,55%{background:#ffd84d;box-shadow:0 0 0 4px #ffd84d}100%{}}
 mark.qm{background:rgba(36,80,143,.10);color:inherit;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2.5px;text-underline-offset:4px;border-radius:3px;padding:1px 0}
 .qdot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-left:6px;display:inline-block}
 .chip.on .qdot{background:var(--on-accent)}
@@ -316,6 +320,68 @@ mark.qm{background:rgba(36,80,143,.10);color:inherit;text-decoration:underline;t
 .readtog{flex:none;min-height:44px;padding:6px 14px 6px 10px;border-radius:12px;gap:6px;font-weight:600;color:var(--muted)}
 .readtog[hidden]{display:none}
 .trnote{color:var(--muted);font-size:13.5px;font-weight:600}
+#toolbar,#bRead{display:none!important}
+.stags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.stag{min-height:30px;padding:2px 10px;border-radius:999px;font:700 12px var(--sans);border:1px solid var(--accent);background:var(--surface);color:var(--accent)}
+.stag.added{background:#1f7a4a;border-color:#1f7a4a;color:#fff}
+.scard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.scard.added{border-color:#1f7a4a;box-shadow:inset 3px 0 0 #1f7a4a}
+.starget{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:4px}
+.sok{color:#1f7a4a}
+.spoint{font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.scard blockquote{margin:6px 0;font-family:var(--serif);font-size:15.5px;line-height:1.55;border-left:3px solid var(--accent);padding-left:10px}
+.smeta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.srole{background:var(--surface2);border-radius:999px;padding:3px 9px;font-weight:600}
+.sreason{font-size:13.5px;color:var(--ink);margin-top:6px}
+.swarn{font-size:12.5px;color:#8a5a00;background:#fff4d6;border-radius:8px;padding:6px 9px;margin-top:6px}
+.sact{display:flex;gap:8px;margin-top:10px}
+.sact button{min-height:42px;border-radius:11px}
+.scanbox{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:13.5px}
+.scanbox button{min-height:40px;flex:none}
+.swarnt{color:#8a5a00}
+.sfilt button{font-size:13px;padding:4px 8px}
+.ptopic{margin:0 6px 14px;font-size:12.5px;color:var(--muted);line-height:1.45}
+.pnode{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;padding:6px 10px;border:0;border-radius:10px;background:transparent;text-align:left;white-space:normal;font-size:13.5px;color:var(--ink)}
+.pnode.l1{font-weight:700;margin-top:8px}
+.pnode.l2{padding-left:18px}
+.pnode.l3{padding-left:30px;font-size:13px;color:var(--muted)}
+.pnode.on{background:var(--accent-soft);color:var(--accent)}
+.pnode.nosrc .ptitle{opacity:.6}
+.ptitle{flex:1}
+.pend{font-size:11px;font-weight:700;background:var(--accent);color:var(--on-accent);border-radius:999px;padding:1px 7px}
+.pdot{width:10px;height:10px;border-radius:50%;flex:none;display:inline-block}
+.pdot.c0{background:#d9534f}.pdot.c1{background:#e0a100}.pdot.c2{background:#1f9d55}.pdot.cx{background:transparent;border:1px solid var(--line)}
+.phealth{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:13px;color:var(--muted);margin:12px 2px}
+.phealth b{color:var(--ink)}
+.warnt{color:#8a5a00}
+.plegend{display:inline-flex;align-items:center;gap:6px;margin-left:auto}
+.plegend i{margin-left:6px}
+.pmain{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:30px}
+.phead h2{margin:2px 0 4px;font-family:var(--serif);font-size:26px}
+.pcrumb{font-size:12.5px;color:var(--muted);font-weight:600}
+.ppages{font-size:12.5px;color:var(--muted);background:var(--surface2);border-radius:999px;padding:2px 9px;margin-left:6px}
+.ptip{background:var(--accent-soft);border-radius:12px;padding:10px 12px;font-size:13.5px;margin:10px 0}
+.ptip.muted{background:var(--surface2);color:var(--muted)}
+.pkids{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin:12px 0}
+.pkid{display:flex;gap:10px;align-items:flex-start;justify-content:flex-start;text-align:left;white-space:normal;min-height:56px;padding:10px 12px;border-radius:12px;background:var(--surface)}
+.pkid .pdot{margin-top:5px}
+.pkid b{display:block;font-size:14px}
+.pkid small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px;font-weight:400}
+.pskel{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0}
+.pskel.c0{border-left:4px solid #d9534f}.pskel.c1{border-left:4px solid #e0a100}.pskel.c2{border-left:4px solid #1f9d55}
+.pshead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pshead b{font-size:15.5px}
+.pcount{margin-left:auto;font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 10px;color:#fff}
+.pcount.c0{background:#d9534f}.pcount.c1{background:#b88400}.pcount.c2{background:#1f7a4a}
+.pskel ul{margin:8px 0 12px;padding-left:20px;color:var(--muted);font-size:13.5px;line-height:1.5}
+.kwsout .kw{margin-top:8px}
+.scites{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.scite{background:var(--surface2);border-radius:10px;padding:9px 11px;font-size:13px}
+.sch b{color:var(--ink)}
+.sref{margin:6px 0 0;font-family:var(--serif);font-size:13.5px;line-height:1.45;padding-left:1.4em;text-indent:-1.4em}
+.srefact{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.srefact button,.srefact .btn{min-height:34px;padding:4px 10px;font-size:12.5px;border-radius:9px}
+.nref{margin-top:4px;font-family:var(--serif);font-size:12.5px;color:var(--muted)}
 .readtog svg{color:var(--line)}
 .readtog.on{background:#e6f4ec;border-color:#1f7a4a;color:#1f7a4a}
 .readtog.on svg{color:#1f7a4a}
@@ -382,23 +448,22 @@ details.setup li{margin-bottom:6px}
 <body>
 <div id="app">
   <nav class="rail" aria-label="Ana menü">
-    <div class="mark" aria-hidden="true">M</div>
+    <div class="mark" aria-hidden="true">H</div>
     <button class="nv on" id="nRead"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg>Oku</button>
-    <button class="nv" id="bLib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h7"/></svg>Kütüphane</button>
-    <button class="nv" id="bArc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9"/><path d="M10 13h4"/></svg>Arşiv</button>
-    <label class="nv" for="file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>PDF ekle</label>
+    <button class="nv" id="bLib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h7"/></svg>Makaleler</button>
+    <button class="nv" id="bArc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9"/><path d="M10 13h4"/></svg>Harita</button>
+    <label class="nv" for="file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Makale ekle</label>
     <button class="nv nvNotes" id="bNotes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Notlar<span class="badge" id="noteCount">0</span></button>
     <span class="grow"></span>
     <button class="nv" id="bSet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Ayarlar</button>
     <input type="file" id="file" class="vh" accept="application/pdf,.pdf">
-    <input type="file" id="arcFile" class="vh" accept="application/pdf,.pdf" multiple>
-    <input type="file" id="arcAttach" class="vh" accept="application/pdf,.pdf">
+    <input type="file" id="pdfAttach" class="vh" accept="application/pdf,.pdf">
   </nav>
   <div class="work" id="readView">
     <div class="main">
       <div class="readcol">
         <header class="top">
-          <button class="pname" id="pname"><b>Makale Okuyucu</b><small>Makale seçilmedi</small></button>
+          <button class="pname" id="pname"><b>Tez Haritası</b><small>Makale seçilmedi</small></button>
           <button class="readtog" id="bRead" aria-pressed="false" hidden>Okudum</button>
           <div class="seg" id="viewSeg" role="group" aria-label="Görünüm" hidden></div>
         </header>
@@ -423,16 +488,17 @@ details.setup li{margin-bottom:6px}
       </div>
       <aside class="notes" id="notes" aria-label="Notlar">
         <div class="nhead">
-          <div class="seg" id="paneTabs" role="tablist" aria-label="Sağ panel"><button data-pane="notes" class="on">Notlar</button><button data-pane="ask">Makaleye sor</button></div>
+          <div class="seg" id="paneTabs" role="tablist" aria-label="Sağ panel"><button data-pane="sug" class="on">Öneriler</button><button data-pane="notes">Notlar</button><button data-pane="ask">Sor</button></div>
           <span style="flex:1"></span>
           <button id="bExport" class="outline">Word’e aktar</button>
           <button id="bCloseNotes" class="nclose" aria-label="Paneli kapat">✕</button>
         </div>
-        <div class="pane" id="notesPane">
+        <div class="pane" id="notesPane" hidden>
           <div class="catbar" id="catbar"></div>
           <div id="notesList"></div>
           <div class="nbottom"><button id="bFree">+ Kendi notunu yaz</button></div>
         </div>
+        <div class="pane" id="sugPane"><div class="asklog" id="sugLog"></div></div>
         <div class="pane" id="askPane" hidden>
           <div class="asklog" id="askLog"></div>
           <div class="askin"><textarea id="askQ" rows="2" placeholder="Makaleye bir soru sor… (ör. Yalnızlıkla ilgili neler yazıyor?)"></textarea><button class="primary" id="askGo" aria-label="Sor">Sor</button></div>
@@ -464,7 +530,7 @@ const LS = {
 };
 const DB = {
   db: null, mem: new Map(),
-  open() { return new Promise((res, rej) => { const r = indexedDB.open('makale-okuyucu', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => { this.db = r.result; res(); }; r.onerror = () => rej(r.error); }); },
+  open() { return new Promise((res, rej) => { const r = indexedDB.open('tez-haritasi', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => { this.db = r.result; res(); }; r.onerror = () => rej(r.error); }); },
   tx(mode) { return this.db.transaction('kv', mode).objectStore('kv'); },
   get(k) { if (!this.db) return Promise.resolve(this.mem.get(k)); return new Promise((res, rej) => { const q = this.tx('readonly').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); },
   set(k, v) { if (!this.db) { this.mem.set(k, v); return Promise.resolve(); } return new Promise((res, rej) => { const t = this.db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); },
@@ -473,9 +539,8 @@ const DB = {
 };
 
 const S = {
-  settings: Object.assign({ key: '', model: 'gemini-2.5-flash', style: 'en', clientId: '' }, LS.get('mo:settings', {})),
-  cats: [], catView: LS.get('mo:catView', 'all'), pendingFiles: {}, attachFor: null,
-  arcFolder: LS.get('mo:arcFolder', 'all'), arcTarget: null,
+  settings: Object.assign({ key: '', model: 'gemini-2.5-flash', style: 'en', clientId: '' }, LS.get('th:settings', {})),
+  cats: [], catView: LS.get('th:catView', 'all'), pendingFiles: {}, attachFor: null,
   papers: {}, notes: [], cur: null, sec: 0, view: 'orig', tool: 'select', color: '#d9342b',
   undo: [], translating: false, trText: '', showSkipped: false, hinted: {}
 };
@@ -490,14 +555,8 @@ function saveNotes() {
   clearTimeout(timers.notes);
   timers.notes = setTimeout(() => { DB.set('notes', S.notes).catch(() => toast('Notlar kaydedilemedi.', 'err')); }, 250);
 }
-function saveSettings() { LS.set('mo:settings', S.settings); }
+function saveSettings() { LS.set('th:settings', S.settings); }
 function saveCats() { DB.set('cats', S.cats).catch(() => toast('Kategoriler kaydedilemedi.', 'err')); }
-async function flushSaves() {
-  clearTimeout(timers.notes);
-  const jobs = [DB.set('notes', S.notes), DB.set('cats', S.cats), DB.set('archive', ARC.items)];
-  const p = curPaper(); if (p) { clearTimeout(timers[p.id]); jobs.push(DB.set('paper:' + p.id, p)); }
-  await Promise.all(jobs).catch(() => {});
-}
 
 /* ---------- UI helpers ---------- */
 let toastT;
@@ -577,6 +636,7 @@ function doiFmt(s) {
   return s;
 }
 function refParts(p, sm) {
+  if (p.raw) return [[p.raw, false]];
   const m = p.meta || {}; const out = []; const add = (t, i = false) => { if (t) out.push([t, i]); };
   const au = refAuthors(p); const yr = `(${yearLabel(p, sm)}).`;
   let title = String(m.title || '').trim().replace(/\s+/g, ' ');
@@ -597,17 +657,41 @@ function refParts(p, sm) {
   return out;
 }
 const refHTML = (p, sm) => refParts(p, sm).map(([t, i]) => i ? `<i>${esc(t)}</i>` : esc(t)).join('');
-const refSortKey = p => (refAuthors(p) || String(p.meta.title || p.name || '')).toLocaleLowerCase('tr');
+const refSortKey = p => p.raw ? p.raw.toLocaleLowerCase('tr') : (refAuthors(p) || String(p.meta.title || p.name || '')).toLocaleLowerCase('tr');
+const usesPaper = n => !(n.cites && n.cites.length && n.direct);
 function citedPapers(notes = S.notes) {
   const sm = suffixMap(notes);
-  const ids = [...new Set(notes.filter(n => n.paperId && S.papers[n.paperId]).map(n => n.paperId))];
-  return ids.map(id => S.papers[id]).sort((a, b) =>
-    refSortKey(a).localeCompare(refSortKey(b), 'tr') || yearLabel(a, sm).localeCompare(yearLabel(b, sm)));
+  const ids = [...new Set(notes.filter(n => n.paperId && S.papers[n.paperId] && usesPaper(n)).map(n => n.paperId))];
+  const raws = [...new Set(notes.filter(n => n.direct && n.cites).flatMap(n => n.cites.map(c => c.ref).filter(Boolean)))].map(r => ({ raw: r }));
+  return [...ids.map(id => S.papers[id]), ...raws].sort((a, b) =>
+    refSortKey(a).localeCompare(refSortKey(b), 'tr') || (a.raw || b.raw ? 0 : yearLabel(a, sm).localeCompare(yearLabel(b, sm))));
+}
+function citeStr(n, p, sm) {
+  if (n.cites && n.cites.length) {
+    const list = n.cites.map(c => c.intext).filter(Boolean).join('; ');
+    if (list) return n.direct ? `(${list})` : `(${list}, ${S.settings.style === 'tr' ? 'akt.' : 'as cited in'} ${inText(p, sm)})`;
+  }
+  return `(${inText(p, sm)})`;
+}
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function inlineCite(t, n, p, sm) {
+  if (!n.cites || !n.cites.length) return null;
+  let done = 0; const akt = `, ${S.settings.style === 'tr' ? 'akt.' : 'as cited in'} ${inText(p, sm)}`;
+  for (const c of n.cites) {
+    const y = (c.intext.match(/\d{4}[a-z]?/) || [])[0]; const sur = (c.intext.match(/\p{Lu}[\p{L}'’\-]+/u) || [])[0];
+    if (!y || !sur) continue;
+    const re = new RegExp(`\\(([^()]*${escRe(sur)}[^()]*${y}[^()]*)\\)`, 'u');
+    if (re.test(t)) { t = t.replace(re, (m, inner) => n.direct ? m : `(${inner.trim()}${akt})`); done++; continue; }
+    const re2 = new RegExp(`(${escRe(sur)}[^()]{0,60}?)\\((${y}[^()]*)\\)`, 'u');
+    if (re2.test(t)) { t = t.replace(re2, (m, a, inner) => n.direct ? m : `${a}(${inner}${akt})`); done++; }
+  }
+  return done ? t : null;
 }
 function noteWithCite(n, sm) {
   const p = S.papers[n.paperId]; const t = String(n.text || '').trim();
   if (!p) return t;
-  const c = `(${inText(p, sm)})`;
+  const inl = inlineCite(t, n, p, sm); if (inl) return inl;
+  const c = citeStr(n, p, sm);
   if (/[^.]\.$/.test(t)) return t.slice(0, -1) + ' ' + c + '.';
   return t + ' ' + c;
 }
@@ -779,7 +863,7 @@ function errMsg(e) {
   if (/API key not valid|API_KEY_INVALID|API key expired/i.test(m)) return 'API anahtarı geçersiz. Ayarlar’dan kontrol et.';
   if (m === 'DAILY_QUOTA') return 'Gemini’nin günlük ücretsiz kotası doldu. Yarın tekrar dene ya da Ayarlar’dan “Flash-Lite” modelini seç.';
   if (/429|quota|RESOURCE_EXHAUSTED|rate/i.test(m)) return 'Ücretsiz kullanım sınırına ulaşıldı. Bir dakika bekleyip tekrar dene.';
-  if (m === 'DRIVE_AUTH') return 'Drive oturumu sona erdi. Arşiv’den ya da Ayarlar’dan tekrar bağlan.';
+  if (m === 'DRIVE_AUTH') return 'Drive oturumu sona erdi. Ayarlar’dan tekrar bağlan.';
   if (/^Drive/.test(m)) return m.replace(/^Drive: /, 'Drive hatası: ');
   if (/not found|is not supported|404/i.test(m)) return 'Model bulunamadı. Ayarlar’dan başka bir model seç.';
   if (/Failed to fetch|NetworkError|Load failed|network/i.test(m)) return 'Bağlantı kurulamadı. İnternetini kontrol et.';
@@ -817,31 +901,7 @@ function normKw(k) {
   const seen = new Set();
   return arr.filter(x => { const f = x.toLocaleLowerCase('tr'); if (seen.has(f)) return false; seen.add(f); return true; }).slice(0, 25);
 }
-const META_JSON = '{"meta":{"authors":[{"family":"Soyadı","given":"Adı"}],"year":"","title":"","journal":"","volume":"","issue":"","pages":"","doi":""},"keywords":["..."]}';
 const KW_RULE = 'Anahtar kelimeler TÜRKÇE olmalı: Yayında "Keywords" ya da "Anahtar kelimeler" listesi varsa her birini akademik Türkçeye çevir (zaten Türkçeyse aynen al); liste yoksa 5-8 Türkçe anahtar kelime öner. Kısaltmalar ve özel adlar (ör. PISA, COVID-19) olduğu gibi kalabilir. Özel adlar dışında küçük harfle yaz.';
-function metaPrompt(src) {
-  return `Aşağıda bir akademik yayının ${src}. Görevin APA 7 kaynakçası için künye bilgilerini ve anahtar kelimeleri çıkarmak.
-Kurallar: Yazar adlarını yayındaki gibi tam yaz. Başlığı özgün dilinde ve büyük-küçük harf düzenini koruyarak yaz. pages "45-60" biçiminde, doi yalnızca "10." ile başlayan kısım olsun. Bilinmeyen alanları boş bırak.
-${KW_RULE}
-Yalnızca şu yapıda JSON döndür:
-${META_JSON}`;
-}
-function toB64(file) {
-  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = () => rej(new Error('Dosya okunamadı.')); r.readAsDataURL(file); });
-}
-async function metaFromPdf(f, onStage) {
-  let paras = [];
-  try { paras = await extractPdf(f, () => {}, 3); } catch {}
-  const text = paras.map(x => x.t).join('\n').slice(0, 14000);
-  let res;
-  if (text.length >= 300) res = await gemini(metaPrompt('ilk sayfalarından çıkarılmış metin var') + '\n\nMETİN:\n' + text);
-  else {
-    if (f.size > 18 * 1024 * 1024) throw new Error('Bu PDF taranmış görünüyor ve Gemini’ye gönderilemeyecek kadar büyük.');
-    if (onStage) onStage('Taranmış PDF, Gemini sayfaları okuyor…');
-    res = await gemini([{ inlineData: { mimeType: 'application/pdf', data: await toB64(f) } }, { text: metaPrompt('PDF dosyası ekte') }]);
-  }
-  return { meta: normMeta(res && res.meta), keywords: normKw(res && res.keywords) };
-}
 async function analyze(p) {
   const list = p.paras.map((x, i) => `[${i}] ${i < 25 ? x.t.slice(0, 1500) : x.t.slice(0, 280)}`).join('\n');
   const prompt = `Aşağıda bir akademik makalenin PDF’ten çıkarılmış, numaralandırılmış paragrafları var (uzun paragraflar kısaltıldı).
@@ -954,25 +1014,25 @@ function blk(p, i, l, text, skipped) {
   const noted = isNoted(p, i, l);
   return `<div class="blk${l === 't' ? ' tr' : ''}${noted ? ' noted' : ''}${skipped ? ' skipped' : ''}" data-p="${i}" data-l="${l}">`
     + `<button class="addn" data-add aria-label="${noted ? 'Nottan çıkar' : 'Notlara ekle'}">${noted ? '✓' : '+'}</button>`
-    + `<p>${l === 'o' ? markText(text, (activeMarks(p) || {})[i]) : esc(text)}</p><svg class="ink" viewBox="0 0 1000 1000" preserveAspectRatio="none">${inkPaths(p, i + ':' + l)}</svg></div>`;
+    + `<p>${l === 'o' ? markText(text, (activeMarks(p) || {})[i]) : esc(text)}</p>${l === 'o' ? sugTags(p, i) : ''}<svg class="ink" viewBox="0 0 1000 1000" preserveAspectRatio="none">${inkPaths(p, i + ':' + l)}</svg></div>`;
 }
 function emptyState() {
-  const hasKey = !!S.settings.key; const hasPapers = Object.keys(S.papers).length > 0;
+  const hasKey = !!S.settings.key; const n = Object.keys(S.papers).length;
   return `<div class="empty">
-    <h2>Okumak istediğin makaleyi ekle</h2>
-    <p class="lead">PDF’i seçtiğinde Gemini makaleyi Özet, Giriş, Yöntem gibi bölümlere ayırır ve künyesini çıkarır.</p>
+    <h2>Tez haritası</h2>
+    <p class="lead">Makaleni ekle; Gemini okur ve “bu cümle 2.3.2’ye, şu cümle 1.1’in 3. paragrafına olur” diye önerir. Sen metinde okur, beğendiğini eklersin.</p>
     <div class="acts">
       ${hasKey ? '' : '<button class="primary big" data-act="settings">Gemini API anahtarını ekle</button>'}
-      <label class="btn big ${hasKey ? 'primary' : ''}" for="file">PDF seç</label>
-      ${hasPapers ? '<button class="big" data-act="lib">Kütüphaneyi aç</button>' : ''}
-      <button class="big" data-act="arc">Eski makaleleri arşivle</button>
+      <label class="btn big ${hasKey ? 'primary' : ''}" for="file">Makale ekle (PDF)</label>
+      ${n ? `<button class="big" data-act="lib">Makaleler (${n})</button>` : ''}
+      <button class="big" data-act="plan">Tez haritası</button>
     </div>
     <ol class="steps">
-      <li><span>1</span><div>Üstten bir bölüm seç ve <b>Bölümü çevir</b>’e dokun.</div></li>
-      <li><span>2</span><div>Apple Pencil’ı <b>Fosforlu</b> moda al, beğendiğin paragrafın üstünden geç. Hangi not kategorisine ekleneceğini sen seçersin.</div></li>
-      <li><span>3</span><div><b>Kalem</b> ile metnin üstüne çiz, <b>Silgi</b> ile sil. Parmağınla kaydırmaya devam edebilirsin.</div></li>
-      <li><span>4</span><div><b>Word’e aktar</b> ile istediğin kategorinin notlarını APA 7 atıflarıyla ve kaynakçasıyla indir.</div></li>
-      <li><span>5</span><div><b>Arşiv</b>’e eski makalelerinin PDF’lerini ver. Gemini künyelerini ve anahtar kelimelerini çıkarır, PDF’ler Google Drive’ına yüklenir.</div></li>
+      <li><span>1</span><div><b>Makale ekle</b> ile PDF’i seç. Gemini bölümleri ve künyeyi çıkarır; künyeyi onaylayınca makale tez planına göre taranır.</div></li>
+      <li><span>2</span><div>Metinde altı çizili cümlelerin yanında <b>→ 2.3.2</b> gibi etiketler çıkar. Dokun, oku; beğenirsen <b>Ekle</b>, beğenmezsen <b>Reddet</b>.</div></li>
+      <li><span>3</span><div>Cümle başka bir çalışmaya atıf yapıyorsa, o çalışmanın makalenin kaynakçasındaki künyesi de gösterilir.</div></li>
+      <li><span>4</span><div><b>Harita</b>’da her başlığın ne kadar dolduğunu gör: kırmızı boş, sarı az, yeşil yeterli.</div></li>
+      <li><span>5</span><div><b>Taslağı Word’e aktar</b> ile başlıkları, iskelet maddelerini ve eklediğin alıntıları atıflarıyla al.</div></li>
     </ol>
   </div>`;
 }
@@ -989,7 +1049,7 @@ function renderReader(keepScroll) {
   for (const i of idx) {
     const o = p.paras[i].t, t = p.tr[i], skp = sk.has(i);
     h += '<div class="para">';
-    if (S.view !== 'tr' || !t) h += blk(p, i, 'o', o, skp);
+    if (S.view !== 'tr' || !t || S.sugs.some(x => x.paperId === p.id && x.para === i && x.status !== 'rejected')) h += blk(p, i, 'o', o, skp);
     if (S.view !== 'orig' && t) h += blk(p, i, 't', t, skp);
     h += '</div>';
   }
@@ -1010,7 +1070,7 @@ function refreshNoted() {
 function renderHeader() {
   const p = curPaper(); const b = $('#pname');
   const r = $('#bRead');
-  if (!p) { b.innerHTML = '<b>Makale Okuyucu</b><small>Makale seçilmedi</small>'; r.hidden = true; }
+  if (!p) { b.innerHTML = '<b>Tez Haritası</b><small>Makale seçilmedi</small>'; r.hidden = true; }
   else {
     b.innerHTML = `<b>${esc(p.meta.title || p.name)}</b><small>${esc(inText(p))}. Künyeyi düzenlemek için dokun</small>`;
     r.hidden = false; r.classList.toggle('on', !!p.read); r.setAttribute('aria-pressed', p.read ? 'true' : 'false');
@@ -1048,7 +1108,7 @@ const catCount = id => S.notes.filter(n => inCat(n, id)).length;
 const visibleNotes = () => S.catView === 'all' ? S.notes : S.notes.filter(n => inCat(n, S.catView));
 const selMain = () => { const c = catOf(S.catView); return c ? (c.parent || c.id) : null; };
 function newCat(name, parent = null) { const c = { id: 'c' + uid(), name: name.trim(), parent }; S.cats.push(c); saveCats(); return c; }
-function setCatView(v) { S.catView = v; LS.set('mo:catView', v); renderNotes(); }
+function setCatView(v) { S.catView = v; LS.set('th:catView', v); renderNotes(); }
 function fixNotes() {
   if (!S.cats.length) S.cats.push({ id: 'c-genel', name: 'Genel', parent: null });
   for (const c of S.cats) { const p = c.parent ? catOf(c.parent) : null; if (!p || p.parent || p.id === c.id) c.parent = null; }
@@ -1110,8 +1170,8 @@ function editCat(id) {
   });
 }
 function pickCategory({ title = 'Hangi nota eklensin?', sub = '', has = [], onRemove = null } = {}, done) {
-  const last = catOf(LS.get('mo:lastCat', null));
-  const finish = id => { LS.set('mo:lastCat', id); closeModal(); renderCatBar(); done(id); };
+  const last = catOf(LS.get('th:lastCat', null));
+  const finish = id => { LS.set('th:lastCat', id); closeModal(); renderCatBar(); done(id); };
   const step = (mainId) => {
     const m = mainId ? catOf(mainId) : null;
     const items = m ? [m, ...subsOf(m.id)] : mains();
@@ -1159,7 +1219,7 @@ function renderNotes() {
       return `<div class="note" data-id="${esc(n.id)}"><div class="note-top"><span class="num">${k + 1}</span>${src}
         <span class="nact"><button data-up aria-label="Yukarı taşı">↑</button><button data-down aria-label="Aşağı taşı">↓</button><button data-del aria-label="Sil">✕</button></span></div>
         <textarea data-edit rows="2" placeholder="Notunu yaz. Apple Pencil ile elle de yazabilirsin.">${esc(n.text)}</textarea>
-        <div class="nfoot">${p ? `<div class="cite">Atıf: (${esc(inText(p, sm))})</div>` : ''}<button class="cattag" data-move title="Kategoriyi değiştir">${esc(catName(n.cat))}</button></div></div>`;
+        <div class="nfoot">${p ? `<div class="cite">Atıf: ${esc(citeStr(n, p, sm))}${n.plan ? ` · ${esc(shortTarget(n.plan.target))}` : ''}${n.cites && n.cites.length ? `${n.cites.filter(c => c.ref).map(c => `<div class="nref">Asıl kaynak: ${esc(c.ref)}</div>`).join('')}<div><button class="link" data-direct>${n.direct ? 'Yeniden “akt.” kullan' : 'Asıl kaynağı okudum, doğrudan atıf yap'}</button></div>` : ''}</div>` : ''}<button class="cattag" data-move title="Kategoriyi değiştir">${esc(catName(n.cat))}</button></div></div>`;
     }).join('');
     $$('textarea', L).forEach(autosize);
   }
@@ -1172,8 +1232,9 @@ function openPaper(id) {
   const p = S.papers[id]; if (!p) return;
   S.cur = id; S.sec = Math.min(p.lastSec || 0, p.sections.length - 1); S.undo = []; showScreen('read');
   p.opened = Date.now(); savePaper(p);
-  LS.set('mo:last', id); renderAll();
+  LS.set('th:last', id); renderAll();
   if (S.pane === 'ask') renderAsk();
+  if (S.pane === 'sug' || !S.pane) renderSugPane();
 }
 
 /* ---------- notes ---------- */
@@ -1214,6 +1275,11 @@ $('#notesList').addEventListener('click', e => {
   else if (e.target.closest('[data-up]') && j > 0) swapNotes(n, vis[j - 1]);
   else if (e.target.closest('[data-down]') && j < vis.length - 1) swapNotes(n, vis[j + 1]);
   else if (e.target.closest('[data-move]')) pickCategory({ title: 'Hangi kategoriye taşınsın?', has: [n.cat] }, cat => { n.cat = cat; saveNotes(); renderNotes(); toast(`Not “${catName(cat)}” kategorisine taşındı.`); });
+  else if (e.target.closest('[data-direct]')) {
+    if (!n.direct && !(n.cites || []).some(c => c.ref)) { toast('Bu atfın künyesi makalenin kaynakçasında bulunamadı, doğrudan atıf yapılamaz.', 'err'); return; }
+    if (!n.direct && !confirm('Doğrudan atıf, asıl kaynağı kendin okuyup bilgiyi orada doğruladıysan uygundur. Kaynakçaya bu makale yerine asıl kaynak yazılacak. Devam edilsin mi?')) return;
+    n.direct = !n.direct; saveNotes(); renderNotes(); toast(n.direct ? 'Atıf doğrudan asıl kaynağa çevrildi.' : 'Atıf yeniden “akt.” biçiminde.');
+  }
   else if (e.target.closest('[data-jump]')) jumpTo(n);
 });
 $('#notesList').addEventListener('input', e => {
@@ -1224,7 +1290,7 @@ $('#notesList').addEventListener('input', e => {
 $('#bFree').onclick = () => {
   const addFree = cat => {
     S.notes.push({ id: uid(), paperId: null, text: '', cat, created: Date.now() });
-    if (S.catView !== 'all' && S.catView !== cat) { S.catView = cat; LS.set('mo:catView', cat); }
+    if (S.catView !== 'all' && S.catView !== cat) { S.catView = cat; LS.set('th:catView', cat); }
     saveNotes(); renderNotes(); renderHeader();
     const ta = $$('#notesList textarea').pop(); if (ta) { ta.scrollIntoView({ block: 'center' }); ta.focus(); }
   };
@@ -1260,7 +1326,7 @@ function handleAct(a) {
   if (a === 'forcetr') { const p = curPaper(); const s = p && p.sections[S.sec]; if (s) { s.forceTr = true; savePaper(p); renderSectionBar(); translateCurrent(); } }
   else if (a === 'settings') openSettings();
   else if (a === 'lib') openLib();
-  else if (a === 'arc') openArchive();
+  else if (a === 'arc' || a === 'plan') openPlan();
   else if (a === 'toggleskip') { S.showSkipped = !S.showSkipped; renderReader(true); }
 }
 $('#secbar').addEventListener('click', e => {
@@ -1280,7 +1346,6 @@ function showScreen(s) {
   S.screen = s;
   $('#readView').hidden = s !== 'read'; $('#arcView').hidden = s !== 'arc';
   $('#nRead').classList.toggle('on', s === 'read'); $('#bArc').classList.toggle('on', s === 'arc');
-  if (s !== 'arc') ARC.onChange = null;
 }
 $('#nRead').onclick = () => { closeModal(); showScreen('read'); };
 $('#bLib').onclick = openLib;
@@ -1524,39 +1589,29 @@ function bindMetaPreview(box, base, sm) {
 function openMeta(pid, fresh) {
   const p = S.papers[pid]; if (!p) return;
   const file = fresh ? S.pendingFiles[pid] : null;
-  const arcItem = p.arcId ? ARC.get(p.arcId) : null;
-  const arcOpt = arcItem
-    ? '<p class="hint">Bu makale arşivde. Künyedeki değişiklikler arşive de yansır.</p>'
-    : `<label class="check"><input type="checkbox" id="mArc" ${fresh ? 'checked' : ''}><span>Arşive ekle${file ? (Drive.ok() ? ' ve PDF’i Drive’a yükle' : '. Drive bağlı değil, yalnızca künye kaydedilir.') : ''}</span></label>
-      <label>Arşiv klasörü<select id="mFolder">${folderOptions(S.arcFolder !== 'all' && ARC.folder(S.arcFolder) ? S.arcFolder : GENEL)}</select></label>`;
   modal(`<h3>Künye</h3>
     <p class="hint">${fresh ? 'Gemini’nin bulduğu bilgileri kontrol et. ' : ''}Kaynakça bu bilgilerle APA 7’ye göre yazılır. Her satıra bir yazar, <b>Soyadı, Adı</b> biçiminde.</p>
-    ${metaForm(p.meta, p.keywords)}${arcOpt}
-    <div class="mact"><button data-close>Vazgeç</button><button class="primary" id="mSave">Kaydet</button></div>`, box => {
+    ${metaForm(p.meta, p.keywords)}
+    ${fresh ? `<p class="hint">Kaydettiğinde ${file && Drive.ok() ? 'PDF Drive’a yüklenir ve ' : ''}makale tez planına göre otomatik taranır.${file && !Drive.ok() && S.settings.clientId ? ' Drive bağlı olmadığı için PDF yüklenmeyecek; sonra Makaleler’den ekleyebilirsin.' : ''}</p>` : ''}
+    <div class="mact"><button data-close>Vazgeç</button><button class="primary" id="mSave">${fresh ? 'Kaydet ve tara' : 'Kaydet'}</button></div>`, box => {
     bindMetaPreview(box, p);
-    if ($('#mFolder')) bindFolderSelect($('#mFolder'));
     $('#mSave').onclick = async () => {
-      const { meta, keywords } = readMetaForm(); const toArc = !!($('#mArc') && $('#mArc').checked);
-      const folderId = $('#mFolder') ? $('#mFolder').value : null;
-      p.meta = meta; p.keywords = keywords; savePaper(p); closeModal(); renderHeader(); renderNotes();
+      const { meta, keywords } = readMetaForm();
+      p.meta = meta; p.keywords = keywords; savePaper(p); closeModal(); renderHeader(); renderNotes(); refreshMap();
       delete S.pendingFiles[pid];
-      if (arcItem) { await saveArcItem({ item: arcItem, meta, keywords }); toast('Künye kaydedildi.'); return; }
-      if (!toArc) { toast('Künye kaydedildi.'); return; }
-      const up = !!(file && Drive.ok());
-      busy(up ? 'PDF Drive’a yükleniyor…' : 'Arşive ekleniyor…');
-      const r = await saveArcItem({ meta, keywords, file: up ? file : null, readId: p.id, folderId, fileName: file ? file.name : null });
-      busy(false); p.arcId = r.item.id; savePaper(p);
-      if (r.upErr) toast('Künye arşive eklendi ama PDF yüklenemedi. ' + errMsg(r.upErr), 'err');
-      else toast(up ? 'Künye kaydedildi, PDF Drive arşivine yüklendi.' : 'Künye kaydedildi ve arşive eklendi.');
+      if (fresh && file && Drive.ok()) { busy('PDF Drive’a yükleniyor…'); await uploadPdf(p, file); busy(false); }
+      if (fresh && S.settings.key) { setPane('sug'); await scanWithUi(p); } else toast('Künye kaydedildi.');
     };
   });
 }
 
+$('#bArc').onclick = () => openPlan();
+
 /* ---------- Google Drive ---------- */
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
-const FOLDER_NAME = 'Makale Arşivi', INDEX_NAME = 'arsiv-dizini.json', BACKUP_NAME = 'makale-okuyucu-yedek.json';
+const FOLDER_NAME = 'Tez Haritası', BACKUP_NAME = 'tez-haritasi-yedek.json';
 const Drive = {
-  tok: LS.get('mo:dtok', null), folder: LS.get('mo:dfolder', null), indexId: LS.get('mo:dindex', null),
+  tok: LS.get('th:dtok', null), folder: LS.get('th:dfolder', null), indexId: LS.get('th:dindex', null),
   ok() { return !!(this.tok && this.tok.t && this.tok.exp > Date.now() + 60000); },
   web() { return /^https?:$/.test(location.protocol); },
   redirectUri() { return location.origin + location.pathname; },
@@ -1566,7 +1621,7 @@ const Drive = {
     if (!S.settings.clientId) { openSettings('drive'); toast('Önce Google Client ID’yi ekle.'); return; }
     busy('Google’a yönlendiriliyor…');
     await flushSaves();
-    const state = uid(); LS.set('mo:dstate', state); LS.set('mo:after', after || 'connected');
+    const state = uid(); LS.set('th:dstate', state); LS.set('th:after', after || 'connected');
     const q = new URLSearchParams({ client_id: S.settings.clientId, redirect_uri: this.redirectUri(), response_type: 'token', scope: DRIVE_SCOPE, include_granted_scopes: 'true', state });
     location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + q.toString();
   },
@@ -1575,22 +1630,22 @@ const Drive = {
     if (!/(^|&)(access_token|error)=/.test(raw)) return null;
     const h = new URLSearchParams(raw);
     history.replaceState(null, '', location.pathname + location.search);
-    const st = LS.get('mo:dstate', null); LS.set('mo:dstate', null);
-    const after = LS.get('mo:after', null); LS.set('mo:after', null);
+    const st = LS.get('th:dstate', null); LS.set('th:dstate', null);
+    const after = LS.get('th:after', null); LS.set('th:after', null);
     if (h.get('error')) { setTimeout(() => toast(h.get('error') === 'access_denied' ? 'Drive izni verilmedi.' : 'Drive bağlantısı kurulamadı: ' + h.get('error'), 'err'), 300); return null; }
     if (!st || h.get('state') !== st) { setTimeout(() => toast('Drive bağlantısı doğrulanamadı. Tekrar dene.', 'err'), 300); return null; }
     this.tok = { t: h.get('access_token'), exp: Date.now() + (parseInt(h.get('expires_in'), 10) || 3600) * 1000 };
-    LS.set('mo:dtok', this.tok);
+    LS.set('th:dtok', this.tok);
     return after || 'connected';
   },
   disconnect() {
     if (this.tok && this.tok.t) fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(this.tok.t), { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).catch(() => {});
-    this.tok = null; LS.set('mo:dtok', null);
+    this.tok = null; LS.set('th:dtok', null);
   },
   async api(url, opts = {}) {
     if (!this.ok()) throw new Error('DRIVE_AUTH');
     const r = await fetch(/^https:/.test(url) ? url : 'https://www.googleapis.com/drive/v3/' + url, Object.assign({}, opts, { headers: Object.assign({ Authorization: 'Bearer ' + this.tok.t }, opts.headers || {}) }));
-    if (r.status === 401) { this.tok = null; LS.set('mo:dtok', null); throw new Error('DRIVE_AUTH'); }
+    if (r.status === 401) { this.tok = null; LS.set('th:dtok', null); throw new Error('DRIVE_AUTH'); }
     if (!r.ok) { const d = await r.json().catch(() => ({})); const e = new Error('Drive: ' + ((d.error && d.error.message) || ('HTTP ' + r.status))); e.status = r.status; throw e; }
     return r;
   },
@@ -1604,7 +1659,7 @@ const Drive = {
     const res = await this.json(`files?q=${this.qs(`name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`)}&fields=files(id)&spaces=drive`);
     let id = res.files && res.files[0] && res.files[0].id;
     if (!id) id = (await this.json('files?fields=id', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' }) })).id;
-    this.folder = id; LS.set('mo:dfolder', id); return id;
+    this.folder = id; LS.set('th:dfolder', id); return id;
   },
   async findFile(name) {
     const folder = await this.ensureFolder();
@@ -1630,7 +1685,7 @@ const Drive = {
     const id = this[idKey]; if (!id) return null;
     try { const f = await this.json(`files/${id}?fields=id,trashed`); if (!f.trashed) return id; }
     catch (e) { if (e.message === 'DRIVE_AUTH') throw e; }
-    this[idKey] = null; LS.set('mo:dindex', null); return null;
+    this[idKey] = null; LS.set('th:dindex', null); return null;
   },
   async putJson(name, data, idKey) {
     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
@@ -1641,427 +1696,107 @@ const Drive = {
       catch (e) { if (e.status !== 404) throw e; }
     }
     const r = await this.upload(blob, { name, parents: [await this.ensureFolder()], mimeType: 'application/json' });
-    if (idKey) { this[idKey] = r.id; LS.set('mo:dindex', r.id); }
+    if (idKey) { this[idKey] = r.id; LS.set('th:dindex', r.id); }
     return r.id;
   },
   async getJson(name, idKey) {
     const id = idKey ? await this.validId(idKey) : null;
     if (id) return (await this.api(`files/${id}?alt=media`)).json().catch(() => null);
     const f = await this.findFile(name); if (!f) return null;
-    if (idKey) { this[idKey] = f.id; LS.set('mo:dindex', f.id); }
+    if (idKey) { this[idKey] = f.id; LS.set('th:dindex', f.id); }
     return (await this.api(`files/${f.id}?alt=media`)).json().catch(() => null);
   }
 };
 
-/* ---------- archive ---------- */
-const GENEL = 'f-genel';
-const ARC = {
-  items: [], folders: [], ver: 0, dirty: LS.get('mo:arcDirty', false), busy: null, again: false,
-  live() { return this.items.filter(x => !x.deleted); },
-  get(id) { return this.items.find(x => x.id === id && !x.deleted) || null; },
-  liveFolders() { return this.folders.filter(f => !f.deleted); },
-  folder(id) { return this.folders.find(f => f.id === id && !f.deleted) || null; },
-  fix() {
-    if (!this.folders.some(f => f.id === GENEL)) this.folders.unshift({ id: GENEL, name: 'Genel', updated: 0 });
-    const g = this.folders.find(f => f.id === GENEL); if (g.deleted) { delete g.deleted; g.updated = Date.now(); }
-    for (const x of this.items) if (!x.deleted && !this.folder(x.folderId)) x.folderId = GENEL;
+
+/* ---------- Drive: this app’s own folder, PDFs + automatic backup ---------- */
+async function flushSaves() {
+  clearTimeout(timers.notes);
+  const jobs = [DB.set('notes', S.notes), DB.set('cats', S.cats)];
+  const p = curPaper(); if (p) { clearTimeout(timers[p.id]); jobs.push(DB.set('paper:' + p.id, p)); }
+  await Promise.all(jobs).catch(() => {});
+}
+const pdfName = n => { n = String(n || '').trim().replace(/[\\/:*?"<>|]+/g, '-') || 'makale'; return /\.pdf$/i.test(n) ? n : n + '.pdf'; };
+const DSync = {
+  dirty: LS.get('th:ddirty', false), last: LS.get('th:dlast', 0), t: null, busy: false, warned: false,
+  mark() {
+    this.dirty = true; LS.set('th:ddirty', true); clearTimeout(this.t);
+    if (Drive.ok()) this.t = setTimeout(() => this.push(true), 8000);
+    else if (S.settings.clientId && !this.warned && !S.booting) { this.warned = true; toast('Drive oturumu kapalı, değişiklikler Drive’a yedeklenmiyor.', '', { label: 'Bağlan', fn: () => Drive.connect('settings') }); }
   },
-  save() { return Promise.all([DB.set('archive', this.items), DB.set('arcFolders', this.folders)]).catch(() => toast('Arşiv kaydedilemedi.', 'err')); },
-  touch() { this.ver++; this.save(); this.dirty = true; LS.set('mo:arcDirty', true); clearTimeout(this.t); this.t = setTimeout(() => this.sync(true), 1200); },
-  merge(remote) {
-    const mix = (local, rem) => {
-      const m = new Map(local.map(x => [x.id, x]));
-      for (const r of (rem || [])) { const l = m.get(r && r.id); if (r && r.id && (!l || (r.updated || 0) > (l.updated || 0))) m.set(r.id, r); }
-      return [...m.values()];
-    };
-    this.items = mix(this.items, remote && remote.items);
-    this.folders = mix(this.folders, remote && remote.folders);
-    this.fix();
-  },
-  async sync(quiet) {
-    if (!Drive.ok()) return false;
-    if (this.busy) { this.again = true; return this.busy; }
-    this.busy = (async () => {
-      try {
-        const remote = await Drive.getJson(INDEX_NAME, 'indexId');
-        this.merge(remote); const v = this.ver; await this.save();
-        await Drive.putJson(INDEX_NAME, { app: 'makale-arsivi', v: 2, updated: Date.now(), items: this.items, folders: this.folders }, 'indexId');
-        if (v === this.ver) { this.dirty = false; LS.set('mo:arcDirty', false); }
-        if (this.onChange) this.onChange();
-        return true;
-      } catch (e) { if (!quiet) toast(errMsg(e), 'err'); return false; }
-    })();
-    const r = await this.busy; this.busy = null;
-    if (this.again) { this.again = false; return this.sync(quiet); }
-    return r;
+  async push(quiet) {
+    if (!Drive.ok() || this.busy) return false;
+    if (!Object.keys(S.papers).length && !S.notes.length) return false; // never overwrite a Drive backup with an empty app
+    this.busy = true;
+    try {
+      await Drive.putJson(BACKUP_NAME, backupData(), 'indexId');
+      this.dirty = false; LS.set('th:ddirty', false); this.last = Date.now(); LS.set('th:dlast', this.last);
+      if (!quiet) toast('Yedek Drive’a kaydedildi.');
+      return true;
+    } catch (e) { if (!quiet) toast(errMsg(e), 'err'); return false; }
+    finally { this.busy = false; }
   }
 };
-const fold = s => String(s || '').toLocaleLowerCase('tr');
-const asPaper = x => ({ id: x.id, name: x.fileName || '', meta: x.meta || {} });
-const folderName = id => (ARC.folder(id) || { name: 'Genel' }).name;
-const pdfName = n => { n = String(n || '').trim().replace(/[\\/:*?"<>|]+/g, '-') || 'makale'; return /\.pdf$/i.test(n) ? n : n + '.pdf'; };
-const dispName = x => x.fileName || (x.meta && x.meta.title) || 'Adsız kayıt';
-function arcDesc(x) {
-  return refParts(asPaper(x), {}).map(r => r[0]).join('') + ((x.keywords || []).length ? '\n\nAnahtar kelimeler: ' + x.keywords.join(', ') : '');
-}
-function newFolder(name) { const f = { id: 'f' + uid(), name: name.trim(), updated: Date.now() }; ARC.folders.push(f); ARC.touch(); return f; }
-const qEsc = s => String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-Object.assign(Drive, {
-  async ensureSub(fid) {
-    const root = await this.ensureFolder();
-    const f = ARC.folder(fid); if (!f || f.id === GENEL) return root;
-    if (f.driveId) {
-      try { const r = await this.json(`files/${f.driveId}?fields=id,trashed`); if (!r.trashed) return f.driveId; }
-      catch (e) { if (e.message === 'DRIVE_AUTH') throw e; }
-    }
-    const q = await this.json(`files?q=${this.qs(`name='${qEsc(f.name)}' and mimeType='application/vnd.google-apps.folder' and '${root}' in parents and trashed=false`)}&fields=files(id)&spaces=drive`);
-    let id = q.files && q.files[0] && q.files[0].id;
-    if (!id) id = (await this.json('files?fields=id', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: f.name, mimeType: 'application/vnd.google-apps.folder', parents: [root] }) })).id;
-    f.driveId = id; f.updated = Date.now(); ARC.touch(); return id;
-  },
-  async moveFile(fileId, to) {
-    const r = await this.json(`files/${fileId}?fields=parents`);
-    const rm = (r.parents || []).filter(p => p !== to).join(',');
-    await this.api(`files/${fileId}?addParents=${to}${rm ? '&removeParents=' + rm : ''}&fields=id`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: '{}' });
-  },
-  async patch(id, body) { return this.api(`files/${id}?fields=id`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); }
-});
-
-async function saveArcItem({ item = null, meta, keywords, file = null, readId = null, folderId = null, fileName = null }) {
-  const now = Date.now(); let upErr = null;
-  if (!item) { item = { id: 'a' + uid(), added: now, fileId: null, fileName: '', folderId: GENEL }; if (readId) item.readId = readId; }
-  const oldFolder = item.folderId || GENEL, oldName = item.fileName;
-  Object.assign(item, { meta, keywords, updated: now });
-  if (folderId && ARC.folder(folderId)) item.folderId = folderId;
-  if (file) item.fileName = pdfName(fileName || file.name);
-  else if (fileName) item.fileName = pdfName(fileName);
+/* every saved change schedules a backup */
+const _dbSet = DB.set.bind(DB), _dbDel = DB.del.bind(DB);
+DB.set = (k, v) => _dbSet(k, v).then(r => { DSync.mark(); return r; });
+DB.del = k => _dbDel(k).then(r => { DSync.mark(); return r; });
+async function uploadPdf(p, file) {
   try {
-    if (file) {
-      const parent = await Drive.ensureSub(item.folderId);
-      const r = await Drive.upload(file, { name: item.fileName, parents: [parent], mimeType: 'application/pdf', description: arcDesc(item), appProperties: { arsivId: item.id } });
-      item.fileId = r.id;
-    } else if (item.fileId) {
-      if (!Drive.ok()) { if (item.folderId !== oldFolder || item.fileName !== oldName) throw new Error('DRIVE_AUTH'); }
-      else {
-        await Drive.patch(item.fileId, { name: item.fileName, description: arcDesc(item) });
-        if (item.folderId !== oldFolder) await Drive.moveFile(item.fileId, await Drive.ensureSub(item.folderId));
-      }
-    }
-  } catch (e) { upErr = e; }
-  const k = ARC.items.findIndex(x => x.id === item.id);
-  if (k >= 0) ARC.items[k] = item; else ARC.items.push(item);
-  ARC.touch();
-  return { item, upErr };
+    const folder = await Drive.ensureFolder();
+    const r = await Drive.upload(file, { name: pdfName(file.name), parents: [folder], mimeType: 'application/pdf', description: refParts(p, {}).map(x => x[0]).join('') });
+    p.driveId = r.id; savePaper(p); return true;
+  } catch (e) { toast('PDF Drive’a yüklenemedi: ' + errMsg(e), 'err'); return false; }
 }
-async function copyRef(x) {
-  const p = asPaper(x); const html = refHTML(p, {}); const text = refParts(p, {}).map(r => r[0]).join('');
-  try {
-    if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([text], { type: 'text/plain' }) })]);
-    else await navigator.clipboard.writeText(text);
-    toast('Kaynak APA 7 biçiminde kopyalandı.');
-  } catch { try { await navigator.clipboard.writeText(text); toast('Kaynak kopyalandı.'); } catch { toast('Kopyalanamadı.', 'err'); } }
-}
-function folderOptions(sel) {
-  return ARC.liveFolders().map(f => `<option value="${f.id}" ${f.id === sel ? 'selected' : ''}>${esc(f.name)}</option>`).join('') + '<option value="__new">+ Yeni klasör…</option>';
-}
-function bindFolderSelect(el) {
-  let prev = el.value;
-  el.addEventListener('change', () => {
-    if (el.value !== '__new') { prev = el.value; return; }
-    const n = (prompt('Yeni klasörün adı (ör. Doktora makaleleri)') || '').trim();
-    if (!n) { el.value = prev; return; }
-    const f = newFolder(n); el.innerHTML = folderOptions(f.id); prev = f.id;
-  });
-}
-function openArcEditor({ item = null, meta = {}, keywords = [], file = null, folderId = null } = {}) {
-  const fid = item ? item.folderId : (folderId || (S.arcFolder !== 'all' && ARC.folder(S.arcFolder) ? S.arcFolder : GENEL));
-  const showName = !!(file || (item && (item.fileId || item.fileName)));
-  const nameVal = file ? file.name : (item ? item.fileName : '');
-  const up = file ? (Drive.ok() ? '<label class="check"><input type="checkbox" id="aUp" checked><span>PDF’i Drive’a yükle</span></label>' : '<p class="hint">Drive bağlı olmadığı için PDF yüklenmeyecek, yalnızca künye kaydedilecek.</p>') : '';
-  modal(`<h3>${item ? 'Kaydı düzenle' : 'Arşive ekle'}</h3>
-    <label>Klasör<select id="aFolder">${folderOptions(fid)}</select></label>
-    ${showName ? `<label>Dosya adı<input id="aName" value="${esc(nameVal)}" autocapitalize="off" autocomplete="off" spellcheck="false"></label>` : ''}
-    <p class="hint">${file ? 'Gemini’nin bulduğu künyeyi kontrol et. ' : ''}Her satıra bir yazar, <b>Soyadı, Adı</b> biçiminde.</p>
-    ${metaForm(meta, keywords)}${up}
-    <div class="mact"><button id="aBack">Vazgeç</button><button class="primary" id="mSave">Arşive kaydet</button></div>`, box => {
-    bindFolderSelect($('#aFolder'));
-    bindMetaPreview(box, { id: item ? item.id : '_new', name: nameVal.replace(/\.pdf$/i, '') }, {});
-    $('#aBack').onclick = () => openArchive();
-    $('#mSave').onclick = async () => {
-      const r0 = readMetaForm(); const doUp = !!($('#aUp') && $('#aUp').checked);
-      const folder = $('#aFolder').value; const fname = $('#aName') ? $('#aName').value.trim() : null;
-      closeModal(); busy(doUp ? 'PDF Drive’a yükleniyor…' : 'Kaydediliyor…');
-      const r = await saveArcItem({ item, meta: r0.meta, keywords: r0.keywords, file: doUp ? file : null, folderId: folder, fileName: fname });
-      busy(false); arcSel = r.item.id;
-      for (const p of Object.values(S.papers)) if (p.arcId === r.item.id) { p.meta = JSON.parse(JSON.stringify(r0.meta)); p.keywords = r0.keywords.slice(); savePaper(p); }
-      renderHeader(); renderNotes();
-      if (r.upErr) toast('Kaydedildi ama Drive’daki dosya güncellenemedi. ' + errMsg(r.upErr), 'err'); else toast(`“${folderName(r.item.folderId)}” klasörüne kaydedildi.`);
-      openArchive();
-    };
-  });
-}
-function pickFolder({ title, current = null, sub = '' }, done) {
-  const cnt = id => ARC.live().filter(x => x.folderId === id).length;
-  modal(`<h3>${esc(title)}</h3>${sub ? `<p class="hint">${esc(sub)}</p>` : ''}
-    <div class="picklist">${ARC.liveFolders().map(f => `<button data-pf="${f.id}" ${f.id === current ? 'disabled' : ''}><span>${esc(f.name)}</span><small>${f.id === current ? 'Şu an burada' : cnt(f.id) + ' kayıt'}</small></button>`).join('')}</div>
-    <div class="newcat"><input id="pfNew" placeholder="Yeni klasör adı" autocomplete="off"><button id="pfAdd">Oluştur</button></div>
-    <div class="mact"><button id="pfBack">Vazgeç</button></div>`, box => {
-    box.querySelector('.picklist').onclick = e => { const b = e.target.closest('[data-pf]'); if (b && !b.disabled) done(b.dataset.pf); };
-    const add = () => { const v = $('#pfNew').value.trim(); if (!v) { $('#pfNew').focus(); return; } done(newFolder(v).id); };
-    $('#pfAdd').onclick = add; $('#pfNew').onkeydown = e => { if (e.key === 'Enter') add(); };
-    $('#pfBack').onclick = () => openArchive();
-  });
-}
-function editFolder(id) {
-  const f = ARC.folder(id); if (!f) return;
-  const items = ARC.live().filter(x => x.folderId === id);
-  modal(`<h3>Klasörü düzenle</h3><label>Klasör adı<input id="fName" value="${esc(f.name)}" autocomplete="off"></label>
-    ${id === GENEL ? '<p class="hint">“Genel” klasörü silinemez. Drive’da doğrudan “Makale Arşivi” klasörüne karşılık gelir.</p>' : `<p class="hint">Klasörü silersen içindeki ${items.length} kayıt “Genel” klasörüne taşınır.</p>`}
-    <div class="mact">${id === GENEL ? '' : '<button class="danger" id="fDel">Klasörü sil</button>'}<button id="fBack">Vazgeç</button><button class="primary" id="fOk">Kaydet</button></div>`, () => {
-    $('#fBack').onclick = () => openArchive();
-    $('#fOk').onclick = async () => {
-      const v = $('#fName').value.trim(); if (!v) return;
-      f.name = v; f.updated = Date.now(); ARC.touch();
-      if (f.driveId && Drive.ok()) { try { await Drive.patch(f.driveId, { name: v }); } catch (e) { toast(errMsg(e), 'err'); } }
-      openArchive(); toast('Klasör adı değişti.');
-    };
-    if (id === GENEL) return;
-    $('#fDel').onclick = async () => {
-      const withPdf = items.filter(x => x.fileId);
-      if (withPdf.length && !Drive.ok()) { toast('Bu klasörde Drive’da PDF var. Silmeden önce Drive’a bağlan.', 'err'); return; }
-      if (!confirm(`“${f.name}” klasörü silinecek, içindeki ${items.length} kayıt “Genel”e taşınacak. Emin misin?`)) return;
-      busy('Klasör siliniyor…');
-      try {
-        if (withPdf.length) { const root = await Drive.ensureFolder(); for (const x of withPdf) await Drive.moveFile(x.fileId, root); }
-        if (f.driveId && Drive.ok()) await Drive.patch(f.driveId, { trashed: true }).catch(() => {});
-        const now = Date.now(); for (const x of items) { x.folderId = GENEL; x.updated = now; }
-        f.deleted = true; f.updated = now; ARC.touch();
-        if (S.arcFolder === id) { S.arcFolder = 'all'; LS.set('mo:arcFolder', 'all'); }
-        toast('Klasör silindi.');
-      } catch (e) { toast(errMsg(e), 'err'); }
-      finally { busy(false); openArchive(); }
-    };
-  });
-}
-let arcQ = ''; let arcSel = null;
-const ICO = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
-const FOLDER_SVG = `<svg ${ICO}><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`;
-function openArchive() {
-  closeModal(); showScreen('arc');
-  if (S.arcFolder !== 'all' && !ARC.folder(S.arcFolder)) S.arcFolder = 'all';
-  const old = $('#arcView'); const box = old.cloneNode(false); old.replaceWith(box); box.hidden = false;
-  box.innerHTML = `<div class="arc">
-    <section class="afold" aria-label="Klasörler"><h2>Arşiv</h2><div id="aFolders"></div><span style="flex:1"></span><div class="astat" id="aStat"></div></section>
-    <div class="amain">
-      <div class="atop">
-        <label class="asearch"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-          <input id="aSearch" type="search" aria-label="Arşivde ara" placeholder="Anahtar kelime, dosya adı, yazar…" value="${esc(arcQ)}" autocapitalize="off" autocomplete="off" spellcheck="false"></label>
-        <button class="primary" id="aAdd">+ PDF ekle</button>
-        <button id="aManual">Elle künye gir</button>
-      </div>
-      <div class="afbar" id="aFbar"></div>
-      <div class="kw" id="aSug" style="margin:12px 0 4px"></div>
-      <p class="count" id="aCount" style="margin:6px 4px 10px"></p>
-      <div class="alist" id="aList"></div>
-    </div>
-    <aside class="adetail" id="aDetail" aria-label="Seçili makale"></aside>
-  </div>`;
-  const cnt = id => ARC.live().filter(x => x.folderId === id).length;
-  const statHTML = () => Drive.ok()
-    ? `<span class="dot on"></span><span><b>Drive bağlı</b><small>Klasörler Drive ile eşit</small></span><button id="aSync">Eşitle</button>`
-    : (S.settings.clientId && Drive.web()
-      ? `<span class="dot"></span><span><b>Drive bağlı değil</b></span><button class="primary" id="aConn">Bağlan</button>`
-      : `<span class="dot"></span><span><b>Drive kurulmadı</b></span><button id="aSet">Kur</button>`);
-  const stat = () => { $('#aStat').innerHTML = statHTML(); };
-  const folders = () => {
-    $('#aFolders').innerHTML = `<button class="fd${S.arcFolder === 'all' ? ' on' : ''}" data-fv="all"><svg ${ICO}><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9"/></svg><span>Tümü</span><small>${ARC.live().length}</small></button>`
-      + ARC.liveFolders().map(f => `<button class="fd${S.arcFolder === f.id ? ' on' : ''}" data-fv="${f.id}">${FOLDER_SVG}<span>${esc(f.name)}</span><small>${cnt(f.id)}</small></button>`).join('')
-      + `<button class="fd ghost" data-fnew><svg ${ICO}><path d="M12 5v14M5 12h14"/></svg><span>Yeni klasör</span></button>`
-      + `<button class="fd ghost" data-kwtr><svg ${ICO}><path d="M4 5h8M8 3v2M6 5c0 4 3 7 6 8M10 5c-1 4-4 7-6 8"/><path d="M13 21l4-9 4 9M14.5 18h5"/></svg><span>Etiketleri Türkçeleştir</span></button>`
-      + (S.arcFolder !== 'all' ? `<button class="fd ghost" data-fedit><svg ${ICO}><path d="M17 3l4 4L8 20H4v-4z"/></svg><span>Klasörü düzenle</span></button>` : '');
-    $('#aFbar').innerHTML = `<button class="chip${S.arcFolder === 'all' ? ' on' : ''}" data-fv="all">Tümü<small>${ARC.live().length}</small></button>`
-      + ARC.liveFolders().map(f => `<button class="chip${S.arcFolder === f.id ? ' on' : ''}" data-fv="${f.id}">${esc(f.name)}<small>${cnt(f.id)}</small></button>`).join('')
-      + '<button class="chip ghost" data-fnew>+ Klasör</button>' + (S.arcFolder !== 'all' ? '<button class="chip ghost" data-fedit>Düzenle</button>' : '')
-      + '<button class="chip ghost" data-kwtr>Etiketleri Türkçeleştir</button>'
-      + `<div class="astat">${statHTML()}</div>`;
-  };
-  const detail = (open) => {
-    const D = $('#aDetail'); const x = arcSel ? ARC.get(arcSel) : null;
-    if (!x) { arcSel = null; D.classList.remove('open'); D.innerHTML = '<p class="aempty">Ayrıntılarını görmek için bir makaleye dokun.</p>'; return; }
-    const reading = Object.values(S.papers).some(p => p.arcId === x.id);
-    D.innerHTML = `<button class="adclose" data-aclose aria-label="Kapat">✕</button>
-      <div><h3>${esc(dispName(x))}</h3><p class="count" style="margin-top:4px">${esc(folderName(x.folderId))}${x.fileId ? '' : ', PDF yok'}${reading ? ', kütüphanende' : ''}</p></div>
-      <div><p class="lb">Künye (APA 7)</p><p class="refp">${refHTML(asPaper(x), {})}</p></div>
-      ${(x.keywords || []).length ? `<div><p class="lb">Anahtar kelimeler</p><div class="kw" style="margin:0">${x.keywords.map(k => `<button data-kw="${esc(k)}">${esc(k)}</button>`).join('')}</div></div>` : ''}
-      <div class="agrid" data-aid="${esc(x.id)}">${x.fileId ? '<button class="primary" data-aread>Okumaya aç</button><button data-aopen>PDF’i aç</button>' : '<button class="primary" data-aattach>PDF ekle</button>'}<button data-acopy>APA kopyala</button><button data-aedit>Düzenle</button></div>
-      <div class="arow2" data-aid="${esc(x.id)}"><button data-amove>Taşı</button><button class="danger" data-adel>Sil</button></div>`;
-    if (open) D.classList.add('open');
-  };
-  const list = () => {
-    const q = fold(arcQ).trim(); const toks = q.split(/\s+/).filter(Boolean);
-    const scope = ARC.live().filter(x => S.arcFolder === 'all' || x.folderId === S.arcFolder);
-    const hay = x => fold([x.fileName, x.meta.title, x.meta.journal, x.meta.year, x.meta.doi, ...(x.meta.authors || []).map(a => a.family + ' ' + a.given), ...(x.keywords || [])].join(' | '));
-    const kwHit = k => toks.length && toks.some(t => fold(k).includes(t));
-    const hits = x => (x.keywords || []).filter(kwHit).length;
-    const items = scope.filter(x => toks.every(t => hay(x).includes(t)))
-      .sort((a, b) => (hits(b) - hits(a)) || dispName(a).localeCompare(dispName(b), 'tr', { numeric: true }));
-    const freq = new Map(); for (const x of scope) for (const k of (x.keywords || [])) { const f = fold(k); const e = freq.get(f) || { k, n: 0 }; e.n++; freq.set(f, e); }
-    const sug = [...freq.values()].filter(e => !q || (fold(e.k).includes(q) && fold(e.k) !== q)).sort((a, b) => b.n - a.n).slice(0, q ? 12 : 14);
-    $('#aSug').innerHTML = sug.map(e => `<button data-kw="${esc(e.k)}">${esc(e.k)} (${e.n})</button>`).join('');
-    const where = S.arcFolder === 'all' ? 'Arşivde' : `“${folderName(S.arcFolder)}” içinde`;
-    $('#aCount').textContent = scope.length ? (q ? `${where} ${items.length} makale bulundu` : `${where} ${scope.length} makale`) : '';
-    $('#aList').innerHTML = items.length ? items.map(x => {
-      const m = x.meta || {};
-      const sub = [inText(asPaper(x), {}), m.journal, S.arcFolder === 'all' ? folderName(x.folderId) : ''].filter(Boolean).join(', ');
-      return `<div class="arow${x.id === arcSel ? ' on' : ''}" data-arow="${esc(x.id)}"><span class="ficon${x.fileId ? '' : ' none'}" aria-hidden="true">${x.fileId ? 'PDF' : 'YOK'}</span>
-        <div style="flex:1;min-width:0"><button class="arname" data-asel><b>${esc(dispName(x))}</b><small>${esc(sub)}</small></button>
-        <div class="kw">${(x.keywords || []).map(k => `<button data-kw="${esc(k)}" class="${kwHit(k) ? 'hit' : ''}">${esc(k)}</button>`).join('')}</div></div></div>`;
-    }).join('') : `<p class="hint" style="padding:0 4px">${scope.length ? 'Bu kelimeyle eşleşen makale yok.' : (ARC.live().length ? 'Bu klasör boş. PDF ekle ile başla.' : 'Arşiv boş. Eski makalelerinin PDF’lerini ekleyerek başla.')}</p>`;
-  };
-  const all = () => { stat(); folders(); list(); detail(false); };
-  all();
-  ARC.onChange = () => { if (S.screen === 'arc' && $('#aList')) all(); };
-  $('#aSearch').addEventListener('input', e => { arcQ = e.target.value; list(); });
-  box.addEventListener('click', async e => {
-    const t = e.target;
-    if (t.closest('#aConn')) { Drive.connect('archive'); return; }
-    if (t.closest('#aSet')) { openSettings('drive'); return; }
-    if (t.closest('#aSync')) { const b = t.closest('#aSync'); b.disabled = true; b.textContent = 'Eşitleniyor…'; const ok = await ARC.sync(false); if (ok) toast('Arşiv Drive ile eşitlendi.'); all(); return; }
-    if (t.closest('#aManual')) { openArcEditor({}); return; }
-    if (t.closest('[data-aclose]')) { $('#aDetail').classList.remove('open'); return; }
-    if (t.closest('#aAdd')) {
-      if (S.arcFolder !== 'all') { S.arcTarget = S.arcFolder; $('#arcFile').click(); return; }
-      modal(`<h3>PDF’ler hangi klasöre gitsin?</h3><div class="picklist">${ARC.liveFolders().map(f => `<label class="btn" for="arcFile" data-tg="${f.id}"><span>${esc(f.name)}</span></label>`).join('')}</div>
-        <div class="newcat"><input id="tgNew" placeholder="Yeni klasör adı" autocomplete="off"><button id="tgAdd">Oluştur</button></div>
-        <div class="mact"><button data-close>Vazgeç</button></div>`, b2 => {
-        b2.querySelector('.picklist').addEventListener('click', ev => { const l = ev.target.closest('[data-tg]'); if (l) S.arcTarget = l.dataset.tg; });
-        $('#tgAdd').onclick = () => { const v = $('#tgNew').value.trim(); if (!v) return; const f = newFolder(v); S.arcFolder = f.id; LS.set('mo:arcFolder', f.id); openArchive(); toast(`“${f.name}” klasörü oluşturuldu. Şimdi PDF ekle’ye dokun.`); };
-      });
-      return;
-    }
-    const fv = t.closest('[data-fv]'); if (fv) { S.arcFolder = fv.dataset.fv; LS.set('mo:arcFolder', S.arcFolder); folders(); list(); return; }
-    if (t.closest('[data-fnew]')) { const n = (prompt('Yeni klasörün adı (ör. Doktora makaleleri)') || '').trim(); if (n) { const f = newFolder(n); S.arcFolder = f.id; LS.set('mo:arcFolder', f.id); folders(); list(); toast(`“${f.name}” klasörü oluşturuldu.`); } return; }
-    if (t.closest('[data-fedit]')) { editFolder(S.arcFolder); return; }
-    if (t.closest('[data-kwtr]')) { translateKeywords(); return; }
-    const kw = t.closest('[data-kw]'); if (kw) { arcQ = kw.dataset.kw; $('#aSearch').value = arcQ; list(); $('#aDetail').classList.remove('open'); return; }
-    const row = t.closest('[data-arow]'); if (row) { arcSel = row.dataset.arow; $$('.arow', box).forEach(r => r.classList.toggle('on', r === row)); detail(true); return; }
-    const card = t.closest('[data-aid]'); if (!card) return;
-    const x = ARC.get(card.dataset.aid); if (!x) return;
-    if (t.closest('[data-aopen]')) window.open(`https://drive.google.com/file/d/${encodeURIComponent(x.fileId)}/view`, '_blank', 'noopener');
-    else if (t.closest('[data-acopy]')) copyRef(x);
-    else if (t.closest('[data-aedit]')) openArcEditor({ item: x, meta: x.meta, keywords: x.keywords });
-    else if (t.closest('[data-aread]')) readFromArchive(x);
-    else if (t.closest('[data-amove]')) pickFolder({ title: 'Hangi klasöre taşınsın?', current: x.folderId, sub: dispName(x) }, async fid => {
-      closeModal(); busy('Taşınıyor…'); const r = await saveArcItem({ item: x, meta: x.meta, keywords: x.keywords, folderId: fid }); busy(false);
-      if (r.upErr) toast('Arşivde taşındı ama Drive’daki PDF taşınamadı. ' + errMsg(r.upErr), 'err'); else toast(`“${folderName(fid)}” klasörüne taşındı.`);
-      openArchive();
-    });
-    else if (t.closest('[data-aattach]')) {
-      if (!Drive.ok()) { toast('PDF eklemek için önce Drive’a bağlan.', '', S.settings.clientId ? { label: 'Bağlan', fn: () => Drive.connect('archive') } : null); return; }
-      S.attachFor = x.id; $('#arcAttach').click();
-    } else if (t.closest('[data-adel]')) {
-      if (!confirm(x.fileId ? 'Bu kayıt arşivden silinecek, PDF de Drive’da çöp kutusuna taşınacak. Emin misin?' : 'Bu kayıt arşivden silinecek. Emin misin?')) return;
-      if (x.fileId) {
-        if (Drive.ok()) { try { await Drive.patch(x.fileId, { trashed: true }); } catch { toast('PDF Drive’dan silinemedi, Drive’dan elle silebilirsin.', 'err'); } }
-        else toast('Drive bağlı değil. PDF Drive’da duruyor, oradan silebilirsin.');
-      }
-      const k = ARC.items.indexOf(x); ARC.items[k] = { id: x.id, deleted: true, updated: Date.now() }; ARC.touch();
-      for (const p of Object.values(S.papers)) if (p.arcId === x.id) { delete p.arcId; savePaper(p); }
-      arcSel = null; all();
-    }
-  });
-}
-async function translateKeywords() {
-  if (!S.settings.key) { openSettings(); toast('Bu işlem için Gemini API anahtarı gerekli.', 'err'); return; }
-  const live = ARC.live(); const papers = Object.values(S.papers);
-  const uniq = [...new Set([...live.flatMap(x => x.keywords || []), ...papers.flatMap(p => p.keywords || [])])];
-  if (!uniq.length) { toast('Çevrilecek etiket yok.'); return; }
-  if (!confirm(`Arşivdeki ${uniq.length} farklı etiket Türkçeye çevrilecek. Zaten Türkçe olanlar aynen kalır. Devam edilsin mi?`)) return;
-  const map = {};
-  try {
-    for (let i = 0; i < uniq.length; i += 120) {
-      const part = uniq.slice(i, i + 120);
-      busy(`Etiketler çevriliyor ${Math.min(i + 120, uniq.length)}/${uniq.length}`);
-      const res = await gemini(`Aşağıdaki akademik anahtar kelimeleri akademik Türkçeye çevir. Zaten Türkçe olanları aynen bırak. Kısaltmalar ve özel adlar (ör. PISA, COVID-19) olduğu gibi kalabilir. Özel adlar dışında küçük harf kullan.
-Yalnızca şu yapıda JSON döndür: {"map":{"orijinal ifade":"türkçe karşılığı"}}
-ANAHTAR KELİMELER:
-${JSON.stringify(part)}`);
-      Object.assign(map, (res && res.map) || {});
-    }
-  } catch (e) { busy(false); toast(errMsg(e), 'err'); return; }
-  const tr = list => normKw((list || []).map(k => str(map[k]) || k));
-  const same = (a, b) => JSON.stringify(a || []) === JSON.stringify(b || []);
-  const changed = live.filter(x => !same(x.keywords, tr(x.keywords)));
-  for (const p of papers) { const k = tr(p.keywords); if (!same(p.keywords, k)) { p.keywords = k; savePaper(p); } }
-  let i = 0, fail = 0;
-  for (const x of changed) {
-    i++; busy(`Arşiv güncelleniyor ${i}/${changed.length}`);
-    const r = await saveArcItem({ item: x, meta: x.meta, keywords: tr(x.keywords) });
-    if (r.upErr) fail++;
-  }
-  busy(false); arcQ = '';
-  if (S.screen === 'arc') openArchive();
-  toast(changed.length ? `${changed.length} kaydın etiketleri Türkçeleştirildi.${fail ? ` ${fail} PDF’in Drive açıklaması güncellenemedi.` : ''}` : 'Etiketlerin zaten Türkçe.');
-}
-async function readFromArchive(x) {
-  const ex = Object.values(S.papers).find(p => p.arcId === x.id);
-  if (ex) { closeModal(); S.view = 'orig'; openPaper(ex.id); return; }
-  if (!Drive.ok()) { toast('PDF’i indirmek için Drive’a bağlan.', '', S.settings.clientId ? { label: 'Bağlan', fn: () => Drive.connect('archive') } : null); return; }
-  busy('PDF Drive’dan indiriliyor…');
-  try {
-    const blob = await (await Drive.api(`files/${x.fileId}?alt=media`)).blob();
-    busy(false);
-    await importPdf(new File([blob], x.fileName || 'makale.pdf', { type: 'application/pdf' }), { arcItem: x });
-  } catch (e) { busy(false); toast(errMsg(e), 'err'); }
-}
-$('#arcFile').addEventListener('change', async e => {
-  const files = [...(e.target.files || [])]; e.target.value = ''; if (!files.length) return;
-  const target = ARC.folder(S.arcTarget) ? S.arcTarget : GENEL; S.arcTarget = null;
-  if (!window.pdfjsLib) { toast('PDF okuyucu yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.', 'err'); return; }
-  if (!S.settings.key) { openSettings(); toast('Künye çıkarmak için önce Gemini API anahtarını ekle.', 'err'); return; }
-  if (files.length === 1) {
-    const f = files[0]; closeModal();
-    try { busy('Künye çıkarılıyor…'); const r = await metaFromPdf(f, t => busy(t)); busy(false); openArcEditor({ meta: r.meta, keywords: r.keywords, file: f, folderId: target }); }
-    catch (err) { busy(false); toast(errMsg(err) + ' Künyeyi elle girebilirsin.', 'err'); openArcEditor({ meta: { title: f.name.replace(/\.pdf$/i, '') }, file: f, folderId: target }); }
-    return;
-  }
-  const up = Drive.ok();
-  if (!up && !confirm(`Drive bağlı değil. ${files.length} PDF yüklenmeden yalnızca künyeleri kaydedilsin mi?`)) return;
-  closeModal(); let ok = 0, upFail = 0; const fail = [];
-  for (let i = 0; i < files.length; i++) {
-    const f = files[i];
-    busy(`Künye çıkarılıyor ${i + 1}/${files.length}: ${f.name}`);
-    try {
-      const r = await metaFromPdf(f);
-      if (up) busy(`Drive’a yükleniyor ${i + 1}/${files.length}: ${f.name}`);
-      const s = await saveArcItem({ meta: r.meta, keywords: r.keywords, file: up ? f : null, folderId: target, fileName: up ? null : f.name }); ok++; if (s.upErr) upFail++;
-    } catch { fail.push(f.name); }
-  }
-  busy(false); arcQ = ''; S.arcFolder = target; LS.set('mo:arcFolder', target); openArchive();
-  let msg = `${ok} makale “${folderName(target)}” klasörüne eklendi. Künyeleri kontrol etmeyi unutma.`;
-  if (upFail) msg += ` ${upFail} PDF Drive’a yüklenemedi.`;
-  if (fail.length) msg += ` Okunamayanlar: ${fail.join(', ')}`;
-  toast(msg, fail.length || upFail ? 'err' : '');
-});
-$('#arcAttach').addEventListener('change', async e => {
+$('#pdfAttach').addEventListener('change', async e => {
   const f = e.target.files && e.target.files[0]; e.target.value = '';
-  const x = ARC.get(S.attachFor); S.attachFor = null; if (!f || !x) return;
-  busy('PDF Drive’a yükleniyor…');
-  const r = await saveArcItem({ item: x, meta: x.meta, keywords: x.keywords, file: f });
-  busy(false); toast(r.upErr ? 'PDF yüklenemedi: ' + errMsg(r.upErr) : 'PDF arşiv kaydına eklendi.', r.upErr ? 'err' : ''); openArchive();
+  const p = S.papers[S.attachFor]; S.attachFor = null; if (!f || !p) return;
+  busy('PDF Drive’a yükleniyor…'); const ok = await uploadPdf(p, f); busy(false);
+  if (ok) toast('PDF Drive’daki “' + FOLDER_NAME + '” klasörüne yüklendi.');
+  if ($('#lList')) openLib();
 });
-$('#bArc').onclick = () => openArchive();
+function driveSettingsHTML() {
+  const web = Drive.web(); const last = DSync.last ? `Son yedek: ${new Date(DSync.last).toLocaleString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'Henüz yedeklenmedi';
+  return `<div class="field" id="sDrive"><div class="flabel">Google Drive</div>
+    <div class="status"><span class="dot ${Drive.ok() ? 'on' : ''}"></span><span>${Drive.ok() ? `Bağlı. ${last}${DSync.dirty ? ', bekleyen değişiklik var' : ''}.` : `Bağlı değil. ${last}.`}</span></div>
+    <p class="hint">PDF’ler ve uygulamanın tüm verisi Drive’ındaki “${FOLDER_NAME}” klasörüne yedeklenir; değişiklikler birkaç saniye içinde kendiliğinden kaydedilir. Uygulama yalnızca kendi oluşturduğu dosyaları görür.</p>
+    ${web ? '' : '<p class="hint warn">Bu sayfa bir dosyadan açılmış. Drive yalnızca uygulama https adresinde yayındayken çalışır.</p>'}
+    <label>OAuth Client ID<input id="sCid" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="…apps.googleusercontent.com" value="${esc(S.settings.clientId || '')}"></label>
+    <div class="row wrap" style="margin-top:10px">${Drive.ok() ? '<button id="sDisc">Bağlantıyı kes</button><button class="primary" id="sPush">Şimdi yedekle</button>' : '<button class="primary" id="sConn">Drive’a bağlan</button>'}<button id="sPull">Drive’dan geri yükle</button></div>
+    <details class="setup"><summary>Kurulum (Makale Okuyucu’daki Client ID kullanılabilir)</summary><ol>
+      <li>console.cloud.google.com/auth/clients adresinde Client’ını aç.</li>
+      <li><b>Authorized redirect URIs</b> kısmına aşağıdaki adresi ekle ve <b>Save</b>’e dokun.</li>
+      <li>Client ID’yi yukarıya yapıştır, <b>Kaydet</b>, sonra <b>Drive’a bağlan</b>.</li></ol>
+      ${web ? `<span class="code">${esc(Drive.redirectUri())}</span><div class="row"><button id="sCopy">Adresi kopyala</button></div>` : ''}</details></div>`;
+}
+function bindDriveSettings(apply) {
+  if ($('#sConn')) $('#sConn').onclick = () => { apply(); Drive.connect('settings'); };
+  if ($('#sDisc')) $('#sDisc').onclick = () => { Drive.disconnect(); apply(); openSettings(); toast('Drive bağlantısı kesildi.'); };
+  if ($('#sPush')) $('#sPush').onclick = async () => { busy('Yedek Drive’a kaydediliyor…'); await DSync.push(false); busy(false); openSettings(); };
+  if ($('#sCopy')) $('#sCopy').onclick = async () => { try { await navigator.clipboard.writeText(Drive.redirectUri()); toast('Adres kopyalandı.'); } catch { toast('Kopyalanamadı.', 'err'); } };
+  $('#sPull').onclick = async () => {
+    if (!Drive.ok()) { apply(); if (S.settings.clientId) Drive.connect('settings'); else toast('Önce Client ID’yi gir.', 'err'); return; }
+    busy('Yedek Drive’dan alınıyor…');
+    try {
+      const d = await Drive.getJson(BACKUP_NAME, 'indexId'); busy(false);
+      if (!d) { toast('Drive’da yedek bulunamadı.'); return; }
+      if (!confirm(`Drive’daki yedekte ${Object.keys(d.papers || {}).length} makale var. Bu cihazdaki verilere eklenecek. Devam edilsin mi?`)) return;
+      await restoreData(d); closeModal(); renderAll(); refreshMap(); toast('Yedek Drive’dan geri yüklendi.');
+    } catch (e) { busy(false); toast(errMsg(e), 'err'); }
+  };
+}
 
 /* ---------- ask the paper ---------- */
 const ASK_SUGGEST = ['Makalenin amacı ve ana bulguları neler?', 'Yöntemi ve örneklemi anlatan cümleler', 'Sınırlılıklar ve öneriler neler?', 'Hangi kuramlara ve kavramlara dayanıyor?'];
 let askBusy = false;
-S.qk = LS.get('mo:qk', {}) || {};
+S.qk = LS.get('th:qk', {}) || {};
 function setPane(which) {
   S.pane = which;
-  $('#notesPane').hidden = which !== 'notes'; $('#askPane').hidden = which !== 'ask';
+  $('#notesPane').hidden = which !== 'notes'; $('#askPane').hidden = which !== 'ask'; $('#sugPane').hidden = which !== 'sug';
   $('#bExport').hidden = which !== 'notes';
   $$('#paneTabs button').forEach(b => b.classList.toggle('on', b.dataset.pane === which));
   if (which === 'ask') renderAsk();
+  if (which === 'sug') renderSugPane();
 }
 /* Find a quote inside a paragraph even if spacing or punctuation differs slightly. */
 function normMap(s) {
@@ -2090,14 +1825,16 @@ function findQuote(para, quote) {
   return { r: toRange(a, end), exact: false };
 }
 function activeMarks(p) {
-  const k = S.qk[p.id]; const m = k !== undefined && p.chat && p.chat[k]; if (!m || !m.r) return {};
-  const out = {}; for (const it of m.r.items) if (it.r) (out[it.p] = out[it.p] || []).push(it.r);
+  const out = {};
+  const k = S.qk[p.id]; const m = k !== undefined && p.chat && p.chat[k];
+  if (m && m.r) for (const it of m.r.items) if (it.r) (out[it.p] = out[it.p] || []).push(it.r);
+  for (const s of (S.sugs || [])) if (s.paperId === p.id && s.status !== 'rejected' && s.r) (out[s.para] = out[s.para] || []).push([s.r[0], s.r[1], s.status === 'added' ? 'qadd' : 'qpend', s.id]);
   return out;
 }
 function markText(text, ranges) {
   if (!ranges || !ranges.length) return esc(text);
   const rs = ranges.slice().sort((a, b) => a[0] - b[0]); let h = '', pos = 0;
-  for (const [s, e] of rs) { if (s < pos) continue; h += esc(text.slice(pos, s)) + `<mark class="qm">${esc(text.slice(s, e))}</mark>`; pos = e; }
+  for (const [s, e, cls, id] of rs) { if (s < pos) continue; h += esc(text.slice(pos, s)) + `<mark class="qm ${cls || ''}"${id ? ` data-mk="${id}"` : ''}>${esc(text.slice(s, e))}</mark>`; pos = e; }
   return h + esc(text.slice(pos));
 }
 function askText(s) {
@@ -2108,7 +1845,7 @@ function askText(s) {
   });
 }
 function renderAsk() {
-  LS.set('mo:qk', S.qk);
+  LS.set('th:qk', S.qk);
   const L = $('#askLog'); const p = curPaper();
   $('#askQ').disabled = !p; $('#askGo').disabled = !p || askBusy;
   if (!p) { L.innerHTML = '<div class="empty-notes">Soru sormak için önce bir makale aç.</div>'; return; }
@@ -2203,65 +1940,549 @@ $('#askLog').addEventListener('click', async e => {
   }
 });
 
+/* ---------- the thesis plan (from Tez_Iskeleti_KKT_Yaslilar.pdf) ---------- */
+const DEFAULT_PLAN = {
+  noDisc: true,
+  topic: 'Kabul ve Kararlılık Temelli Hemşirelik Müdahalesinin Yaşlılarda Pozitif Yaşlanma, Yalnızlık ve Geriatrik Depresyona Etkisi',
+  design: 'Randomize kontrollü deneysel araştırma (ön test-son test-izlem, kontrol gruplu); 65 yaş ve üzeri yaşlılarla 8 oturumluk grup temelli KKT hemşirelik müdahalesi.',
+  rules: [
+    'Giriş bir argüman kurar (neden bu araştırma?), Genel Bilgiler kavramları tanımlar ve kuramsal zemini hazırlar.',
+    'Giriş’te kısaca verilen istatistikler Genel Bilgiler’de aynen tekrarlanmaz; orada daha ayrıntılı ve tablolarla verilir.',
+    'Kaynakların önemli bölümü son 5–10 yıldan olmalı; klasik kuram kaynakları istisnadır.',
+    'Mümkün olduğunca birincil kaynak kullanılmalı; ulusal ve uluslararası kaynaklar dengeli olmalı.',
+    'Metinde adı geçen kuram ve yazar adları orijinal kaynaklarından doğrulanmalı.'
+  ],
+  nodes: [
+    { code: '1', title: 'GİRİŞ', level: 1, src: true, pages: '~4 sayfa' },
+    { code: '1.1', title: 'Problemin Tanımı ve Önemi', level: 2, src: true, pages: '~3 sayfa', tip: 'Genelden özele (huni) yapı.', paras: [
+      { title: 'Paragraf 1: Yaşlanan nüfus', pages: '~½ sayfa', points: ['Dünyada yaşlı nüfusun artışı ve gelecek projeksiyonu (DSÖ, BM verileri).', 'Türkiye’de yaşlı nüfus oranı ve artış hızı (TÜİK’in en güncel “İstatistiklerle Yaşlılar” bülteni).', 'Bu artışın sağlık sistemi ve hemşirelik açısından anlamı.'] },
+      { title: 'Paragraf 2: Pozitif yaşlanma', pages: '~½ sayfa', points: ['Yaşlılığa bakışın hastalık odaklı yaklaşımdan pozitif yaklaşıma geçişi.', 'Pozitif yaşlanmanın kısa tanımı ve neden önemli olduğu.', 'Pozitif yaşlanmanın yaşam kalitesi, sağlık ve uzun ömürle ilişkisine dair bulgular.'] },
+      { title: 'Paragraf 3: Yalnızlık', pages: '~½ sayfa', points: ['Yaşlılarda yalnızlığın yaygınlığı (dünya ve Türkiye’den çalışmalar).', 'Risk faktörleri: eş kaybı, emeklilik, kronik hastalık, sosyal ağın daralması.', 'Fiziksel ve ruhsal sağlık üzerindeki olumsuz sonuçları.'] },
+      { title: 'Paragraf 4: Geriatrik depresyon', pages: '~½ sayfa', points: ['Yaygınlığı ve yaşlılarda sık görülen ruhsal sorun olması.', 'Gözden kaçma ve yetersiz tedavi edilme sorunu.', 'Sonuçları: işlevsellik kaybı, bakım ihtiyacı, mortalite, intihar riski.'] },
+      { title: 'Paragraf 5: Değişkenlerin birbiriyle ilişkisi', pages: '~¼ sayfa', points: ['Yalnızlığın depresyonu artırdığı, pozitif yaşlanmanın ise koruyucu olduğuna dair bulgular.', 'Üç değişkeni birlikte ele almanın gerekçesi.'] },
+      { title: 'Paragraf 6: Mevcut müdahaleler ve sınırlılıkları', pages: '~¼ sayfa', points: ['Farmakolojik tedavilerin yaşlılardaki dezavantajları (yan etki, çoklu ilaç kullanımı).', 'Klasik psikososyal yaklaşımların sınırlılıkları.', 'Yaşlılık döneminin değiştirilemeyen kayıplarına uygun bir yaklaşım ihtiyacı.'] },
+      { title: 'Paragraf 7: KKT’nin uygunluğu', pages: '~½ sayfa', points: ['KKT’nin kısa tanımı ve psikolojik esneklik hedefi.', 'Belirtiyi ortadan kaldırmak yerine kabul ve değer odaklı yaşamı esas alması; bu nedenle kayıpların yoğun olduğu yaşlılık dönemine özellikle uygun olması.', 'Yaşlılarda KKT’nin yalnızlık, depresyon ve iyi oluş üzerine etkinliğine dair kanıtlar.'] },
+      { title: 'Paragraf 8: Hemşireliğin rolü ve literatür boşluğu', pages: '~½ sayfa', points: ['Hemşirelerin yaşlılarla en sık temas eden sağlık profesyoneli olması.', 'KKT’nin hemşireler tarafından uygulanabilirliği.', 'Literatür boşluğu: Türkiye’de yaşlılarda KKT temelli hemşirelik müdahalesinin bu üç değişken üzerine birlikte incelendiği çalışmanın olmaması veya sınırlı olması.', 'Araştırmanın özgün değeri ve hemşirelik bilimine beklenen katkısı.'] }] },
+    { code: '1.2', title: 'Araştırmanın Amacı ve Hipotezleri', level: 2, src: false, pages: '~1 sayfa', tip: 'Hipotezlerin dili, Bulgular’daki 4.5 başlığındaki özet tabloyla birebir aynı olmalıdır.', paras: [
+      { title: 'Paragraf 1: Amaç', pages: '~¼ sayfa', points: ['Tek cümlelik net amaç: “Bu araştırma, kabul ve kararlılık temelli hemşirelik müdahalesinin yaşlılarda pozitif yaşlanma, yalnızlık ve geriatrik depresyon üzerine etkisini belirlemek amacıyla yapılmıştır.”'] },
+      { title: 'Paragraf 2: Hipotezler', pages: '~¾ sayfa', points: ['Pozitif yaşlanma: H1: Müdahale grubundaki yaşlıların pozitif yaşlanma puan ortalaması kontrol grubundan yüksektir. H0: Fark yoktur.', 'Yalnızlık: H1: Müdahale grubunun yalnızlık puan ortalaması kontrol grubundan düşüktür. H0: Fark yoktur.', 'Geriatrik depresyon: H1: Müdahale grubunun depresyon puan ortalaması kontrol grubundan düşüktür. H0: Fark yoktur.', 'İzlem ölçümü varsa, etkinin izlemde sürdüğüne ilişkin ek hipotezler.'] }] },
+    { code: '2', title: 'GENEL BİLGİLER', level: 1, src: true, pages: '~21 sayfa' },
+    { code: '2.1', title: 'Yaşlılık ve Yaşlanma', level: 2, src: true, pages: '~2 sayfa' },
+    { code: '2.1.1', title: 'Yaşlılığın Tanımı ve Sınıflandırılması', level: 3, src: true, pages: '~½ sayfa', paras: [{ title: 'İçerik', points: ['Yaşlanma (süreç) ile yaşlılık (dönem) kavramlarının ayrımı.', 'Yaşlanmanın türleri: kronolojik, biyolojik, psikolojik ve sosyal yaşlanma.', 'DSÖ’nün yaş sınıflandırması (genç yaşlı, orta yaşlı, ileri yaşlı) ve araştırmada esas alınan yaş sınırı.'] }] },
+    { code: '2.1.2', title: 'Dünyada ve Türkiye’de Yaşlı Nüfusun Durumu', level: 3, src: true, pages: '~½ sayfa', tip: 'Verileri yıllara göre gösteren küçük bir tablo. Giriş’teki istatistikleri burada aynen tekrarlamayın, ayrıntılandırın.', paras: [{ title: 'İçerik', points: ['Demografik dönüşüm: doğurganlığın azalması, yaşam süresinin uzaması.', 'Dünya ve Türkiye için yaşlı nüfus oranı, projeksiyonlar ve yaşlı bağımlılık oranı.', 'Cinsiyete göre dağılım ve yalnız yaşayan yaşlı oranı (yalnızlık başlığına köprü kurar).'] }] },
+    { code: '2.1.3', title: 'Yaşlılıkta Psikososyal Değişimler', level: 3, src: true, pages: '~1 sayfa', paras: [{ title: 'İçerik', points: ['Erikson’un “ego bütünlüğüne karşı umutsuzluk” evresi.', 'Yaşlılıktaki kayıplar: eş ve yakın kaybı, emeklilik ve rol kaybı, gelir azalması, fiziksel işlev kaybı.', 'Sosyal ağın daralması ve yaşçılık (ageism).', 'Kapanış: Bu değişimlerin yalnızlık ve depresyona zemin hazırladığı, ancak uyumla karşılandığında pozitif yaşlanmanın mümkün olduğu (2.2’ye geçiş).'] }] },
+    { code: '2.2', title: 'Pozitif Yaşlanma', level: 2, src: true, pages: '~3 sayfa' },
+    { code: '2.2.1', title: 'Pozitif Yaşlanma Kavramı ve İlişkili Kavramlar', level: 3, src: true, pages: '~1 sayfa', tip: 'Kavramları tanım ve odak noktası açısından karşılaştıran bir tablo.', paras: [{ title: 'İçerik', points: ['Pozitif psikolojinin doğuşu ve yaşlılık çalışmalarına yansıması.', 'Pozitif yaşlanmanın tanımı ve tezde esas alınan tanım.', 'Benzer kavramlarla karşılaştırma: başarılı yaşlanma (Rowe ve Kahn), aktif yaşlanma (DSÖ, 2002), sağlıklı yaşlanma (DSÖ, 2015).', 'Farkı: nesnel sağlık ölçütlerinden çok öznel algıya ve uyuma odaklanması.'] }] },
+    { code: '2.2.2', title: 'Pozitif Yaşlanmanın Boyutları', level: 3, src: true, pages: '~1 sayfa', tip: 'Kullanılan ölçeğin alt boyutlarıyla birebir uyumlu bir yapı kurun; her boyuta bir paragraf ayırın.', paras: [{ title: 'İçerik', points: ['Pozitif yaşlanmanın boyutları (kullanılan ölçeğin alt boyutlarıyla uyumlu).', 'Her boyutun tanımı ve yaşlı birey için anlamı.'] }] },
+    { code: '2.2.3', title: 'Pozitif Yaşlanmayı Etkileyen Faktörler', level: 3, src: true, pages: '~1 sayfa', paras: [{ title: 'İçerik', points: ['Bireysel faktörler: sağlık durumu, yaşlanmaya yönelik tutum, öz yeterlilik, anlam ve amaç duygusu.', 'Sosyal faktörler: sosyal destek, sosyal katılım, aile ilişkileri.', 'Çevresel ve ekonomik faktörler.', 'Kapanış: Psikolojik esneklik ve değer odaklı yaşamın pozitif yaşlanmayı destekleyen faktörler olduğu (KKT bölümüne bağ kurar).'] }] },
+    { code: '2.3', title: 'Yaşlılıkta Yalnızlık', level: 2, src: true, pages: '~3 sayfa' },
+    { code: '2.3.1', title: 'Yalnızlığın Tanımı ve Türleri', level: 3, src: true, pages: '~1 sayfa', paras: [{ title: 'İçerik', points: ['Yalnızlığın öznel bir deneyim olarak tanımı: kişinin istediği ile sahip olduğu sosyal ilişkiler arasındaki uyumsuzluk (Peplau ve Perlman).', 'Benzer kavramlardan ayrımı: yalnız yaşama, sosyal izolasyon ve yalnızlık aynı şey değildir.', 'Türleri: sosyal yalnızlık ve duygusal yalnızlık (Weiss); varoluşsal yalnızlık; geçici ve kronik yalnızlık.', 'Kullanılan yalnızlık ölçeğinin dayandığı tanım.'] }] },
+    { code: '2.3.2', title: 'Yaşlılarda Yalnızlığın Yaygınlığı ve Risk Faktörleri', level: 3, src: true, pages: '~1 sayfa', paras: [{ title: 'İçerik', points: ['Dünyada ve Türkiye’de yaşlılarda yalnızlık yaygınlığı (toplumda ve kurumda yaşayanlar ayrı ayrı).', 'Sosyodemografik risk faktörleri: ileri yaş, kadın cinsiyet, dul olma, düşük gelir, yalnız yaşama.', 'Sağlıkla ilgili faktörler: kronik hastalık, işitme ve görme kaybı, hareket kısıtlılığı.', 'Psikososyal ve çevresel faktörler: kayıplar, sosyal destek azlığı, kurum bakımı, göç, kırsal yaşam.', 'COVID-19 pandemisinin yaşlılarda yalnızlığa etkisi.'] }] },
+    { code: '2.3.3', title: 'Yalnızlığın Sağlık Üzerine Etkileri', level: 3, src: true, pages: '~1 sayfa', paras: [{ title: 'İçerik', points: ['Fiziksel etkiler: kardiyovasküler hastalık, inme, bağışıklık ve uyku sorunları.', 'Ruhsal etkiler: depresyon, anksiyete, intihar düşüncesi.', 'Bilişsel etkiler: bilişsel gerileme ve demans riski.', 'Mortalite üzerine etkisi (sosyal ilişkiler ve mortalite meta-analizleri).', 'Kapanış: Yalnızlığın en önemli sonuçlarından birinin depresyon olduğu (2.4’e geçiş).'] }] },
+    { code: '2.4', title: 'Geriatrik Depresyon', level: 2, src: true, pages: '~3 sayfa' },
+    { code: '2.4.1', title: 'Tanımı ve Epidemiyolojisi', level: 3, src: true, pages: '~½ sayfa', paras: [{ title: 'İçerik', points: ['Depresyonun tanımı ve DSM-5-TR tanı ölçütleri (kısaca).', 'Erken başlangıçlı ve geç başlangıçlı depresyon ayrımı; subsendromal (eşik altı) depresyon.', 'Yaygınlık: toplumda, huzurevinde ve hastanede yatan yaşlılarda; Türkiye’den veriler.'] }] },
+    { code: '2.4.2', title: 'Risk Faktörleri', level: 3, src: true, pages: '~¾ sayfa', paras: [{ title: 'İçerik', points: ['Biyolojik: vasküler depresyon hipotezi, kronik hastalıklar, nörodejeneratif süreçler, ilaçlar.', 'Psikolojik: kayıp ve yas, olumsuz düşünce örüntüleri, deneyimsel kaçınma (KKT ile bağlantı).', 'Sosyal: yalnızlık, sosyal destek eksikliği, ekonomik güçlükler.'] }] },
+    { code: '2.4.3', title: 'Belirtiler ve Tanılama', level: 3, src: true, pages: '~¾ sayfa', paras: [{ title: 'İçerik', points: ['Yaşlılarda depresyonun farklı görünümü: somatik yakınmaların ön planda olması, üzüntünün belirgin olmadığı tablo, anhedoni, bilişsel yakınmalar.', 'Demans ve psödodemans ayrımı.', 'Tarama araçları: Geriatrik Depresyon Ölçeği ve Türkçe geçerlik-güvenirlik çalışması.', 'Hemşirenin erken tanılamadaki rolü.'] }] },
+    { code: '2.4.4', title: 'Tedavi ve Yönetim Yaklaşımları', level: 3, src: true, pages: '~1 sayfa', paras: [{ title: 'İçerik', points: ['Farmakolojik tedavi ve yaşlılarda dikkat edilmesi gerekenler (yan etki, ilaç etkileşimi, çoklu ilaç kullanımı).', 'Psikoterapötik yaklaşımlar: bilişsel davranışçı terapi, problem çözme terapisi, hatırlama (reminiscence) terapisi, KKT.', 'Fiziksel aktivite ve sosyal katılım programları.', 'Kapanış: Yaşlılarda farmakolojik olmayan, kabul ve anlam odaklı müdahalelere duyulan ihtiyaç.'] }] },
+    { code: '2.5', title: 'Pozitif Yaşlanma, Yalnızlık ve Geriatrik Depresyon Arasındaki İlişki', level: 2, src: true, pages: '~1,5 sayfa', tip: 'Tezin bütünlüğü için kritik: neden bu üç değişkeni birlikte seçtiğinizi ve neden KKT’yi tercih ettiğinizi burada kanıtlarla gösterin. Üç değişken ile KKT süreçlerini gösteren bir kavramsal model şekli önerilir.', paras: [{ title: 'İçerik', points: ['Yalnızlık ile depresyon arasındaki ilişki (boylamsal çalışmalar; iki yönlü ilişki).', 'Pozitif yaşlanmanın yalnızlık ve depresyona karşı koruyucu rolü.', 'Depresyonun pozitif yaşlanma algısını azaltması.', 'Ortak mekanizma: psikolojik katılık, deneyimsel kaçınma ve değerlerden uzaklaşma.', 'Kapanış: Bu ortak mekanizmayı hedefleyen bir müdahalenin üç değişkeni birlikte etkileyebileceği; bu müdahalenin KKT olduğu (2.6’ya geçiş).'] }] },
+    { code: '2.6', title: 'Kabul ve Kararlılık Terapisi (KKT)', level: 2, src: true, pages: '~5 sayfa' },
+    { code: '2.6.1', title: 'Tarihçesi ve Felsefi Temelleri', level: 3, src: true, pages: '~1 sayfa', paras: [{ title: 'İçerik', points: ['Bilişsel davranışçı terapilerin üç dalgası ve KKT’nin “üçüncü dalga” içindeki yeri.', 'Steven C. Hayes ve arkadaşlarının çalışmalarıyla gelişimi.', 'Felsefi temel: işlevsel bağlamsalcılık.', 'Kuramsal temel: İlişkisel Çerçeve Kuramı; dilin ve bilişin insan acısını nasıl büyüttüğü.'] }] },
+    { code: '2.6.2', title: 'Psikolojik Katılık ve Psikolojik Esneklik', level: 3, src: true, pages: '~¾ sayfa', tip: 'Esneklik ve katılık modellerini (hexaflex) gösteren şekil.', paras: [{ title: 'İçerik', points: ['Psikolojik esnekliğin tanımı ve KKT’nin temel hedefi olması.', 'Psikolojik katılığın altı süreci: deneyimsel kaçınma, bilişsel kaynaşma, geçmiş ve gelecekle meşguliyet, kavramsallaştırılmış benliğe bağlılık, değerlerin belirsizliği, eylemsizlik veya dürtüsellik.'] }] },
+    { code: '2.6.3', title: 'KKT’nin Temel Süreçleri', level: 3, src: true, pages: '~2 sayfa', tip: 'Her süreç için aynı yapı: tanım → yaşlılıktaki karşılığı → örnek teknik veya metafor → müdahale programındaki yeri.', paras: [{ title: 'Süreçler', points: ['Kabul: İstenmeyen duygu ve düşüncelere mücadele etmeden yer açmak; yaşlılıkta değiştirilemeyen kayıpların kabulü.', 'Bilişsel ayrışma: Düşünceleri gerçeğin kendisi değil, zihnin ürünleri olarak görmek (ör. “Zihnim bana ... düşüncesini veriyor” tekniği).', 'Şimdiki anla temas: Farkındalık temelli egzersizler; geçmişe dair pişmanlık ve geleceğe dair kaygıdan uzaklaşma.', 'Bağlam olarak benlik: Gözlemleyen benlik; satranç tahtası metaforu; rol kayıplarına rağmen benliğin sürekliliği.', 'Değerler: Yaşamda neyin önemli olduğunun belirlenmesi; yaşlılık döneminde anlam bulma.', 'Kararlı eylem: Değerler doğrultusunda somut, ulaşılabilir hedefler ve davranış değişikliği.'] }] },
+    { code: '2.6.4', title: 'Yaşlılarda KKT Uygulamaları ve Etkinliği', level: 3, src: true, pages: '~1¼ sayfa', paras: [{ title: 'İçerik', points: ['KKT’nin yaşlılar için uygunluğunun gerekçeleri: değiştirilemeyen kayıplar, kabul ihtiyacı, anlam arayışı.', 'Yaşlılara uyarlamalar: kısa oturumlar, görsel ve somut materyaller, yavaş tempo, bilişsel düzeye uygun dil.', 'Etkinlik kanıtları: sistematik derleme ve meta-analizler; depresyon, anksiyete, yalnızlık ve iyi oluş üzerine sonuçlar.', 'Türkiye’de yaşlılarla yapılmış KKT çalışmaları.', 'Mevcut çalışmaların sınırlılıkları (küçük örneklem, kontrol grubu eksikliği, kısa izlem) ve literatür boşluğu.'] }] },
+    { code: '2.7', title: 'Kabul ve Kararlılık Terapisi ve Hemşirelik', level: 2, src: true, pages: '~3,5 sayfa' },
+    { code: '2.7.1', title: 'Yaşlı Ruh Sağlığında Hemşirenin Rolü', level: 3, src: true, pages: '~1 sayfa', paras: [{ title: 'İçerik', points: ['Koruyucu ruh sağlığı, tarama, danışmanlık, eğitim ve savunuculuk rolleri.', 'Geriatri hemşireliği ve psikiyatri hemşireliği yetkinlikleri.', 'Hemşirelik Yönetmeliği’nde tanımlanan görev, yetki ve sorumluluklar.', 'Huzurevi, evde bakım ve birinci basamakta hemşirenin konumu.'] }] },
+    { code: '2.7.2', title: 'KKT Temelli Hemşirelik Müdahaleleri', level: 3, src: true, pages: '~1¼ sayfa', paras: [{ title: 'İçerik', points: ['Hemşirelerin KKT uygulama yeterliliği ve gerekli eğitim.', 'Hemşireler tarafından yürütülen KKT çalışmalarına örnekler (kronik hastalığı olanlar, bakım verenler, yaşlılar) ve sonuçları.', 'Grup ve bireysel uygulama biçimleri.', 'KKT’nin hemşirelik sürecine entegrasyonu: tanılama (ör. yalnızlık riski, umutsuzluk, etkisiz baş etme gibi hemşirelik tanıları), planlama, uygulama, değerlendirme.'] }] },
+    { code: '2.7.3', title: 'Araştırmanın Kuramsal Çerçevesi', level: 3, src: true, pages: '~1¼ sayfa', tip: 'Jüri, müdahalenin bir hemşirelik kuramına dayandırılmasını sıklıkla bekler. Kuram seçimini danışmanınızla yapın ve aynı kuramı Tartışma’da da kullanın.', paras: [{ title: 'İçerik', points: ['Reed’in Öz-Aşkınlık Kuramı: yaşlılık, kırılganlık ve iyi oluş ilişkisi; pozitif yaşlanma ve KKT ile güçlü uyum.', 'Roy Adaptasyon Modeli: yaşlılıktaki değişimlere psikososyal uyum.', 'Peplau’nun Kişilerarası İlişkiler Kuramı: terapötik ilişki ve grup süreci.', 'Kuram kavramlarının KKT süreçleri ve araştırma değişkenleriyle eşleştirilmesi.'] }] }
+  ]
+};
+
+/* ---------- thesis map: plan, suggestions, scanning ---------- */
+const ROLES = ['tanım', 'kuram', 'istatistik', 'risk faktörü', 'sonuç/etki', 'müdahale: etkili', 'müdahale: etkisiz/farklı', 'yöntem/ölçek', 'uygulama'];
+S.plan = null; S.sugs = []; S.scans = {}; S.planSel = LS.get('th:planSel', '1.1'); S.sugFilter = 'pending';
+const saveSugs = () => DB.set('sugs', S.sugs).catch(() => toast('Öneriler kaydedilemedi.', 'err'));
+const saveScans = () => DB.set('scans', S.scans).catch(() => {});
+const savePlan = () => DB.set('plan', S.plan).catch(() => toast('Plan kaydedilemedi.', 'err'));
+const planNode = code => S.plan.nodes.find(n => n.code === code) || null;
+const topCode = code => String(code).split('.')[0];
+function planTargets(all = false) {
+  const out = [];
+  for (const n of S.plan.nodes) (n.paras || []).forEach((p, k) => {
+    if (!all && (!n.src || p.src === false)) return;
+    out.push({ key: `${n.code}#${k + 1}`, node: n, para: p, k });
+  });
+  return out;
+}
+const targetOf = key => { const [c, k] = String(key).split('#'); const n = planNode(c); const p = n && n.paras && n.paras[+k - 1]; return p ? { key, node: n, para: p, k: +k - 1 } : null; };
+const targetLabel = t => t ? `${t.node.code} ${t.node.title}${t.node.paras.length > 1 || !/^İçerik$/.test(t.para.title) ? ' › ' + t.para.title : ''}` : 'Bilinmeyen başlık';
+function shortTarget(key) { const t = targetOf(key); if (!t) return key; const m = t.para.title.match(/^(Paragraf|Adım) (\d+)/); return t.node.code + (m ? ` ${m[1]} ${m[2]}` : ''); }
+const targetGoal = t => Math.max(2, Math.ceil((t.para.points || []).length * 0.8));
+const paperYear = p => parseInt((p && p.meta && p.meta.year) || '', 10) || null;
+
+/* plan headings become note categories: main = chapter, sub = section */
+function syncPlanCats() {
+  const tops = S.plan.nodes.filter(n => n.level === 1 && n.src);
+  for (const t of tops) {
+    const id = 'pc-' + t.code; const name = `${t.code}. ${t.title}`;
+    const c = catOf(id); if (c) c.name = name; else S.cats.push({ id, name, parent: null });
+  }
+  for (const n of S.plan.nodes) {
+    if (n.level === 1 || !n.paras || !n.paras.length || !n.src) continue;
+    const id = 'pc-' + n.code; const name = `${n.code} ${n.title}`; const parent = 'pc-' + topCode(n.code);
+    if (!catOf(parent)) continue;
+    const c = catOf(id); if (c) { c.name = name; c.parent = parent; } else S.cats.push({ id, name, parent });
+  }
+  saveCats();
+}
+const catForTarget = t => t.node.level === 1 ? 'pc-' + t.node.code : 'pc-' + t.node.code;
+
+/* ---------- scanning an article against the plan ---------- */
+function planPrompt() {
+  return planTargets().map(t => `[${t.key}] ${t.node.code} ${t.node.title} › ${t.para.title}\n${(t.para.points || []).map((x, i) => `   (${i + 1}) ${x}`).join('\n')}`).join('\n');
+}
+async function scanPaper(p, { quiet = false } = {}) {
+  if (!S.settings.key) throw new Error('NOKEY');
+  const sk = new Set(p.skip || []); const lines = [];
+  p.sections.forEach((s, k) => {
+    if (isNoTr(s) && !/başlık ve künye/i.test(s.title)) return;
+    for (let i = s.start; i <= s.end; i++) if (!sk.has(i) && wordy(p.paras[i].t)) lines.push(`[${i}] (${s.title}) ${p.paras[i].t}`);
+  });
+  let body = lines.join('\n'); if (body.length > 400000) body = body.slice(0, 400000);
+  const prompt = `Sen bir hemşirelik doktora tezi danışmanı gibi çalışan akademik asistansın. Aşağıda öğrencinin TEZ KONUSU, tez planındaki başlıklar ve her başlığın paragraf iskeleti (maddeler) var. Ardından bir makalenin numaralandırılmış paragrafları var.
+Görevin: Bu makalede, tezin belirli bir paragrafında kaynak olarak kullanılabilecek cümleleri bulmak.
+Kurallar:
+- Her öneri için: "p" makale paragraf numarası; "quote" makaleden HARFİ HARFİNE cümle(ler) (tek paragraftan, kelime değiştirme, kısaltma ya da çeviri yok); "target" önerinin gideceği iskelet kimliği (köşeli parantezdeki, ör. "2.3.2#1"); "point" o iskeletteki uygun madde numarası (yoksa 0); "role" şunlardan biri: ${ROLES.join(', ')}; "reason" en fazla 20 kelimelik Türkçe gerekçe; "cites" cümle başka bir kaynağa atıf yapıyorsa o kaynak(lar) APA metin içi biçimde (ör. ["Hayes vd., 2006"]), makalenin kendi ifadesi ya da bulgusuysa boş liste.
+- Makalenin KENDİ bulgularını, tanımlarını ve sonuçlarını tercih et. Makalenin başka çalışmalardan aktardığı cümleleri ancak çok değerliyse öner ve "cites" alanını mutlaka doldur.
+- İstatistik ve yaygınlık verilerinde yılı ve ülkeyi içeren cümleleri seç.
+- Yalnızca güçlü ve doğrudan işe yarayacak eşleşmeleri öner; zayıf ya da genel bağlantıları ekleme. Aynı cümle en fazla iki farklı hedefe önerilebilir (ör. Giriş’te kısa, Genel Bilgiler’de ayrıntılı kullanım). En fazla 30 öneri.
+- Özet (Abstract) bölümündeki cümleler yerine, aynı bilgiyi veren gövde cümlelerini tercih et.
+Yalnızca şu yapıda JSON döndür: {"items":[{"p":0,"quote":"","target":"","point":0,"role":"","reason":"","cites":[]}]}
+
+TEZ KONUSU: ${S.plan.topic}
+TASARIM: ${S.plan.design || ''}
+TEZ PLANI (kaynak alabilecek iskeletler):
+${planPrompt()}
+
+MAKALE: ${p.meta.title || p.name} (${inText(p)})
+PARAGRAFLAR:
+${body}`;
+  const res = await gemini(prompt, { temperature: 0.1 });
+  const now = Date.now(); let added = 0;
+  const keep = S.sugs.filter(s => s.paperId !== p.id || s.status !== 'pending');
+  const items = res && Array.isArray(res.items) ? res.items : [];
+  for (const it of items) {
+    const t = targetOf(str(it && it.target)); const n = parseInt(it && it.p, 10); const quote = str(it && it.quote);
+    if (!t || !p.paras[n] || !quote) continue;
+    let f = findQuote(p.paras[n].t, quote); let pi = n;
+    if (!f) for (let i = Math.max(0, n - 3); i <= Math.min(p.paras.length - 1, n + 3) && !f; i++) { if (i === n) continue; const g = findQuote(p.paras[i].t, quote); if (g) { f = g; pi = i; } }
+    if (!f) continue;
+    const exact = p.paras[pi].t.slice(f.r[0], f.r[1]);
+    if (keep.some(s => s.paperId === p.id && s.target === t.key && s.para === pi && Math.abs(s.r[0] - f.r[0]) < 20)) continue;
+    const role = ROLES.includes(str(it.role)) ? str(it.role) : 'sonuç/etki';
+    keep.push({ id: 's' + uid(), paperId: p.id, para: pi, r: f.r, quote: exact, target: t.key, point: Math.max(0, parseInt(it.point, 10) || 0), role, reason: str(it.reason).slice(0, 220),
+      cites: (Array.isArray(it.cites) ? it.cites : []).map(str).filter(Boolean).slice(0, 4), status: 'pending', at: now });
+    added++;
+  }
+  S.sugs = keep; saveSugs();
+  S.scans[p.id] = { at: now, ver: S.plan.ver || 1, n: added }; saveScans();
+  return added;
+}
+async function scanWithUi(p) {
+  if (!p) return;
+  if (!S.settings.key) { openSettings(); toast('Önce Gemini API anahtarını ekle.', 'err'); return; }
+  busy(`“${(p.meta.title || p.name).slice(0, 60)}” tez planına göre taranıyor…`);
+  try { const n = await scanPaper(p); busy(false); toast(n ? `${n} öneri bulundu. Öneriler sekmesinden ya da metindeki etiketlerden incele.` : 'Bu makalede planına uyan güçlü bir eşleşme bulunamadı.'); }
+  catch (e) { busy(false); toast(errMsg(e), 'err'); }
+  refreshMap();
+}
+async function scanMany(ids) {
+  if (!ids.length) { toast('Taranacak makale yok.'); return; }
+  if (!S.settings.key) { openSettings(); toast('Önce Gemini API anahtarını ekle.', 'err'); return; }
+  let ok = 0, tot = 0; const fail = [];
+  for (let i = 0; i < ids.length; i++) {
+    const p = S.papers[ids[i]]; if (!p) continue;
+    busy(`Taranıyor ${i + 1}/${ids.length}: ${(p.meta.title || p.name).slice(0, 50)}`);
+    try { tot += await scanPaper(p); ok++; }
+    catch (e) { if (e.message === 'DAILY_QUOTA' || e.message === 'NOKEY') { fail.push('…'); toast(errMsg(e), 'err'); break; } fail.push(p.meta.title || p.name); }
+  }
+  busy(false); refreshMap();
+  toast(`${ok} makale tarandı, ${tot} öneri bulundu.${fail.length ? ' Taranamayan: ' + fail.length : ''}`, fail.length ? 'err' : '');
+}
+const needsScan = p => !S.scans[p.id] || (S.scans[p.id].ver || 1) !== (S.plan.ver || 1);
+
+/* ---------- accept / reject ---------- */
+function acceptSug(s) {
+  const p = S.papers[s.paperId]; const t = targetOf(s.target); if (!p || !t) return;
+  syncPlanCats();
+  const sec = secOf(p, s.para);
+  const n = { id: uid(), paperId: p.id, para: s.para, lang: 'o', secTitle: sec ? sec.title : '', text: s.quote, partial: true, cat: catForTarget(t), created: Date.now(), plan: { target: s.target, point: s.point, role: s.role } };
+  const cs = sugCites(s); if (cs.length) { n.cites = cs.map(c => ({ intext: c.intext, ref: c.ref })); n.direct = false; }
+  S.notes.push(n); s.status = 'added'; s.noteId = n.id; saveSugs(); notesChanged(); pulseNotes();
+  toast(`Eklendi: ${t.node.code} ${t.para.title !== 'İçerik' ? t.para.title : t.node.title}`, '', { label: 'Geri al', fn: () => undoSug(s) });
+  refreshMap();
+}
+function rejectSug(s) { s.status = 'rejected'; saveSugs(); refreshMap(); toast('Öneri reddedildi.', '', { label: 'Geri al', fn: () => undoSug(s) }); }
+function undoSug(s) {
+  if (s.noteId) { S.notes = S.notes.filter(n => n.id !== s.noteId); delete s.noteId; notesChanged(); }
+  s.status = 'pending'; saveSugs(); refreshMap();
+}
+function refreshMap() {
+  if (curPaper()) { renderReader(true); renderSectionBar(); }
+  if (S.pane === 'sug') renderSugPane();
+  if (S.screen === 'arc' && $('#mapMain')) renderPlanMain();
+  if ($('#planTree')) renderPlanTree();
+}
+
+/* ---------- cited sources inside a suggested sentence ---------- */
+const foldRef = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/ı/g, 'i');
+function refEntries(p) {
+  if (p._refs) return p._refs;
+  let idx = [];
+  p.sections.forEach(s => { if (/kaynak|referen|bibliograph/i.test(`${s.title} ${s.original || ''}`)) for (let i = s.start; i <= s.end; i++) idx.push(i); });
+  if (!idx.length) for (let i = p.paras.length - 1; i > p.paras.length * 0.5; i--) if (/^(kaynak(ça|lar)|references|bibliography)\b/i.test(p.paras[i].t.trim())) { for (let j = i + 1; j < p.paras.length; j++) idx.push(j); break; }
+  const joined = idx.map(i => p.paras[i].t.trim()).filter(t => !/^(kaynak(ça|lar)|references|bibliography)$/i.test(t)).join('\n');
+  const parts = joined.split(/\n(?=\p{Lu}[\p{L}'’\-]+,?\s)|(?<=[.)])\s+(?=\p{Lu}[\p{L}'’\-]+,\s+(?:\p{Lu}\.|\p{Lu}\p{Ll}))/u);
+  p._refs = parts.map(x => x.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()).filter(x => x.length > 20 && /\b(1[89]\d\d|20\d\d)/.test(x));
+  return p._refs;
+}
+const citeKey = c => ({ sur: (String(c).match(/\p{Lu}[\p{L}'’\-]+/u) || [])[0] || '', year: (String(c).match(/\b(1[89]\d\d|20\d\d)[a-z]?\b/) || [])[0] || '' });
+function findRefFor(p, cite) {
+  const { sur, year } = citeKey(cite); if (!sur || !year) return '';
+  const fs = foldRef(sur); const y = year.slice(0, 4);
+  const es = refEntries(p);
+  const hit = es.find(e => foldRef(e.slice(0, 50)).startsWith(fs) && e.includes(y)) || es.find(e => foldRef(e.slice(0, 90)).includes(fs) && e.slice(0, 200).includes(y));
+  return hit ? hit.slice(0, 700) : '';
+}
+/* in-text citations written in the sentence itself, in case the model missed one */
+function citesInText(q) {
+  const out = []; let m;
+  const re = /\(([^()]*?\b(?:1[89]\d\d|20\d\d)[a-z]?[^()]*)\)/g;
+  while ((m = re.exec(q))) for (const part of m[1].split(';')) { const t = part.replace(/^\s*(akt\.?|aktaran|bkz\.?|ör\.?|e\.g\.|as cited in)?[\s,]*/i, '').trim(); if (/\p{Lu}/u.test(t) && /\d{4}/.test(t)) out.push(t); }
+  const re2 = /(\p{Lu}[\p{L}'’\-]+(?:\s+(?:ve|&|and)\s+\p{Lu}[\p{L}'’\-]+)?(?:\s+(?:vd\.|ve ark\.|ve arkadaşları(?:nın)?|et al\.))?)\s*\((\d{4}[a-z]?)\)/gu;
+  while ((m = re2.exec(q))) out.push(`${m[1].replace(/ve arkadaşları(nın)?/, 'vd.')}, ${m[2]}`);
+  return out;
+}
+function sugCites(s) {
+  if (s._cr) return s._cr;
+  const p = S.papers[s.paperId]; if (!p) return [];
+  const list = [...(s.cites || [])];
+  for (const c of citesInText(s.quote)) { const k = citeKey(c); if (!list.some(x => { const j = citeKey(x); return foldRef(j.sur) === foldRef(k.sur) && j.year.slice(0, 4) === k.year.slice(0, 4); })) list.push(c); }
+  s._cr = list.map(c => ({ intext: c.replace(/\s+/g, ' ').trim(), ref: findRefFor(p, c) }));
+  return s._cr;
+}
+function citeBlock(s) {
+  const cs = sugCites(s); if (!cs.length) return '';
+  return `<div class="scites">${cs.map(c => `<div class="scite"><div class="sch">Bu cümlede atıf yapılan kaynak: <b>${esc(c.intext)}</b></div>${c.ref
+    ? `<p class="sref">${esc(c.ref)}</p><div class="srefact"><button data-copyref="${esc(c.ref)}">Künyeyi kopyala</button><a class="btn" href="https://scholar.google.com/scholar?q=${encodeURIComponent(c.ref.slice(0, 250))}" target="_blank" rel="noopener">Google Akademik’te bul</a></div>`
+    : '<div class="qwarn">Makalenin kaynakçasında bu atfın künyesi bulunamadı. Kullanmadan önce bu kaynağın gerçekten var olduğunu doğrula.</div>'}</div>`).join('')}</div>`;
+}
+
+/* ---------- warnings that follow the plan’s own rules ---------- */
+function sugWarnings(s) {
+  const w = []; const p = S.papers[s.paperId]; const y = paperYear(p); const now = new Date().getFullYear();
+  if (sugCites(s).length) w.push('Bu bilgi makalenin kendi bulgusu değil. Eklersen atıf “akt.” ile yapılır; asıl kaynağı okuyunca notunda tek dokunuşla doğrudan atfa çevirebilirsin.');
+  if (y && s.role === 'istatistik' && now - y > 5) w.push(`Veri ${y} yılına ait. Planın en güncel veriyi (TÜİK, DSÖ) istiyor.`);
+  else if (y && now - y > 10 && !['kuram', 'tanım'].includes(s.role)) w.push(`Kaynak ${now - y} yıllık. Plan son 5–10 yılın kaynaklarını istiyor (klasik kuram kaynakları hariç).`);
+  const top = topCode(s.target);
+  if (top === '1' || top === '2') {
+    const other = S.sugs.find(o => o !== s && o.status === 'added' && o.paperId === s.paperId && o.para === s.para && topCode(o.target) !== top && ['1', '2'].includes(topCode(o.target)));
+    if (other) w.push(`Bu cümle ${other.target.split('#')[0]} başlığında da kullanıldı. Plan, Giriş’teki bilgiyi Genel Bilgiler’de aynen tekrarlamamanı istiyor: birinde kısa, diğerinde ayrıntılı ver.`);
+  }
+  return w;
+}
+
+/* ---------- reader integration: underline + tags ---------- */
+const paperSugs = p => S.sugs.filter(s => s.paperId === p.id && s.status !== 'rejected');
+function sugTags(p, i) {
+  const list = paperSugs(p).filter(s => s.para === i); if (!list.length) return '';
+  return `<div class="stags">${list.map(s => { const t = targetOf(s.target); return `<button class="stag ${s.status}" data-sug="${s.id}">${s.status === 'added' ? '✓ ' : '→ '}${esc(t ? t.node.code + (t.para.title !== 'İçerik' ? ' · ' + t.para.title.replace(/^(Paragraf|Adım) (\d+).*$/, '$1 $2') : '') : s.target)}</button>`; }).join('')}</div>`;
+}
+function sugCard(s, { showSource = false, compact = false } = {}) {
+  const t = targetOf(s.target); const p = S.papers[s.paperId]; const pt = t && s.point && t.para.points[s.point - 1];
+  const warns = sugWarnings(s);
+  return `<div class="scard ${s.status}" data-sid="${s.id}">
+    <div class="starget">${s.status === 'added' ? '<b class="sok">Eklendi ✓</b> ' : ''}${esc(targetLabel(t))}</div>
+    ${pt && !compact ? `<div class="spoint">Madde: ${esc(pt)}</div>` : ''}
+    <blockquote>“${esc(s.quote)}”</blockquote>
+    ${citeBlock(s)}
+    <div class="smeta">${showSource && p ? `<b>${esc(inText(p))}</b>` : ''}<button class="pref" data-goto="${s.id}" aria-label="Metinde oku">¶${s.para + 1} Metinde oku</button><span class="srole">${esc(s.role)}</span></div>
+    ${s.reason ? `<div class="sreason">${esc(s.reason)}</div>` : ''}
+    ${warns.map(x => `<div class="swarn">${esc(x)}</div>`).join('')}
+    <div class="sact">${s.status === 'pending' ? '<button class="primary" data-acc>Ekle</button><button data-rej>Reddet</button>' : `<button data-undo>${s.status === 'added' ? 'Eklemeyi geri al' : 'Geri al'}</button>`}</div>
+  </div>`;
+}
+function gotoSug(s) {
+  const p = S.papers[s.paperId]; if (!p) return;
+  closeModal();
+  if (S.cur !== p.id) { S.view = 'orig'; openPaper(p.id); }
+  showScreen('read');
+  jumpTo({ paperId: p.id, para: s.para, lang: 'o' });
+  setTimeout(() => {
+    const m = R.querySelector(`mark[data-mk="${s.id}"]`); if (!m) return;
+    m.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    m.classList.remove('qfocus'); void m.offsetWidth; m.classList.add('qfocus');
+  }, 250);
+}
+function openSugModal(s) {
+  modal(`<h3>Öneri</h3>${sugCard(s)}<div class="mact"><button data-close>Kapat</button></div>`, box => bindSugActions(box, true));
+}
+function bindSugActions(root, inModal) {
+  root.addEventListener('click', e => {
+    const cr = e.target.closest('[data-copyref]');
+    if (cr) { navigator.clipboard.writeText(cr.dataset.copyref).then(() => toast('Künye kopyalandı.'), () => toast('Kopyalanamadı.', 'err')); return; }
+    const card = e.target.closest('[data-sid]'); const g = e.target.closest('[data-goto]');
+    const s = S.sugs.find(x => x.id === (g ? g.dataset.goto : card && card.dataset.sid)); if (!s) return;
+    if (g) { gotoSug(s); return; }
+    if (e.target.closest('[data-acc]')) { acceptSug(s); if (inModal) closeModal(); }
+    else if (e.target.closest('[data-rej]')) { rejectSug(s); if (inModal) closeModal(); }
+    else if (e.target.closest('[data-undo]')) { undoSug(s); if (inModal) closeModal(); }
+  });
+}
+$('#reader').addEventListener('click', e => { const mk = S.tool === 'select' || !S.tool ? e.target.closest('mark[data-mk]') : null; if (mk && !window.getSelection().toString()) { const s0 = S.sugs.find(x => x.id === mk.dataset.mk); if (s0) { openSugModal(s0); return; } } const b = e.target.closest('[data-sug]'); if (!b) return; const s = S.sugs.find(x => x.id === b.dataset.sug); if (s) openSugModal(s); });
+
+/* ---------- right pane: suggestions for the open article ---------- */
+function renderSugPane() {
+  const L = $('#sugLog'); const p = curPaper();
+  if (!p) { L.innerHTML = '<div class="empty-notes">Önerileri görmek için bir makale aç.</div>'; return; }
+  const all = S.sugs.filter(s => s.paperId === p.id);
+  const sc = S.scans[p.id];
+  const cnt = st => all.filter(s => s.status === st).length;
+  let h = `<div class="scanbox">${sc ? `<span>${needsScan(p) ? '<b class="swarnt">Plan değişti, yeniden tara.</b>' : `Tarandı: ${fmtDay(sc.at)}`}</span><button data-scan>${needsScan(p) ? 'Yeniden tara' : 'Tekrar tara'}</button>`
+    : `<span>Bu makale henüz tez planına göre taranmadı.</span><button class="primary" data-scan>Planıma göre tara</button>`}</div>`;
+  if (all.length) h += `<div class="seg wide sfilt">${[['pending', 'Bekleyen'], ['added', 'Eklenen'], ['rejected', 'Reddedilen']].map(([k, l]) => `<button data-sf="${k}" class="${S.sugFilter === k ? 'on' : ''}">${l} (${cnt(k)})</button>`).join('')}</div>`;
+  const list = all.filter(s => s.status === S.sugFilter).sort((a, b) => a.target.localeCompare(b.target, 'tr', { numeric: true }) || a.para - b.para);
+  h += list.length ? list.map(s => sugCard(s, { compact: true })).join('') : (all.length ? `<p class="hint">Bu grupta öneri yok.</p>` : '');
+  L.innerHTML = h;
+}
+$('#sugLog').addEventListener('click', e => {
+  const p = curPaper();
+  if (e.target.closest('[data-scan]')) { scanWithUi(p); return; }
+  const f = e.target.closest('[data-sf]'); if (f) { S.sugFilter = f.dataset.sf; renderSugPane(); return; }
+});
+bindSugActions($('#sugLog'), false);
+
+/* ---------- plan screen ---------- */
+function coverage(t) {
+  const added = S.sugs.filter(s => s.target === t.key && s.status === 'added').length;
+  const pending = S.sugs.filter(s => s.target === t.key && s.status === 'pending').length;
+  const goal = targetGoal(t);
+  return { added, pending, goal, cls: added === 0 ? 'c0' : added < goal ? 'c1' : 'c2' };
+}
+function nodeCoverage(n) {
+  const ts = planTargets().filter(t => t.node.code === n.code || t.node.code.startsWith(n.code + '.'));
+  if (!ts.length) return null;
+  const cs = ts.map(coverage);
+  return { added: cs.reduce((a, c) => a + c.added, 0), pending: cs.reduce((a, c) => a + c.pending, 0), cls: cs.some(c => c.cls === 'c0') ? (cs.every(c => c.cls === 'c0') ? 'c0' : 'c1') : (cs.some(c => c.cls === 'c1') ? 'c1' : 'c2') };
+}
+function renderPlanTree() {
+  const T = $('#planTree'); if (!T) return;
+  T.innerHTML = S.plan.nodes.map(n => {
+    const c = nodeCoverage(n);
+    return `<button class="pnode l${n.level}${n.code === S.planSel ? ' on' : ''}${n.src ? '' : ' nosrc'}" data-pn="${esc(n.code)}"><span class="pdot ${c ? c.cls : 'cx'}"></span><span class="ptitle">${n.code !== '0' && n.code !== '7' ? esc(n.code) + ' ' : ''}${esc(n.title)}</span>${c && c.pending ? `<small class="pend">${c.pending}</small>` : ''}</button>`;
+  }).join('');
+}
+function sourceHealth() {
+  const notes = S.notes.filter(n => n.plan && S.papers[n.paperId]);
+  const papers = [...new Set(notes.map(n => n.paperId))].map(id => S.papers[id]);
+  const now = new Date().getFullYear();
+  const old = papers.filter(p => paperYear(p) && now - paperYear(p) > 10);
+  const tr = papers.filter(p => p.lang === 'tr').length;
+  return { notes: notes.length, papers: papers.length, old, tr, intl: papers.length - tr };
+}
+function renderPlanMain() {
+  const M = $('#mapMain'); if (!M) return;
+  const n = planNode(S.planSel) || S.plan.nodes[0];
+  const kids = S.plan.nodes.filter(x => x.code.startsWith(n.code + '.') && x.code.split('.').length === n.code.split('.').length + 1);
+  let h = `<div class="phead"><div class="pcrumb">${n.level > 1 ? esc(planNode(topCode(n.code)) ? planNode(topCode(n.code)).title : '') : 'Tez planı'}</div><h2>${n.code !== '0' && n.code !== '7' ? esc(n.code) + ' ' : ''}${esc(n.title)}</h2>${n.pages ? `<span class="ppages">${esc(n.pages)}</span>` : ''}</div>`;
+  if (n.tip) h += `<div class="ptip"><b>Planındaki not:</b> ${esc(n.tip)}</div>`;
+  if (!n.src) h += `<div class="ptip muted">Bu bölüme makalelerden kaynak önerilmez (planına göre burada kaynak gösterilmiyor ya da kendi verin/çalışman yazılıyor).</div>`;
+  if (kids.length) h += `<div class="pkids">${kids.map(k => { const c = nodeCoverage(k); return `<button class="pkid" data-pn="${esc(k.code)}"><span class="pdot ${c ? c.cls : 'cx'}"></span><span><b>${esc(k.code)} ${esc(k.title)}</b><small>${c ? `${c.added} kaynak eklendi${c.pending ? `, ${c.pending} öneri bekliyor` : ''}` : 'Kaynak alınmayan bölüm'}</small></span></button>`; }).join('')}</div>`;
+  (n.paras || []).forEach((pa, k) => {
+    const t = { key: `${n.code}#${k + 1}`, node: n, para: pa, k }; const src = n.src && pa.src !== false;
+    const c = src ? coverage(t) : null;
+    const sugs = S.sugs.filter(s => s.target === t.key && s.status !== 'rejected').sort((a, b) => (a.status === 'added' ? 0 : 1) - (b.status === 'added' ? 0 : 1));
+    const rej = S.sugs.filter(s => s.target === t.key && s.status === 'rejected').length;
+    h += `<section class="pskel ${c ? c.cls : ''}"><div class="pshead"><b>${esc(pa.title)}</b>${pa.pages ? `<span class="ppages">${esc(pa.pages)}</span>` : ''}${c ? `<span class="pcount ${c.cls}">${c.added}/${c.goal} kaynak</span>` : ''}</div>
+      <ul>${pa.points.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+      ${src ? (sugs.length ? sugs.map(s => sugCard(s, { showSource: true })).join('') : '<p class="hint">Henüz öneri yok.</p>') : '<p class="hint">Bu kısım için kaynak önerilmez.</p>'}
+      ${src && c && c.added === 0 ? `<button class="link" data-kws="${esc(t.key)}">Bu paragraf için hangi kelimelerle makale aramalıyım?</button><div class="kwsout" id="kw-${esc(t.key.replace(/[^\w]/g, '_'))}"></div>` : ''}
+      ${rej ? `<p class="count">${rej} öneri reddedildi.</p>` : ''}</section>`;
+  });
+  M.innerHTML = h;
+}
+function openPlan() {
+  closeModal(); showScreen('arc');
+  const old = $('#arcView'); const box = old.cloneNode(false); old.replaceWith(box); box.hidden = false;
+  const hl = sourceHealth(); const unscanned = Object.values(S.papers).filter(needsScan).length;
+  box.innerHTML = `<div class="arc">
+    <section class="afold" aria-label="Tez planı"><h2>Tez haritası</h2><p class="ptopic">${esc(S.plan.topic)}</p><div id="planTree"></div></section>
+    <div class="amain">
+      <div class="atop">
+        <button class="primary" id="pScan" ${unscanned ? '' : 'disabled'}>${unscanned ? `Taranmamış ${unscanned} makaleyi tara` : 'Tüm makaleler tarandı ✓'}</button>
+        <button id="pDocx">Taslağı Word’e aktar</button>
+        <button id="pEdit">Planı düzenle</button>
+      </div>
+      <div class="phealth">${hl.papers ? `<span><b>${hl.notes}</b> alıntı, <b>${hl.papers}</b> kaynak</span><span>Ulusal <b>${hl.tr}</b> / uluslararası <b>${hl.intl}</b></span><span class="${hl.old.length ? 'warnt' : ''}">10 yıldan eski: <b>${hl.old.length}</b>${hl.old.length ? ' (klasik kuram kaynağı değilse güncelle)' : ''}</span>` : '<span>Henüz kaynak eklemedin. Makaleleri tarayıp önerileri kabul ettikçe burada kaynak sağlığın görünecek.</span>'}
+        <span class="plegend"><i class="pdot c0"></i>kaynak yok <i class="pdot c1"></i>az <i class="pdot c2"></i>yeterli</span></div>
+      <div id="mapMain" class="pmain"></div>
+    </div>
+  </div>`;
+  renderPlanTree(); renderPlanMain();
+  box.addEventListener('click', async e => {
+    const pn = e.target.closest('[data-pn]'); if (pn) { S.planSel = pn.dataset.pn; LS.set('th:planSel', S.planSel); renderPlanTree(); renderPlanMain(); $('#mapMain').scrollTop = 0; return; }
+    if (e.target.closest('#pScan')) { await scanMany(Object.values(S.papers).filter(needsScan).map(p => p.id)); openPlan(); return; }
+    if (e.target.closest('#pDocx')) { exportDraft(); return; }
+    if (e.target.closest('#pEdit')) { editPlan(); return; }
+    const kb = e.target.closest('[data-kws]'); if (kb) { searchTerms(kb.dataset.kws, kb); return; }
+  });
+  bindSugActions(box, false);
+}
+async function searchTerms(key, btn) {
+  const t = targetOf(key); if (!t) return;
+  if (!S.settings.key) { openSettings(); return; }
+  const out = $('#kw-' + key.replace(/[^\w]/g, '_')); btn.disabled = true; btn.textContent = 'Düşünüyorum…';
+  try {
+    const r = await gemini(`Hemşirelik doktora tezi konusu: "${S.plan.topic}". Tezin şu paragrafı için kaynak makale arıyorum:
+${t.node.code} ${t.node.title} › ${t.para.title}
+${t.para.points.map(x => '- ' + x).join('\n')}
+Google Scholar, PubMed ve TR Dizin / DergiPark’ta kullanabileceğim arama ifadeleri öner: 4 Türkçe, 4 İngilizce (MeSH terimleri ve tırnaklı ifadeler kullanabilirsin). Yalnızca JSON: {"tr":[""],"en":[""]}`, { temperature: 0.3 });
+    const all = [...(r.tr || []), ...(r.en || [])].map(str).filter(Boolean);
+    out.innerHTML = `<div class="kw">${all.map(x => `<button data-copy="${esc(x)}">${esc(x)}</button>`).join('')}</div><p class="hint">Bir ifadeye dokununca kopyalanır.</p>`;
+    out.onclick = async ev => { const c = ev.target.closest('[data-copy]'); if (c) { try { await navigator.clipboard.writeText(c.dataset.copy); toast('Arama ifadesi kopyalandı.'); } catch {} } };
+    btn.remove();
+  } catch (e) { btn.disabled = false; btn.textContent = 'Tekrar dene'; toast(errMsg(e), 'err'); }
+}
+
+/* ---------- plan editing (plain text outline) ---------- */
+function planToText(pl) {
+  let s = `KONU: ${pl.topic}\nTASARIM: ${pl.design || ''}\n\n`;
+  for (const n of pl.nodes) {
+    s += `${'#'.repeat(n.level)} ${n.code} ${n.title}${n.pages ? ' {' + n.pages + '}' : ''}${n.src ? '' : ' [kaynaksız]'}\n`;
+    if (n.tip) s += `ipucu: ${n.tip}\n`;
+    for (const p of (n.paras || [])) { s += `> ${p.title}${p.pages ? ' {' + p.pages + '}' : ''}${p.src === false ? ' [kaynaksız]' : ''}\n`; for (const x of p.points) s += `- ${x}\n`; }
+    s += '\n';
+  }
+  return s;
+}
+function textToPlan(txt, old) {
+  const pl = { topic: old.topic, design: old.design, rules: old.rules, nodes: [], ver: old.ver || 1 }; let n = null, pa = null;
+  for (const raw of String(txt).split('\n')) {
+    const l = raw.trim(); if (!l) continue;
+    let m;
+    if ((m = l.match(/^KONU:\s*(.*)$/i))) { pl.topic = m[1].trim(); continue; }
+    if ((m = l.match(/^TASARIM:\s*(.*)$/i))) { pl.design = m[1].trim(); continue; }
+    const flags = s => ({ src: !/\[kaynaksız\]/i.test(s), pages: ((s.match(/\{([^}]*)\}/) || [])[1] || '').trim(), clean: s.replace(/\{[^}]*\}|\[kaynaksız\]/gi, '').trim() });
+    if ((m = l.match(/^(#{1,3})\s+(.+)$/))) {
+      const f = flags(m[2]); const mm = f.clean.match(/^(\d+(?:\.\d+)*)\.?\s+(.*)$/);
+      n = { code: mm ? mm[1] : 'x' + pl.nodes.length, title: mm ? mm[2] : f.clean, level: m[1].length, src: f.src, pages: f.pages || undefined, paras: [] }; pa = null; pl.nodes.push(n);
+      const o = old.nodes.find(x => x.code === n.code); if (o && o.disc) n.disc = o.disc;
+      continue;
+    }
+    if (!n) continue;
+    if ((m = l.match(/^ipucu:\s*(.*)$/i))) { n.tip = m[1]; continue; }
+    if ((m = l.match(/^>\s*(.+)$/))) { const f = flags(m[1]); pa = { title: f.clean, pages: f.pages || undefined, points: [] }; if (!f.src) pa.src = false; n.paras.push(pa); continue; }
+    if ((m = l.match(/^[-•*]\s*(.+)$/))) { if (!pa) { pa = { title: 'İçerik', points: [] }; n.paras.push(pa); } pa.points.push(m[1].trim()); continue; }
+    if (pa && pa.points.length) pa.points[pa.points.length - 1] += ' ' + l;
+  }
+  return pl;
+}
+function editPlan() {
+  modal(`<h3>Planı düzenle</h3>
+    <p class="hint"><b>#</b> bölüm, <b>##</b> alt başlık, <b>###</b> alt alt başlık; <b>&gt;</b> paragraf iskeleti, <b>-</b> madde. <b>{~1 sayfa}</b> sayfa tahmini, <b>[kaynaksız]</b> o kısma kaynak önerilmesin demek. Başlık numaralarını değiştirirsen o başlığa bağlı eski öneriler eşleşmez.</p>
+    <textarea id="plTxt" rows="22" spellcheck="false" style="font-family:ui-monospace,Menlo,monospace;font-size:13px;line-height:1.45">${esc(planToText(S.plan))}</textarea>
+    <div class="mact"><button id="plReset" class="danger">PDF’teki ilk hâline dön</button><button data-close>Vazgeç</button><button class="primary" id="plSave">Kaydet</button></div>`, () => {
+    $('#plSave').onclick = () => {
+      const np = textToPlan($('#plTxt').value, S.plan);
+      if (!np.nodes.length) { toast('Planda hiç başlık bulunamadı.', 'err'); return; }
+      const changed = JSON.stringify(planTargets().map(t => [t.key, t.para.points])) !== JSON.stringify((() => { const o = S.plan; S.plan = np; const r = planTargets().map(t => [t.key, t.para.points]); S.plan = o; return r; })());
+      np.ver = (S.plan.ver || 1) + (changed ? 1 : 0); S.plan = np; savePlan(); syncPlanCats(); closeModal(); openPlan();
+      toast(changed ? 'Plan kaydedildi. Makaleleri yeni plana göre yeniden tarayabilirsin.' : 'Plan kaydedildi.');
+    };
+    $('#plReset').onclick = () => { if (!confirm('Plan, PDF’ten aktarılan ilk hâline dönecek. Emin misin?')) return; S.plan = JSON.parse(JSON.stringify(DEFAULT_PLAN)); S.plan.ver = 1; savePlan(); syncPlanCats(); closeModal(); openPlan(); };
+  });
+}
+
+/* ---------- draft export: plan skeleton + accepted quotes ---------- */
+async function exportDraft() {
+  if (!window.JSZip) { toast('Word oluşturucu yüklenemedi. İnternet bağlantını kontrol et.', 'err'); return; }
+  const notes = S.notes.filter(n => n.plan && hasText(n));
+  const blob = await buildDocx({ notes, title: 'Tez Taslağı: Kaynak Haritası', custom: ({ run, para, textRuns, sm }) => {
+    let b = para(run(S.plan.topic, { i: true, color: '444444' }), { jc: 'center', after: 360 });
+    for (const n of S.plan.nodes) {
+      const head = `${n.code !== '0' && n.code !== '7' ? n.code + ' ' : ''}${n.title}`;
+      b += para(run(head, { b: true, sz: n.level === 1 ? 30 : n.level === 2 ? 26 : 24 }), { before: n.level === 1 ? 400 : 240, after: 120, keep: true });
+      (n.paras || []).forEach((pa, k) => {
+        const key = `${n.code}#${k + 1}`; const ns = notes.filter(x => x.plan.target === key);
+        b += para(run(pa.title + (pa.pages ? ` (${pa.pages})` : ''), { b: true, sz: 22, color: '24508F' }), { before: 120, after: 60, keep: true });
+        pa.points.forEach(x => { b += para(run('• ' + x, { i: true, color: '666666', sz: 20 }), { after: 40, ind: '<w:ind w:left="284"/>' }); });
+        ns.forEach((x, j) => { b += para(run(`${j + 1}.`) + '<w:r><w:tab/></w:r>' + textRuns(noteWithCite(x, sm)), { ind: '<w:ind w:left="425" w:hanging="425"/>', after: 120, before: j ? 0 : 80 }); });
+      });
+    }
+    return b;
+  } });
+  downloadBlob(blob, `tez-taslagi-${new Date().toISOString().slice(0, 10)}.docx`);
+  toast('Taslak indirildi: başlıklar, iskelet maddeleri ve eklediğin alıntılar atıflarıyla.');
+}
+
 /* ---------- backup ---------- */
-function backupData() { return { app: 'makale-okuyucu', v: 2, papers: S.papers, notes: S.notes, cats: S.cats, archive: ARC.items, arcFolders: ARC.folders, style: S.settings.style }; }
+function backupData() { return { app: 'tez-haritasi', v: 3, papers: S.papers, notes: S.notes, cats: S.cats, plan: S.plan, sugs: S.sugs, scans: S.scans, style: S.settings.style }; }
 async function restoreData(d) {
-  if (!d || d.app !== 'makale-okuyucu') throw new Error('Bu dosya bir Makale Okuyucu yedeği değil.');
+  if (!d || d.app !== 'tez-haritasi') throw new Error('Bu dosya bir Tez Haritası yedeği değil.');
   for (const p of Object.values(d.papers || {})) { S.papers[p.id] = p; await DB.set('paper:' + p.id, p); }
   const cids = new Set(S.cats.map(c => c.id)); for (const c of (d.cats || [])) if (c && c.id && !cids.has(c.id)) S.cats.push(c);
   const ids = new Set(S.notes.map(n => n.id)); for (const n of (d.notes || [])) if (!ids.has(n.id)) S.notes.push(n);
   fixNotes(); saveCats(); saveNotes();
-  if (Array.isArray(d.archive)) { ARC.merge({ items: d.archive, folders: d.arcFolders || [] }); ARC.touch(); }
+  if (d.plan && d.plan.nodes) { S.plan = d.plan; savePlan(); }
+  if (Array.isArray(d.sugs)) { const k = new Set(S.sugs.map(x => x.id)); d.sugs.forEach(x => { if (!k.has(x.id)) S.sugs.push(x); }); saveSugs(); }
+  if (d.scans) { S.scans = Object.assign({}, d.scans, S.scans); saveScans(); }
 }
 
 const fmtDay = t => new Date(t).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: new Date(t).getFullYear() === new Date().getFullYear() ? undefined : 'numeric' });
 function setRead(p, v) { p.read = v; p.readAt = v ? Date.now() : null; savePaper(p); renderHeader(); }
 const CHECK_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
 function openLib() {
-  let filter = LS.get('mo:libFilter', 'all');
-  modal(`<h3>Kütüphane</h3><div class="seg wide" id="lFilter" role="group" aria-label="Filtre" style="margin-top:12px"></div><div id="lList"></div>
-    <div class="mact"><label class="btn" for="file">PDF ekle</label><button data-close>Kapat</button></div>`, box => {
+  modal(`<h3>Makaleler</h3><div id="lList"></div>
+    <div class="mact"><label class="btn" for="file">Makale ekle</label><button id="lAll">Taranmamışları tara</button><button data-close>Kapat</button></div>`, box => {
     const render = () => {
-      const all = Object.values(S.papers);
-      const nRead = all.filter(p => p.read).length;
-      $('#lFilter').innerHTML = [['all', `Tümü (${all.length})`], ['unread', `Okunmadı (${all.length - nRead})`], ['read', `Okundu (${nRead})`]]
-        .map(([k, l]) => `<button data-lf="${k}" class="${filter === k ? 'on' : ''}">${l}</button>`).join('');
-      const lastId = all.filter(p => p.opened).sort((a, b) => b.opened - a.opened)[0];
-      const list = all.filter(p => filter === 'all' || (filter === 'read' ? p.read : !p.read))
-        .sort((a, b) => (b.opened || b.added) - (a.opened || a.added));
+      const all = Object.values(S.papers).sort((a, b) => (b.opened || b.added) - (a.opened || a.added));
       const sm = suffixMap();
-      $('#lList').innerHTML = list.length ? list.map(p => {
-        const c = S.notes.filter(n => n.paperId === p.id).length;
-        const status = p.read ? `<b class="lread">Okundu${p.readAt ? ', ' + fmtDay(p.readAt) : ''}</b>` : '<b class="lunread">Okunmadı</b>';
-        const opened = p.opened ? `son açılış ${fmtDay(p.opened)}` : 'hiç açılmadı';
-        return `<div class="libitem lrow"><button class="lcheck${p.read ? ' on' : ''}" data-tick="${p.id}" aria-pressed="${p.read ? 'true' : 'false'}" aria-label="${p.read ? 'Okunmadı olarak işaretle' : 'Okudum olarak işaretle'}">${CHECK_SVG}</button>
-          <div style="flex:1;min-width:0">${lastId && lastId.id === p.id ? '<span class="llast">En son açtığın</span>' : ''}<p class="refp">${refHTML(p, sm)}</p>
-          <div class="libmeta">${status}, ${opened}, ${c} not</div>
-          <div class="libact"><button class="primary" data-open="${p.id}">Aç</button><button data-meta="${p.id}">Künyeyi düzenle</button><button class="danger" data-delp="${p.id}">Sil</button></div></div></div>`;
-      }).join('') : `<p class="hint">${all.length ? (filter === 'read' ? 'Henüz okundu olarak işaretlediğin makale yok.' : 'Okunmamış makale kalmadı.') : 'Henüz makale eklemedin.'}</p>`;
+      $('#lAll').hidden = !all.some(needsScan);
+      $('#lList').innerHTML = all.length ? all.map(p => {
+        const sc = S.scans[p.id]; const ss = S.sugs.filter(s => s.paperId === p.id);
+        const st = !sc ? '<b class="lunread">Taranmadı</b>' : needsScan(p) ? '<b class="swarnt">Plan değişti, yeniden tara</b>' : `<b class="lread">Tarandı</b>: ${ss.filter(s => s.status === 'pending').length} öneri bekliyor, ${ss.filter(s => s.status === 'added').length} eklendi`;
+        return `<div class="libitem"><p class="refp">${refHTML(p, sm)}</p><div class="libmeta">${st}</div>
+          <div class="libact"><button class="primary" data-open="${p.id}">Aç</button><button data-scanp="${p.id}">${sc ? 'Yeniden tara' : 'Planıma göre tara'}</button><button data-meta="${p.id}">Künye</button>${p.driveId ? `<button data-pdf="${p.id}">PDF’i aç</button>` : (S.settings.clientId ? `<button data-attach="${p.id}">PDF’i Drive’a yükle</button>` : '')}<button class="danger" data-delp="${p.id}">Sil</button></div></div>`;
+      }).join('') : '<p class="hint">Henüz makale yok. <b>Makale ekle</b> ile bir PDF seç; Gemini okur, künyesini çıkarır ve tez planına göre tarar.</p>';
     };
     render();
-    box.addEventListener('click', e => {
-      const f = e.target.closest('[data-lf]'); if (f) { filter = f.dataset.lf; LS.set('mo:libFilter', filter); render(); return; }
-      const t = e.target.closest('[data-tick]');
-      if (t) { const p = S.papers[t.dataset.tick]; if (p) { setRead(p, !p.read); render(); toast(p.read ? 'Okundu olarak işaretlendi.' : 'Okunmadı olarak işaretlendi.'); } return; }
-      const o = e.target.closest('[data-open]'), m = e.target.closest('[data-meta]'), d = e.target.closest('[data-delp]');
-      if (o) { closeModal(); S.view = 'orig'; openPaper(o.dataset.open); }
+    box.addEventListener('click', async e => {
+      const o = e.target.closest('[data-open]'), sc = e.target.closest('[data-scanp]'), m = e.target.closest('[data-meta]'), d = e.target.closest('[data-delp]');
+      if (o) { closeModal(); S.view = 'orig'; openPaper(o.dataset.open); setPane('sug'); }
+      else if (sc) { await scanWithUi(S.papers[sc.dataset.scanp]); render(); }
       else if (m) openMeta(m.dataset.meta);
-      else if (d) {
-        const id = d.dataset.delp; const c = S.notes.filter(n => n.paperId === id).length;
-        if (!confirm(c ? `Bu makale ve ondan aldığın ${c} not silinecek. Emin misin?` : 'Bu makale silinecek. Emin misin?')) return;
-        delete S.papers[id]; DB.del('paper:' + id); S.notes = S.notes.filter(n => n.paperId !== id); saveNotes();
-        if (S.cur === id) { S.cur = null; LS.set('mo:last', null); }
-        renderAll(); render();
+      else if (e.target.closest('[data-pdf]')) window.open(`https://drive.google.com/file/d/${encodeURIComponent(S.papers[e.target.closest('[data-pdf]').dataset.pdf].driveId)}/view`, '_blank', 'noopener');
+      else if (e.target.closest('[data-attach]')) {
+        if (!Drive.ok()) { toast('Önce Drive’a bağlan.', '', { label: 'Bağlan', fn: () => Drive.connect('settings') }); return; }
+        S.attachFor = e.target.closest('[data-attach]').dataset.attach; $('#pdfAttach').click();
       }
+      else if (d) {
+        const id = d.dataset.delp; const nn = S.notes.filter(n => n.paperId === id).length;
+        if (!confirm(nn ? `Makale, önerileri ve ondan eklediğin ${nn} alıntı silinecek. Emin misin?` : 'Makale ve önerileri silinecek. Emin misin?')) return;
+        const did = S.papers[id] && S.papers[id].driveId;
+        if (did && Drive.ok()) Drive.api(`files/${did}?fields=id`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trashed: true }) }).catch(() => {});
+        delete S.papers[id]; DB.del('paper:' + id);
+        S.notes = S.notes.filter(n => n.paperId !== id); saveNotes();
+        S.sugs = S.sugs.filter(x => x.paperId !== id); saveSugs(); delete S.scans[id]; saveScans();
+        if (S.cur === id) { S.cur = null; LS.set('th:last', null); }
+        renderAll(); refreshMap(); render();
+      }
+      else if (e.target.closest('#lAll')) { await scanMany(Object.values(S.papers).filter(needsScan).map(p => p.id)); render(); }
     });
   });
 }
 function openSettings(focus) {
   let style = S.settings.style;
-  const cached = LS.get('mo:models', null);
-  const web = Drive.web();
+  const cached = LS.get('th:models', null);
   modal(`<h3>Ayarlar</h3>
     <label>Gemini API anahtarı<div class="row"><input id="sKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AIza…" value="${esc(S.settings.key)}"><button id="sShow">Göster</button></div></label>
     <p class="hint">Anahtar yalnızca bu cihazda saklanır ve sadece Google’a gönderilir.</p>
@@ -2271,22 +2492,9 @@ function openSettings(focus) {
     <div class="field"><div class="flabel">Atıf dili (APA 7)</div><div class="seg wide" id="sStyle">
       <button data-style="en" class="${style === 'en' ? 'on' : ''}">İngilizce: “&amp;”, “et al.”</button>
       <button data-style="tr" class="${style === 'tr' ? 'on' : ''}">Türkçe: “ve”, “vd.”</button></div></div>
-    <div class="field" id="sDrive"><div class="flabel">Google Drive</div>
-      <div class="status"><span class="dot ${Drive.ok() ? 'on' : ''}"></span><span>${Drive.ok() ? `Bağlı. Oturum ${Drive.minsLeft()} dakika daha geçerli.` : 'Bağlı değil'}</span></div>
-      ${web ? '' : '<p class="hint warn">Bu sayfa bir dosyadan açılmış. Drive bağlantısı yalnızca uygulama bir https adresinde yayındayken çalışır (ör. GitHub Pages).</p>'}
-      <label>OAuth Client ID<input id="sCid" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="…apps.googleusercontent.com" value="${esc(S.settings.clientId)}"></label>
-      <div class="row wrap" style="margin-top:10px">${Drive.ok() ? '<button id="sDisc">Bağlantıyı kes</button>' : '<button class="primary" id="sConn">Drive’a bağlan</button>'}<button id="sDBk">Yedeği Drive’a kaydet</button><button id="sDRs">Drive’daki yedeği yükle</button></div>
-      <details class="setup" ${focus === 'drive' ? 'open' : ''}><summary>Kurulum adımları (bir kere yapılır)</summary><ol>
-        <li>Uygulamayı bir https adresinde yayınla (ör. GitHub Pages) ve oradan aç.</li>
-        <li><b>console.cloud.google.com</b>’da AI Studio’nun kullandığı projeyi seç.</li>
-        <li><b>APIs &amp; Services → Library</b> bölümünde <b>Google Drive API</b>’yi bul ve <b>Enable</b>’a dokun.</li>
-        <li><b>OAuth consent screen</b> (Google Auth Platform) bölümünde uygulamaya bir ad ver, kullanıcı türünü <b>External</b> seç ve <b>Test users</b> kısmına kendi Gmail adresini ekle.</li>
-        <li><b>Credentials → Create credentials → OAuth client ID</b>, tür <b>Web application</b>. <b>Authorized JavaScript origins</b>’e ve <b>Authorized redirect URIs</b>’e aşağıdaki adresleri ekle.</li>
-        <li>Oluşan Client ID’yi yukarıya yapıştır, <b>Kaydet</b>’e dokun, sonra <b>Drive’a bağlan</b>.</li></ol>
-        ${web ? `<p class="hint">JavaScript origin:</p><span class="code">${esc(location.origin)}</span><p class="hint">Redirect URI:</p><span class="code" id="sRedir">${esc(Drive.redirectUri())}</span><div class="row"><button id="sCopy">Redirect URI’yi kopyala</button></div>` : ''}
-        <p class="hint">Uygulama yalnızca kendi oluşturduğu dosyalara erişir. Drive’ındaki diğer dosyaları göremez. Oturum bir saat geçerlidir, sonra tek dokunuşla tekrar bağlanırsın.</p></details></div>
-    <div class="field"><div class="flabel">Yedek</div>
-      <p class="hint">Makaleler, notlar ve kategoriler bu cihazın tarayıcısında saklanır. Ara sıra yedek al.</p>
+    ${driveSettingsHTML()}
+    <div class="field"><div class="flabel">Yedek dosyası</div>
+      <p class="hint">Drive’a ek olarak, istersen yedeği dosya olarak da indirebilirsin.</p>
       <div class="row"><button id="sBk">Yedeği indir</button><label class="btn" for="bkIn">Yedeği yükle</label><input type="file" id="bkIn" class="vh" accept="application/json,.json"></div></div>
     <div class="mact"><button id="sTest">Anahtarı test et</button><button class="primary" id="sSave">Kaydet</button></div>`, box => {
     const fill = (list, cur) => {
@@ -2302,7 +2510,7 @@ function openSettings(focus) {
       const my = ++seq; hint('Modeller getiriliyor…'); $('#sRefresh').disabled = true;
       try {
         const list = await listModels(key); if (my !== seq || !$('#sModel')) return;
-        LS.set('mo:models', list); fill(list, $('#sModel').value || S.settings.model);
+        LS.set('th:models', list); fill(list, $('#sModel').value || S.settings.model);
         hint(`Bu anahtarla ${list.length} metin modeli kullanılabiliyor. Sınır hatası alırsan “Flash” ya da “Flash-Lite” modellerinden birini seç.`);
       } catch (e) { if (my === seq) hint(errMsg(e)); }
       finally { const b = $('#sRefresh'); if (b) b.disabled = false; }
@@ -2313,6 +2521,7 @@ function openSettings(focus) {
     $('#sShow').onclick = () => { const k = $('#sKey'); k.type = k.type === 'password' ? 'text' : 'password'; $('#sShow').textContent = k.type === 'password' ? 'Göster' : 'Gizle'; };
     $('#sStyle').onclick = e => { const b = e.target.closest('[data-style]'); if (!b) return; style = b.dataset.style; $$('#sStyle button').forEach(x => x.classList.toggle('on', x === b)); };
     const apply = () => { S.settings.key = $('#sKey').value.trim(); S.settings.model = $('#sModel').value || 'gemini-2.5-flash'; S.settings.style = style; S.settings.clientId = $('#sCid').value.trim(); saveSettings(); };
+    bindDriveSettings(apply);
     if (focus === 'drive') setTimeout(() => $('#sDrive').scrollIntoView({ block: 'start', behavior: 'smooth' }), 50);
     $('#sTest').onclick = async () => {
       apply(); const b = $('#sTest'); b.disabled = true; b.textContent = 'Deneniyor…';
@@ -2321,34 +2530,14 @@ function openSettings(focus) {
       finally { b.disabled = false; b.textContent = 'Anahtarı test et'; }
     };
     $('#sSave').onclick = () => { apply(); closeModal(); renderAll(true); toast('Ayarlar kaydedildi.'); };
-    if ($('#sConn')) $('#sConn').onclick = () => { apply(); Drive.connect('settings'); };
-    if ($('#sDisc')) $('#sDisc').onclick = () => { Drive.disconnect(); apply(); openSettings('drive'); toast('Drive bağlantısı kesildi.'); };
-    if ($('#sCopy')) $('#sCopy').onclick = async () => { try { await navigator.clipboard.writeText(Drive.redirectUri()); toast('Redirect URI kopyalandı.'); } catch { toast('Kopyalanamadı. Adresi elle seç.', 'err'); } };
-    const needDrive = () => { if (Drive.ok()) return true; apply(); toast('Önce Drive’a bağlan.', '', S.settings.clientId && Drive.web() ? { label: 'Bağlan', fn: () => Drive.connect('settings') } : null); return false; };
-    $('#sDBk').onclick = async () => {
-      if (!needDrive()) return;
-      busy('Yedek Drive’a kaydediliyor…');
-      try { await Drive.putJson(BACKUP_NAME, backupData()); toast('Yedek Drive’daki “' + FOLDER_NAME + '” klasörüne kaydedildi.'); }
-      catch (e) { toast(errMsg(e), 'err'); } finally { busy(false); }
-    };
-    $('#sDRs').onclick = async () => {
-      if (!needDrive()) return;
-      busy('Yedek Drive’dan alınıyor…');
-      try {
-        const d = await Drive.getJson(BACKUP_NAME); busy(false);
-        if (!d) { toast('Drive’da yedek bulunamadı.'); return; }
-        if (!confirm('Drive’daki yedekte bulunan makaleler, notlar ve kategoriler mevcut verilerine eklenecek. Devam edilsin mi?')) return;
-        await restoreData(d); closeModal(); renderAll(); toast('Yedek Drive’dan yüklendi.');
-      } catch (e) { busy(false); toast(errMsg(e), 'err'); }
-    };
     $('#sBk').onclick = () => {
-      downloadBlob(new Blob([JSON.stringify(backupData())], { type: 'application/json' }), `makale-okuyucu-yedek-${new Date().toISOString().slice(0, 10)}.json`);
+      downloadBlob(new Blob([JSON.stringify(backupData())], { type: 'application/json' }), `tez-haritasi-yedek-${new Date().toISOString().slice(0, 10)}.json`);
     };
     $('#bkIn').onchange = async ev => {
       const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
       try {
         const d = JSON.parse(await f.text());
-        if (!d || d.app !== 'makale-okuyucu') throw new Error('Bu dosya bir Makale Okuyucu yedeği değil.');
+        if (!d || d.app !== 'tez-haritasi') throw new Error('Bu dosya bir Tez Haritası yedeği değil.');
         if (!confirm('Yedekteki makaleler ve notlar mevcut verilerine eklenecek. Devam edilsin mi?')) return;
         await restoreData(d); closeModal(); renderAll(); toast('Yedek yüklendi.');
       } catch (e) { toast(errMsg(e), 'err'); }
@@ -2374,7 +2563,8 @@ async function buildDocx(set) {
   const sm = suffixMap(set.notes);
   let body = para(run(set.title, { b: true, sz: 32 }), { jc: 'center', after: 80 });
   body += para(run(new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }), { color: '666666', sz: 20 }), { jc: 'center', after: 360 });
-  for (const g of exportGroups(set)) {
+  if (set.custom) body += set.custom({ run, para, textRuns, sm });
+  else for (const g of exportGroups(set)) {
     if (g.name) body += para(run(g.name, { b: true, sz: g.level === 1 ? 28 : 24, i: g.level === 2 }), { before: g.level === 1 ? 320 : 200, after: 140, keep: true });
     g.notes.forEach((n, k) => {
       body += para(run(`${k + 1}.`) + '<w:r><w:tab/></w:r>' + textRuns(noteWithCite(n, sm)), { ind: '<w:ind w:left="425" w:hanging="425"/>', after: 200 });
@@ -2458,6 +2648,7 @@ function openExport() {
 /* ---------- init ---------- */
 async function init() {
   if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  S.booting = true;
   const after = Drive.handleRedirect();
   try {
     await DB.open();
@@ -2465,24 +2656,49 @@ async function init() {
       if (String(k).startsWith('paper:')) { const p = await DB.get(k); if (p && p.id) { p.strokes = p.strokes || {}; p.tr = p.tr || {}; S.papers[p.id] = p; } }
     }
     S.notes = (await DB.get('notes')) || [];
-    let fixed = 0;
-    for (const p of Object.values(S.papers)) if (repairPaper(p)) { fixed++; await DB.set('paper:' + p.id, p); }
-    if (fixed) await DB.set('notes', S.notes);
+    for (const p of Object.values(S.papers)) if (repairPaper(p)) await DB.set('paper:' + p.id, p);
+    S.plan = (await DB.get('plan')) || null;
+    S.sugs = (await DB.get('sugs')) || [];
+    S.scans = (await DB.get('scans')) || {};
     S.cats = (await DB.get('cats')) || [];
-    ARC.items = (await DB.get('archive')) || [];
-    ARC.folders = (await DB.get('arcFolders')) || [];
   } catch (e) {
     DB.db = null; toast('Tarayıcı depolaması kullanılamıyor. Veriler kaydedilmeyecek.', 'err');
   }
-  fixNotes(); saveCats(); ARC.fix();
+  if (!S.plan) { S.plan = JSON.parse(JSON.stringify(DEFAULT_PLAN)); S.plan.ver = 1; savePlan(); }
+  /* The plan now covers only Giriş (1) and Genel Bilgiler (2): drop everything else from older saved plans. */
+  const keepTop = code => ['1', '2'].includes(String(code).split('.')[0]);
+  if (S.plan.nodes.some(n => !keepTop(n.code))) {
+    S.plan.nodes = S.plan.nodes.filter(n => keepTop(n.code)); savePlan();
+    S.sugs = S.sugs.filter(x => keepTop(String(x.target).split('#')[0]) || x.status === 'added'); saveSugs();
+    const used = new Set(S.notes.map(n => n.cat));
+    S.cats = S.cats.filter(c => !/^pc-/.test(c.id) || keepTop(c.id.slice(3)) || used.has(c.id) || S.cats.some(k => k.parent === c.id && used.has(k.id)));
+    if (!keepTop(S.planSel)) { S.planSel = '1.1'; LS.set('th:planSel', '1.1'); }
+  }
+  if (!S.plan.noDisc) {
+    S.plan.nodes = S.plan.nodes.filter(n => topCode(n.code) !== '5'); S.plan.noDisc = true; savePlan();
+    S.sugs = S.sugs.filter(x => topCode(x.target) !== '5' || x.status === 'added'); saveSugs();
+    S.cats = S.cats.filter(c => !/^pc-5(\.|$)/.test(c.id) || S.notes.some(n => inCat(n, c.id)));
+  }
+  /* suggestions whose article is no longer in this app’s own library are dropped */
+  const orphan = x => !S.papers[x.paperId];
+  if (S.sugs.some(orphan)) { S.sugs = S.sugs.filter(x => !orphan(x)); saveSugs(); }
+  for (const id of Object.keys(S.scans)) if (!S.papers[id]) delete S.scans[id];
+  fixNotes(); syncPlanCats(); S.pane = 'sug';
   resizeOv();
-  const last = LS.get('mo:last', null);
+  const last = LS.get('th:last', null);
   if (last && S.papers[last]) openPaper(last); else renderAll();
+  S.booting = false;
   if (after) {
-    toast('Drive bağlandı. Arşiv eşitleniyor…');
-    await ARC.sync(false);
-    if (after === 'archive') openArchive(); else if (after === 'settings') openSettings('drive');
-  } else if (Drive.ok()) ARC.sync(true);
+    toast('Drive bağlandı.');
+    if (!Object.keys(S.papers).length) {
+      try {
+        const d = await Drive.getJson(BACKUP_NAME, 'indexId');
+        if (d && Object.keys(d.papers || {}).length && confirm(`Drive’da ${Object.keys(d.papers).length} makalelik bir Tez Haritası yedeği bulundu. Geri yüklensin mi?`)) { await restoreData(d); renderAll(); refreshMap(); toast('Yedek Drive’dan geri yüklendi.'); }
+      } catch (e) { toast(errMsg(e), 'err'); }
+    }
+    await DSync.push(true);
+    if (after === 'settings') openSettings('drive');
+  } else if (Drive.ok() && DSync.dirty) DSync.push(true);
 }
 init();
 })();
