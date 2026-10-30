@@ -339,6 +339,15 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
 .sh-item small { font: 400 .78rem var(--sans); color: var(--muted); flex: none; }
 .sh-item.none { color: var(--muted); font-weight: 400; }
 .sh-item.new { color: var(--accent); }
+.xrow { display: flex; align-items: center; gap: 12px; padding: 10px 10px; min-height: 50px; border-radius: 9px; cursor: pointer; font: 500 1rem var(--sans); }
+.xrow:hover { background: var(--sunk); }
+.xrow input { width: 22px; height: 22px; flex: none; accent-color: var(--accent); margin: 0; }
+.xrow span { flex: 1; min-width: 0; }
+.xrow small { color: var(--muted); font: 400 .82rem var(--sans); flex: none; }
+.xrow.l1 { font-weight: 650; } .xrow.l2 { padding-left: 30px; } .xrow.l3 { padding-left: 50px; font-weight: 400; } .xrow.l4 { padding-left: 70px; font-weight: 400; }
+.xrow.none span { color: var(--muted); }
+.xtools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.sh-bot.x { justify-content: space-between; gap: 8px; }
 .sh-bot { display: flex; justify-content: flex-end; padding: 8px 12px; border-top: 1px solid var(--line); }
 </style>
 </head>
@@ -424,7 +433,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
             <h2 class="atitle" id="aTitle"></h2>
             <div id="aBib" class="bib"></div>
             <p class="hint">Metin içi: <span id="aCite"></span></p>
-            <div class="btns"><button id="editArticle" class="btn" type="button">Bilgileri düzenle</button></div>
+            <div class="btns"><button id="editArticle" class="btn" type="button">Bilgileri düzenle</button><button id="delArticle2" class="btn" type="button" style="margin-left:auto;color:var(--err)">Kaynağı sil</button></div>
           </section>
           <section class="card" id="webBox" hidden>
             <h2>Web sayfası</h2>
@@ -1042,19 +1051,22 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     pendingWeb = null;
     openArticle(a.id);
   };
-  $("#deleteArticle").onclick = async () => {
-    const a = formFor && art(formFor);
+  $("#deleteArticle").onclick = () => deleteArticle(formFor && art(formFor));
+  $("#delArticle2").onclick = () => deleteArticle(A);
+  async function deleteArticle(a) {
     if (!a) return;
     const n = DB.notes.filter((x) => x.articleId === a.id).length;
-    if (!confirm(`“${a.meta.title}” silinsin mi? ${n ? n + " notu, " : ""}PDF'i ve çizimleri de silinecek.`)) return;
+    if (!confirm(`“${a.meta.title}” silinsin mi?\n\n${n ? `Bu kaynağa ait ${n} not, ` : ""}PDF'i ve çizimleri de silinecek. Bu işlem geri alınamaz.`)) return;
     DB.articles = DB.articles.filter((x) => x !== a);
     DB.notes = DB.notes.filter((x) => x.articleId !== a.id);
     saveDB();
     store.del("ok:hl:" + a.id);
     try { await IDB.del(a.id); await IDB.del(a.id, "ink"); await IDB.del("web:" + a.id); } catch (e) {}
     formFor = null;
+    if (A === a) A = null;
+    toast("Kaynak silindi");
     show("welcome");
-  };
+  }
 
   /* ---------- Web sayfası metni ---------- */
   // Sayfanın okunabilir metnini okuma servisi (r.jina.ai) üzerinden alır
@@ -1985,14 +1997,75 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     })(d, false);
     return out;
   }
+  // Word'e girecek başlıkları seçme penceresi
+  function pickExport() {
+    return new Promise((resolve) => {
+      const counts = {};
+      DB.notes.forEach((n) => { const k = H(n.hid) ? n.hid : ""; counts[k] = (counts[k] || 0) + 1; });
+      const saved = store.get("ok:exSel", null);
+      const sel = new Set(saved ? saved.filter((id) => id === "" || H(id)) : [...DB.outline.map((h) => h.id), ""]);
+      if (saved) DB.outline.forEach((h) => { if (!saved.includes(h.id) && !(store.get("ok:exKnown", []) || []).includes(h.id)) sel.add(h.id); });
+      const back = document.createElement("div");
+      back.id = "sheetBack";
+      back.innerHTML = `<div id="sheet" role="dialog" aria-modal="true" aria-labelledby="xTitle"><div class="sh-top"><h3 id="xTitle">Hangi başlıklar Word'e girsin?</h3><div class="xtools"><button type="button" class="btn small" data-x="all">Tümünü seç</button><button type="button" class="btn small" data-x="none">Hiçbirini seçme</button><button type="button" class="btn small" data-x="filled">Sadece notu olanlar</button></div></div><div class="sh-list"></div><div class="sh-bot x"><button type="button" class="btn" data-x="cancel">Vazgeç</button><button type="button" class="btn primary" data-x="go">Word olarak indir</button></div></div>`;
+      const list = back.querySelector(".sh-list");
+      const go = back.querySelector('[data-x="go"]');
+      const rows = [];
+      const descendants = (i) => { const out = [], lv = DB.outline[i].level; for (let j = i + 1; j < DB.outline.length && DB.outline[j].level > lv; j++) out.push(DB.outline[j].id); return out; };
+      const update = () => {
+        rows.forEach(([id, cb]) => (cb.checked = sel.has(id)));
+        const n = DB.notes.filter((x) => sel.has(H(x.hid) ? x.hid : "")).length;
+        const hs = DB.outline.filter((h) => sel.has(h.id)).length;
+        go.textContent = `Word olarak indir (${hs} başlık, ${n} not)`;
+        go.disabled = !hs && !(sel.has("") && counts[""]);
+      };
+      const addRow = (id, label, cls, i) => {
+        const l = document.createElement("label");
+        l.className = "xrow " + cls;
+        l.innerHTML = `<input type="checkbox"><span></span><small></small>`;
+        l.querySelector("span").textContent = label;
+        l.querySelector("small").textContent = counts[id] ? counts[id] + " not" : "boş";
+        const cb = l.querySelector("input");
+        cb.onchange = () => {
+          const ids = [id, ...(i != null ? descendants(i) : [])];
+          ids.forEach((x) => (cb.checked ? sel.add(x) : sel.delete(x)));
+          update();
+        };
+        rows.push([id, cb]);
+        list.append(l);
+      };
+      DB.outline.forEach((h, i) => addRow(h.id, h.label || "(adsız başlık)", "l" + h.level, i));
+      if (counts[""]) addRow("", "Başlıksız notlar", "none", null);
+      if (!rows.length) list.innerHTML = '<p class="hint" style="padding:8px">Henüz başlık ya da not yok.</p>';
+      const done = (r) => { back.remove(); resolve(r); };
+      back.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-x]");
+        if (e.target === back) return done(null);
+        if (!b) return;
+        const x = b.dataset.x;
+        if (x === "all") { DB.outline.forEach((h) => sel.add(h.id)); sel.add(""); update(); }
+        if (x === "none") { sel.clear(); update(); }
+        if (x === "filled") { sel.clear(); Object.keys(counts).forEach((k) => sel.add(k)); update(); }
+        if (x === "cancel") done(null);
+        if (x === "go") { store.set("ok:exSel", [...sel]); store.set("ok:exKnown", DB.outline.map((h) => h.id)); done(sel); }
+      });
+      document.body.append(back);
+      update();
+    });
+  }
   async function exportDocx() {
     if (!DB.notes.length && !DB.outline.length) { $("#exportMsg").textContent = "Henüz not yok."; return; }
+    const pick = await pickExport();
+    if (!pick) return;
     const loc = locale();
     const showPages = $("#exPages").checked, showComments = $("#exComments").checked, withEmpty = $("#exEmpty").checked;
     const pageWord = loc === "tr-TR" ? "çeviri s." : "translation p.";
     let body = para(run("Okuma Notları"), "Title") + para(run(new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }), { color: "666666" }), "Subtitle");
     const used = new Set();
+    let nCount = 0;
     for (const [h, notes] of groups(DB.notes, withEmpty)) {
+      if (!pick.has(h ? h.id : "")) continue;
+      nCount += notes.length;
       body += para(run(h ? h.label || "(adsız başlık)" : "Başlıksız notlar"), "Heading" + (h ? Math.min(4, h.level) : 1));
       for (const n of notes) {
         const a = art(n.articleId);
@@ -2009,8 +2082,10 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     if (bibs.length) { body += para(run(loc === "tr-TR" ? "Kaynakça" : "References"), "Heading1"); bibs.forEach((b) => (body += para(bibRuns(b), "Bibliography"))); }
     const docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1417" w:right="1417" w:bottom="1417" w:left="1417" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>`;
     const blob = docxBlob(docXml);
-    $("#exportMsg").textContent = `Word dosyası hazır: ${DB.notes.length} not, ${bibs.length} kaynak.`;
-    await deliver(blob, `okuma-notlari-${stamp()}.docx`);
+    $("#exportMsg").textContent = `Word dosyası hazır: ${nCount} not, ${bibs.length} kaynak.`;
+    const chosen = DB.outline.filter((h) => pick.has(h.id));
+    const slug = chosen.length === 1 ? "-" + chosen[0].label.toLocaleLowerCase("tr").replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 40) : "";
+    await deliver(blob, `okuma-notlari${slug}-${stamp()}.docx`);
   }
   $("#exportDocx").onclick = () => exportDocx().catch((e) => ($("#exportMsg").textContent = "Word dosyası oluşturulamadı: " + e.message));
   function docxBlob(documentXml) {
