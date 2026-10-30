@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Zotero Not Defteri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #eef1f4; --surface: #ffffff; --sunk: #f6f8fa; --ink: #18212c; --muted: #5a6676; --line: #d6dce4;
+  --accent: #1f4e79; --accent-ink: #ffffff; --mark: #f2d94e; --ok: #2f855a; --err: #b4442a;
+  --serif: "Literata", Georgia, "Times New Roman", serif;
+  --sans: "Public Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0f1318; --surface: #171d24; --sunk: #12171d; --ink: #e4e9ef; --muted: #9aa5b3; --line: #2b343f;
+    --accent: #8fb8e8; --accent-ink: #0f1318; --mark: #e3c73a; --ok: #68c391; --err: #f08a70;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f1318; --surface: #171d24; --sunk: #12171d; --ink: #e4e9ef; --muted: #9aa5b3; --line: #2b343f;
+  --accent: #8fb8e8; --accent-ink: #0f1318; --mark: #e3c73a; --ok: #68c391; --err: #f08a70;
+}
+*, *::before, *::after { box-sizing: inherit; }
+input, select, textarea, button, details > * { box-sizing: border-box; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--sans); -webkit-text-size-adjust: 100%; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 20px clamp(12px, 3vw, 24px) 40px; }
+h1, h2 { font-family: var(--serif); font-weight: 650; margin: 0; letter-spacing: -0.01em; }
+header { margin-bottom: 16px; }
+header h1 { font-size: 1.6rem; }
+header p { margin: 4px 0 0; color: var(--muted); }
+section.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+section.card > h2 { font-size: 1.08rem; margin-bottom: 8px; }
+label { display: block; font-weight: 500; font-size: .92rem; margin: 10px 0 4px; }
+.hint { color: var(--muted); font-size: .86rem; margin: 6px 0 0; }
+.hint a { color: var(--accent); }
+input[type=text], input[type=password], select, textarea {
+  width: 100%; font: inherit; color: var(--ink); background: var(--sunk); border: 1px solid var(--line); border-radius: 7px; padding: 9px 10px; min-height: 44px;
+}
+textarea { min-height: 220px; resize: vertical; line-height: 1.55; font-family: var(--serif); font-size: 1.02rem; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row { display: flex; gap: 8px; align-items: end; }
+.row > * { flex: 1; min-width: 0; }
+.row > .btn { flex: none; }
+.check { display: flex; gap: 10px; align-items: center; font-weight: 400; margin: 10px 0; }
+.check input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
+.btn { font: 500 .95rem var(--sans); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 9px 14px; min-height: 44px; cursor: pointer; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.link { border: 0; background: none; color: var(--accent); padding: 4px 0; min-height: 0; text-decoration: underline; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+#connected { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; justify-content: space-between; }
+#items { list-style: none; margin: 10px 0 0; padding: 0; max-height: 50vh; overflow: auto; border: 1px solid var(--line); border-radius: 8px; }
+#items:empty { display: none; }
+#items li { border-bottom: 1px solid var(--line); }
+#items li:last-child { border-bottom: 0; }
+#items li.muted { padding: 10px 12px; color: var(--muted); }
+.item { display: block; width: 100%; text-align: left; background: none; border: 0; color: var(--ink); padding: 11px 12px; cursor: pointer; font: inherit; }
+.item strong { display: block; font-weight: 500; line-height: 1.35; }
+.item small { color: var(--muted); }
+.chosen { border-left: 4px solid var(--mark); padding: 4px 0 4px 12px; margin: 0 0 4px; }
+.chosen h3 { font: 600 1.05rem/1.35 var(--serif); margin: 0; }
+.chosen p { margin: 2px 0 0; color: var(--muted); font-size: .9rem; }
+#status { font-size: .92rem; min-height: 1.4em; }
+#status.ok { color: var(--ok); }
+#status.err { color: var(--err); }
+#sent { list-style: none; margin: 8px 0 0; padding: 0; }
+#sent li { border-top: 1px solid var(--line); padding: 8px 0; font-size: .9rem; }
+#sent li strong { font-weight: 500; }
+#sent li span { color: var(--muted); }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Zotero Not Defteri</h1>
+    <p>Okurken aldığın notları Zotero'daki ilgili makalenin altına not olarak ekler.</p>
+  </header>
+
+  <section class="card" id="connectCard">
+    <h2>Zotero bağlantısı</h2>
+    <div id="connectForm">
+      <label for="zKey">Zotero API anahtarı</label>
+      <input id="zKey" type="password" autocomplete="off" spellcheck="false">
+      <div class="row">
+        <div><label for="zId">Kullanıcı kimliği (userID)</label><input id="zId" type="text" inputmode="numeric" autocomplete="off"></div>
+        <div style="flex:.8"><label for="zType">Kütüphane</label><select id="zType"><option value="user">Kişisel</option><option value="group">Grup</option></select></div>
+      </div>
+      <p class="hint">İkisi de <a href="https://www.zotero.org/settings/keys" target="_blank" rel="noopener">zotero.org/settings/keys</a> sayfasında. Anahtarı oluştururken “Allow library access” ve “Allow write access” açık olmalı.</p>
+      <label class="check"><input id="remember" type="checkbox" checked> Bu cihazda hatırla</label>
+      <button id="connect" class="btn primary" type="button">Bağlan</button>
+    </div>
+    <div id="connected" hidden>
+      <span id="connectedText"></span>
+      <button id="disconnect" class="btn link" type="button">Bağlantı bilgilerini değiştir</button>
+    </div>
+    <p id="connectMsg" class="hint" aria-live="polite"></p>
+  </section>
+
+  <section class="card" id="pickCard" hidden>
+    <h2>Makale</h2>
+    <div id="chosenBox" hidden>
+      <div class="chosen"><h3 id="chosenTitle"></h3><p id="chosenMeta"></p></div>
+      <button id="change" class="btn link" type="button">Başka makale seç</button>
+    </div>
+    <div id="search">
+      <label for="collection">Koleksiyon</label>
+      <select id="collection"><option value="">Tüm kütüphane</option></select>
+      <div class="row">
+        <div><label for="q">Başlık, yazar ya da yıl</label><input id="q" type="search" placeholder="ör. Yılmaz 2023"></div>
+        <button id="go" class="btn" type="button">Ara</button>
+      </div>
+      <ul id="items"></ul>
+    </div>
+  </section>
+
+  <section class="card" id="noteCard" hidden>
+    <h2>Not</h2>
+    <label for="target">Nereye eklensin</label>
+    <select id="target"><option value="">Yeni not oluştur</option></select>
+    <label for="title">Başlık (isteğe bağlı)</label>
+    <input id="title" type="text" placeholder="ör. Yöntem bölümü">
+    <label for="text">Notun</label>
+    <textarea id="text" placeholder="Okurken aldığın notu buraya yaz. Yazdıkların bu cihazda taslak olarak saklanır."></textarea>
+    <div class="row">
+      <div><label for="page">Sayfa (isteğe bağlı)</label><input id="page" type="text" inputmode="numeric" placeholder="ör. 12"></div>
+      <div><label for="tag">Etiket (isteğe bağlı)</label><input id="tag" type="text" placeholder="ör. okuma notu"></div>
+    </div>
+    <div class="btns">
+      <button id="send" class="btn primary" type="button">Zotero'ya gönder</button>
+      <span id="status" aria-live="polite"></span>
+    </div>
+    <ul id="sent"></ul>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+  };
+  const val = (id) => $("#" + id).value.trim();
+  const S = { item: null, notes: [] };
+
+  /* ---------- Zotero API ---------- */
+  const base = () => `https://api.zotero.org/${val("zType") === "group" ? "groups" : "users"}/${val("zId")}`;
+  async function zGet(path, params = {}) {
+    const u = new URL(base() + path);
+    for (const [k, v] of Object.entries({ ...params, key: val("zKey"), v: 3 })) if (v !== "" && v != null) u.searchParams.set(k, v);
+    for (let a = 0; ; a++) {
+      const r = await fetch(u);
+      if ((r.status === 429 || r.status === 503) && a < 4) { await new Promise((ok) => setTimeout(ok, (+r.headers.get("Retry-After") || 4) * 1000)); continue; }
+      if (r.status === 403) throw new Error("Zotero erişimi reddetti. API anahtarını ve “Allow library access” iznini kontrol et.");
+      if (r.status === 404) throw new Error("Kütüphane bulunamadı. Kullanıcı kimliğini kontrol et.");
+      if (!r.ok) throw new Error("Zotero hatası " + r.status);
+      return r.json();
+    }
+  }
+  // Yazma: önce standart istek; tarayıcı engellerse ön kontrolsüz basit istekle tekrar dene
+  async function zPost(objects) {
+    const body = JSON.stringify(objects);
+    const token = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
+    let r;
+    try {
+      r = await fetch(base() + "/items", { method: "POST", headers: { "Content-Type": "application/json", "Zotero-API-Key": val("zKey"), "Zotero-API-Version": "3", "Zotero-Write-Token": token }, body });
+    } catch (e) {
+      r = await fetch(base() + "/items?key=" + encodeURIComponent(val("zKey")) + "&v=3", { method: "POST", body });
+    }
+    if (r.status === 403) throw new Error("Bu anahtarın yazma izni yok. zotero.org/settings/keys sayfasında anahtarı düzenleyip “Allow write access” iznini aç.");
+    if (!r.ok) throw new Error("Zotero hatası " + r.status + ": " + (await r.text()).slice(0, 200));
+    const res = await r.json();
+    if (res.failed && res.failed["0"]) {
+      const f = res.failed["0"];
+      const err = new Error(f.message || "Zotero notu kaydetmedi.");
+      err.code = f.code;
+      throw err;
+    }
+    return res;
+  }
+
+  /* ---------- Bağlantı ---------- */
+  function saveCreds() {
+    if ($("#remember").checked) store.set("zn:creds", { key: val("zKey"), id: val("zId"), type: val("zType") });
+    else store.del("zn:creds");
+  }
+  async function connect() {
+    if (!val("zKey") || !val("zId")) { $("#connectMsg").textContent = "API anahtarı ve kullanıcı kimliği gerekli."; return; }
+    $("#connectMsg").textContent = "Bağlanılıyor…";
+    try {
+      const cols = [];
+      for (let start = 0; ; start += 100) {
+        const page = await zGet("/collections", { limit: 100, start });
+        cols.push(...page);
+        if (page.length < 100) break;
+      }
+      saveCreds();
+      const byKey = Object.fromEntries(cols.map((c) => [c.key, c]));
+      const path = (c) => { const p = []; let x = c, g = 0; while (x && g++ < 20) { p.unshift(x.data.name); x = byKey[x.data.parentCollection]; } return p.join(" / "); };
+      const sel = $("#collection");
+      sel.innerHTML = "";
+      sel.append(new Option("Tüm kütüphane", ""));
+      cols.map((c) => [c.key, path(c)]).sort((a, b) => a[1].localeCompare(b[1], "tr")).forEach(([k, p]) => sel.append(new Option(p, k)));
+      const lastCol = store.get("zn:col", "");
+      if ([...sel.options].some((o) => o.value === lastCol)) sel.value = lastCol;
+      $("#connectForm").hidden = true;
+      $("#connected").hidden = false;
+      $("#connectedText").textContent = `Bağlı (kullanıcı ${val("zId")}).`;
+      $("#connectMsg").textContent = "";
+      $("#pickCard").hidden = false;
+      const last = store.get("zn:item", null);
+      if (last) choose(last, true); else search();
+    } catch (e) {
+      $("#connectMsg").textContent = e instanceof TypeError ? "Zotero'ya ulaşılamadı. İnternet bağlantısını kontrol et." : e.message;
+    }
+  }
+  $("#connect").onclick = connect;
+  $("#disconnect").onclick = () => { $("#connectForm").hidden = false; $("#connected").hidden = true; };
+
+  /* ---------- Makale seçimi ---------- */
+  async function search() {
+    const list = $("#items");
+    list.innerHTML = "<li class='muted'>Aranıyor…</li>";
+    try {
+      const col = val("collection");
+      store.set("zn:col", col);
+      const items = await zGet(col ? `/collections/${col}/items/top` : "/items/top", { q: val("q"), qmode: "titleCreatorYear", limit: 50, sort: "dateModified", direction: "desc", itemType: "-note" });
+      list.innerHTML = "";
+      if (!items.length) { list.innerHTML = "<li class='muted'>Sonuç yok. Başka bir arama dene.</li>"; return; }
+      for (const it of items) {
+        const li = document.createElement("li");
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "item";
+        b.innerHTML = "<strong></strong><small></small>";
+        b.firstChild.textContent = it.data.title || "(başlıksız)";
+        b.lastChild.textContent = meta(it);
+        b.onclick = () => choose({ key: it.key, title: it.data.title || "(başlıksız)", meta: meta(it) });
+        li.append(b);
+        list.append(li);
+      }
+    } catch (e) {
+      list.innerHTML = "";
+      const li = document.createElement("li");
+      li.className = "muted";
+      li.textContent = e.message;
+      list.append(li);
+    }
+  }
+  const meta = (it) => [it.meta && it.meta.creatorSummary, it.meta && it.meta.parsedDate && it.meta.parsedDate.slice(0, 4)].filter(Boolean).join(", ");
+  $("#go").onclick = search;
+  $("#q").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); search(); } });
+  $("#collection").onchange = search;
+
+  async function choose(item, restoring) {
+    saveDraft();
+    S.item = item;
+    store.set("zn:item", item);
+    $("#chosenTitle").textContent = item.title;
+    $("#chosenMeta").textContent = item.meta || "";
+    $("#chosenBox").hidden = false;
+    $("#search").hidden = true;
+    $("#noteCard").hidden = false;
+    $("#sent").innerHTML = "";
+    setStatus("");
+    loadDraft();
+    await loadNotes(store.get("zn:target:" + item.key, ""));
+    if (!restoring) $("#text").focus();
+  }
+  $("#change").onclick = () => {
+    saveDraft();
+    $("#search").hidden = false;
+    $("#chosenBox").hidden = true;
+    $("#noteCard").hidden = true;
+    if (!$("#items").children.length) search();
+  };
+
+  /* ---------- Mevcut notlar ---------- */
+  const firstLine = (html) => {
+    const d = document.createElement("div");
+    d.innerHTML = String(html || "").replace(/<\/(p|h[1-6]|li|div|blockquote|pre)>|<br\s*\/?>/gi, "$&\n");
+    return ((d.textContent || "").split("\n").map((l) => l.trim()).find(Boolean) || "");
+  };
+  async function loadNotes(select) {
+    const sel = $("#target");
+    sel.innerHTML = "";
+    sel.append(new Option("Yeni not oluştur", ""));
+    try {
+      S.notes = (await zGet(`/items/${S.item.key}/children`, { itemType: "note" })).filter((n) => n.data.itemType === "note");
+      for (const n of S.notes) sel.append(new Option("Şu nota ekle: " + (firstLine(n.data.note).slice(0, 60) || "(boş not)"), n.key));
+      if (select && S.notes.some((n) => n.key === select)) sel.value = select;
+    } catch (e) {
+      S.notes = [];
+      setStatus("Mevcut notlar okunamadı: " + e.message, "err");
+    }
+  }
+  $("#target").onchange = () => { if (S.item) store.set("zn:target:" + S.item.key, val("target")); };
+
+  /* ---------- Taslak ---------- */
+  const draftKey = () => S.item && "zn:draft:" + S.item.key;
+  function saveDraft() {
+    if (!S.item) return;
+    const d = { title: $("#title").value, text: $("#text").value, page: $("#page").value, tag: $("#tag").value };
+    if (d.title || d.text || d.page) store.set(draftKey(), d); else store.del(draftKey());
+    store.set("zn:lastTag", d.tag);
+  }
+  function loadDraft() {
+    const d = store.get(draftKey(), {});
+    $("#title").value = d.title || "";
+    $("#text").value = d.text || "";
+    $("#page").value = d.page || "";
+    $("#tag").value = d.tag != null ? d.tag : store.get("zn:lastTag", "");
+  }
+  let dt;
+  ["title", "text", "page", "tag"].forEach((id) => $("#" + id).addEventListener("input", () => { clearTimeout(dt); dt = setTimeout(saveDraft, 400); }));
+  window.addEventListener("pagehide", saveDraft);
+
+  /* ---------- Gönderme ---------- */
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  function noteHtml(isNew) {
+    const title = val("title");
+    const page = val("page");
+    const date = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+    const paras = $("#text").value.trim().split(/\n\s*\n/).map((p) => "<p>" + esc(p.trim()).replace(/\n/g, "<br>") + "</p>").join("");
+    const head = title || (isNew ? "Okuma notu" : "");
+    const heading = head ? (isNew ? `<h1>${esc(head)}</h1>` : `<h2>${esc(head)}</h2>`) : "";
+    const metaLine = `<p><em>${esc(date)}${page ? " · s. " + esc(page) : ""}</em></p>`;
+    return heading + metaLine + paras;
+  }
+  function setStatus(msg, kind = "") { const s = $("#status"); s.textContent = msg; s.className = kind; }
+
+  async function send() {
+    if (!S.item) return;
+    if (!$("#text").value.trim()) { setStatus("Önce notunu yaz.", "err"); $("#text").focus(); return; }
+    const btn = $("#send");
+    btn.disabled = true;
+    setStatus("Gönderiliyor…");
+    const targetKey = val("target");
+    try {
+      if (!targetKey) {
+        const obj = { itemType: "note", parentItem: S.item.key, note: noteHtml(true), tags: val("tag") ? [{ tag: val("tag") }] : [], collections: [], relations: {} };
+        const res = await zPost([obj]);
+        const key = res.success && res.success["0"];
+        record("Yeni not oluşturuldu");
+        await loadNotes(key || "");
+        if (key) { $("#target").value = key; store.set("zn:target:" + S.item.key, key); }
+      } else {
+        let attempt = 0;
+        for (;;) {
+          const cur = (await zGet(`/items/${targetKey}`)).data;
+          const tags = cur.tags || [];
+          if (val("tag") && !tags.some((t) => t.tag === val("tag"))) tags.push({ tag: val("tag") });
+          try {
+            await zPost([{ key: targetKey, version: cur.version, note: cur.note + noteHtml(false), tags }]);
+            break;
+          } catch (e) {
+            if (e.code === 412 && attempt++ < 2) continue; // not başka yerde değişmiş: yeniden okuyup ekle
+            throw e;
+          }
+        }
+        record("Mevcut nota eklendi");
+        await loadNotes(targetKey);
+      }
+      $("#title").value = ""; $("#text").value = ""; $("#page").value = "";
+      store.del(draftKey());
+      setStatus("Zotero'ya eklendi. Senkron sonrası iPad'de makalenin altında görünür.", "ok");
+    } catch (e) {
+      setStatus((e instanceof TypeError ? "Zotero'ya ulaşılamadı. " : "") + e.message + " Notun silinmedi, tekrar deneyebilirsin.", "err");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+  function record(what) {
+    const li = document.createElement("li");
+    const t = new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+    li.innerHTML = "<strong></strong> <span></span>";
+    li.firstChild.textContent = what;
+    li.lastChild.textContent = `${t} · ${$("#text").value.trim().slice(0, 70)}${$("#text").value.trim().length > 70 ? "…" : ""}`;
+    $("#sent").prepend(li);
+  }
+  $("#send").onclick = send;
+  $("#text").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } });
+
+  /* ---------- Başlangıç ---------- */
+  const c = store.get("zn:creds", null);
+  if (c) { $("#zKey").value = c.key || ""; $("#zId").value = c.id || ""; $("#zType").value = c.type || "user"; connect(); }
+})();
+</script>
+</body>
+</html>
