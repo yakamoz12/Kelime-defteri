@@ -1161,8 +1161,7 @@ if (typeof module !== "undefined") module.exports = Core;
           b.textContent = "İndiriliyor…";
           try {
             if (/^(linked_file|linked_url)$/.test(p.data.linkMode)) throw new Error("Bu ek bağlantılı bir dosya; Zotero sunucusunda kopyası yok.");
-            const r = await Z.get(`/items/${p.key}/file`);
-            const bytes = new Uint8Array(await r.arrayBuffer());
+            const bytes = await zDownload(p.key);
             await loadPdf(bytes, p.data.filename || (item.data.title || "makale") + ".pdf", { parentKey: item.data.itemType === "attachment" ? null : item.key, title: item.data.title || "" });
             b.textContent = "Açıldı";
           } catch (e) {
@@ -1175,6 +1174,35 @@ if (typeof module !== "undefined") module.exports = Core;
       }
     } catch (e) { box.textContent = e.message; }
   }
+  // Önce imzalı dosya adresini alıp oradan indir (Safari yönlendirmeli CORS isteklerini engelleyebiliyor)
+  async function zDownload(attKey) {
+    const errors = [];
+    let signed = null;
+    try {
+      signed = (await (await Z.get(`/items/${attKey}/file/view/url`)).text()).trim();
+    } catch (e) {
+      if (/Bulunamadı|reddedildi/.test(e.message)) throw e;
+      errors.push("adres: " + e.message);
+    }
+    if (signed && /^https?:/.test(signed)) {
+      for (const opts of [{}, { credentials: "omit", referrerPolicy: "no-referrer" }]) {
+        try {
+          const r = await fetch(signed, opts);
+          if (r.ok) return new Uint8Array(await r.arrayBuffer());
+          errors.push("depo: " + r.status);
+        } catch (e) { errors.push("depo: " + e.message); }
+      }
+    }
+    try {
+      const r = await Z.get(`/items/${attKey}/file`);
+      return new Uint8Array(await r.arrayBuffer());
+    } catch (e) {
+      if (/Bulunamadı/.test(e.message)) throw e;
+      errors.push("yönlendirme: " + e.message);
+    }
+    throw new Error("Tarayıcı dosyayı Zotero deposundan alamadı (" + errors.join("; ") + "). Geçici çözüm: Zotero uygulamasında PDF'i açıp Paylaş > Dosyalara Kaydet deyin, sonra burada “Dosyadan” sekmesinden seçin.");
+  }
+
   async function zUpload() {
     const btn = $("#toZotero");
     btn.disabled = true;
