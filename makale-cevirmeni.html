@@ -77,6 +77,7 @@ summary { cursor: pointer; font-weight: 500; padding: 6px 0; }
 .zitem { display: block; width: 100%; text-align: left; background: none; border: 0; color: var(--ink); padding: 10px 12px; cursor: pointer; font: inherit; }
 .zitem strong { display: block; font-weight: 500; line-height: 1.35; }
 .zitem small { color: var(--muted); }
+label.btn { display: inline-flex; align-items: center; position: relative; margin: 0; }
 .pdfs { padding: 0 12px 10px; display: flex; flex-wrap: wrap; gap: 6px; color: var(--muted); font-size: .88rem; }
 .meter { height: 8px; background: var(--sunk); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; margin-top: 12px; }
 #bar { height: 100%; width: 0; background: var(--mark); transition: width .3s; }
@@ -1167,11 +1168,15 @@ if (typeof module !== "undefined") module.exports = Core;
           } catch (e) {
             b.disabled = false;
             b.textContent = "Aç: " + (p.data.filename || "PDF");
-            log("Zotero'dan indirilemedi: " + (e.message.includes("Bulunamadı") ? "Dosya Zotero sunucusunda yok (WebDAV kullanıyor ya da henüz senkronlanmamış olabilir)." : e.message), "err");
+            if (e.message.includes("Bulunamadı")) log("Zotero'dan indirilemedi: Dosya Zotero sunucusunda yok (WebDAV kullanıyor ya da henüz senkronlanmamış olabilir). Aşağıdaki “dosyalardan seç” butonunu kullanın.", "err");
+            else if (e.storage) { S.zBlocked = true; log("Zotero'nun depolama sunucusu bu sayfadan doğrudan indirmeye izin vermiyor. PDF'i aşağıdaki “dosyalardan seç” butonuyla seçin; çeviri yine bu Zotero kaydına eklenebilir.", "warn"); }
+            else log("Zotero'dan indirilemedi: " + e.message, "err");
+            offerLocal(box, item);
           }
         };
         box.append(b);
       }
+      if (S.zBlocked) offerLocal(box, item);
     } catch (e) { box.textContent = e.message; }
   }
   // Önce imzalı dosya adresini alıp oradan indir (Safari yönlendirmeli CORS isteklerini engelleyebiliyor)
@@ -1200,7 +1205,37 @@ if (typeof module !== "undefined") module.exports = Core;
       if (/Bulunamadı/.test(e.message)) throw e;
       errors.push("yönlendirme: " + e.message);
     }
-    throw new Error("Tarayıcı dosyayı Zotero deposundan alamadı (" + errors.join("; ") + "). Geçici çözüm: Zotero uygulamasında PDF'i açıp Paylaş > Dosyalara Kaydet deyin, sonra burada “Dosyadan” sekmesinden seçin.");
+    const err = new Error("Tarayıcı dosyayı Zotero deposundan alamadı (" + errors.join("; ") + ").");
+    err.storage = true;
+    throw err;
+  }
+
+  // Zotero deposu indirmeye izin vermezse: PDF'i cihazdan seç ama Zotero kaydına bağlı tut
+  function offerLocal(box, item) {
+    if (box.querySelector(".local")) return;
+    const lab = document.createElement("label");
+    lab.className = "btn small primary local";
+    const span = document.createElement("span");
+    span.textContent = "PDF'i dosyalardan seç";
+    const inp = document.createElement("input");
+    inp.type = "file";
+    inp.accept = "application/pdf,.pdf";
+    inp.style.cssText = "position:absolute;width:1px;height:1px;opacity:0;overflow:hidden";
+    inp.onchange = async () => {
+      const f = inp.files[0];
+      if (!f) return;
+      span.textContent = "Açılıyor…";
+      await loadPdf(new Uint8Array(await f.arrayBuffer()), f.name, { parentKey: item.data.itemType === "attachment" ? null : item.key, title: item.data.title || "" });
+      span.textContent = "Açıldı: " + f.name;
+      inp.value = "";
+    };
+    lab.append(span, inp);
+    box.append(lab);
+    const tip = document.createElement("p");
+    tip.className = "hint";
+    tip.style.width = "100%";
+    tip.textContent = "PDF cihazda yoksa: Zotero uygulamasında makaleyi açın, Paylaş > Dosyalara Kaydet deyin, sonra bu butonla seçin. Çeviri bu kaydın altına eklenebilir.";
+    box.append(tip);
   }
 
   async function zUpload() {
