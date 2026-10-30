@@ -106,6 +106,12 @@ label.btn input { position: absolute; width: 1px; height: 1px; opacity: 0; overf
 .hl i.sent { background: rgba(120, 190, 140, .45); }
 .textLayer { position: absolute; inset: 0; overflow: hidden; line-height: 1; text-size-adjust: none; -webkit-text-size-adjust: none; forced-color-adjust: none; transform-origin: 0 0; z-index: 2; }
 .textLayer span, .textLayer br { color: transparent; position: absolute; white-space: pre; cursor: text; transform-origin: 0% 0%; }
+.ink { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: visible; }
+#pages.inking .textLayer, #pages.inking .textLayer span { user-select: none; -webkit-user-select: none; }
+#pages.ink-all { touch-action: none; }
+#pages.ink-all .textLayer span { cursor: crosshair; }
+.rtools .btn[aria-pressed="true"] { background: var(--mark); color: #18212c; border-color: var(--mark); }
+.rhint { padding: 0 12px 8px; margin: 0; color: var(--muted); font-size: .84rem; border-bottom: 1px solid var(--line); }
 .textLayer ::selection { background: rgba(31, 78, 121, .28); }
 .textLayer .endOfContent { display: block; position: absolute; inset: 100% 0 0; z-index: -1; cursor: default; user-select: none; -webkit-user-select: none; }
 #clips { list-style: none; margin: 4px 0 0; padding: 0; }
@@ -196,8 +202,13 @@ body.reading .wrap { padding-bottom: 96px; }
   <section class="card" id="readerCard" hidden>
     <div class="rtools">
       <div class="grp"><button id="zoomOut" class="btn" type="button" aria-label="Küçült">−</button><span id="zoomLabel">%100</span><button id="zoomIn" class="btn" type="button" aria-label="Büyüt">+</button></div>
+      <div class="grp">
+        <button id="fingerMode" class="btn" type="button" aria-pressed="false">Parmakla işaretle</button>
+        <button id="undo" class="btn" type="button" disabled>Geri al</button>
+      </div>
       <div class="grp"><span id="pageInfo"></span></div>
     </div>
+    <p class="rhint" id="rhint">Apple Pencil ile metnin üstünden fosforlu kalem gibi geç; o kısım nota eklenir. Parmakla sayfayı kaydırırsın.</p>
     <div id="pages"></div>
   </section>
 
@@ -824,6 +835,12 @@ body.reading .wrap { padding-bottom: 96px; }
     if (ev) ev.preventDefault();
     const d = readSelection() || selCache;
     if (!d || !S.item) return;
+    commitClip(d);
+    selCache = null;
+    try { getSelection().removeAllRanges(); } catch (e) {}
+    $("#addSel").hidden = true;
+  }
+  function commitClip(d) {
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     S.clips.push({ id, text: d.text, page: d.page, comment: "" });
     for (const part of d.parts) S.hl.push({ id, page: part.page, rects: part.rects, sent: false });
@@ -831,9 +848,6 @@ body.reading .wrap { padding-bottom: 96px; }
     redrawHighlights();
     renderClips();
     saveDraft();
-    selCache = null;
-    try { getSelection().removeAllRanges(); } catch (e) {}
-    $("#addSel").hidden = true;
     toast(`Nota eklendi (${S.clips.length})`);
   }
   $("#addSel").addEventListener("pointerdown", addClip);
@@ -849,6 +863,7 @@ body.reading .wrap { padding-bottom: 96px; }
     $("#clipsBox").hidden = !S.clips.length;
     $("#textLabel").textContent = S.clips.length ? "Ek not (isteğe bağlı)" : "Notun";
     $("#goNote").textContent = S.clips.length ? `Not (${S.clips.length})` : "Not";
+    $("#undo").disabled = !S.clips.length;
     S.clips.forEach((c) => {
       const li = document.createElement("li");
       li.innerHTML = '<blockquote></blockquote><div class="cmeta"><span></span><button type="button" class="btn link">Çıkar</button></div><textarea placeholder="Yorumun (isteğe bağlı)"></textarea>';
@@ -882,6 +897,126 @@ body.reading .wrap { padding-bottom: 96px; }
       }
     }
   }
+
+  /* ---------- Kalem (fosforlu işaretleme) ---------- */
+  const pagesEl = $("#pages");
+  let ink = null;
+  S.fingerMode = !!store.get("zn:finger", false);
+  function applyFingerMode() {
+    $("#fingerMode").setAttribute("aria-pressed", String(S.fingerMode));
+    pagesEl.classList.toggle("ink-all", S.fingerMode);
+    $("#rhint").textContent = S.fingerMode
+      ? "Parmakla işaretleme açık: metnin üstünden geçince nota eklenir. Kaydırmak için bu düğmeyi kapat ya da kenardaki kaydırma çubuğunu kullan."
+      : "Apple Pencil ile metnin üstünden fosforlu kalem gibi geç; o kısım nota eklenir. Parmakla sayfayı kaydırırsın.";
+  }
+  $("#fingerMode").onclick = () => { S.fingerMode = !S.fingerMode; store.set("zn:finger", S.fingerMode); applyFingerMode(); };
+  applyFingerMode();
+  $("#undo").onclick = () => {
+    const c = S.clips[S.clips.length - 1];
+    if (!c) return;
+    S.clips.pop();
+    S.hl = S.hl.filter((h) => h.id !== c.id);
+    saveHl(); redrawHighlights(); renderClips(); saveDraft();
+    toast("Son işaret geri alındı");
+  };
+  const isStylus = (e) => [...(e.touches || [])].some((t) => t.touchType === "stylus");
+  // Kalem dokunuşunda sayfanın kaymasını engelle (parmak normal kaydırır)
+  pagesEl.addEventListener("touchstart", (e) => { if (isStylus(e) || (S.fingerMode && e.touches.length === 1)) e.preventDefault(); }, { passive: false });
+  pagesEl.addEventListener("touchmove", (e) => { if (ink || isStylus(e)) e.preventDefault(); }, { passive: false });
+
+  pagesEl.addEventListener("pointerdown", (e) => {
+    if (!(e.pointerType === "pen" || S.fingerMode) || e.button > 0) return;
+    const div = e.target.closest && e.target.closest(".page");
+    if (!div || ink) return;
+    e.preventDefault();
+    try { getSelection().removeAllRanges(); } catch (er) {}
+    try { pagesEl.setPointerCapture(e.pointerId); } catch (er) {}
+    const spans = [...div.querySelectorAll(".textLayer span")].map((s) => s.getBoundingClientRect().height).filter((h) => h > 2).sort((a, b) => a - b);
+    const width = spans.length ? spans[Math.floor(spans.length / 2)] * 1.05 : 14;
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "ink");
+    const pl = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+    pl.setAttribute("fill", "none");
+    pl.setAttribute("stroke", "rgba(242,217,78,.55)");
+    pl.setAttribute("stroke-width", width);
+    pl.setAttribute("stroke-linecap", "round");
+    pl.setAttribute("stroke-linejoin", "round");
+    svg.append(pl);
+    div.append(svg);
+    pagesEl.classList.add("inking");
+    ink = { id: e.pointerId, div, pl, pts: [] };
+    addPoint(e);
+  });
+  function addPoint(e) {
+    const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+    for (const ev of evs.length ? evs : [e]) ink.pts.push([ev.clientX, ev.clientY]);
+    const b = ink.div.getBoundingClientRect();
+    ink.pl.setAttribute("points", ink.pts.map(([x, y]) => `${(x - b.left).toFixed(1)},${(y - b.top).toFixed(1)}`).join(" "));
+  }
+  pagesEl.addEventListener("pointermove", (e) => { if (ink && e.pointerId === ink.id) { e.preventDefault(); addPoint(e); } });
+  const endInk = (e) => {
+    if (!ink || e.pointerId !== ink.id) return;
+    const cur = ink;
+    ink = null;
+    pagesEl.classList.remove("inking");
+    cur.pl.parentNode.remove();
+    if (e.type === "pointercancel") return;
+    const xs = cur.pts.map((p) => p[0]), ys = cur.pts.map((p) => p[1]);
+    if (Math.max(...xs) - Math.min(...xs) < 6 && Math.max(...ys) - Math.min(...ys) < 6) return; // dokunma, çizgi değil
+    const d = inkToClip(cur.div, cur.pts);
+    if (d) commitClip(d); else toast("Burada işaretlenecek metin bulunamadı");
+  };
+  pagesEl.addEventListener("pointerup", endInk);
+  pagesEl.addEventListener("pointercancel", endInk);
+
+  // Çizginin geçtiği metni, kelime sınırlarına yaslayarak bul
+  function inkToClip(div, pts) {
+    const pb = div.getBoundingClientRect();
+    const n = +div.dataset.page;
+    const isWord = (c) => /[\p{L}\p{N}]/u.test(c || "");
+    const pieces = [];
+    const rg = document.createRange();
+    for (const sp of div.querySelectorAll(".textLayer span")) {
+      const node = sp.firstChild;
+      if (!node || node.nodeType !== 3 || !node.length) continue;
+      const r = sp.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) continue;
+      const tol = r.height * 0.3;
+      const near = pts.filter(([x, y]) => y >= r.top - tol && y <= r.bottom + tol && x >= r.left - r.height && x <= r.right + r.height);
+      if (!near.length) continue;
+      const x0 = Math.min(...near.map((p) => p[0])), x1 = Math.max(...near.map((p) => p[0]));
+      let first = -1, last = -1;
+      for (let i = 0; i < node.length; i++) {
+        rg.setStart(node, i); rg.setEnd(node, i + 1);
+        const cr = rg.getBoundingClientRect();
+        const cx = cr.left + cr.width / 2;
+        if (cx >= x0 - 2 && cx <= x1 + 2) { if (first < 0) first = i; last = i; }
+      }
+      if (first < 0) continue;
+      const t = node.data;
+      while (first > 0 && isWord(t[first - 1])) first--;
+      while (last < t.length - 1 && isWord(t[last + 1])) last++;
+      while (first <= last && /\s/.test(t[first])) first++;
+      while (last >= first && /\s/.test(t[last])) last--;
+      if (first > last) continue;
+      rg.setStart(node, first); rg.setEnd(node, last + 1);
+      const rects = [...rg.getClientRects()].filter((q) => q.width > 0.5 && q.height > 0.5);
+      if (!rects.length) continue;
+      pieces.push({ text: t.slice(first, last + 1), rects, top: rects[0].top, h: rects[0].height, left: rects[0].left, right: rects[rects.length - 1].right });
+    }
+    if (!pieces.length) return null;
+    let text = "";
+    pieces.forEach((p, i) => {
+      const prev = pieces[i - 1];
+      const sameLine = prev && Math.abs(prev.top - p.top) < p.h * 0.5;
+      const glued = sameLine && p.left - prev.right < p.h * 0.15;
+      text += i === 0 ? p.text : (glued ? "" : " ") + p.text;
+    });
+    text = text.replace(/(\p{Ll})-\s+(\p{Ll})/gu, "$1$2").replace(/\s+/g, " ").trim();
+    const rects = pieces.flatMap((p) => p.rects).map((q) => [(q.left - pb.left) / pb.width, (q.top - pb.top) / pb.height, q.width / pb.width, q.height / pb.height].map((v) => Math.round(v * 10000) / 10000));
+    return { text, page: n, parts: [{ page: n, rects }] };
+  }
+
   let tt;
   function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => (t.hidden = true), 1600); }
 
