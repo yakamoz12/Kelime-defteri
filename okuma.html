@@ -169,198 +169,315 @@ body.reading #noteClose { display: inline-flex; }
 body.reading #dock { z-index: 35; }
 @media (prefers-reduced-motion: reduce) { body.reading #noteCard { transition: none; } }
 
-/* ---- Okuma ---- */
-input[type=search] { width: 100%; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; min-height: 44px; -webkit-appearance: none; appearance: none; }
-.wrap { max-width: 860px; }
-.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
-.top h1 { font-size: 1.7rem; }
-.nav { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--surface); }
-.nav button { font: 500 .95rem var(--sans); border: 0; background: none; color: var(--muted); padding: 9px 16px; min-height: 42px; cursor: pointer; }
-.nav button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
-.libbar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
-.libbar input { flex: 1; }
-#libList { list-style: none; margin: 0; padding: 0; }
-#libList li { margin-bottom: 8px; }
-.acard { display: block; width: 100%; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; cursor: pointer; color: var(--ink); font: inherit; }
-.acard strong { display: block; font: 600 1.02rem/1.35 var(--serif); }
-.acard .sub { color: var(--muted); font-size: .88rem; margin-top: 3px; }
-.badge { display: inline-block; font-size: .78rem; border: 1px solid var(--line); border-radius: 99px; padding: 1px 8px; margin-right: 6px; color: var(--muted); }
-.empty { text-align: center; color: var(--muted); padding: 32px 12px; }
-.empty strong { display: block; color: var(--ink); font: 600 1.1rem var(--serif); margin-bottom: 4px; }
-.back { margin-bottom: 8px; }
-.atitle { font: 650 1.3rem/1.3 var(--serif); margin: 0 0 6px; }
+/* ================= Okuma ================= */
+html, body { height: 100%; }
+body { overscroll-behavior: none; }
+input[type=search] { width: 100%; font: inherit; color: var(--ink); background: var(--sunk); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; min-height: 44px; -webkit-appearance: none; appearance: none; }
+.muted { color: var(--muted); }
 .bib { font-family: var(--serif); line-height: 1.5; padding-left: 2em; text-indent: -2em; margin: 4px 0; overflow-wrap: anywhere; }
+
+/* Uygulama kabuğu: solda liste, sağda içerik */
+.app { display: grid; grid-template-columns: 320px minmax(0, 1fr); height: 100vh; height: 100dvh; }
+.side { background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+.sidehead { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 14px 8px; }
+.sidehead h1 { font-size: 1.55rem; }
+.sidesearch { padding: 0 14px 10px; }
+#libList { list-style: none; margin: 0; padding: 0 8px; overflow: auto; flex: 1; min-height: 0; }
+#libList li { margin: 0 0 4px; }
+.acard { display: block; width: 100%; text-align: left; background: none; border: 1px solid transparent; border-radius: 9px; padding: 10px 10px; cursor: pointer; color: var(--ink); font: inherit; }
+.acard:hover { background: var(--sunk); }
+.acard[aria-current="true"] { background: color-mix(in srgb, var(--mark) 22%, var(--surface)); border-color: color-mix(in srgb, var(--mark) 60%, var(--line)); }
+.acard strong { display: block; font: 600 .97rem/1.35 var(--serif); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.acard .sub { color: var(--muted); font-size: .84rem; margin-top: 2px; }
+.badge { display: inline-block; font-size: .75rem; border: 1px solid var(--line); border-radius: 99px; padding: 0 7px; margin-right: 4px; color: var(--muted); }
+.sidenav { border-top: 1px solid var(--line); padding: 8px; display: grid; gap: 2px; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+.sidenav button { display: flex; justify-content: space-between; align-items: center; width: 100%; text-align: left; font: 500 .97rem var(--sans); background: none; border: 0; border-radius: 8px; color: var(--ink); padding: 11px 10px; min-height: 46px; cursor: pointer; }
+.sidenav button:hover { background: var(--sunk); }
+.sidenav button[aria-current="true"] { background: var(--ink); color: var(--surface); }
+.sidenav .cnt { font-weight: 400; font-size: .85rem; opacity: .75; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--err); display: inline-block; }
+.main { overflow: auto; min-height: 0; padding: 16px clamp(12px, 2.4vw, 28px) calc(32px + env(safe-area-inset-bottom, 0px)); }
+.mainback { display: none; margin-bottom: 8px; }
+.view { max-width: 1100px; margin: 0 auto; }
+.vhead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.vhead h2 { font-size: 1.35rem; }
+.empty { text-align: center; color: var(--muted); padding: 48px 16px; }
+.empty strong { display: block; color: var(--ink); font: 650 1.25rem var(--serif); margin-bottom: 6px; }
+.empty .btns { justify-content: center; }
+.nag { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; border-color: var(--mark); background: color-mix(in srgb, var(--mark) 18%, var(--surface)); max-width: 1100px; margin: 0 auto 12px; }
+
+/* Dar ekran / dikey: tek panel */
+@media (max-width: 899px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  body[data-pane="side"] .main { display: none; }
+  body[data-pane="main"] .side { display: none; }
+  .mainback { display: inline-flex; }
+  .side { border-right: 0; }
+}
+
+/* Makale sayfası: iki sütun */
+.adetail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 14px; align-items: start; }
+@media (max-width: 1099px) { .adetail { grid-template-columns: minmax(0, 1fr); } }
+.atitle { font: 650 1.3rem/1.3 var(--serif); margin: 0 0 6px; }
+.readbtn { width: 100%; min-height: 56px; font-size: 1.05rem; margin-top: 4px; }
+.pdfrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.pdfname { font-family: var(--serif); overflow-wrap: anywhere; flex: 1 1 100%; color: var(--muted); font-size: .92rem; }
+label.btn { display: inline-flex; align-items: center; position: relative; margin: 0; }
+label.btn input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
 .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 10px; }
-@media (max-width: 520px) { .grid2, .grid3 { grid-template-columns: 1fr 1fr; } }
 #fAuthors { min-height: 96px; font-family: var(--sans); font-size: .95rem; }
+
+/* Not kartları */
 .note { border: 1px solid var(--line); border-radius: 9px; padding: 10px; margin-bottom: 10px; background: var(--surface); }
-.note .nh { min-height: 40px; font-weight: 500; }
+.note select { min-height: 40px; font-weight: 500; }
 .note textarea { min-height: 44px; overflow: hidden; resize: none; margin-top: 6px; font-size: .97rem; }
-.note textarea.qt { font-family: var(--serif); border-left: 4px solid var(--mark); background: var(--sunk); }
+.note textarea.qt { font-family: var(--serif); border-left: 4px solid var(--mark); }
 .note textarea.cm { font-family: var(--sans); font-size: .92rem; }
 .note .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; justify-content: space-between; align-items: center; color: var(--muted); font-size: .84rem; margin-top: 6px; }
 .note .src { color: var(--muted); font-size: .85rem; margin-top: 4px; }
+.nform { border: 1px dashed var(--line); border-radius: 9px; padding: 10px; margin-bottom: 12px; }
+.nform textarea { min-height: 84px; margin-top: 6px; }
+.nform .row { align-items: center; margin-top: 6px; }
+.nform .pg { flex: 0 0 96px; }
+.active-h { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.active-h label { margin: 0; font-size: .85rem; color: var(--muted); font-weight: 500; }
+.active-h select { font-weight: 600; border-color: color-mix(in srgb, var(--mark) 70%, var(--line)); background: color-mix(in srgb, var(--mark) 14%, var(--surface)); }
 .grp-h { font: 650 1.05rem var(--serif); margin: 18px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
-.grp-h.l2 { font-size: 1rem; margin-left: 12px; } .grp-h.l3, .grp-h.l4 { font-size: .96rem; margin-left: 24px; font-style: italic; }
+.grp-h.l2 { font-size: 1rem; margin-left: 14px; } .grp-h.l3, .grp-h.l4 { font-size: .96rem; margin-left: 28px; font-style: italic; }
 .grp-h .cnt { font: 400 .85rem var(--sans); color: var(--muted); margin-left: 6px; }
-.nform textarea { min-height: 90px; }
-.nform .row { align-items: end; }
-.nform .pg { flex: 0 0 90px; }
-#noteCard { display: none; }
-body.reading #noteCard { display: block; }
-#noteCard .notehead small { display: block; font-weight: 400; color: var(--muted); font-family: var(--sans); font-size: .85rem; }
-.muted { color: var(--muted); }
-.nag { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; border-color: var(--mark); background: color-mix(in srgb, var(--mark) 18%, var(--surface)); }
-#backupCard { margin-top: 18px; }
+
+/* Başlıklar */
+#olist { list-style: none; margin: 0; padding: 0; }
+.orow { display: flex; gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.orow input { flex: 1; min-width: 0; min-height: 44px; }
+.orow.l1 input { font-weight: 600; }
+.orow.l2 { padding-left: 22px; } .orow.l3 { padding-left: 44px; } .orow.l4 { padding-left: 66px; }
+.orow .cnt { color: var(--muted); font-size: .84rem; flex: none; min-width: 44px; text-align: right; }
+.ib { font: 600 1rem var(--sans); width: 40px; height: 40px; flex: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; cursor: pointer; padding: 0; }
+.ib:disabled { opacity: .35; }
+.ib.del { color: var(--err); }
+#bulkText { min-height: 200px; font-family: var(--sans); }
+
+/* ===== Okuyucu ===== */
+body.reading #readerCard { padding-top: env(safe-area-inset-top, 0px); }
+.rtop { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--surface); border-bottom: 1px solid var(--line); flex: none; }
+.rtitle { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.rtitle strong { font: 600 .95rem var(--serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rtitle span { color: var(--muted); font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rtop .grp { display: flex; align-items: center; gap: 4px; flex: none; }
+.rbody { flex: 1; min-height: 0; display: grid; grid-template-columns: 84px minmax(0, 1fr); }
+body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px 8px 60px; }
+.rail { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-right: 1px solid var(--line); overflow-y: auto; scrollbar-width: none; }
+.rail::-webkit-scrollbar { display: none; }
+.rb { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 100%; min-height: 58px; border: 1px solid transparent; border-radius: 10px; background: none; color: var(--ink); font: 500 .72rem var(--sans); cursor: pointer; padding: 4px 2px; }
+.rb svg { width: 24px; height: 24px; }
+.rb[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.rb:disabled { opacity: .35; }
+.rail .sep { height: 1px; background: var(--line); margin: 2px 4px; flex: none; }
+#swatches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; justify-items: center; padding: 4px 0; }
+#swatches:empty { display: none; }
+.sw { width: 28px; height: 28px; }
+#sizeBtn, #fingerDraw { font-size: .72rem; min-height: 40px; }
+#fingerDraw { line-height: 1.1; }
+/* Notlar paneli: yatayda sağda sabit sütun */
+@media (min-width: 900px) and (orientation: landscape), (min-width: 1100px) {
+  body.reading.notes-open .rbody { grid-template-columns: 84px minmax(0, 1fr) min(380px, 34vw); }
+  body.reading #noteCard { position: static; transform: none; width: auto; box-shadow: none; border-width: 0 0 0 1px; border-radius: 0; padding: 12px 12px calc(20px + env(safe-area-inset-bottom, 0px)); overflow: auto; min-height: 0; transition: none; }
+  body.reading:not(.notes-open) #noteCard { display: none; }
+  #noteClose { display: none !important; }
+}
+/* Dikeyde: araçlar üstte yatay, notlar çekmece */
+@media not all and (min-width: 900px) and (orientation: landscape) {
+  @media (max-width: 1099px) {
+    .rbody { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+    .rail { flex-direction: row; border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; overflow-y: hidden; padding: 6px; }
+    .rb { width: auto; min-width: 58px; min-height: 52px; flex: none; }
+    .rail .sep { width: 1px; height: auto; margin: 4px 2px; }
+    #swatches { display: flex; gap: 6px; padding: 0 4px; align-items: center; }
+  }
+}
+#noteCard .notehead { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+#noteCard .notehead h2 { font-size: 1.05rem; }
+#noteCard .notehead small { display: block; font: 400 .82rem var(--sans); color: var(--muted); margin-top: 2px; }
+#dNotes .note textarea { font-size: .92rem; }
+#dock { z-index: 35; }
 </style>
 </head>
-<body>
-<div class="wrap">
-  <div class="top">
-    <h1>Okuma</h1>
-    <div class="nav" role="group" aria-label="Bölüm">
-      <button type="button" data-view="lib" aria-pressed="true">Makaleler</button>
-      <button type="button" data-view="notes" aria-pressed="false">Notlar</button>
+<body data-pane="side">
+<div class="app">
+  <aside class="side">
+    <div class="sidehead">
+      <h1>Okuma</h1>
+      <button id="newArticle" class="btn primary" type="button">+ Makale</button>
     </div>
-  </div>
-
-  <!-- Makaleler -->
-  <section id="vLib">
-    <div class="libbar">
-      <input id="libSearch" type="search" placeholder="Makalelerde ara">
-      <button id="newArticle" class="btn primary" type="button">Yeni makale</button>
-    </div>
-    <div id="backupNag" class="card nag" hidden><span id="nagText"></span><button class="btn primary" type="button" data-backup>Yedek al</button></div>
+    <div class="sidesearch"><input id="libSearch" type="search" placeholder="Makalelerde ara"></div>
     <ul id="libList"></ul>
-    <section class="card" id="backupCard">
-      <h2>Yedek</h2>
-      <p class="hint" style="margin-top:0">Makalelerin ve notların bu cihazda, Safari'nin içinde saklanır. Yedek al dediğinde Paylaş penceresi açılır: <strong>Dosyalara Kaydet</strong> de, <strong>iPad'imde</strong> bir klasör seç (ör. “Okuma Yedekleri”). Uygulamayı Safari'den <strong>Ana Ekrana Ekle</strong> ile kullanırsan verilerin daha güvende olur.</p>
-      <p class="hint" id="lastBackup"></p>
-      <label class="check"><input id="bkPdfs" type="checkbox"> PDF'leri ve çizimleri de yedekle (dosya büyük olur)</label>
-      <div class="btns"><button class="btn primary" type="button" data-backup>Yedek al</button><label class="btn"><span>Yedekten geri yükle</span><input id="restore" type="file" accept="application/json,.json"></label></div>
-      <p id="backupMsg" class="hint" aria-live="polite"></p>
-    </section>
-  </section>
+    <nav class="sidenav" aria-label="Bölümler">
+      <button type="button" data-view="outline"><span>Başlıklar</span><span class="cnt" id="cntH"></span></button>
+      <button type="button" data-view="notes"><span>Tüm notlar</span><span class="cnt" id="cntN"></span></button>
+      <button type="button" data-view="backup"><span>Yedek</span><span id="bkDot"></span></button>
+    </nav>
+  </aside>
 
-  <!-- Makale ekle / düzenle -->
-  <section id="vForm" hidden>
-    <button class="btn link back" type="button" data-back>← Geri</button>
-    <section class="card">
-      <h2 id="formTitle">Yeni makale</h2>
-      <p class="hint" style="margin-top:0">Orijinal makalenin DOI'sini girersen bilgiler kendiliğinden dolar. DOI yoksa alanları elle doldur. Yalnızca başlık zorunlu.</p>
-      <div class="row">
-        <div><label for="fDoi">DOI</label><input id="fDoi" type="text" placeholder="10.1000/xyz123" spellcheck="false" autocapitalize="off"></div>
-        <button id="doiGo" class="btn" type="button">Getir</button>
-      </div>
-      <p id="doiMsg" class="hint" aria-live="polite"></p>
-      <label for="fTitle">Başlık</label>
-      <input id="fTitle" type="text">
-      <label for="fAuthors">Yazarlar (her satıra bir yazar: Soyad, Ad)</label>
-      <textarea id="fAuthors" placeholder="Smith, John&#10;Yılmaz, Ayşe Nur"></textarea>
-      <div class="grid2">
-        <div><label for="fYear">Yıl</label><input id="fYear" type="text" inputmode="numeric"></div>
-        <div><label for="fJournal">Dergi</label><input id="fJournal" type="text"></div>
-      </div>
-      <div class="grid3">
-        <div><label for="fVolume">Cilt</label><input id="fVolume" type="text"></div>
-        <div><label for="fIssue">Sayı</label><input id="fIssue" type="text"></div>
-        <div><label for="fPages">Sayfalar</label><input id="fPages" type="text" placeholder="12–30"></div>
-      </div>
-      <label>APA önizleme</label>
-      <div id="fPreview" class="bib"></div>
-      <p class="hint">Metin içi: <span id="fCite"></span></p>
-      <div class="btns">
-        <button id="saveArticle" class="btn primary" type="button">Kaydet</button>
-        <button id="deleteArticle" class="btn" type="button" hidden>Makaleyi sil</button>
-      </div>
-      <p id="formMsg" class="hint" aria-live="polite"></p>
-    </section>
-  </section>
+  <main class="main">
+    <button class="btn link mainback" type="button" id="mainBack">‹ Makaleler</button>
+    <div id="backupNag" class="card nag" hidden><span id="nagText"></span><button class="btn primary" type="button" data-backup>Yedek al</button></div>
 
-  <!-- Makale sayfası -->
-  <section id="vArticle" hidden>
-    <button class="btn link back" type="button" data-back>← Makaleler</button>
-    <section class="card">
-      <h2 class="atitle" id="aTitle"></h2>
-      <div id="aBib" class="bib"></div>
-      <p class="hint">Metin içi: <span id="aCite"></span></p>
-      <div class="btns"><button id="editArticle" class="btn" type="button">Bilgileri düzenle</button></div>
+    <!-- Karşılama -->
+    <section class="view" id="vWelcome">
+      <div class="empty" id="welcomeBox"></div>
     </section>
-    <section class="card">
-      <h2>Türkçe PDF</h2>
-      <div id="pdfEmpty">
-        <p class="hint" style="margin-top:0">Bu makalenin kendi çevirdiğin PDF'ini ekle. PDF yalnızca bu cihazda saklanır. Zorunlu değil; PDF'siz de not alabilirsin.</p>
-        <label class="btn primary"><span>PDF ekle</span><input id="pdfInput" type="file" accept="application/pdf,.pdf"></label>
-      </div>
-      <div id="pdfLoaded" class="pdfrow" hidden>
-        <span class="pdfname" id="pdfName"></span>
-        <button id="pdfOpen" class="btn primary" type="button">Oku</button>
-        <label class="btn"><span>Değiştir</span><input id="pdfInput2" type="file" accept="application/pdf,.pdf"></label>
-        <button id="pdfRemove" class="btn" type="button">Kaldır</button>
-      </div>
-      <p id="pdfMsg" class="hint" aria-live="polite"></p>
-    </section>
-    <section class="card">
-      <h2>Notlar</h2>
-      <div class="nform" data-form="a"></div>
-      <div id="aNotes"></div>
-    </section>
-  </section>
 
-  <!-- Tüm notlar -->
-  <section id="vNotes" hidden>
-    <section class="card">
-      <h2>Word çıktısı</h2>
-      <p class="hint" style="margin-top:0">Notların yazdığın başlıklara göre gruplanır; numaralı başlıklar (1., 1.1., 1.1.1.) sırasına ve düzeyine göre dizilir. Sonuna kullandığın makalelerin APA kaynakçası eklenir.</p>
-      <div class="btns"><button id="exportDocx" class="btn primary" type="button">Word olarak indir</button></div>
-      <p id="exportMsg" class="hint" aria-live="polite"></p>
-      <details>
-        <summary>Ayarlar ve yedek</summary>
+    <!-- Makale ekle / düzenle -->
+    <section class="view" id="vForm" hidden>
+      <section class="card" style="max-width:760px">
+        <h2 id="formTitle">Yeni makale</h2>
+        <p class="hint" style="margin-top:0">Orijinal makalenin DOI'sini girersen bilgiler kendiliğinden dolar. DOI yoksa alanları elle doldur. Yalnızca başlık zorunlu.</p>
+        <div class="row">
+          <div><label for="fDoi">DOI</label><input id="fDoi" type="text" placeholder="10.1000/xyz123" spellcheck="false" autocapitalize="off"></div>
+          <button id="doiGo" class="btn" type="button">Getir</button>
+        </div>
+        <p id="doiMsg" class="hint" aria-live="polite"></p>
+        <label for="fTitle">Başlık</label>
+        <input id="fTitle" type="text">
+        <label for="fAuthors">Yazarlar (her satıra bir yazar: Soyad, Ad)</label>
+        <textarea id="fAuthors" placeholder="Smith, John&#10;Yılmaz, Ayşe Nur"></textarea>
+        <div class="grid2">
+          <div><label for="fYear">Yıl</label><input id="fYear" type="text" inputmode="numeric"></div>
+          <div><label for="fJournal">Dergi</label><input id="fJournal" type="text"></div>
+        </div>
+        <div class="grid3">
+          <div><label for="fVolume">Cilt</label><input id="fVolume" type="text"></div>
+          <div><label for="fIssue">Sayı</label><input id="fIssue" type="text"></div>
+          <div><label for="fPages">Sayfalar</label><input id="fPages" type="text" placeholder="12–30"></div>
+        </div>
+        <label>APA önizleme</label>
+        <div id="fPreview" class="bib"></div>
+        <p class="hint">Metin içi: <span id="fCite"></span></p>
+        <div class="btns">
+          <button id="saveArticle" class="btn primary" type="button">Kaydet</button>
+          <button id="cancelForm" class="btn" type="button">Vazgeç</button>
+          <button id="deleteArticle" class="btn" type="button" hidden style="margin-left:auto;color:var(--err)">Makaleyi sil</button>
+        </div>
+        <p id="formMsg" class="hint" aria-live="polite"></p>
+      </section>
+    </section>
+
+    <!-- Makale sayfası -->
+    <section class="view" id="vArticle" hidden>
+      <div class="adetail">
+        <div>
+          <section class="card">
+            <h2 class="atitle" id="aTitle"></h2>
+            <div id="aBib" class="bib"></div>
+            <p class="hint">Metin içi: <span id="aCite"></span></p>
+            <div class="btns"><button id="editArticle" class="btn" type="button">Bilgileri düzenle</button></div>
+          </section>
+          <section class="card">
+            <h2>Türkçe PDF</h2>
+            <div id="pdfEmpty">
+              <p class="hint" style="margin-top:0">Bu makalenin kendi çevirdiğin PDF'ini ekle. PDF yalnızca bu cihazda saklanır. Zorunlu değil; PDF'siz de not alabilirsin.</p>
+              <label class="btn primary readbtn" style="justify-content:center"><span>PDF ekle</span><input id="pdfInput" type="file" accept="application/pdf,.pdf"></label>
+            </div>
+            <div id="pdfLoaded" hidden>
+              <button id="pdfOpen" class="btn primary readbtn" type="button">Okumaya başla</button>
+              <div class="pdfrow">
+                <span class="pdfname" id="pdfName"></span>
+                <label class="btn"><span>Değiştir</span><input id="pdfInput2" type="file" accept="application/pdf,.pdf"></label>
+                <button id="pdfRemove" class="btn" type="button">Kaldır</button>
+              </div>
+            </div>
+            <p id="pdfMsg" class="hint" aria-live="polite"></p>
+          </section>
+        </div>
+        <section class="card">
+          <h2>Notlar</h2>
+          <div data-form="a"></div>
+          <div id="aNotes"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Başlıklar -->
+    <section class="view" id="vOutline" hidden>
+      <div class="vhead"><h2>Başlıklar</h2><span class="hint" id="outlineInfo"></span></div>
+      <section class="card">
+        <p class="hint" style="margin-top:0">Tezinin ana ve alt başlıkları. Sırasını oklarla, düzeyini ‹ › ile değiştirebilirsin. Bir başlığın adını değiştirirsen o başlıktaki notlar da yeni adla görünür.</p>
+        <ol id="olist"></ol>
+        <div class="btns">
+          <button id="addH" class="btn primary" type="button">+ Başlık ekle</button>
+          <button id="bulkOpen" class="btn" type="button">Listeyi yapıştır</button>
+        </div>
+        <div id="bulkBox" hidden>
+          <label for="bulkText">Her satıra bir başlık. Numaralar (1., 1.1., 1.1.1.) ya da satır başındaki boşluk alt başlığı belirler.</label>
+          <textarea id="bulkText" placeholder="1. GİRİŞ&#10;1.1. Araştırmanın Amacı&#10;1.2. Araştırmanın Önemi&#10;2. KAVRAMSAL ÇERÇEVE&#10;2.1. Şizofreni"></textarea>
+          <div class="btns"><button id="bulkAdd" class="btn primary" type="button">Listeye ekle</button><button id="bulkCancel" class="btn" type="button">Vazgeç</button></div>
+        </div>
+      </section>
+    </section>
+
+    <!-- Tüm notlar -->
+    <section class="view" id="vNotes" hidden>
+      <div class="vhead"><h2>Tüm notlar</h2><button id="exportDocx" class="btn primary" type="button">Word olarak indir</button></div>
+      <p id="exportMsg" class="hint" aria-live="polite" style="margin-top:-6px"></p>
+      <details class="card" style="padding:10px 14px">
+        <summary>Word ayarları</summary>
         <label for="citeLocale">Atıf dili</label>
         <select id="citeLocale"><option value="tr-TR">Türkçe (vd., t.y.)</option><option value="en-US">İngilizce (et al., n.d.)</option></select>
+        <label class="check"><input id="exEmpty" type="checkbox" checked> Notu olmayan başlıkları da ekle (tez iskeleti)</label>
         <label class="check"><input id="exPages" type="checkbox" checked> Çeviri PDF'inin sayfa numarasını hatırlatma olarak ekle</label>
         <label class="check"><input id="exComments" type="checkbox" checked> Yorumlarımı ekle</label>
       </details>
+      <input id="noteSearch" type="search" placeholder="Notlarda ara" style="margin:4px 0 4px">
+      <div id="allNotes"></div>
     </section>
-    <div class="libbar"><input id="noteSearch" type="search" placeholder="Notlarda ya da başlıklarda ara"></div>
-    <div id="allNotes"></div>
-  </section>
 
-  <!-- Okuyucu -->
-  <section class="card" id="readerCard" hidden>
-    <div class="rbar" role="toolbar" aria-label="Okuyucu araçları">
-      <button id="rClose" class="tb" type="button" aria-label="Okuyucuyu kapat">✕</button>
+    <!-- Yedek -->
+    <section class="view" id="vBackup" hidden>
+      <div class="vhead"><h2>Yedek</h2></div>
+      <section class="card" id="backupCard" style="max-width:760px">
+        <p class="hint" style="margin-top:0">Makalelerin, başlıkların ve notların bu cihazda, Safari'nin içinde saklanır. <strong>Yedek al</strong> dediğinde Paylaş penceresi açılır: <strong>Dosyalara Kaydet</strong> de, <strong>iPad'imde</strong> bir klasör seç (ör. “Okuma Yedekleri”). Uygulamayı Safari'den <strong>Ana Ekrana Ekle</strong> ile kullanırsan verilerin daha güvende olur.</p>
+        <p class="hint" id="lastBackup"></p>
+        <label class="check"><input id="bkPdfs" type="checkbox"> PDF'leri ve çizimleri de yedekle (dosya büyük olur)</label>
+        <div class="btns"><button class="btn primary" type="button" data-backup>Yedek al</button><label class="btn"><span>Yedekten geri yükle</span><input id="restore" type="file" accept="application/json,.json"></label></div>
+        <p id="backupMsg" class="hint" aria-live="polite"></p>
+      </section>
+    </section>
+  </main>
+</div>
+
+<!-- Okuyucu -->
+<section class="card" id="readerCard" hidden>
+  <div class="rtop">
+    <button id="rClose" class="tb" type="button">‹ Kapat</button>
+    <div class="rtitle"><strong id="rTitle"></strong><span id="rCite"></span></div>
+    <div class="grp"><button id="zoomOut" class="tb" type="button" aria-label="Küçült">−</button><span id="zoomLabel">%100</span><button id="zoomIn" class="tb" type="button" aria-label="Büyüt">+</button></div>
+    <span id="pageInfo"></span>
+    <button id="notesBtn" class="tb primary" type="button">Notlar</button>
+  </div>
+  <div class="rbody">
+    <div class="rail" role="toolbar" aria-label="Kalem araçları">
+      <button class="rb" type="button" data-tool="hand" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 11.5v-7a1.5 1.5 0 0 1 3 0V12"/><path d="M14 6.5a1.5 1.5 0 0 1 3 0V13"/><path d="M17 9.5a1.5 1.5 0 0 1 3 0v4.5a7 7 0 0 1-7 7h-1.2a6 6 0 0 1-4.6-2.2L4 15.5a1.6 1.6 0 0 1 2.4-2.1L8 15"/></svg>El</button>
+      <button class="rb" type="button" data-tool="pen" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1.2-4.6L16.5 4.1a2 2 0 0 1 2.8 0l.6.6a2 2 0 0 1 0 2.8L8.6 18.8z"/><path d="M14.5 6l3.5 3.5"/></svg>Kalem</button>
+      <button class="rb" type="button" data-tool="hl" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l-3 3h4l1.5-1.5"/><path d="M8.5 12.5l6.8-6.8a1.8 1.8 0 0 1 2.5 0l.5.5a1.8 1.8 0 0 1 0 2.5l-6.8 6.8z"/><path d="M8.5 12.5l3 3"/><path d="M3 21h18" stroke-width="3" opacity=".45"/></svg>Fosforlu</button>
+      <button class="rb" type="button" data-tool="eraser" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h12"/><path d="M4.6 14.6l9.2-9.2a2 2 0 0 1 2.8 0l2 2a2 2 0 0 1 0 2.8L11 18.8a2 2 0 0 1-1.4.6H8.4a2 2 0 0 1-1.4-.6l-2.4-2.4a1.3 1.3 0 0 1 0-1.8z"/><path d="M9 10l5 5"/></svg>Silgi</button>
       <span class="sep"></span>
-      <button class="tb" type="button" data-tool="hand" aria-pressed="true" title="Kaydır ve metin seç">El</button>
-      <button class="tb" type="button" data-tool="pen" aria-pressed="false">Kalem</button>
-      <button class="tb" type="button" data-tool="hl" aria-pressed="false">Fosforlu</button>
-      <button class="tb" type="button" data-tool="eraser" aria-pressed="false">Silgi</button>
-      <span id="swatches"></span>
-      <button id="sizeBtn" class="tb" type="button" title="Kalınlık">İnce</button>
-      <button id="fingerDraw" class="tb" type="button" aria-pressed="false" title="Kalem yoksa parmakla çiz">Parmakla çiz</button>
+      <div id="swatches"></div>
+      <button id="sizeBtn" class="rb" type="button" title="Kalınlık">İnce</button>
+      <button id="fingerDraw" class="rb" type="button" aria-pressed="false" title="Kalem yoksa parmakla çiz">Parmakla<br>çiz</button>
       <span class="sep"></span>
-      <button id="undo" class="tb" type="button" disabled>Geri al</button>
-      <button id="redo" class="tb" type="button" disabled>Yinele</button>
-      <span class="sep"></span>
-      <button id="zoomOut" class="tb" type="button" aria-label="Küçült">−</button>
-      <span id="zoomLabel">%100</span>
-      <button id="zoomIn" class="tb" type="button" aria-label="Büyüt">+</button>
-      <span id="pageInfo"></span>
-      <span class="sep"></span>
-      <button id="notesBtn" class="tb primary" type="button">Notlar</button>
+      <button id="undo" class="rb" type="button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>Geri al</button>
+      <button id="redo" class="rb" type="button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>Yinele</button>
     </div>
     <div id="pages"><div id="pinner"></div></div>
-  </section>
-
-  <!-- Okurken not çekmecesi -->
-  <section class="card" id="noteCard">
-    <div class="notehead"><h2>Notlar <small id="dCite"></small></h2><button id="noteClose" class="tb" type="button">PDF'e dön</button></div>
-    <div class="nform" data-form="d"></div>
-    <div id="dNotes"></div>
-  </section>
-</div>
-<datalist id="headingList"></datalist>
+    <section class="card" id="noteCard">
+      <div class="notehead"><h2>Notlar <small id="dCite"></small></h2><button id="noteClose" class="tb" type="button">PDF'e dön</button></div>
+      <div data-form="d"></div>
+      <div id="dNotes"></div>
+    </section>
+  </div>
+</section>
 <div id="dock" hidden>
   <button id="addSel" class="btn primary" type="button" hidden>Seçimi nota ekle</button>
 </div>
@@ -421,7 +538,7 @@ body.reading #noteCard { display: block; }
   const val = (id) => $("#" + id).value.trim();
   const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-  const DB = store.get("ok:data", { articles: [], notes: [] });
+  const DB = store.get("ok:data", { articles: [], notes: [], outline: [] });
   const saveDB = () => { store.set("ok:data", DB); store.set("ok:changedAt", Date.now()); };
   const S = { hl: [] };
   let A = null; // açık makale
@@ -545,18 +662,178 @@ body.reading #noteCard { display: block; }
     throw new Error(errs.join(" · "));
   }
 
-  /* ---------- Görünümler ---------- */
-  let view = "lib";
-  function show(v) {
-    view = v;
-    for (const [id, name] of [["vLib", "lib"], ["vNotes", "notes"], ["vForm", "form"], ["vArticle", "article"]]) $("#" + id).hidden = name !== v;
-    document.querySelectorAll("[data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === v || (v !== "notes" && b.dataset.view === "lib"))));
-    if (v === "lib") { renderLib(); updateBackupInfo(); }
-    if (v === "notes") renderAllNotes();
-    window.scrollTo(0, 0);
+
+  /* ---------- Başlıklar (tez planı) ---------- */
+  DB.outline = DB.outline || [];
+  const numOf = (h) => { const m = String(h).match(/^\s*(\d+(?:\.\d+)*)\.?\s/); return m ? m[1] : null; };
+  const levelOf = (h) => { const n = numOf(h); return n ? Math.min(4, n.split(".").length) : 1; };
+  function headingSort(a, b) {
+    const na = numOf(a), nb = numOf(b);
+    if (na && nb) {
+      const x = na.split(".").map(Number), y = nb.split(".").map(Number);
+      for (let i = 0; i < Math.max(x.length, y.length); i++) { const d = (x[i] ?? -1) - (y[i] ?? -1); if (d) return d; }
+      return 0;
+    }
+    if (na) return -1;
+    if (nb) return 1;
+    return a.localeCompare(b, "tr", { numeric: true });
   }
-  document.querySelectorAll("[data-view]").forEach((b) => (b.onclick = () => show(b.dataset.view)));
-  document.querySelectorAll("[data-back]").forEach((b) => (b.onclick = () => (view === "form" && formFor ? openArticle(formFor) : show("lib"))));
+  // Eski sürümdeki serbest başlıkları başlık listesine taşı
+  function migrate() {
+    if (DB.v2) return;
+    const hs = [...new Set(DB.notes.map((n) => (n.heading || "").trim()).filter(Boolean))].sort(headingSort);
+    for (const h of hs) if (!DB.outline.some((o) => o.label === h)) DB.outline.push({ id: uid(), label: h, level: levelOf(h) });
+    DB.notes.forEach((n) => { if (n.hid === undefined) { const o = DB.outline.find((x) => x.label === (n.heading || "").trim()); n.hid = o ? o.id : ""; } delete n.heading; });
+    DB.v2 = true;
+    saveDB();
+  }
+  migrate();
+  const H = (id) => DB.outline.find((h) => h.id === id);
+  const activeH = () => { const id = store.get("ok:activeH", ""); return H(id) ? id : ""; };
+  function addHeading(label, level, at) {
+    const h = { id: uid(), label, level: level || levelOf(label) };
+    // numaralı başlığı numarasına göre doğru yere koy (ör. 2.2., 3.'ten önce gelir)
+    if (at == null && numOf(label)) { const i = DB.outline.findIndex((x) => numOf(x.label) && headingSort(label, x.label) < 0); if (i >= 0) at = i; }
+    if (at == null) DB.outline.push(h); else DB.outline.splice(at, 0, h);
+    saveDB();
+    return h;
+  }
+  function parseLines(txt) {
+    const out = [];
+    for (const raw of txt.replace(/\r/g, "").split("\n")) {
+      if (!raw.trim()) continue;
+      const line = raw.trim().replace(/^[-–•*]\s+/, "");
+      let level;
+      if (numOf(line)) level = levelOf(line);
+      else { const ind = raw.match(/^\s*/)[0].replace(/\t/g, "    ").length; level = Math.min(4, 1 + Math.floor(ind / 2) + (/^\s*[-–•*]\s/.test(raw) ? 1 : 0)); }
+      out.push({ label: line, level });
+    }
+    return out;
+  }
+  // Başlık seçme kutusu: Başlıksız + liste + yeni başlık
+  function fillHSelect(sel, value) {
+    sel.innerHTML = "";
+    sel.append(new Option(DB.outline.length ? "— Başlıksız —" : "— Başlıksız (önce başlık ekleyebilirsin) —", ""));
+    for (const h of DB.outline) sel.append(new Option("\u00a0\u00a0\u00a0".repeat(h.level - 1) + h.label, h.id));
+    sel.append(new Option("＋ Yeni başlık…", "__new"));
+    sel.value = H(value) ? value : "";
+    sel.dataset.prev = sel.value;
+  }
+  function bindHSelect(sel, onPick) {
+    sel.addEventListener("change", () => {
+      if (sel.value === "__new") {
+        const label = (prompt("Yeni başlık (ör. 2.3. Tedavi Yaklaşımları)") || "").trim();
+        if (!label) { sel.value = sel.dataset.prev || ""; return; }
+        const h = addHeading(label);
+        refreshHeadingUI();
+        sel.value = h.id;
+      }
+      sel.dataset.prev = sel.value;
+      onPick(sel.value);
+    });
+  }
+  function refreshHeadingUI() {
+    document.querySelectorAll("select[data-hsel]").forEach((s) => fillHSelect(s, s.dataset.hsel === "active" ? activeH() : s.value));
+    $("#cntH").textContent = DB.outline.length || "";
+    if (view === "outline") renderOutline();
+    if (view === "notes") renderAllNotes();
+  }
+
+  function renderOutline() {
+    const ol = $("#olist");
+    ol.innerHTML = "";
+    const counts = {};
+    DB.notes.forEach((n) => (counts[n.hid] = (counts[n.hid] || 0) + 1));
+    $("#outlineInfo").textContent = DB.outline.length ? `${DB.outline.length} başlık` : "";
+    if (!DB.outline.length) ol.innerHTML = '<li class="hint" style="padding:8px 0">Henüz başlık yok. “Listeyi yapıştır” ile tez planını tek seferde ekleyebilirsin.</li>';
+    DB.outline.forEach((h, i) => {
+      const li = document.createElement("li");
+      li.className = "orow l" + h.level;
+      li.innerHTML = `<button class="ib" data-a="out" aria-label="Üst düzeye al">‹</button><button class="ib" data-a="in" aria-label="Alt düzeye al">›</button><input type="text" aria-label="Başlık adı"><span class="cnt"></span><button class="ib" data-a="up" aria-label="Yukarı">↑</button><button class="ib" data-a="down" aria-label="Aşağı">↓</button><button class="ib del" data-a="del" aria-label="Sil">✕</button>`;
+      const inp = li.querySelector("input");
+      inp.value = h.label;
+      inp.addEventListener("input", () => { h.label = inp.value; saveSoon(); });
+      inp.addEventListener("change", () => { if (!inp.value.trim()) inp.value = h.label = "(adsız başlık)"; saveDB(); refreshHeadingUI(); });
+      li.querySelector(".cnt").textContent = counts[h.id] ? counts[h.id] + " not" : "";
+      li.querySelector('[data-a="out"]').disabled = h.level <= 1;
+      li.querySelector('[data-a="in"]').disabled = h.level >= 4;
+      li.querySelector('[data-a="up"]').disabled = i === 0;
+      li.querySelector('[data-a="down"]').disabled = i === DB.outline.length - 1;
+      li.addEventListener("click", (e) => {
+        const a = e.target.closest("[data-a]");
+        if (!a) return;
+        const act = a.dataset.a;
+        if (act === "out") h.level--;
+        if (act === "in") h.level++;
+        if (act === "up") [DB.outline[i - 1], DB.outline[i]] = [DB.outline[i], DB.outline[i - 1]];
+        if (act === "down") [DB.outline[i + 1], DB.outline[i]] = [DB.outline[i], DB.outline[i + 1]];
+        if (act === "del") {
+          const n = counts[h.id] || 0;
+          if (!confirm(`“${h.label}” silinsin mi?${n ? ` Bu başlıktaki ${n} not başlıksız kalacak, silinmeyecek.` : ""}`)) return;
+          DB.outline.splice(i, 1);
+          DB.notes.forEach((x) => { if (x.hid === h.id) x.hid = ""; });
+          if (store.get("ok:activeH", "") === h.id) store.set("ok:activeH", "");
+        }
+        saveDB();
+        refreshHeadingUI();
+        renderOutline();
+        const again = $("#olist").children[act === "up" ? i - 1 : act === "down" ? i + 1 : i];
+        const btn = again && again.querySelector(`[data-a="${act}"]`);
+        if (btn && !btn.disabled) btn.focus();
+      });
+      ol.append(li);
+    });
+  }
+  $("#addH").onclick = () => {
+    const last = DB.outline[DB.outline.length - 1];
+    const h = addHeading("", last ? last.level : 1);
+    renderOutline();
+    refreshHeadingUI();
+    const inputs = $("#olist").querySelectorAll("input");
+    const inp = inputs[inputs.length - 1];
+    if (inp) { inp.placeholder = "Başlık adı"; inp.focus(); }
+    h.label = "";
+  };
+  $("#bulkOpen").onclick = () => { $("#bulkBox").hidden = false; $("#bulkText").focus(); };
+  $("#bulkCancel").onclick = () => { $("#bulkBox").hidden = true; };
+  $("#bulkAdd").onclick = () => {
+    const items = parseLines($("#bulkText").value);
+    if (!items.length) return;
+    for (const it of items) if (!DB.outline.some((h) => h.label === it.label)) DB.outline.push({ id: uid(), label: it.label, level: it.level });
+    saveDB();
+    $("#bulkText").value = "";
+    $("#bulkBox").hidden = true;
+    refreshHeadingUI();
+    renderOutline();
+    toast(`${items.length} başlık eklendi`);
+  };
+
+  /* ---------- Görünümler ---------- */
+  let view = "welcome";
+  const VIEWS = { welcome: "vWelcome", form: "vForm", article: "vArticle", outline: "vOutline", notes: "vNotes", backup: "vBackup" };
+  function show(v, pane) {
+    view = v;
+    for (const [k, id] of Object.entries(VIEWS)) $("#" + id).hidden = k !== v;
+    document.querySelectorAll(".sidenav [data-view]").forEach((b) => b.setAttribute("aria-current", String(b.dataset.view === v)));
+    document.body.dataset.pane = pane || (v === "welcome" ? "side" : "main");
+    if (v !== "article" && v !== "form") { A = v === "welcome" ? null : A; }
+    if (v === "welcome") renderWelcome();
+    if (v === "outline") renderOutline();
+    if (v === "notes") renderAllNotes();
+    if (v === "backup") updateBackupInfo();
+    renderLib();
+    updateBackupInfo();
+    $(".main").scrollTop = 0;
+  }
+  document.querySelectorAll(".sidenav [data-view]").forEach((b) => (b.onclick = () => show(b.dataset.view)));
+  $("#mainBack").onclick = () => show("welcome", "side");
+  function renderWelcome() {
+    const box = $("#welcomeBox");
+    if (!DB.outline.length) box.innerHTML = '<strong>Hoş geldin</strong><p>İstersen önce tezinin başlıklarını gir; not alırken bunlardan seçersin. Sonra makalelerini ekle.</p><div class="btns"><button class="btn primary" type="button" data-go="outline">Başlıkları gir</button><button class="btn" type="button" data-go="new">Makale ekle</button></div>';
+    else if (!DB.articles.length) box.innerHTML = '<strong>Makale ekle</strong><p>DOI ile ya da elle ilk makaleni ekle.</p><div class="btns"><button class="btn primary" type="button" data-go="new">Makale ekle</button></div>';
+    else box.innerHTML = '<strong>Bir makale seç</strong><p>Soldaki listeden okumak ya da not almak istediğin makaleyi seç.</p>';
+    box.querySelectorAll("[data-go]").forEach((b) => (b.onclick = () => (b.dataset.go === "new" ? openForm(null) : show("outline"))));
+  }
 
   /* ---------- Makale listesi ---------- */
   function renderLib() {
@@ -565,21 +842,23 @@ body.reading #noteCard { display: block; }
     ul.innerHTML = "";
     const list = DB.articles.slice().sort((a, b) => (b.opened || b.created) - (a.opened || a.created))
       .filter((a) => !q || (a.meta.title + " " + plain(apa(a.meta).bib)).toLocaleLowerCase("tr").includes(q));
-    if (!DB.articles.length) { ul.innerHTML = '<li class="empty"><strong>Henüz makale yok</strong>“Yeni makale” ile başla. DOI’yi girmen yeterli.</li>'; return; }
-    if (!list.length) { ul.innerHTML = '<li class="empty">Aramaya uyan makale yok.</li>'; return; }
+    if (!DB.articles.length) ul.innerHTML = '<li class="hint" style="padding:8px 6px">Henüz makale yok. “+ Makale” ile ekle.</li>';
+    else if (!list.length) ul.innerHTML = '<li class="hint" style="padding:8px 6px">Aramaya uyan makale yok.</li>';
     for (const a of list) {
       const n = DB.notes.filter((x) => x.articleId === a.id).length;
       const li = document.createElement("li");
       const b = document.createElement("button");
       b.type = "button"; b.className = "acard";
-      b.innerHTML = '<strong></strong><div class="sub"></div><div class="sub"></div>';
+      b.setAttribute("aria-current", String(!!A && A.id === a.id && view === "article"));
+      b.innerHTML = '<strong></strong><div class="sub"></div>';
       b.children[0].textContent = a.meta.title || "(başlıksız)";
-      b.children[1].textContent = apa(a.meta).cite;
-      b.children[2].innerHTML = (a.pdfName ? '<span class="badge">PDF</span>' : "") + `<span class="badge">${n} not</span>`;
+      b.children[1].innerHTML = esc(apa(a.meta).cite) + " " + (a.pdfName ? '<span class="badge">PDF</span>' : "") + (n ? `<span class="badge">${n} not</span>` : "");
       b.onclick = () => openArticle(a.id);
       li.append(b);
       ul.append(li);
     }
+    $("#cntN").textContent = DB.notes.length || "";
+    $("#cntH").textContent = DB.outline.length || "";
   }
   $("#libSearch").addEventListener("input", renderLib);
 
@@ -651,13 +930,16 @@ body.reading #noteCard { display: block; }
     store.del("ok:hl:" + a.id);
     try { await IDB.del(a.id); await IDB.del(a.id, "ink"); } catch (e) {}
     formFor = null;
-    show("lib");
+    show("welcome");
   };
+
+
+  $("#cancelForm").onclick = () => (formFor && art(formFor) ? openArticle(formFor) : show("welcome"));
 
   /* ---------- Makale sayfası ---------- */
   function openArticle(id) {
     A = art(id);
-    if (!A) { show("lib"); return; }
+    if (!A) { show("welcome"); return; }
     A.opened = Date.now();
     saveDB();
     S.hl = store.get("ok:hl:" + A.id, []);
@@ -666,8 +948,9 @@ body.reading #noteCard { display: block; }
     $("#aBib").innerHTML = r.bib;
     $("#aCite").textContent = r.cite;
     $("#dCite").textContent = r.cite;
+    $("#rTitle").textContent = A.meta.title;
+    $("#rCite").textContent = r.cite;
     $("#pdfMsg").textContent = "";
-    document.querySelectorAll(".nform .fh").forEach((h) => (h.value = lastHeading()));
     showPdfState();
     show("article");
     renderArticleNotes();
@@ -688,6 +971,7 @@ body.reading #noteCard { display: block; }
     A.pdfName = f.name;
     saveDB();
     showPdfState();
+    renderLib();
     await openReader(bytes, f.name);
   }
   $("#pdfInput").onchange = pickPdf;
@@ -704,40 +988,22 @@ body.reading #noteCard { display: block; }
     if (!A || !confirm("PDF ve üzerindeki çizimler bu makaleden kaldırılsın mı? Notların silinmez.")) return;
     try { await IDB.del(A.id); await IDB.del(A.id, "ink"); } catch (e) {}
     S.hl = []; store.del("ok:hl:" + A.id);
-    A.pdfName = ""; saveDB(); showPdfState();
+    A.pdfName = ""; saveDB(); showPdfState(); renderLib();
   };
 
-  /* ---------- Notlar ---------- */
-  const lastHeading = () => store.get("ok:lastHeading", "");
-  function updateHeadingList() {
-    const hs = [...new Set(DB.notes.map((n) => (n.heading || "").trim()).filter(Boolean))].sort(headingSort);
-    $("#headingList").innerHTML = hs.map((h) => `<option value="${esc(h)}"></option>`).join("");
-  }
-  const numOf = (h) => { const m = String(h).match(/^\s*(\d+(?:\.\d+)*)\.?\s/); return m ? m[1] : null; };
-  const levelOf = (h) => { const n = numOf(h); return n ? Math.min(4, n.split(".").length) : 1; };
-  function headingSort(a, b) {
-    const na = numOf(a), nb = numOf(b);
-    if (na && nb) {
-      const x = na.split(".").map(Number), y = nb.split(".").map(Number);
-      for (let i = 0; i < Math.max(x.length, y.length); i++) { const d = (x[i] ?? -1) - (y[i] ?? -1); if (d) return d; }
-      return 0;
-    }
-    if (na) return -1;
-    if (nb) return 1;
-    return a.localeCompare(b, "tr", { numeric: true });
-  }
+  /* ---------- Not kartı ---------- */
   function autoGrow(t) { t.style.height = "auto"; t.style.height = t.scrollHeight + 2 + "px"; }
   let saveT;
-  const saveSoon = () => { clearTimeout(saveT); saveT = setTimeout(() => { saveDB(); updateHeadingList(); }, 400); };
+  const saveSoon = () => { clearTimeout(saveT); saveT = setTimeout(saveDB, 400); };
   function noteEl(n, opts = {}) {
     const d = document.createElement("div");
     d.className = "note";
-    d.innerHTML = `<input class="nh" type="text" list="headingList" placeholder="Başlık (isteğe bağlı), ör. 2.1. Pozitif Belirtiler" aria-label="Başlık"><textarea class="${n.kind === "quote" ? "qt" : ""}" aria-label="Not"></textarea><textarea class="cm" placeholder="Yorumun (isteğe bağlı)" aria-label="Yorum"></textarea><div class="src"></div><div class="meta"><span></span><button type="button" class="btn link">Sil</button></div>`;
-    const [h, tx, cm] = [d.querySelector(".nh"), d.querySelector("textarea"), d.querySelector(".cm")];
-    h.value = n.heading || ""; tx.value = n.text || ""; cm.value = n.comment || "";
+    d.innerHTML = `<select data-hsel="note" aria-label="Başlık"></select><textarea class="${n.kind === "quote" ? "qt" : ""}" aria-label="Not"></textarea><textarea class="cm" placeholder="Yorumun (isteğe bağlı)" aria-label="Yorum"></textarea><div class="src"></div><div class="meta"><span></span><button type="button" class="btn link">Sil</button></div>`;
+    const sel = d.querySelector("select"), tx = d.querySelector("textarea"), cm = d.querySelector(".cm");
+    fillHSelect(sel, n.hid);
+    bindHSelect(sel, (id) => { n.hid = id; saveDB(); if (opts.onMove) opts.onMove(); else renderLib(); });
+    tx.value = n.text || ""; cm.value = n.comment || "";
     if (!n.comment && n.kind !== "quote") cm.hidden = true;
-    h.addEventListener("input", () => { n.heading = h.value.trim(); if (n.heading) store.set("ok:lastHeading", n.heading); saveSoon(); });
-    h.addEventListener("change", () => { if (opts.onHeading) opts.onHeading(); });
     tx.addEventListener("input", () => { n.text = tx.value; autoGrow(tx); saveSoon(); });
     cm.addEventListener("input", () => { n.comment = cm.value; autoGrow(cm); saveSoon(); });
     const a = art(n.articleId);
@@ -752,7 +1018,8 @@ body.reading #noteCard { display: block; }
       const before = S.hl.length;
       S.hl = S.hl.filter((x) => x.id !== n.id);
       if (S.hl.length !== before && A) { store.set("ok:hl:" + A.id, S.hl); redrawHighlights(); }
-      refreshNotes();
+      if (view === "notes") renderAllNotes(); else renderArticleNotes();
+      renderLib();
     };
     requestAnimationFrame(() => { autoGrow(tx); if (!cm.hidden) autoGrow(cm); });
     return d;
@@ -766,15 +1033,16 @@ body.reading #noteCard { display: block; }
       list.forEach((n) => box.append(noteEl(n)));
     }
     $("#notesBtn").textContent = list.length ? `Notlar (${list.length})` : "Notlar";
-    updateHeadingList();
+    renderLib();
   }
-  function refreshNotes() { if (view === "notes") renderAllNotes(); else renderArticleNotes(); if (document.body.classList.contains("reading")) renderArticleNotes(); }
 
-  // serbest not formu (makale sayfasında ve okurken çekmecede)
-  document.querySelectorAll(".nform").forEach((box) => {
+  // Not formu: aktif başlık + serbest not (makale sayfasında ve okurken panelde)
+  document.querySelectorAll("[data-form]").forEach((box) => {
     const k = box.dataset.form;
-    box.innerHTML = `<label>Yeni not</label><input class="fh" type="text" list="headingList" placeholder="Başlık (isteğe bağlı)"><textarea class="ft" placeholder="Notunu yaz" style="margin-top:6px"></textarea><div class="row" style="margin-top:6px"><div class="pg"><input class="fp" type="text" inputmode="numeric" placeholder="Sayfa"></div><button class="btn primary fa" type="button">Not ekle</button></div>`;
-    const [h, t, p] = [box.querySelector(".fh"), box.querySelector(".ft"), box.querySelector(".fp")];
+    box.innerHTML = `<div class="active-h"><label>Aktif başlık: yeni notlar buraya eklenir</label><select data-hsel="active" aria-label="Aktif başlık"></select></div><div class="nform"><textarea class="ft" placeholder="Kendi notunu yaz"></textarea><div class="row"><div class="pg"><input class="fp" type="text" inputmode="numeric" placeholder="Sayfa"></div><button class="btn primary fa" type="button">Not ekle</button></div></div>`;
+    const sel = box.querySelector("select"), t = box.querySelector(".ft"), p = box.querySelector(".fp");
+    fillHSelect(sel, activeH());
+    bindHSelect(sel, (id) => { store.set("ok:activeH", id); document.querySelectorAll('select[data-hsel="active"]').forEach((s) => { if (s !== sel) fillHSelect(s, id); }); });
     const dk = "ok:draft:" + k;
     const dr = store.get(dk, {});
     t.value = dr.t || ""; p.value = dr.p || "";
@@ -783,13 +1051,12 @@ body.reading #noteCard { display: block; }
     box.querySelector(".fa").onclick = () => {
       if (!A) return;
       if (!t.value.trim()) { t.focus(); return; }
-      const heading = h.value.trim();
-      if (heading) store.set("ok:lastHeading", heading);
-      DB.notes.push({ id: uid(), articleId: A.id, kind: "free", heading, text: t.value.trim(), page: p.value.trim(), comment: "", created: Date.now() });
+      const hid = activeH();
+      DB.notes.push({ id: uid(), articleId: A.id, kind: "free", hid, text: t.value.trim(), page: p.value.trim(), comment: "", created: Date.now() });
       saveDB();
       t.value = ""; p.value = ""; keep();
       renderArticleNotes();
-      toast("Not eklendi" + (heading ? " · " + heading : ""));
+      toast("Not eklendi" + (H(hid) ? " · " + H(hid).label : ""));
     };
   });
 
@@ -797,42 +1064,42 @@ body.reading #noteCard { display: block; }
   function addQuoteNote(d) {
     if (!A) return;
     const id = uid();
-    const heading = lastHeading();
-    DB.notes.push({ id, articleId: A.id, kind: "quote", heading, text: d.text, page: d.page, comment: "", created: Date.now() });
+    const hid = activeH();
+    DB.notes.push({ id, articleId: A.id, kind: "quote", hid, text: d.text, page: d.page, comment: "", created: Date.now() });
     saveDB();
     for (const part of d.parts || []) S.hl.push({ id, page: part.page, rects: part.rects });
     store.set("ok:hl:" + A.id, S.hl);
     redrawHighlights();
     renderArticleNotes();
-    toast("Nota eklendi" + (heading ? " · " + heading : ""));
+    toast("Nota eklendi" + (H(hid) ? " · " + H(hid).label : ""));
   }
 
   /* ---------- Tüm notlar ---------- */
+  function groups(list, withEmpty) {
+    const byH = new Map();
+    for (const n of list) { const k = H(n.hid) ? n.hid : ""; if (!byH.has(k)) byH.set(k, []); byH.get(k).push(n); }
+    for (const v of byH.values()) v.sort((a, b) => a.created - b.created);
+    const out = [];
+    for (const h of DB.outline) if (byH.has(h.id) || withEmpty) out.push([h, byH.get(h.id) || []]);
+    if (byH.has("")) out.push([null, byH.get("")]);
+    return out;
+  }
   function renderAllNotes() {
     const q = val("noteSearch").toLocaleLowerCase("tr");
     const box = $("#allNotes");
     box.innerHTML = "";
-    const list = DB.notes.filter((n) => !q || [n.heading, n.text, n.comment, (art(n.articleId) || { meta: {} }).meta.title].join(" ").toLocaleLowerCase("tr").includes(q));
+    const list = DB.notes.filter((n) => !q || [H(n.hid) ? H(n.hid).label : "", n.text, n.comment, (art(n.articleId) || { meta: {} }).meta.title].join(" ").toLocaleLowerCase("tr").includes(q));
     if (!DB.notes.length) { box.innerHTML = '<div class="empty"><strong>Henüz not yok</strong>Bir makale açıp not almaya başla.</div>'; return; }
     if (!list.length) { box.innerHTML = '<div class="empty">Aramaya uyan not yok.</div>'; return; }
-    for (const [h, notes] of groups(list)) {
+    for (const [h, notes] of groups(list, false)) {
       const hd = document.createElement("div");
-      hd.className = "grp-h l" + (h ? levelOf(h) : 1);
+      hd.className = "grp-h l" + (h ? h.level : 1);
       hd.innerHTML = "<span></span><span class='cnt'></span>";
-      hd.firstChild.textContent = h || "Başlıksız notlar";
+      hd.firstChild.textContent = h ? h.label : "Başlıksız notlar";
       hd.lastChild.textContent = notes.length + " not";
       box.append(hd);
-      notes.forEach((n) => box.append(noteEl(n, { showArticle: true, onHeading: renderAllNotes })));
+      notes.forEach((n) => box.append(noteEl(n, { showArticle: true, onMove: renderAllNotes })));
     }
-    updateHeadingList();
-  }
-  function groups(list) {
-    const m = new Map();
-    for (const n of list) { const h = (n.heading || "").trim(); if (!m.has(h)) m.set(h, []); m.get(h).push(n); }
-    for (const v of m.values()) v.sort((a, b) => a.created - b.created);
-    const keys = [...m.keys()].filter(Boolean).sort(headingSort);
-    if (m.has("")) keys.push("");
-    return keys.map((k) => [k, m.get(k)]);
   }
   $("#noteSearch").addEventListener("input", renderAllNotes);
 
@@ -878,7 +1145,7 @@ body.reading #noteCard { display: block; }
   function closeReader() {
     saveInkNow();
     hideBubble();
-    document.body.classList.remove("notes-open");
+    if (!wideReader()) document.body.classList.remove("notes-open");
     R.token++;
     for (const p of R.pages) if (p.task) try { p.task.cancel(); } catch (e) {}
     if (R.pdf) try { R.pdf.destroy(); } catch (e) {}
@@ -1028,9 +1295,12 @@ body.reading #noteCard { display: block; }
   }
   $("#addSel").addEventListener("pointerdown", addClip);
   $("#addSel").addEventListener("click", (e) => { if (selCache) addClip(e); });
-  $("#notesBtn").onclick = () => document.body.classList.toggle("notes-open");
-  $("#noteClose").onclick = () => document.body.classList.remove("notes-open");
-  $("#rClose").onclick = () => { closeReader(); openArticle(A.id); };
+  const wideReader = () => matchMedia("(min-width: 900px) and (orientation: landscape), (min-width: 1100px)").matches;
+  const relayout = () => requestAnimationFrame(() => { if (R.pages.length) { layout(); updateVisible(); } });
+  if (store.get("ok:panel", true)) document.body.classList.add("notes-open");
+  $("#notesBtn").onclick = () => { document.body.classList.toggle("notes-open"); store.set("ok:panel", document.body.classList.contains("notes-open")); relayout(); };
+  $("#noteClose").onclick = () => { document.body.classList.remove("notes-open"); relayout(); };
+  $("#rClose").onclick = () => { const keep = document.body.classList.contains("notes-open"); closeReader(); if (keep) document.body.classList.add("notes-open"); openArticle(A.id); };
   function redrawHighlights() {
     for (const p of R.pages) {
       if (!p.div) continue;
@@ -1384,16 +1654,17 @@ body.reading #noteCard { display: block; }
       const j = JSON.parse(await f.text());
       if (j.app !== "okuma" || !j.data) throw new Error("Bu dosya bir Okuma yedeği değil.");
       const np = j.pdfs ? Object.keys(j.pdfs).length : 0;
-      if (!confirm(`Yedekte ${j.data.articles.length} makale, ${j.data.notes.length} not${np ? ` ve ${np} PDF` : ""} var (${(j.created || "").slice(0, 10)}). Bu cihazdakilerin yerine geçsin mi?`)) return;
+      if (!confirm(`Yedekte ${(j.data.outline || []).length} başlık, ${j.data.articles.length} makale, ${j.data.notes.length} not${np ? ` ve ${np} PDF` : ""} var (${(j.created || "").slice(0, 10)}). Bu cihazdakilerin yerine geçsin mi?`)) return;
       msg.textContent = "Geri yükleniyor…";
-      DB.articles = j.data.articles; DB.notes = j.data.notes;
+      DB.articles = j.data.articles; DB.notes = j.data.notes; DB.outline = j.data.outline || []; DB.v2 = !!j.data.v2; migrate();
       saveDB();
       for (const [k, v] of Object.entries(j.hl || {})) store.set("ok:hl:" + k, v);
       for (const [k, v] of Object.entries(j.pdfs || {})) { try { await IDB.put(k, { name: v.name, data: (await fromB64(v.b64)).buffer }); } catch (er) {} }
       for (const [k, v] of Object.entries(j.ink || {})) { try { await IDB.put(k, v, "ink"); } catch (er) {} }
       msg.textContent = "Yedek yüklendi." + (np ? "" : " Bu yedekte PDF yok; gerekirse PDF'leri makalelere yeniden ekle.");
       store.set("ok:lastBackup", Date.now());
-      show("lib");
+      refreshHeadingUI();
+      show("welcome");
     } catch (er) { msg.textContent = "Yedek okunamadı: " + er.message; }
   };
   function updateBackupInfo() {
@@ -1402,18 +1673,20 @@ body.reading #noteCard { display: block; }
     $("#lastBackup").textContent = last ? `Son yedek: ${new Date(last).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}${days ? ` (${days} gün önce)` : " (bugün)"}` : "Henüz yedek almadın.";
     const need = DB.notes.length && changed > last && (!last || Date.now() - last > 3 * 864e5);
     $("#backupNag").hidden = !need;
+    $("#bkDot").className = need ? "dot" : "";
     if (need) $("#nagText").textContent = last ? `Son yedeğin ${days} gün önce. Yeni notların var.` : `${DB.notes.length} notun var ama hiç yedek almadın.`;
   }
   // Safari'den verilerin kalıcı tutulmasını iste
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then((p) => { if (!p) navigator.storage.persist(); }); } catch (e) {}
 
+
   /* ---------- Word ---------- */
   $("#citeLocale").value = store.get("ok:locale", "tr-TR");
   $("#citeLocale").onchange = () => store.set("ok:locale", val("citeLocale"));
-  $("#exPages").checked = store.get("ok:exPages", true);
-  $("#exComments").checked = store.get("ok:exComments", true);
-  $("#exPages").onchange = () => store.set("ok:exPages", $("#exPages").checked);
-  $("#exComments").onchange = () => store.set("ok:exComments", $("#exComments").checked);
+  for (const [id, def] of [["exPages", true], ["exComments", true], ["exEmpty", true]]) {
+    $("#" + id).checked = store.get("ok:" + id, def);
+    $("#" + id).onchange = () => store.set("ok:" + id, $("#" + id).checked);
+  }
   const xesc = (t) => String(t).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const run = (t, o = {}) => `<w:r>${o.i || o.b || o.color ? `<w:rPr>${o.b ? "<w:b/>" : ""}${o.i ? "<w:i/>" : ""}${o.color ? `<w:color w:val="${o.color}"/>` : ""}</w:rPr>` : ""}<w:t xml:space="preserve">${xesc(t)}</w:t></w:r>`;
   const para = (runs, style) => `<w:p>${style ? `<w:pPr><w:pStyle w:val="${style}"/></w:pPr>` : ""}${runs}</w:p>`;
@@ -1430,14 +1703,14 @@ body.reading #noteCard { display: block; }
     return out;
   }
   async function exportDocx() {
-    if (!DB.notes.length) { $("#exportMsg").textContent = "Henüz not yok."; return; }
+    if (!DB.notes.length && !DB.outline.length) { $("#exportMsg").textContent = "Henüz not yok."; return; }
     const loc = locale();
-    const showPages = $("#exPages").checked, showComments = $("#exComments").checked;
+    const showPages = $("#exPages").checked, showComments = $("#exComments").checked, withEmpty = $("#exEmpty").checked;
     const pageWord = loc === "tr-TR" ? "çeviri s." : "translation p.";
     let body = para(run("Okuma Notları"), "Title") + para(run(new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }), { color: "666666" }), "Subtitle");
     const used = new Set();
-    for (const [h, notes] of groups(DB.notes)) {
-      body += para(run(h || "Başlıksız notlar"), "Heading" + (h ? levelOf(h) : 1));
+    for (const [h, notes] of groups(DB.notes, withEmpty)) {
+      body += para(run(h ? h.label || "(adsız başlık)" : "Başlıksız notlar"), "Heading" + (h ? Math.min(4, h.level) : 1));
       for (const n of notes) {
         const a = art(n.articleId);
         if (a) used.add(a.id);
@@ -1453,13 +1726,8 @@ body.reading #noteCard { display: block; }
     if (bibs.length) { body += para(run(loc === "tr-TR" ? "Kaynakça" : "References"), "Heading1"); bibs.forEach((b) => (body += para(bibRuns(b), "Bibliography"))); }
     const docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1417" w:right="1417" w:bottom="1417" w:left="1417" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>`;
     const blob = docxBlob(docXml);
-    const name = `okuma-notlari-${stamp()}.docx`;
     $("#exportMsg").textContent = `Word dosyası hazır: ${DB.notes.length} not, ${bibs.length} kaynak.`;
-    const file = new File([blob], name, { type: blob.type });
-    if ("ontouchend" in document && navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: name }); return; } catch (e) { if (e.name === "AbortError") return; }
-    }
-    download(blob, name);
+    await deliver(blob, `okuma-notlari-${stamp()}.docx`);
   }
   $("#exportDocx").onclick = () => exportDocx().catch((e) => ($("#exportMsg").textContent = "Word dosyası oluşturulamadı: " + e.message));
   function docxBlob(documentXml) {
@@ -1519,8 +1787,9 @@ ${st("Bibliography", "Bibliography", '<w:ind w:left="720" w:hanging="720"/><w:jc
 
 
   /* ---------- Başlangıç ---------- */
-  updateHeadingList();
-  show("lib");
+  refreshHeadingUI();
+  const lastA = DB.articles.slice().sort((a, b) => (b.opened || 0) - (a.opened || 0))[0];
+  if (lastA && window.matchMedia("(min-width: 900px)").matches) openArticle(lastA.id); else show("welcome");
 })();
 </script>
 </body>
