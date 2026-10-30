@@ -302,6 +302,44 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
 #noteCard .notehead small { display: block; font: 400 .82rem var(--sans); color: var(--muted); margin-top: 2px; }
 #dNotes .note textarea { font-size: .92rem; }
 #dock { z-index: 35; }
+/* Kaynak türü */
+.seg2 { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; margin: 4px 0 6px; }
+.seg2 button { font: 500 .95rem var(--sans); border: 0; background: var(--surface); color: var(--muted); padding: 9px 14px; min-height: 42px; cursor: pointer; }
+.seg2 button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.urltext { font-size: .85rem; color: var(--muted); overflow-wrap: anywhere; margin: 6px 0 0; }
+/* Web okuyucu */
+#webCard { position: fixed; inset: 0; z-index: 30; background: var(--sunk); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); }
+.wbody { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); }
+#webScroll { overflow: auto; min-height: 0; padding: 20px 14px calc(110px + env(safe-area-inset-bottom, 0px)); -webkit-overflow-scrolling: touch; }
+#webText { max-width: 44rem; margin: 0 auto; background: #fff; color: #1b1f24; border: 1px solid var(--line); border-radius: 10px; padding: 28px clamp(18px, 4vw, 52px); font-family: var(--serif); font-size: var(--wfs, 1.12rem); line-height: 1.7; overflow-wrap: break-word; }
+#webText h1, #webText h2, #webText h3, #webText h4 { font-family: var(--serif); line-height: 1.3; margin: 1.2em 0 .5em; color: #111; }
+#webText h1 { font-size: 1.5em; margin-top: 0; } #webText h2 { font-size: 1.25em; } #webText h3, #webText h4 { font-size: 1.08em; }
+#webText p { margin: 0 0 1em; } #webText ul, #webText ol { margin: 0 0 1em 1.2em; padding: 0; } #webText li { margin: .2em 0; }
+#webText blockquote { margin: 0 0 1em; padding-left: 1em; border-left: 3px solid #d0d5dc; color: #444; }
+#webText pre { white-space: pre-wrap; font-size: .85em; background: #f4f6f8; padding: 10px; border-radius: 6px; }
+#webText a { color: #1f4e79; }
+#webText ::selection { background: rgba(31, 78, 121, .25); }
+#webText .wmsg { font-family: var(--sans); font-size: 1rem; color: #444; }
+@media (min-width: 900px) and (orientation: landscape), (min-width: 1100px) {
+  body.webreading.notes-open .wbody { grid-template-columns: minmax(0, 1fr) min(380px, 34vw); }
+}
+/* Başlık seçme penceresi */
+#sheetBack { position: fixed; inset: 0; z-index: 60; background: rgba(15, 19, 24, .45); display: flex; align-items: center; justify-content: center; padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
+#sheet { background: var(--surface); color: var(--ink); border-radius: 14px; width: min(520px, 100%); max-height: 100%; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.3); overflow: hidden; }
+.sh-top { padding: 14px 16px 10px; border-bottom: 1px solid var(--line); }
+.sh-top h3 { margin: 0 0 6px; font: 650 1.08rem var(--serif); }
+.sh-quote { font-family: var(--serif); font-size: .95rem; line-height: 1.45; border-left: 4px solid var(--mark); padding: 2px 0 2px 10px; color: var(--ink); max-height: 4.4em; overflow: hidden; }
+.sh-top textarea { margin-top: 8px; min-height: 44px; font-size: .95rem; }
+.sh-list { overflow: auto; padding: 6px 8px; flex: 1; min-height: 120px; }
+.sh-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; text-align: left; font: 500 1rem var(--sans); color: var(--ink); background: none; border: 0; border-radius: 9px; padding: 12px 10px; min-height: 50px; cursor: pointer; }
+.sh-item:hover, .sh-item:focus-visible { background: var(--sunk); }
+.sh-item.l1 { font-weight: 650; }
+.sh-item.l2 { padding-left: 28px; } .sh-item.l3 { padding-left: 46px; font-weight: 400; } .sh-item.l4 { padding-left: 64px; font-weight: 400; }
+.sh-item.last { background: color-mix(in srgb, var(--mark) 22%, var(--surface)); }
+.sh-item small { font: 400 .78rem var(--sans); color: var(--muted); flex: none; }
+.sh-item.none { color: var(--muted); font-weight: 400; }
+.sh-item.new { color: var(--accent); }
+.sh-bot { display: flex; justify-content: flex-end; padding: 8px 12px; border-top: 1px solid var(--line); }
 </style>
 </head>
 <body data-pane="side">
@@ -333,24 +371,38 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     <section class="view" id="vForm" hidden>
       <section class="card" style="max-width:760px">
         <h2 id="formTitle">Yeni makale</h2>
-        <p class="hint" style="margin-top:0">Orijinal makalenin DOI'sini girersen bilgiler kendiliğinden dolar. DOI yoksa alanları elle doldur. Yalnızca başlık zorunlu.</p>
+        <p class="hint" style="margin-top:0">DOI'yi ya da sayfanın bağlantısını yapıştırıp <strong>Getir</strong>'e bas. Bağlantıda DOI varsa dergi makalesi olarak, yoksa web sayfası olarak kaydedilir. Alanları elle de doldurabilirsin; yalnızca başlık zorunlu.</p>
         <div class="row">
-          <div><label for="fDoi">DOI</label><input id="fDoi" type="text" placeholder="10.1000/xyz123" spellcheck="false" autocapitalize="off"></div>
+          <div><label for="fDoi">DOI ya da bağlantı</label><input id="fDoi" type="text" placeholder="10.1000/xyz123 ya da https://…" spellcheck="false" autocapitalize="off" inputmode="url"></div>
           <button id="doiGo" class="btn" type="button">Getir</button>
         </div>
         <p id="doiMsg" class="hint" aria-live="polite"></p>
+        <div class="seg2" role="group" aria-label="Kaynak türü"><button type="button" data-type="article" aria-pressed="true">Dergi makalesi</button><button type="button" data-type="web" aria-pressed="false">Web sayfası</button></div>
         <label for="fTitle">Başlık</label>
         <input id="fTitle" type="text">
-        <label for="fAuthors">Yazarlar (her satıra bir yazar: Soyad, Ad)</label>
+        <label for="fAuthors" id="fAuthorsLabel">Yazarlar (her satıra bir yazar: Soyad, Ad)</label>
         <textarea id="fAuthors" placeholder="Smith, John&#10;Yılmaz, Ayşe Nur"></textarea>
-        <div class="grid2">
-          <div><label for="fYear">Yıl</label><input id="fYear" type="text" inputmode="numeric"></div>
-          <div><label for="fJournal">Dergi</label><input id="fJournal" type="text"></div>
+        <div class="f-article">
+          <div class="grid2">
+            <div><label for="fYear">Yıl</label><input id="fYear" type="text" inputmode="numeric"></div>
+            <div><label for="fJournal">Dergi</label><input id="fJournal" type="text"></div>
+          </div>
+          <div class="grid3">
+            <div><label for="fVolume">Cilt</label><input id="fVolume" type="text"></div>
+            <div><label for="fIssue">Sayı</label><input id="fIssue" type="text"></div>
+            <div><label for="fPages">Sayfalar</label><input id="fPages" type="text" placeholder="12–30"></div>
+          </div>
         </div>
-        <div class="grid3">
-          <div><label for="fVolume">Cilt</label><input id="fVolume" type="text"></div>
-          <div><label for="fIssue">Sayı</label><input id="fIssue" type="text"></div>
-          <div><label for="fPages">Sayfalar</label><input id="fPages" type="text" placeholder="12–30"></div>
+        <div class="f-web" hidden>
+          <label for="fSite">Site adı</label>
+          <input id="fSite" type="text" placeholder="ör. Türk Psikiyatri Derneği">
+          <div class="grid3">
+            <div><label for="fWYear">Yıl</label><input id="fWYear" type="text" inputmode="numeric"></div>
+            <div><label for="fMonth">Ay (1–12)</label><input id="fMonth" type="text" inputmode="numeric"></div>
+            <div><label for="fDay">Gün</label><input id="fDay" type="text" inputmode="numeric"></div>
+          </div>
+          <label for="fUrl">Bağlantı</label>
+          <input id="fUrl" type="url" placeholder="https://…" spellcheck="false" autocapitalize="off">
         </div>
         <label>APA önizleme</label>
         <div id="fPreview" class="bib"></div>
@@ -374,7 +426,14 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
             <p class="hint">Metin içi: <span id="aCite"></span></p>
             <div class="btns"><button id="editArticle" class="btn" type="button">Bilgileri düzenle</button></div>
           </section>
-          <section class="card">
+          <section class="card" id="webBox" hidden>
+            <h2>Web sayfası</h2>
+            <button id="webRead" class="btn primary readbtn" type="button">Uygulamada oku</button>
+            <div class="pdfrow"><a id="webSafari" class="btn" target="_blank" rel="noopener">Safari'de aç</a><button id="webRefresh" class="btn" type="button">Metni yeniden al</button></div>
+            <p class="urltext" id="webUrl"></p>
+            <p id="webMsg" class="hint" aria-live="polite"></p>
+          </section>
+          <section class="card" id="pdfBox">
             <h2>Türkçe PDF</h2>
             <div id="pdfEmpty">
               <p class="hint" style="margin-top:0">Bu makalenin kendi çevirdiğin PDF'ini ekle. PDF yalnızca bu cihazda saklanır. Zorunlu değil; PDF'siz de not alabilirsin.</p>
@@ -477,6 +536,16 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
       <div id="dNotes"></div>
     </section>
   </div>
+</section>
+<section id="webCard" hidden>
+  <div class="rtop">
+    <button id="wClose" class="tb" type="button">‹ Kapat</button>
+    <div class="rtitle"><strong id="wTitle"></strong><span id="wCite"></span></div>
+    <div class="grp"><button id="wSmaller" class="tb" type="button" aria-label="Yazıyı küçült">A−</button><button id="wBigger" class="tb" type="button" aria-label="Yazıyı büyüt">A+</button></div>
+    <a id="wSafari" class="tb" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Safari'de aç</a>
+    <button id="wNotesBtn" class="tb primary" type="button">Notlar</button>
+  </div>
+  <div class="wbody"><div id="webScroll"><article id="webText"></article></div></div>
 </section>
 <div id="dock" hidden>
   <button id="addSel" class="btn primary" type="button" hidden>Seçimi nota ekle</button>
@@ -609,9 +678,21 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     const title = String(m.title || "").replace(/\s+/g, " ").replace(/[.\s]+$/, "");
     const tail = (m.journal ? ` <i>${esc(m.journal)}</i>${m.volume ? `, <i>${esc(m.volume)}</i>` : ""}${m.issue ? `(${esc(m.issue)})` : ""}${m.pages ? `, ${esc(String(m.pages).replace(/-/g, "–"))}` : ""}.` : "") + (m.doi ? ` https://doi.org/${esc(m.doi)}` : "");
     let bib;
-    const t = m.journal ? esc(title) : `<i>${esc(title)}</i>`;
-    if (authors) bib = `${authors} (${year}). ${t}.${tail}`;
-    else bib = `${t}. (${year}).${tail}`;
+    if (authors && !/\.$/.test(plain(authors))) authors += "."; // kurum adından sonra da nokta (APA)
+    if (m.type === "web") {
+      const MONTHS = loc === "tr-TR" ? ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"] : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const mo = parseInt(m.month, 10), dd = parseInt(m.day, 10);
+      let date = year;
+      if (m.year && mo >= 1 && mo <= 12) date += loc === "tr-TR" ? `, ${dd ? dd + " " : ""}${MONTHS[mo - 1]}` : `, ${MONTHS[mo - 1]}${dd ? " " + dd : ""}`;
+      const authorPlain = plain(authors).replace(/\.$/, "");
+      const site = m.site && m.site !== authorPlain ? ` ${esc(m.site)}.` : "";
+      const url = m.url ? ` ${esc(m.url)}` : "";
+      bib = authors ? `${authors} (${date}). <i>${esc(title)}</i>.${site}${url}` : `<i>${esc(title)}</i>. (${date}).${site}${url}`;
+    } else {
+      const t = m.journal ? esc(title) : `<i>${esc(title)}</i>`;
+      if (authors) bib = `${authors} (${year}). ${t}.${tail}`;
+      else bib = `${t}. (${year}).${tail}`;
+    }
     const fam = au.map((a) => a.family || a.name);
     const etal = loc === "tr-TR" ? "vd." : "et al.";
     const who = fam.length === 0 ? (title.split(" ").slice(0, 4).join(" ") || "?") : fam.length === 1 ? fam[0] : fam.length === 2 ? `${fam[0]} & ${fam[1]}` : `${fam[0]} ${etal}`;
@@ -621,8 +702,8 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
   // Yapıştırılan metnin içinden DOI'yi ayıkla (doi.org bağlantısı, "DOI:" ön eki, görünmez karakterler)
   const cleanDoi = (d) => {
     const s = String(d || "").replace(/[\u00AD\u200B-\u200D\u2060\uFEFF]/g, "").replace(/[‐‑‒–—]/g, "-");
-    const m = s.match(/10\.\d{4,9}\/[^\s"'<>]+/);
-    return m ? decodeURIComponentSafe(m[0]).replace(/[.,;:)\]]+$/, "") : s.trim();
+    const m = decodeURIComponentSafe(s).match(/10\.\d{4,9}\/[^\s"'<>?#]+/);
+    return m ? m[0].replace(/\/(full|pdf|epdf|pdfdirect|abstract|html|fulltext|full-text|references|suppl_file)(\/.*)?$/i, "").replace(/[.,;:)\]]+$/, "") : s.trim();
   };
   function decodeURIComponentSafe(x) { try { return decodeURIComponent(x); } catch (e) { return x; } }
   const doiPath = (doi) => doi.split("/").map(encodeURIComponent).join("/");
@@ -852,7 +933,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
       b.setAttribute("aria-current", String(!!A && A.id === a.id && view === "article"));
       b.innerHTML = '<strong></strong><div class="sub"></div>';
       b.children[0].textContent = a.meta.title || "(başlıksız)";
-      b.children[1].innerHTML = esc(apa(a.meta).cite) + " " + (a.pdfName ? '<span class="badge">PDF</span>' : "") + (n ? `<span class="badge">${n} not</span>` : "");
+      b.children[1].innerHTML = esc(apa(a.meta).cite) + " " + (a.meta.type === "web" ? '<span class="badge">Web</span>' : "") + (a.pdfName ? '<span class="badge">PDF</span>' : "") + (n ? `<span class="badge">${n} not</span>` : "");
       b.onclick = () => openArticle(a.id);
       li.append(b);
       ul.append(li);
@@ -862,31 +943,44 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
   }
   $("#libSearch").addEventListener("input", renderLib);
 
-  /* ---------- Makale ekle / düzenle ---------- */
-  let formFor = null;
-  const F = ["fDoi", "fTitle", "fAuthors", "fYear", "fJournal", "fVolume", "fIssue", "fPages"];
+  /* ---------- Kaynak ekle / düzenle ---------- */
+  let formFor = null, fType = "article", pendingWeb = null;
+  const FIELDS = ["fDoi", "fTitle", "fAuthors", "fYear", "fJournal", "fVolume", "fIssue", "fPages", "fSite", "fWYear", "fMonth", "fDay", "fUrl"];
+  function setType(t) {
+    fType = t;
+    document.querySelectorAll(".seg2 [data-type]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.type === t)));
+    document.querySelector(".f-article").hidden = t !== "article";
+    document.querySelector(".f-web").hidden = t !== "web";
+    $("#fAuthorsLabel").textContent = t === "web" ? "Yazar ya da kurum (her satıra bir: Soyad, Ad ya da kurum adı)" : "Yazarlar (her satıra bir yazar: Soyad, Ad)";
+    preview();
+  }
+  document.querySelectorAll(".seg2 [data-type]").forEach((b) => (b.onclick = () => setType(b.dataset.type)));
   function formMeta() {
     const au = $("#fAuthors").value.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
       const [fam, ...rest] = l.split(",");
       return rest.length ? { family: fam.trim(), given: rest.join(",").trim() } : { name: l };
     });
-    return { title: val("fTitle"), au, year: val("fYear"), journal: val("fJournal"), volume: val("fVolume"), issue: val("fIssue"), pages: val("fPages"), doi: cleanDoi(val("fDoi")) };
+    if (fType === "web") return { type: "web", title: val("fTitle"), au, year: val("fWYear"), month: val("fMonth"), day: val("fDay"), site: val("fSite"), url: val("fUrl") };
+    const d = cleanDoi(val("fDoi"));
+    return { type: "article", title: val("fTitle"), au, year: val("fYear"), journal: val("fJournal"), volume: val("fVolume"), issue: val("fIssue"), pages: val("fPages"), doi: /^10\.\d{4,9}\//.test(d) ? d : "" };
   }
   function fillForm(m) {
     m = m || {};
-    $("#fDoi").value = m.doi || "";
+    $("#fDoi").value = m.type === "web" ? m.url || "" : m.doi || "";
     $("#fTitle").value = m.title || "";
     $("#fAuthors").value = (m.au || []).map((a) => (a.family ? `${a.family}${a.given ? ", " + a.given : ""}` : a.name)).join("\n");
     $("#fYear").value = m.year || ""; $("#fJournal").value = m.journal || "";
     $("#fVolume").value = m.volume || ""; $("#fIssue").value = m.issue || ""; $("#fPages").value = m.pages || "";
-    preview();
+    $("#fSite").value = m.site || ""; $("#fWYear").value = m.year || ""; $("#fMonth").value = m.month || ""; $("#fDay").value = m.day || ""; $("#fUrl").value = m.url || "";
+    setType(m.type === "web" ? "web" : "article");
   }
   function preview() { const r = apa(formMeta()); $("#fPreview").innerHTML = val("fTitle") ? r.bib : '<span class="muted">Başlık girince burada görünecek.</span>'; $("#fCite").textContent = val("fTitle") ? r.cite : ""; }
-  F.forEach((id) => $("#" + id).addEventListener("input", preview));
+  FIELDS.forEach((id) => $("#" + id).addEventListener("input", preview));
   function openForm(id) {
     formFor = id || null;
+    pendingWeb = null;
     const a = id ? art(id) : null;
-    $("#formTitle").textContent = a ? "Makale bilgileri" : "Yeni makale";
+    $("#formTitle").textContent = a ? "Kaynak bilgileri" : "Yeni kaynak";
     $("#deleteArticle").hidden = !a;
     $("#doiMsg").textContent = ""; $("#formMsg").textContent = "";
     fillForm(a ? a.meta : null);
@@ -895,28 +989,57 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
   }
   $("#newArticle").onclick = () => openForm(null);
   $("#editArticle").onclick = () => openForm(A && A.id);
+  const siteFromUrl = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } };
   $("#doiGo").onclick = async () => {
-    const doi = cleanDoi(val("fDoi"));
+    const raw = val("fDoi");
     const msg = $("#doiMsg");
-    if (!/^10\.\d{4,9}\/\S+$/.test(doi)) { msg.textContent = "Bu metinde DOI bulamadım. DOI 10. ile başlar, ör. 10.1093/schbul/sbz001"; return; }
-    $("#fDoi").value = doi;
-    msg.textContent = "Bilgiler getiriliyor…";
+    const doi = cleanDoi(raw);
+    const isDoi = /^10\.\d{4,9}\/\S+$/.test(doi);
+    let url = raw;
+    if (!isDoi && !/^https?:\/\//i.test(url) && /^[\w-]+(\.[\w-]+)+(\/|$)/.test(url)) url = "https://" + url;
+    const isUrl = /^https?:\/\/\S+$/i.test(url);
+    if (!isDoi && !isUrl) { msg.textContent = "DOI (10. ile başlar) ya da bir bağlantı (https://…) yapıştır."; return; }
     $("#doiGo").disabled = true;
     try {
-      const m = await fetchMeta(doi);
-      fillForm({ ...m, doi: m.doi || doi });
-      msg.textContent = "Bilgiler geldi. APA başlıkları cümle düzeninde ister (yalnızca ilk kelime ve özel adlar büyük); gerekirse başlığı düzelt, sonra kaydet.";
-    } catch (e) {
-      msg.textContent = `“${doi}” için bilgi bulunamadı (${e.message}). DOI'yi makalenin ilk sayfasından ya da dergi sitesinden kontrol et; olmazsa alanları elle doldurabilirsin.`;
+      if (isDoi) {
+        msg.textContent = "Makale bilgileri getiriliyor…";
+        try {
+          const m = await fetchMeta(doi);
+          fillForm({ ...m, type: "article", doi: m.doi || doi });
+          $("#fDoi").value = doi;
+          msg.textContent = "Bilgiler geldi. APA başlıkları cümle düzeninde ister (yalnızca ilk kelime ve özel adlar büyük); gerekirse başlığı düzelt, sonra kaydet.";
+          return;
+        } catch (e) {
+          if (!isUrl) { msg.textContent = `“${doi}” için bilgi bulunamadı (${e.message}). DOI'yi kontrol et ya da alanları elle doldur.`; return; }
+          msg.textContent = "Bağlantıdaki DOI ile bilgi bulunamadı; web sayfası olarak deneniyor…";
+        }
+      }
+      // web sayfası
+      setType("web");
+      $("#fUrl").value = url;
+      if (!val("fSite")) $("#fSite").value = siteFromUrl(url);
+      msg.textContent = "Sayfa bilgileri getiriliyor…";
+      try {
+        const w = await fetchWebText(url);
+        pendingWeb = { url, data: w };
+        if (w.title) $("#fTitle").value = w.title;
+        if (w.date) { $("#fWYear").value = w.date.y || ""; $("#fMonth").value = w.date.m || ""; $("#fDay").value = w.date.d || ""; }
+        msg.textContent = "Başlık ve tarih geldi. Yazar ya da kurumu ve site adını kontrol et, sonra kaydet.";
+      } catch (e) {
+        msg.textContent = "Bu sayfanın bilgileri otomatik alınamadı. Başlığı, yazarı ve tarihi sayfaya bakarak elle doldur.";
+      }
+      preview();
     } finally { $("#doiGo").disabled = false; }
   };
-  $("#saveArticle").onclick = () => {
+  $("#saveArticle").onclick = async () => {
     const m = formMeta();
     if (!m.title) { $("#formMsg").textContent = "Başlık gerekli."; $("#fTitle").focus(); return; }
     let a = formFor && art(formFor);
     if (a) a.meta = m;
     else { a = { id: uid(), meta: m, created: Date.now(), pdfName: "" }; DB.articles.push(a); }
     saveDB();
+    if (pendingWeb && m.type === "web" && pendingWeb.url === m.url) { try { await IDB.put("web:" + a.id, { ...pendingWeb.data, fetched: Date.now() }); } catch (e) {} }
+    pendingWeb = null;
     openArticle(a.id);
   };
   $("#deleteArticle").onclick = async () => {
@@ -928,11 +1051,108 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     DB.notes = DB.notes.filter((x) => x.articleId !== a.id);
     saveDB();
     store.del("ok:hl:" + a.id);
-    try { await IDB.del(a.id); await IDB.del(a.id, "ink"); } catch (e) {}
+    try { await IDB.del(a.id); await IDB.del(a.id, "ink"); await IDB.del("web:" + a.id); } catch (e) {}
     formFor = null;
     show("welcome");
   };
 
+  /* ---------- Web sayfası metni ---------- */
+  // Sayfanın okunabilir metnini okuma servisi (r.jina.ai) üzerinden alır
+  async function fetchWebText(url) {
+    const r = await fetch("https://r.jina.ai/" + url);
+    if (!r.ok) throw new Error("hata " + r.status);
+    const txt = await r.text();
+    const head = txt.split(/\nMarkdown Content:\s*\n/);
+    const meta = head.length > 1 ? head[0] : "";
+    const md = (head.length > 1 ? head.slice(1).join("\n") : txt).trim();
+    const title = ((meta.match(/^Title:\s*(.*)$/m) || [])[1] || "").trim();
+    const pub = ((meta.match(/^Published Time:\s*(.*)$/m) || [])[1] || "").trim();
+    let date = null;
+    const dm = pub.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (dm) date = { y: dm[1], m: String(+dm[2]), d: String(+dm[3]) };
+    if (!md || md.length < 40) throw new Error("metin boş");
+    return { title, date, md };
+  }
+  function mdInline(t) {
+    t = esc(t);
+    t = t.replace(/!\[[^\]]*\]\([^)]*\)/g, "");
+    t = t.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)[^)]*\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/__([^_]+)__/g, "<strong>$1</strong>");
+    t = t.replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,;:!?]|$)/g, "$1<em>$2</em>").replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,;:!?]|$)/g, "$1<em>$2</em>");
+    t = t.replace(/`([^`]+)`/g, "<code>$1</code>");
+    return t;
+  }
+  function mdToHtml(md) {
+    const out = [];
+    const blocks = md.replace(/\r/g, "").split(/\n{2,}/);
+    for (let b of blocks) {
+      b = b.replace(/^\s+|\s+$/g, "");
+      if (!b) continue;
+      if (/^```/.test(b)) { out.push("<pre>" + esc(b.replace(/^```\w*\n?|```$/g, "")) + "</pre>"); continue; }
+      const h = b.match(/^(#{1,6})\s+(.*)$/);
+      if (h && !b.includes("\n")) { const lv = Math.min(4, h[1].length + 1); out.push(`<h${lv}>${mdInline(h[2])}</h${lv}>`); continue; }
+      if (/^[^\n]+\n[=-]{3,}$/.test(b)) { out.push(`<h2>${mdInline(b.split("\n")[0])}</h2>`); continue; }
+      const lines = b.split("\n");
+      if (lines.every((l) => /^\s*[-*+]\s+/.test(l))) { out.push("<ul>" + lines.map((l) => "<li>" + mdInline(l.replace(/^\s*[-*+]\s+/, "")) + "</li>").join("") + "</ul>"); continue; }
+      if (lines.every((l) => /^\s*\d+[.)]\s+/.test(l))) { out.push("<ol>" + lines.map((l) => "<li>" + mdInline(l.replace(/^\s*\d+[.)]\s+/, "")) + "</li>").join("") + "</ol>"); continue; }
+      if (lines.every((l) => /^>/.test(l))) { out.push("<blockquote><p>" + mdInline(lines.map((l) => l.replace(/^>\s?/, "")).join(" ")) + "</p></blockquote>"); continue; }
+      if (/^[-*_]{3,}$/.test(b)) continue;
+      const html = mdInline(lines.join(" ")).trim();
+      if (html) out.push("<p>" + html + "</p>");
+    }
+    return out.join("\n");
+  }
+  async function getWebText(force) {
+    let rec = null;
+    if (!force) { try { rec = await IDB.get("web:" + A.id); } catch (e) {} }
+    if (!rec) { rec = { ...(await fetchWebText(A.meta.url)), fetched: Date.now() }; try { await IDB.put("web:" + A.id, rec); } catch (e) {} }
+    return rec;
+  }
+  async function openWebReader(force) {
+    if (!A || !A.meta.url) return;
+    const r = apa(A.meta);
+    $("#wTitle").textContent = A.meta.title;
+    $("#wCite").textContent = r.cite + " · " + (A.meta.site || siteFromUrl(A.meta.url));
+    $("#wSafari").href = A.meta.url;
+    $("#webText").innerHTML = '<p class="wmsg">Sayfanın metni alınıyor…</p>';
+    $("#webText").style.setProperty("--wfs", store.get("ok:wfs", 1.12) + "rem");
+    $("#webCard").hidden = false;
+    $("#webCard .wbody").append($("#noteCard"));
+    document.body.classList.add("reading", "webreading");
+    if (!wideReader()) document.body.classList.remove("notes-open");
+    else if (store.get("ok:panel", true)) document.body.classList.add("notes-open");
+    $("#dock").hidden = false;
+    renderArticleNotes();
+    try {
+      const rec = await getWebText(force);
+      $("#webText").innerHTML = `<h1>${esc(A.meta.title)}</h1>` + mdToHtml(rec.md);
+      $("#webScroll").scrollTop = (store.get("ok:wpos:" + A.id, 0)) * $("#webScroll").scrollHeight;
+    } catch (e) {
+      $("#webText").innerHTML = `<p class="wmsg"><strong>Bu sayfanın metni uygulamaya alınamadı.</strong></p><p class="wmsg">Bazı siteler (özellikle üyelik isteyenler) metinlerinin dışarıdan alınmasına izin vermiyor. Yukarıdaki <strong>Safari'de aç</strong> ile sayfayı aç; istersen ekranı bölerek Okuma'yı yanına al. Not almak istediğin yeri Safari'de seçip <strong>Kopyala</strong> de, sonra burada Notlar panelindeki <strong>Panodan alıntı</strong>'ya bas.</p>`;
+    }
+  }
+  function closeWebReader() {
+    $("#webCard").hidden = true;
+    $("#readerCard .rbody").append($("#noteCard"));
+    document.body.classList.remove("reading", "webreading");
+    $("#dock").hidden = true;
+    $("#addSel").hidden = true;
+  }
+  $("#webRead").onclick = () => openWebReader(false);
+  $("#webRefresh").onclick = async () => { try { $("#webMsg").textContent = "Metin yeniden alınıyor…"; await getWebText(true); $("#webMsg").textContent = "Metin güncellendi."; } catch (e) { $("#webMsg").textContent = "Metin alınamadı. Safari'de açıp Panodan alıntı ile not alabilirsin."; } };
+  $("#wClose").onclick = () => { closeWebReader(); if (store.get("ok:panel", true)) document.body.classList.add("notes-open"); openArticle(A.id); };
+  $("#wNotesBtn").onclick = () => { document.body.classList.toggle("notes-open"); if (wideReader()) store.set("ok:panel", document.body.classList.contains("notes-open")); };
+  const wfs = (d) => { const v = Math.max(0.9, Math.min(1.8, Math.round((store.get("ok:wfs", 1.12) + d) * 100) / 100)); store.set("ok:wfs", v); $("#webText").style.setProperty("--wfs", v + "rem"); };
+  $("#wSmaller").onclick = () => wfs(-0.08);
+  $("#wBigger").onclick = () => wfs(0.08);
+  let wst;
+  $("#webScroll").addEventListener("scroll", () => { clearTimeout(wst); wst = setTimeout(() => { if (A && $("#webScroll").scrollHeight) store.set("ok:wpos:" + A.id, $("#webScroll").scrollTop / $("#webScroll").scrollHeight); }, 200); }, { passive: true });
+  function readWebSelection() {
+    const sel = getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount || !$("#webText").contains(sel.anchorNode)) return null;
+    const text = sel.toString().replace(/\s+/g, " ").trim();
+    return text.length < 2 ? null : { text, page: "", parts: [] };
+  }
 
   $("#cancelForm").onclick = () => (formFor && art(formFor) ? openArticle(formFor) : show("welcome"));
 
@@ -951,6 +1171,10 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     $("#rTitle").textContent = A.meta.title;
     $("#rCite").textContent = r.cite;
     $("#pdfMsg").textContent = "";
+    const isWeb = A.meta.type === "web" && !!A.meta.url;
+    $("#webBox").hidden = !isWeb;
+    if (isWeb) { $("#webSafari").href = A.meta.url; $("#webUrl").textContent = A.meta.url; $("#webMsg").textContent = ""; }
+    $("#pdfBox").querySelector("h2").textContent = isWeb ? "PDF (isteğe bağlı)" : "Türkçe PDF";
     showPdfState();
     show("article");
     renderArticleNotes();
@@ -1039,7 +1263,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
   // Not formu: aktif başlık + serbest not (makale sayfasında ve okurken panelde)
   document.querySelectorAll("[data-form]").forEach((box) => {
     const k = box.dataset.form;
-    box.innerHTML = `<div class="active-h"><label>Aktif başlık: yeni notlar buraya eklenir</label><select data-hsel="active" aria-label="Aktif başlık"></select></div><div class="nform"><textarea class="ft" placeholder="Kendi notunu yaz"></textarea><div class="row"><div class="pg"><input class="fp" type="text" inputmode="numeric" placeholder="Sayfa"></div><button class="btn primary fa" type="button">Not ekle</button></div></div>`;
+    box.innerHTML = `<div class="active-h"><label>Yazacağın notun başlığı</label><select data-hsel="active" aria-label="Aktif başlık"></select></div><div class="nform"><textarea class="ft" placeholder="Kendi notunu yaz"></textarea><div class="row"><div class="pg"><input class="fp" type="text" inputmode="numeric" placeholder="Sayfa"></div><button class="btn fq" type="button" title="Safari'de kopyaladığın metni alıntı olarak ekler">Panodan alıntı</button><button class="btn primary fa" type="button">Not ekle</button></div></div>`;
     const sel = box.querySelector("select"), t = box.querySelector(".ft"), p = box.querySelector(".fp");
     fillHSelect(sel, activeH());
     bindHSelect(sel, (id) => { store.set("ok:activeH", id); document.querySelectorAll('select[data-hsel="active"]').forEach((s) => { if (s !== sel) fillHSelect(s, id); }); });
@@ -1048,6 +1272,14 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     t.value = dr.t || ""; p.value = dr.p || "";
     const keep = () => store.set(dk, { t: t.value, p: p.value });
     t.addEventListener("input", keep); p.addEventListener("input", keep);
+    box.querySelector(".fq").onclick = async () => {
+      if (!A) return;
+      let text = "";
+      try { text = (await navigator.clipboard.readText()) || ""; } catch (e) {}
+      text = text.replace(/(\p{Ll})-\s+(\p{Ll})/gu, "$1$2").replace(/\s+/g, " ").trim();
+      if (!text) { toast("Panoda metin yok. Önce Safari'de bir yeri seçip Kopyala de."); return; }
+      addQuoteNote({ text, page: p.value.trim(), parts: [] });
+    };
     box.querySelector(".fa").onclick = () => {
       if (!A) return;
       if (!t.value.trim()) { t.focus(); return; }
@@ -1060,12 +1292,63 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     };
   });
 
+  // Başlık seçme penceresi: alıntı ancak bir başlığa (ya da Başlıksız'a) dokununca eklenir
+  let sheetOpen = false;
+  function pickHeading(text) {
+    return new Promise((resolve) => {
+      sheetOpen = true;
+      const last = store.get("ok:lastPick", null);
+      const back = document.createElement("div");
+      back.id = "sheetBack";
+      back.innerHTML = `<div id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle"><div class="sh-top"><h3 id="shTitle">Bu alıntı hangi başlığa?</h3><div class="sh-quote"></div><textarea placeholder="Yorumun (isteğe bağlı)" aria-label="Yorum"></textarea></div><div class="sh-list"></div><div class="sh-bot"><button type="button" class="btn">Vazgeç</button></div></div>`;
+      back.querySelector(".sh-quote").textContent = text;
+      const list = back.querySelector(".sh-list");
+      const done = (r) => { sheetOpen = false; back.remove(); document.removeEventListener("keydown", onKey); resolve(r); };
+      const openedAt = Date.now();
+      const early = () => Date.now() - openedAt < 400; // açan dokunuşun yanlışlıkla seçim yapmasını önle
+      const choose = (hid) => { if (early()) return; store.set("ok:lastPick", hid); done({ hid, comment: back.querySelector("textarea").value.trim() }); };
+      const item = (label, cls, onClick, tag) => {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "sh-item " + cls;
+        b.innerHTML = "<span></span>" + (tag ? `<small>${tag}</small>` : "");
+        b.firstChild.textContent = label;
+        b.onclick = onClick;
+        list.append(b);
+        return b;
+      };
+      let lastBtn = null;
+      for (const h of DB.outline) {
+        const b = item(h.label || "(adsız başlık)", "l" + h.level + (h.id === last ? " last" : ""), () => choose(h.id), h.id === last ? "son kullanılan" : "");
+        if (h.id === last) lastBtn = b;
+      }
+      item("Başlıksız", "none" + (last === "" ? " last" : ""), () => choose(""), last === "" ? "son kullanılan" : "");
+      item("＋ Yeni başlık…", "new", () => {
+        if (early()) return;
+        const label = (prompt("Yeni başlık (ör. 2.3. Tedavi Yaklaşımları)") || "").trim();
+        if (!label) return;
+        const h = addHeading(label);
+        refreshHeadingUI();
+        choose(h.id);
+      });
+      back.querySelector(".sh-bot button").onclick = () => done(null);
+      back.addEventListener("click", (e) => { if (e.target === back && !early()) done(null); });
+      const onKey = (e) => { if (e.key === "Escape") done(null); };
+      document.addEventListener("keydown", onKey);
+      document.body.append(back);
+      if (lastBtn) lastBtn.scrollIntoView({ block: "center" });
+    });
+  }
+
   // PDF'ten gelen alıntı
-  function addQuoteNote(d) {
-    if (!A) return;
+  async function addQuoteNote(d) {
+    if (!A || sheetOpen) return;
+    try { getSelection().removeAllRanges(); } catch (e) {}
+    $("#addSel").hidden = true;
+    const pick = await pickHeading(d.text);
+    if (!pick || !A) return;
     const id = uid();
-    const hid = activeH();
-    DB.notes.push({ id, articleId: A.id, kind: "quote", hid, text: d.text, page: d.page, comment: "", created: Date.now() });
+    const hid = pick.hid;
+    DB.notes.push({ id, articleId: A.id, kind: "quote", hid, text: d.text, page: d.page, comment: pick.comment, created: Date.now() });
     saveDB();
     for (const part of d.parts || []) S.hl.push({ id, page: part.page, rects: part.rects });
     store.set("ok:hl:" + A.id, S.hl);
@@ -1278,7 +1561,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     return { text, page: parts[0].page, parts };
   }
   document.addEventListener("selectionchange", () => {
-    const d = readSelection();
+    const d = readSelection() || readWebSelection();
     if (d) { selCache = d; clearTimeout(hideT); $("#addSel").hidden = false; return; }
     clearTimeout(hideT);
     hideT = setTimeout(() => { $("#addSel").hidden = true; selCache = null; }, 800);
@@ -1286,7 +1569,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
 
   function addClip(ev) {
     if (ev) ev.preventDefault();
-    const d = readSelection() || selCache;
+    const d = readSelection() || readWebSelection() || selCache;
     if (!d || !A) return;
     addQuoteNote(d);
     selCache = null;
