@@ -1051,18 +1051,20 @@ body.reading #dock { z-index: 35; }
   const drawsWith = (e) => drawingTool() && (e.pointerType === "pen" || e.pointerType === "mouse" || (e.pointerType === "touch" && T.finger));
   let cur = null, pinch = null;
   pagesEl.addEventListener("touchstart", (e) => {
+    if (e.target.closest && e.target.closest("#bubble")) return;
     if (e.touches.length === 2 && (!cur || cur.tap)) { cur = null; startPinch(e); e.preventDefault(); return; }
     if (drawingTool() && (isStylus(e) || (T.finger && e.touches.length === 1))) e.preventDefault();
   }, { passive: false });
   pagesEl.addEventListener("touchmove", (e) => {
     if (pinch && e.touches.length === 2) { movePinch(e); e.preventDefault(); return; }
-    if (cur) e.preventDefault();
+    if (cur && !cur.tap) e.preventDefault();
   }, { passive: false });
   pagesEl.addEventListener("touchend", (e) => { if (pinch && e.touches.length < 2) endPinch(); });
   document.addEventListener("gesturestart", (e) => { if (document.body.classList.contains("reading")) e.preventDefault(); });
 
   function toPage(div, x, y, p) { const b = div.getBoundingClientRect(); return [Math.round(((x - b.left) / b.width) * 10000) / 10, Math.round(((y - b.top) / b.height) * p.H * 10) / 10]; }
   pagesEl.addEventListener("pointerdown", (e) => {
+    if (e.target.closest && e.target.closest("#bubble")) return;
     const div = e.target.closest && e.target.closest(".page");
     if (!div || e.button > 0) return;
     const p = R.pages[+div.dataset.page - 1];
@@ -1103,6 +1105,7 @@ body.reading #dock { z-index: 35; }
     (INK.strokes[c.p.n] = INK.strokes[c.p.n] || []).push(c.st);
     pushAction({ type: "add", page: c.p.n, strokes: [c.st] });
     saveInk();
+    if (c.st.t === "hl") showBubble(c.div, c.p, c.st, e.clientX, e.clientY);
   }
   pagesEl.addEventListener("pointerup", endPointer);
   pagesEl.addEventListener("pointercancel", endPointer);
@@ -1141,7 +1144,15 @@ body.reading #dock { z-index: 35; }
     hideBubble();
     const bub = document.createElement("div");
     bub.id = "bubble";
-    const add = (label, fn) => { const b = document.createElement("button"); b.type = "button"; b.textContent = label; b.onclick = (ev) => { ev.stopPropagation(); fn(); hideBubble(); }; bub.append(b); };
+    let done = false;
+    const add = (label, fn) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = label;
+      const run = (ev) => { ev.preventDefault(); ev.stopPropagation(); if (done) return; done = true; fn(); hideBubble(); };
+      b.addEventListener("pointerup", run);
+      b.addEventListener("click", run);
+      bub.append(b);
+    };
     if (st.t === "hl") add("Nota ekle", () => {
       const b = div.getBoundingClientRect();
       const pts = st.p.map(([sx, sy]) => [b.left + (sx / 1000) * b.width, b.top + (sy / p.H) * b.height]);
