@@ -123,7 +123,35 @@ label.btn input { position: absolute; width: 1px; height: 1px; opacity: 0; overf
 #dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; justify-content: center; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); pointer-events: none; }
 #dock .btn { pointer-events: auto; box-shadow: 0 4px 16px rgba(0,0,0,.18); min-height: 48px; padding: 10px 18px; }
 #toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(76px + env(safe-area-inset-bottom, 0px)); z-index: 21; background: var(--ink); color: var(--surface); padding: 8px 14px; border-radius: 99px; font-size: .9rem; }
-body.reading .wrap { padding-bottom: 96px; }
+/* Tam ekran okuyucu */
+body.reading { overflow: hidden; }
+body.reading #readerCard { position: fixed; inset: 0; z-index: 30; margin: 0; border: 0; border-radius: 0; display: flex; flex-direction: column; background: var(--sunk); padding: env(safe-area-inset-top, 0px) 0 0; }
+.rbar { display: flex; gap: 6px; align-items: center; padding: 6px 8px; background: var(--surface); border-bottom: 1px solid var(--line); overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex: none; }
+.rbar::-webkit-scrollbar { display: none; }
+.rbar .sep { width: 1px; align-self: stretch; background: var(--line); margin: 2px 2px; flex: none; }
+.tb { font: 500 .92rem var(--sans); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; min-height: 40px; min-width: 40px; padding: 6px 11px; cursor: pointer; flex: none; }
+.tb:disabled { opacity: .4; }
+.tb[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.tb.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.sw { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line); cursor: pointer; flex: none; padding: 0; }
+.sw[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); }
+#swatches { display: flex; gap: 6px; align-items: center; }
+#pageInfo, #zoomLabel { font-variant-numeric: tabular-nums; font-size: .9rem; color: var(--muted); padding: 0 4px; flex: none; }
+body.reading #pages { flex: 1; height: auto; padding: 10px 6px calc(90px + env(safe-area-inset-bottom, 0px)); touch-action: pan-x pan-y; }
+#pinner { transform-origin: 0 0; }
+.inkl { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; overflow: visible; }
+.page .textLayer { z-index: 3; }
+#pages.drawing .textLayer, #pages.drawing .textLayer span { user-select: none; -webkit-user-select: none; cursor: crosshair; }
+#bubble { position: absolute; z-index: 5; display: flex; gap: 6px; background: var(--ink); padding: 6px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+#bubble button { font: 500 .9rem var(--sans); border: 0; border-radius: 7px; padding: 8px 12px; min-height: 38px; background: var(--surface); color: var(--ink); cursor: pointer; }
+body.reading #noteCard { position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100vw); z-index: 40; margin: 0; border-radius: 0; border-width: 0 0 0 1px; overflow: auto; max-height: none; padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(105%); transition: transform .22s ease; box-shadow: -8px 0 30px rgba(0,0,0,.18); }
+body.reading.notes-open #noteCard { transform: none; }
+#noteClose { display: none; }
+body.reading #noteClose { display: inline-flex; }
+.notehead { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.notehead h2 { font-size: 1.08rem; }
+body.reading #dock { z-index: 35; }
+@media (prefers-reduced-motion: reduce) { body.reading #noteCard { transition: none; } }
 </style>
 </head>
 <body>
@@ -191,6 +219,7 @@ body.reading .wrap { padding-bottom: 96px; }
     </div>
     <div id="pdfLoaded" class="pdfrow" hidden>
       <span class="pdfname" id="pdfName"></span>
+      <button id="pdfOpen" class="btn primary" type="button">Oku</button>
       <label class="btn"><span>Değiştir</span><input id="pdfInput2" type="file" accept="application/pdf,.pdf"></label>
       <button id="pdfRemove" class="btn" type="button">Kaldır</button>
     </div>
@@ -200,20 +229,32 @@ body.reading .wrap { padding-bottom: 96px; }
 
   <div id="work">
   <section class="card" id="readerCard" hidden>
-    <div class="rtools">
-      <div class="grp"><button id="zoomOut" class="btn" type="button" aria-label="Küçült">−</button><span id="zoomLabel">%100</span><button id="zoomIn" class="btn" type="button" aria-label="Büyüt">+</button></div>
-      <div class="grp">
-        <button id="fingerMode" class="btn" type="button" aria-pressed="false">Parmakla işaretle</button>
-        <button id="undo" class="btn" type="button" disabled>Geri al</button>
-      </div>
-      <div class="grp"><span id="pageInfo"></span></div>
+    <div class="rbar" role="toolbar" aria-label="Okuyucu araçları">
+      <button id="rClose" class="tb" type="button" aria-label="Okuyucuyu kapat">✕</button>
+      <span class="sep"></span>
+      <button class="tb" type="button" data-tool="hand" aria-pressed="true" title="Kaydır ve metin seç">El</button>
+      <button class="tb" type="button" data-tool="pen" aria-pressed="false">Kalem</button>
+      <button class="tb" type="button" data-tool="hl" aria-pressed="false">Fosforlu</button>
+      <button class="tb" type="button" data-tool="eraser" aria-pressed="false">Silgi</button>
+      <span id="swatches"></span>
+      <button id="sizeBtn" class="tb" type="button" title="Kalınlık">İnce</button>
+      <button id="fingerDraw" class="tb" type="button" aria-pressed="false" title="Kalem yoksa parmakla çiz">Parmakla çiz</button>
+      <span class="sep"></span>
+      <button id="undo" class="tb" type="button" disabled>Geri al</button>
+      <button id="redo" class="tb" type="button" disabled>Yinele</button>
+      <span class="sep"></span>
+      <button id="zoomOut" class="tb" type="button" aria-label="Küçült">−</button>
+      <span id="zoomLabel">%100</span>
+      <button id="zoomIn" class="tb" type="button" aria-label="Büyüt">+</button>
+      <span id="pageInfo"></span>
+      <span class="sep"></span>
+      <button id="notesBtn" class="tb primary" type="button">Notlar</button>
     </div>
-    <p class="rhint" id="rhint">Apple Pencil ile metnin üstünden fosforlu kalem gibi geç; o kısım nota eklenir. Parmakla sayfayı kaydırırsın.</p>
-    <div id="pages"></div>
+    <div id="pages"><div id="pinner"></div></div>
   </section>
 
   <section class="card" id="noteCard" hidden>
-    <h2>Not</h2>
+    <div class="notehead"><h2>Not</h2><button id="noteClose" class="tb" type="button">PDF'e dön</button></div>
     <label for="target">Nereye eklensin</label>
     <select id="target"><option value="">Yeni not oluştur</option></select>
     <label for="title">Başlık (isteğe bağlı)</label>
@@ -238,7 +279,6 @@ body.reading .wrap { padding-bottom: 96px; }
 </div>
 <div id="dock" hidden>
   <button id="addSel" class="btn primary" type="button" hidden>Seçimi nota ekle</button>
-  <button id="goNote" class="btn" type="button">Not</button>
 </div>
 <div id="toast" role="status" hidden></div>
 
@@ -621,24 +661,26 @@ body.reading .wrap { padding-bottom: 96px; }
     open() {
       if (this.db) return Promise.resolve(this.db);
       return new Promise((res, rej) => {
-        const r = indexedDB.open("zotero-not", 1);
-        r.onupgradeneeded = () => r.result.createObjectStore("pdfs");
+        const r = indexedDB.open("zotero-not", 2);
+        r.onupgradeneeded = () => {
+          for (const n of ["pdfs", "ink"]) if (!r.result.objectStoreNames.contains(n)) r.result.createObjectStore(n);
+        };
         r.onsuccess = () => { this.db = r.result; res(this.db); };
         r.onerror = () => rej(r.error);
       });
     },
-    async op(mode, fn) {
+    async op(store, mode, fn) {
       const db = await this.open();
       return new Promise((res, rej) => {
-        const tx = db.transaction("pdfs", mode);
-        const req = fn(tx.objectStore("pdfs"));
+        const tx = db.transaction(store, mode);
+        const req = fn(tx.objectStore(store));
         tx.oncomplete = () => res(req && req.result);
         tx.onerror = () => rej(tx.error);
       });
     },
-    get(k) { return this.op("readonly", (st) => st.get(k)); },
-    put(k, v) { return this.op("readwrite", (st) => st.put(v, k)); },
-    del(k) { return this.op("readwrite", (st) => st.delete(k)); },
+    get(k, store = "pdfs") { return this.op(store, "readonly", (st) => st.get(k)); },
+    put(k, v, store = "pdfs") { return this.op(store, "readwrite", (st) => st.put(v, k)); },
+    del(k, store = "pdfs") { return this.op(store, "readwrite", (st) => st.delete(k)); },
   };
 
   async function restorePdf(key) {
@@ -662,7 +704,8 @@ body.reading .wrap { padding-bottom: 96px; }
   $("#pdfInput2").onchange = pickPdf;
   $("#pdfRemove").onclick = async () => {
     if (!S.item || !confirm("Türkçe PDF bu makaleden kaldırılsın mı? Zotero'daki notların etkilenmez.")) return;
-    try { await IDB.del(S.item.key); } catch (e) {}
+    try { await IDB.del(S.item.key); await IDB.del(S.item.key, "ink"); } catch (e) {}
+    INK.strokes = {};
     S.hl = [];
     saveHl();
     closeReader();
@@ -697,6 +740,11 @@ body.reading .wrap { padding-bottom: 96px; }
     }
     $("#pdfMsg").textContent = "";
     showPdfState(name);
+    R.lastName = name;
+    INK.key = S.item.key;
+    INK.undo = []; INK.redo = [];
+    try { INK.strokes = (await IDB.get(S.item.key, "ink")) || {}; } catch (e) { INK.strokes = {}; }
+    updateUndo();
     document.body.classList.add("reading");
     $("#readerCard").hidden = false;
     $("#dock").hidden = false;
@@ -708,22 +756,26 @@ body.reading .wrap { padding-bottom: 96px; }
     return true;
   }
   function closeReader() {
+    saveInkNow();
+    hideBubble();
+    document.body.classList.remove("notes-open");
     R.token++;
     for (const p of R.pages) if (p.task) try { p.task.cancel(); } catch (e) {}
     if (R.pdf) try { R.pdf.destroy(); } catch (e) {}
     R.pdf = null;
     R.pages = [];
-    $("#pages").innerHTML = "";
+    $("#pinner").innerHTML = "";
     $("#readerCard").hidden = true;
     $("#dock").hidden = true;
     document.body.classList.remove("reading");
     showPdfState(null);
   }
   function layout() {
-    const box = $("#pages");
-    const avail = Math.max(200, box.clientWidth - 16);
+    const box = $("#pages"), inner = $("#pinner");
+    const avail = Math.max(200, box.clientWidth - 12);
     const keep = box.scrollHeight ? box.scrollTop / box.scrollHeight : 0;
-    box.innerHTML = "";
+    inner.innerHTML = "";
+    hideBubble();
     for (const p of R.pages) {
       if (p.task) try { p.task.cancel(); } catch (e) {}
       p.rendered = false;
@@ -734,9 +786,11 @@ body.reading .wrap { padding-bottom: 96px; }
       d.style.width = Math.floor(p.w * p.scale) + "px";
       d.style.height = Math.floor(p.h * p.scale) + "px";
       d.style.setProperty("--scale-factor", p.scale);
-      d.innerHTML = '<canvas></canvas><div class="hl"></div><div class="textLayer"></div>';
-      box.append(d);
+      p.H = Math.round((1000 * p.h) / p.w);
+      d.innerHTML = `<canvas></canvas><div class="hl"></div><svg class="inkl" viewBox="0 0 1000 ${p.H}" preserveAspectRatio="none"></svg><div class="textLayer"></div>`;
+      inner.append(d);
       p.div = d;
+      drawInk(p);
     }
     box.scrollTop = keep * box.scrollHeight;
     $("#zoomLabel").textContent = "%" + Math.round(R.zoom * 100);
@@ -796,7 +850,18 @@ body.reading .wrap { padding-bottom: 96px; }
       if (S.item && $("#pages").scrollHeight) store.set("zn:pos:" + S.item.key, $("#pages").scrollTop / $("#pages").scrollHeight);
     }, 80);
   }, { passive: true });
-  const setZoom = (z) => { R.zoom = Math.max(0.5, Math.min(3, Math.round(z * 10) / 10)); store.set("zn:zoom", R.zoom); layout(); updateVisible(); };
+  const setZoom = (z, focus) => {
+    const box = $("#pages");
+    const old = R.zoom;
+    R.zoom = Math.max(0.5, Math.min(4, Math.round(z * 100) / 100));
+    store.set("zn:zoom", R.zoom);
+    const fx = focus ? focus[0] : box.clientWidth / 2, fy = focus ? focus[1] : box.clientHeight / 2;
+    const ax = box.scrollLeft + fx, ay = box.scrollTop + fy, k = R.zoom / old;
+    layout();
+    box.scrollLeft = ax * k - fx;
+    box.scrollTop = ay * k - fy;
+    updateVisible();
+  };
   $("#zoomIn").onclick = () => setZoom(R.zoom + 0.2);
   $("#zoomOut").onclick = () => setZoom(R.zoom - 0.2);
   let rz, lastW = 0;
@@ -852,18 +917,16 @@ body.reading .wrap { padding-bottom: 96px; }
   }
   $("#addSel").addEventListener("pointerdown", addClip);
   $("#addSel").addEventListener("click", (e) => { if (selCache) addClip(e); });
-  $("#goNote").onclick = () => {
-    const c = $("#noteCard");
-    if (getComputedStyle(c).position === "sticky") { const last = $("#clips li:last-child textarea"); (last || $("#text")).focus(); }
-    else c.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  $("#notesBtn").onclick = () => document.body.classList.toggle("notes-open");
+  $("#noteClose").onclick = () => document.body.classList.remove("notes-open");
+  $("#rClose").onclick = () => { const n = R.lastName; closeReader(); showPdfState(n); };
+  $("#pdfOpen").onclick = () => { if (S.item) restorePdf(S.item.key); };
   function renderClips() {
     const ul = $("#clips");
     ul.innerHTML = "";
     $("#clipsBox").hidden = !S.clips.length;
     $("#textLabel").textContent = S.clips.length ? "Ek not (isteğe bağlı)" : "Notun";
-    $("#goNote").textContent = S.clips.length ? `Not (${S.clips.length})` : "Not";
-    $("#undo").disabled = !S.clips.length;
+    $("#notesBtn").textContent = S.clips.length ? `Notlar (${S.clips.length})` : "Notlar";
     S.clips.forEach((c) => {
       const li = document.createElement("li");
       li.innerHTML = '<blockquote></blockquote><div class="cmeta"><span></span><button type="button" class="btn link">Çıkar</button></div><textarea placeholder="Yorumun (isteğe bağlı)"></textarea>';
@@ -898,79 +961,225 @@ body.reading .wrap { padding-bottom: 96px; }
     }
   }
 
-  /* ---------- Kalem (fosforlu işaretleme) ---------- */
+  /* ---------- Serbest kalem, fosforlu kalem, silgi ---------- */
   const pagesEl = $("#pages");
-  let ink = null;
-  S.fingerMode = !!store.get("zn:finger", false);
-  function applyFingerMode() {
-    $("#fingerMode").setAttribute("aria-pressed", String(S.fingerMode));
-    pagesEl.classList.toggle("ink-all", S.fingerMode);
-    $("#rhint").textContent = S.fingerMode
-      ? "Parmakla işaretleme açık: metnin üstünden geçince nota eklenir. Kaydırmak için bu düğmeyi kapat ya da kenardaki kaydırma çubuğunu kullan."
-      : "Apple Pencil ile metnin üstünden fosforlu kalem gibi geç; o kısım nota eklenir. Parmakla sayfayı kaydırırsın.";
+  const INK = { key: null, strokes: {}, undo: [], redo: [] };
+  const COLORS = { pen: ["#1f2937", "#1d4ed8", "#dc2626", "#15803d"], hl: ["#facc15", "#4ade80", "#f472b6", "#60a5fa"] };
+  const SIZES = { pen: [["İnce", 2.2], ["Orta", 4], ["Kalın", 7]], hl: [["İnce", 12], ["Orta", 20], ["Kalın", 30]] };
+  const T = store.get("zn:tools", { tool: "hand", pen: { c: 0, s: 0 }, hl: { c: 0, s: 1 }, finger: false });
+  const drawingTool = () => T.tool !== "hand";
+  function applyTools() {
+    document.querySelectorAll("[data-tool]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tool === T.tool)));
+    pagesEl.classList.toggle("drawing", drawingTool());
+    const sw = $("#swatches");
+    sw.innerHTML = "";
+    const kind = T.tool === "pen" || T.tool === "hl" ? T.tool : null;
+    $("#sizeBtn").hidden = !kind;
+    $("#fingerDraw").hidden = !drawingTool();
+    $("#fingerDraw").setAttribute("aria-pressed", String(!!T.finger));
+    if (kind) {
+      COLORS[kind].forEach((c, i) => {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "sw"; b.style.background = c;
+        b.setAttribute("aria-label", "Renk " + (i + 1));
+        b.setAttribute("aria-pressed", String(T[kind].c === i));
+        b.onclick = () => { T[kind].c = i; saveTools(); applyTools(); };
+        sw.append(b);
+      });
+      $("#sizeBtn").textContent = SIZES[kind][T[kind].s][0];
+    }
   }
-  $("#fingerMode").onclick = () => { S.fingerMode = !S.fingerMode; store.set("zn:finger", S.fingerMode); applyFingerMode(); };
-  applyFingerMode();
-  $("#undo").onclick = () => {
-    const c = S.clips[S.clips.length - 1];
-    if (!c) return;
-    S.clips.pop();
-    S.hl = S.hl.filter((h) => h.id !== c.id);
-    saveHl(); redrawHighlights(); renderClips(); saveDraft();
-    toast("Son işaret geri alındı");
-  };
-  const isStylus = (e) => [...(e.touches || [])].some((t) => t.touchType === "stylus");
-  // Kalem dokunuşunda sayfanın kaymasını engelle (parmak normal kaydırır)
-  pagesEl.addEventListener("touchstart", (e) => { if (isStylus(e) || (S.fingerMode && e.touches.length === 1)) e.preventDefault(); }, { passive: false });
-  pagesEl.addEventListener("touchmove", (e) => { if (ink || isStylus(e)) e.preventDefault(); }, { passive: false });
+  function saveTools() { store.set("zn:tools", T); }
+  document.querySelectorAll("[data-tool]").forEach((b) => (b.onclick = () => { T.tool = b.dataset.tool; saveTools(); applyTools(); hideBubble(); }));
+  $("#sizeBtn").onclick = () => { const k = T.tool; if (!SIZES[k]) return; T[k].s = (T[k].s + 1) % SIZES[k].length; saveTools(); applyTools(); };
+  $("#fingerDraw").onclick = () => { T.finger = !T.finger; saveTools(); applyTools(); };
+  applyTools();
 
+  // çizimleri sayfaya çiz (sayfa genişliği 1000 birim)
+  function pathD(pts) {
+    if (pts.length === 1) { const [x, y] = pts[0]; return `M${x} ${y}L${x + 0.1} ${y}`; }
+    let d = `M${pts[0][0]} ${pts[0][1]}`;
+    for (let i = 1; i < pts.length - 1; i++) {
+      const [x, y] = pts[i], [nx, ny] = pts[i + 1];
+      d += `Q${x} ${y} ${((x + nx) / 2).toFixed(1)} ${((y + ny) / 2).toFixed(1)}`;
+    }
+    const l = pts[pts.length - 1];
+    return d + `L${l[0]} ${l[1]}`;
+  }
+  function strokeEl(st) {
+    const el = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    el.setAttribute("d", pathD(st.p));
+    el.setAttribute("fill", "none");
+    el.setAttribute("stroke", st.c);
+    el.setAttribute("stroke-width", st.w);
+    el.setAttribute("stroke-linecap", st.t === "hl" ? "butt" : "round");
+    el.setAttribute("stroke-linejoin", "round");
+    if (st.t === "hl") { el.setAttribute("stroke-opacity", "0.42"); el.style.mixBlendMode = "multiply"; }
+    return el;
+  }
+  function drawInk(p) {
+    const svg = p.div && p.div.querySelector(".inkl");
+    if (!svg) return;
+    svg.innerHTML = "";
+    for (const st of INK.strokes[p.n] || []) svg.append(strokeEl(st));
+  }
+  let inkTimer;
+  function saveInk() { clearTimeout(inkTimer); inkTimer = setTimeout(saveInkNow, 500); }
+  function saveInkNow() {
+    clearTimeout(inkTimer);
+    if (INK.key) IDB.put(INK.key, INK.strokes, "ink").catch(() => {});
+  }
+  window.addEventListener("pagehide", saveInkNow);
+  function updateUndo() { $("#undo").disabled = !INK.undo.length; $("#redo").disabled = !INK.redo.length; }
+  function applyAction(a, reverse) {
+    const list = (INK.strokes[a.page] = INK.strokes[a.page] || []);
+    const add = (a.type === "add") !== reverse;
+    for (const st of a.strokes) {
+      if (add) { if (!list.includes(st)) list.push(st); }
+      else { const i = list.indexOf(st); if (i >= 0) list.splice(i, 1); }
+    }
+    const p = R.pages[a.page - 1];
+    if (p) drawInk(p);
+    saveInk();
+  }
+  $("#undo").onclick = () => { const a = INK.undo.pop(); if (!a) return; applyAction(a, true); INK.redo.push(a); updateUndo(); };
+  $("#redo").onclick = () => { const a = INK.redo.pop(); if (!a) return; applyAction(a, false); INK.undo.push(a); updateUndo(); };
+  function pushAction(a) { INK.undo.push(a); if (INK.undo.length > 200) INK.undo.shift(); INK.redo = []; updateUndo(); }
+
+  // dokunma ayrımı: kalem çizer, parmak kaydırır (Parmakla çiz açıksa parmak da çizer)
+  const isStylus = (e) => [...(e.touches || [])].some((t) => t.touchType === "stylus");
+  const drawsWith = (e) => drawingTool() && (e.pointerType === "pen" || e.pointerType === "mouse" || (e.pointerType === "touch" && T.finger));
+  let cur = null, pinch = null;
+  pagesEl.addEventListener("touchstart", (e) => {
+    if (e.touches.length === 2 && (!cur || cur.tap)) { cur = null; startPinch(e); e.preventDefault(); return; }
+    if (drawingTool() && (isStylus(e) || (T.finger && e.touches.length === 1))) e.preventDefault();
+  }, { passive: false });
+  pagesEl.addEventListener("touchmove", (e) => {
+    if (pinch && e.touches.length === 2) { movePinch(e); e.preventDefault(); return; }
+    if (cur) e.preventDefault();
+  }, { passive: false });
+  pagesEl.addEventListener("touchend", (e) => { if (pinch && e.touches.length < 2) endPinch(); });
+  document.addEventListener("gesturestart", (e) => { if (document.body.classList.contains("reading")) e.preventDefault(); });
+
+  function toPage(div, x, y, p) { const b = div.getBoundingClientRect(); return [Math.round(((x - b.left) / b.width) * 10000) / 10, Math.round(((y - b.top) / b.height) * p.H * 10) / 10]; }
   pagesEl.addEventListener("pointerdown", (e) => {
-    if (!(e.pointerType === "pen" || S.fingerMode) || e.button > 0) return;
     const div = e.target.closest && e.target.closest(".page");
-    if (!div || ink) return;
+    if (!div || e.button > 0) return;
+    const p = R.pages[+div.dataset.page - 1];
+    if (!drawsWith(e)) { if (!drawingTool()) cur = { tap: true, id: e.pointerId, x: e.clientX, y: e.clientY, div, p, t: Date.now() }; return; }
     e.preventDefault();
+    hideBubble();
     try { getSelection().removeAllRanges(); } catch (er) {}
     try { pagesEl.setPointerCapture(e.pointerId); } catch (er) {}
-    const spans = [...div.querySelectorAll(".textLayer span")].map((s) => s.getBoundingClientRect().height).filter((h) => h > 2).sort((a, b) => a - b);
-    const width = spans.length ? spans[Math.floor(spans.length / 2)] * 1.05 : 14;
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("class", "ink");
-    const pl = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-    pl.setAttribute("fill", "none");
-    pl.setAttribute("stroke", "rgba(242,217,78,.55)");
-    pl.setAttribute("stroke-width", width);
-    pl.setAttribute("stroke-linecap", "round");
-    pl.setAttribute("stroke-linejoin", "round");
-    svg.append(pl);
-    div.append(svg);
-    pagesEl.classList.add("inking");
-    ink = { id: e.pointerId, div, pl, pts: [] };
-    addPoint(e);
+    if (T.tool === "eraser") { cur = { erase: true, id: e.pointerId, div, p, removed: [] }; eraseAt(e); return; }
+    const kind = T.tool;
+    const st = { t: kind, c: COLORS[kind][T[kind].c], w: SIZES[kind][T[kind].s][1], p: [toPage(div, e.clientX, e.clientY, p)] };
+    const el = strokeEl(st);
+    div.querySelector(".inkl").append(el);
+    cur = { id: e.pointerId, div, p, st, el };
   });
-  function addPoint(e) {
+  pagesEl.addEventListener("pointermove", (e) => {
+    if (!cur || e.pointerId !== cur.id || cur.tap) return;
+    e.preventDefault();
+    if (cur.erase) { eraseAt(e); return; }
     const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
-    for (const ev of evs.length ? evs : [e]) ink.pts.push([ev.clientX, ev.clientY]);
-    const b = ink.div.getBoundingClientRect();
-    ink.pl.setAttribute("points", ink.pts.map(([x, y]) => `${(x - b.left).toFixed(1)},${(y - b.top).toFixed(1)}`).join(" "));
+    for (const ev of evs.length ? evs : [e]) {
+      const pt = toPage(cur.div, ev.clientX, ev.clientY, cur.p);
+      const l = cur.st.p[cur.st.p.length - 1];
+      if (Math.abs(pt[0] - l[0]) + Math.abs(pt[1] - l[1]) > 0.8) cur.st.p.push(pt);
+    }
+    cur.el.setAttribute("d", pathD(cur.st.p));
+  });
+  function endPointer(e) {
+    if (!cur || e.pointerId !== cur.id) return;
+    const c = cur;
+    cur = null;
+    if (c.tap) {
+      if (e.type === "pointerup" && Math.hypot(e.clientX - c.x, e.clientY - c.y) < 8 && Date.now() - c.t < 600 && !selectionInside(pagesEl)) onTap(c.div, c.p, e.clientX, e.clientY);
+      return;
+    }
+    if (c.erase) { if (c.removed.length) pushAction({ type: "del", page: c.p.n, strokes: c.removed }); return; }
+    if (e.type === "pointercancel" && c.st.p.length < 3) { c.el.remove(); return; }
+    (INK.strokes[c.p.n] = INK.strokes[c.p.n] || []).push(c.st);
+    pushAction({ type: "add", page: c.p.n, strokes: [c.st] });
+    saveInk();
   }
-  pagesEl.addEventListener("pointermove", (e) => { if (ink && e.pointerId === ink.id) { e.preventDefault(); addPoint(e); } });
-  const endInk = (e) => {
-    if (!ink || e.pointerId !== ink.id) return;
-    const cur = ink;
-    ink = null;
-    pagesEl.classList.remove("inking");
-    cur.pl.parentNode.remove();
-    if (e.type === "pointercancel") return;
-    const xs = cur.pts.map((p) => p[0]), ys = cur.pts.map((p) => p[1]);
-    if (Math.max(...xs) - Math.min(...xs) < 6 && Math.max(...ys) - Math.min(...ys) < 6) return; // dokunma, çizgi değil
-    const d = inkToClip(cur.div, cur.pts);
-    if (d) commitClip(d); else toast("Burada işaretlenecek metin bulunamadı");
-  };
-  pagesEl.addEventListener("pointerup", endInk);
-  pagesEl.addEventListener("pointercancel", endInk);
+  pagesEl.addEventListener("pointerup", endPointer);
+  pagesEl.addEventListener("pointercancel", endPointer);
+
+  function distToStroke(st, x, y) {
+    let best = Infinity;
+    for (let i = 0; i < st.p.length; i++) {
+      const a = st.p[i], b = st.p[i + 1] || a;
+      const dx = b[0] - a[0], dy = b[1] - a[1], L = dx * dx + dy * dy;
+      const t = L ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / L)) : 0;
+      best = Math.min(best, Math.hypot(x - (a[0] + t * dx), y - (a[1] + t * dy)));
+    }
+    return best;
+  }
+  function eraseAt(e) {
+    const [x, y] = toPage(cur.div, e.clientX, e.clientY, cur.p);
+    const list = INK.strokes[cur.p.n] || [];
+    const hit = list.filter((st) => distToStroke(st, x, y) < st.w / 2 + 10);
+    if (!hit.length) return;
+    INK.strokes[cur.p.n] = list.filter((st) => !hit.includes(st));
+    cur.removed.push(...hit);
+    drawInk(cur.p);
+    saveInk();
+  }
+
+  // El aracında bir çizime dokununca: fosforlu ise “Nota ekle”, her çizim için “Sil”
+  function onTap(div, p, x, y) {
+    const [px, py] = toPage(div, x, y, p);
+    const list = INK.strokes[p.n] || [];
+    let best = null, bd = Infinity;
+    for (const st of list) { const d = distToStroke(st, px, py); if (d < st.w / 2 + 8 && d < bd) { bd = d; best = st; } }
+    if (!best) { hideBubble(); return; }
+    showBubble(div, p, best, x, y);
+  }
+  function showBubble(div, p, st, x, y) {
+    hideBubble();
+    const bub = document.createElement("div");
+    bub.id = "bubble";
+    const add = (label, fn) => { const b = document.createElement("button"); b.type = "button"; b.textContent = label; b.onclick = (ev) => { ev.stopPropagation(); fn(); hideBubble(); }; bub.append(b); };
+    if (st.t === "hl") add("Nota ekle", () => {
+      const b = div.getBoundingClientRect();
+      const pts = st.p.map(([sx, sy]) => [b.left + (sx / 1000) * b.width, b.top + (sy / p.H) * b.height]);
+      const d = inkToClip(div, pts, st.w / 1000 * b.width);
+      if (d) { d.parts = []; commitClip(d); } else toast("Bu işaretin altında metin bulunamadı");
+    });
+    add("Sil", () => {
+      INK.strokes[p.n] = (INK.strokes[p.n] || []).filter((s2) => s2 !== st);
+      pushAction({ type: "del", page: p.n, strokes: [st] });
+      drawInk(p); saveInk();
+    });
+    const inner = $("#pinner").getBoundingClientRect();
+    bub.style.left = Math.max(4, x - inner.left - 60) + "px";
+    bub.style.top = Math.max(4, y - inner.top - 64) + "px";
+    $("#pinner").append(bub);
+  }
+  function hideBubble() { const b = document.getElementById("bubble"); if (b) b.remove(); }
+
+  // iki parmakla yakınlaştırma
+  function tDist(e) { const [a, b] = e.touches; return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); }
+  function startPinch(e) {
+    const [a, b] = e.touches, box = pagesEl.getBoundingClientRect();
+    pinch = { d0: tDist(e), k: 1, fx: (a.clientX + b.clientX) / 2 - box.left, fy: (a.clientY + b.clientY) / 2 - box.top };
+    $("#pinner").style.transformOrigin = `${pagesEl.scrollLeft + pinch.fx}px ${pagesEl.scrollTop + pinch.fy}px`;
+  }
+  function movePinch(e) {
+    pinch.k = Math.max(0.5 / R.zoom, Math.min(4 / R.zoom, tDist(e) / pinch.d0));
+    $("#pinner").style.transform = `scale(${pinch.k})`;
+  }
+  function endPinch() {
+    const pz = pinch;
+    pinch = null;
+    $("#pinner").style.transform = "";
+    if (Math.abs(pz.k - 1) > 0.03) setZoom(R.zoom * pz.k, [pz.fx, pz.fy]);
+  }
 
   // Çizginin geçtiği metni, kelime sınırlarına yaslayarak bul
-  function inkToClip(div, pts) {
+  function inkToClip(div, pts, band) {
     const pb = div.getBoundingClientRect();
     const n = +div.dataset.page;
     const isWord = (c) => /[\p{L}\p{N}]/u.test(c || "");
@@ -981,7 +1190,7 @@ body.reading .wrap { padding-bottom: 96px; }
       if (!node || node.nodeType !== 3 || !node.length) continue;
       const r = sp.getBoundingClientRect();
       if (r.width < 1 || r.height < 1) continue;
-      const tol = r.height * 0.3;
+      const tol = Math.max(r.height * 0.3, (band || 0) / 2 - r.height / 2);
       const near = pts.filter(([x, y]) => y >= r.top - tol && y <= r.bottom + tol && x >= r.left - r.height && x <= r.right + r.height);
       if (!near.length) continue;
       const x0 = Math.min(...near.map((p) => p[0])), x1 = Math.max(...near.map((p) => p[0]));
