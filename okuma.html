@@ -211,6 +211,8 @@ input[type=search] { width: 100%; font: inherit; color: var(--ink); background: 
 body.reading #noteCard { display: block; }
 #noteCard .notehead small { display: block; font-weight: 400; color: var(--muted); font-family: var(--sans); font-size: .85rem; }
 .muted { color: var(--muted); }
+.nag { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; border-color: var(--mark); background: color-mix(in srgb, var(--mark) 18%, var(--surface)); }
+#backupCard { margin-top: 18px; }
 </style>
 </head>
 <body>
@@ -229,7 +231,16 @@ body.reading #noteCard { display: block; }
       <input id="libSearch" type="search" placeholder="Makalelerde ara">
       <button id="newArticle" class="btn primary" type="button">Yeni makale</button>
     </div>
+    <div id="backupNag" class="card nag" hidden><span id="nagText"></span><button class="btn primary" type="button" data-backup>Yedek al</button></div>
     <ul id="libList"></ul>
+    <section class="card" id="backupCard">
+      <h2>Yedek</h2>
+      <p class="hint" style="margin-top:0">Makalelerin ve notların bu cihazda, Safari'nin içinde saklanır. Yedek al dediğinde Paylaş penceresi açılır: <strong>Dosyalara Kaydet</strong> de, <strong>iPad'imde</strong> bir klasör seç (ör. “Okuma Yedekleri”). Uygulamayı Safari'den <strong>Ana Ekrana Ekle</strong> ile kullanırsan verilerin daha güvende olur.</p>
+      <p class="hint" id="lastBackup"></p>
+      <label class="check"><input id="bkPdfs" type="checkbox"> PDF'leri ve çizimleri de yedekle (dosya büyük olur)</label>
+      <div class="btns"><button class="btn primary" type="button" data-backup>Yedek al</button><label class="btn"><span>Yedekten geri yükle</span><input id="restore" type="file" accept="application/json,.json"></label></div>
+      <p id="backupMsg" class="hint" aria-live="polite"></p>
+    </section>
   </section>
 
   <!-- Makale ekle / düzenle -->
@@ -310,8 +321,6 @@ body.reading #noteCard { display: block; }
         <select id="citeLocale"><option value="tr-TR">Türkçe (vd., t.y.)</option><option value="en-US">İngilizce (et al., n.d.)</option></select>
         <label class="check"><input id="exPages" type="checkbox" checked> Çeviri PDF'inin sayfa numarasını hatırlatma olarak ekle</label>
         <label class="check"><input id="exComments" type="checkbox" checked> Yorumlarımı ekle</label>
-        <p class="hint">Makalelerin ve notların yalnızca bu cihazda saklanır. Arada bir yedek al. Yedeğe PDF'ler ve çizimler girmez.</p>
-        <div class="btns"><button id="backup" class="btn" type="button">Yedek indir</button><label class="btn"><span>Yedek yükle</span><input id="restore" type="file" accept="application/json,.json"></label></div>
       </details>
     </section>
     <div class="libbar"><input id="noteSearch" type="search" placeholder="Notlarda ya da başlıklarda ara"></div>
@@ -413,7 +422,7 @@ body.reading #noteCard { display: block; }
   const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const DB = store.get("ok:data", { articles: [], notes: [] });
-  const saveDB = () => store.set("ok:data", DB);
+  const saveDB = () => { store.set("ok:data", DB); store.set("ok:changedAt", Date.now()); };
   const S = { hl: [] };
   let A = null; // açık makale
   const art = (id) => DB.articles.find((a) => a.id === id);
@@ -492,7 +501,49 @@ body.reading #noteCard { display: block; }
     return { bib, cite: `(${who}, ${year})` };
   }
   const plain = (h) => { const d = document.createElement("div"); d.innerHTML = h || ""; return (d.textContent || "").replace(/\s+/g, " ").trim(); };
-  const cleanDoi = (d) => String(d || "").trim().replace(/^(https?:\/\/(dx\.)?doi\.org\/|doi:\s*)/i, "").replace(/[.,;]+$/, "");
+  // Yapıştırılan metnin içinden DOI'yi ayıkla (doi.org bağlantısı, "DOI:" ön eki, görünmez karakterler)
+  const cleanDoi = (d) => {
+    const s = String(d || "").replace(/[\u00AD\u200B-\u200D\u2060\uFEFF]/g, "").replace(/[‐‑‒–—]/g, "-");
+    const m = s.match(/10\.\d{4,9}\/[^\s"'<>]+/);
+    return m ? decodeURIComponentSafe(m[0]).replace(/[.,;:)\]]+$/, "") : s.trim();
+  };
+  function decodeURIComponentSafe(x) { try { return decodeURIComponent(x); } catch (e) { return x; } }
+  const doiPath = (doi) => doi.split("/").map(encodeURIComponent).join("/");
+  function fromCSL(m) {
+    const first = (x) => (Array.isArray(x) ? x[0] : x) || "";
+    const dpOf = (k) => m[k] && m[k]["date-parts"] && m[k]["date-parts"][0];
+    const dp = dpOf("issued") || dpOf("published-print") || dpOf("published-online") || dpOf("created") || [];
+    const title = String(first(m.title)).replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+    return {
+      doi: m.DOI || "", title,
+      au: (m.author || []).map((a) => (a.family ? { family: a.family, given: a.given || "" } : { name: a.literal || a.name || "" })).filter((a) => a.family || a.name),
+      year: dp[0] ? String(dp[0]) : "",
+      journal: String(first(m["container-title"])),
+      volume: m.volume ? String(m.volume) : "", issue: m.issue ? String(m.issue) : "", pages: String(m.page || m["article-number"] || ""),
+    };
+  }
+  async function fetchMeta(doi) {
+    const errs = [];
+    const sources = [
+      ["Crossref", async () => {
+        const r = await fetch("https://api.crossref.org/works/" + doiPath(doi));
+        if (r.status === 404) throw new Error("kayıt yok");
+        if (!r.ok) throw new Error("hata " + r.status);
+        return fromCSL((await r.json()).message);
+      }],
+      ["doi.org", async () => {
+        const r = await fetch("https://doi.org/" + doiPath(doi), { headers: { Accept: "application/vnd.citationstyles.csl+json" } });
+        if (r.status === 404) throw new Error("bu DOI hiç kayıtlı değil");
+        if (!r.ok) throw new Error("hata " + r.status);
+        return fromCSL(await r.json());
+      }],
+    ];
+    for (const [name, fn] of sources) {
+      try { const m = await fn(); if (m && m.title) return m; errs.push(name + ": başlık yok"); }
+      catch (e) { errs.push(name + ": " + (e instanceof TypeError ? "bağlantı kurulamadı" : e.message)); }
+    }
+    throw new Error(errs.join(" · "));
+  }
 
   /* ---------- Görünümler ---------- */
   let view = "lib";
@@ -500,7 +551,7 @@ body.reading #noteCard { display: block; }
     view = v;
     for (const [id, name] of [["vLib", "lib"], ["vNotes", "notes"], ["vForm", "form"], ["vArticle", "article"]]) $("#" + id).hidden = name !== v;
     document.querySelectorAll("[data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === v || (v !== "notes" && b.dataset.view === "lib"))));
-    if (v === "lib") renderLib();
+    if (v === "lib") { renderLib(); updateBackupInfo(); }
     if (v === "notes") renderAllNotes();
     window.scrollTo(0, 0);
   }
@@ -568,26 +619,17 @@ body.reading #noteCard { display: block; }
   $("#doiGo").onclick = async () => {
     const doi = cleanDoi(val("fDoi"));
     const msg = $("#doiMsg");
-    if (!/^10\.\d{4,9}\/\S+$/.test(doi)) { msg.textContent = "Geçerli bir DOI gir (10. ile başlar)."; return; }
+    if (!/^10\.\d{4,9}\/\S+$/.test(doi)) { msg.textContent = "Bu metinde DOI bulamadım. DOI 10. ile başlar, ör. 10.1093/schbul/sbz001"; return; }
+    $("#fDoi").value = doi;
     msg.textContent = "Bilgiler getiriliyor…";
+    $("#doiGo").disabled = true;
     try {
-      const r = await fetch("https://api.crossref.org/works/" + encodeURIComponent(doi));
-      if (r.status === 404) throw new Error("Bu DOI bulunamadı. Yazımını kontrol et.");
-      if (!r.ok) throw new Error("Sunucu hatası " + r.status);
-      const m = (await r.json()).message;
-      const dp = (m.issued && m.issued["date-parts"] && m.issued["date-parts"][0]) || (m["published-print"] && m["published-print"]["date-parts"][0]) || (m["published-online"] && m["published-online"]["date-parts"][0]) || [];
-      fillForm({
-        doi: m.DOI || doi,
-        title: String((m.title && m.title[0]) || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim(),
-        au: (m.author || []).map((a) => (a.family ? { family: a.family, given: a.given || "" } : { name: a.name || "" })).filter((a) => a.family || a.name),
-        year: dp[0] ? String(dp[0]) : "",
-        journal: (m["container-title"] && m["container-title"][0]) || "",
-        volume: m.volume || "", issue: m.issue || "", pages: m.page || m["article-number"] || "",
-      });
+      const m = await fetchMeta(doi);
+      fillForm({ ...m, doi: m.doi || doi });
       msg.textContent = "Bilgiler geldi. APA başlıkları cümle düzeninde ister (yalnızca ilk kelime ve özel adlar büyük); gerekirse başlığı düzelt, sonra kaydet.";
     } catch (e) {
-      msg.textContent = (e instanceof TypeError ? "Bağlantı kurulamadı. " : "") + e.message;
-    }
+      msg.textContent = `“${doi}” için bilgi bulunamadı (${e.message}). DOI'yi makalenin ilk sayfasından ya da dergi sitesinden kontrol et; olmazsa alanları elle doldurabilirsin.`;
+    } finally { $("#doiGo").disabled = false; }
   };
   $("#saveArticle").onclick = () => {
     const m = formMeta();
@@ -1294,27 +1336,76 @@ body.reading #noteCard { display: block; }
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
+  async function deliver(blob, name) {
+    const file = new File([blob], name, { type: blob.type });
+    if ("ontouchend" in document && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: name }); return true; }
+      catch (e) { if (e.name === "AbortError") return false; }
+    }
+    download(blob, name);
+    return true;
+  }
   const stamp = () => new Date().toISOString().slice(0, 10);
-  $("#backup").onclick = () => {
+  const toB64 = (buf) => new Promise((res) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.readAsDataURL(new Blob([buf])); });
+  const fromB64 = async (b64) => new Uint8Array(await (await fetch("data:application/octet-stream;base64," + b64)).arrayBuffer());
+  async function backup() {
+    const msg = $("#backupMsg");
+    msg.textContent = "Yedek hazırlanıyor…";
     const hl = {};
     DB.articles.forEach((a) => { const h = store.get("ok:hl:" + a.id, null); if (h && h.length) hl[a.id] = h; });
-    download(new Blob([JSON.stringify({ app: "okuma", v: 1, data: DB, hl }, null, 1)], { type: "application/json" }), `okuma-yedek-${stamp()}.json`);
-  };
+    const out = { app: "okuma", v: 2, created: new Date().toISOString(), data: DB, hl };
+    const full = $("#bkPdfs").checked;
+    if (full) {
+      out.pdfs = {}; out.ink = {};
+      for (const a of DB.articles) {
+        try {
+          const rec = await IDB.get(a.id);
+          if (rec) out.pdfs[a.id] = { name: rec.name, b64: await toB64(rec.data) };
+          const ink = await IDB.get(a.id, "ink");
+          if (ink) out.ink[a.id] = ink;
+        } catch (e) {}
+      }
+    }
+    const blob = new Blob([JSON.stringify(out)], { type: "application/json" });
+    const ok = await deliver(blob, `okuma-yedek-${stamp()}${full ? "-tam" : ""}.json`);
+    if (ok) { store.set("ok:lastBackup", Date.now()); msg.textContent = `Yedek hazır (${Math.max(1, Math.round(blob.size / 1024))} KB).`; }
+    else msg.textContent = "Yedek kaydedilmedi.";
+    updateBackupInfo();
+  }
+  document.querySelectorAll("[data-backup]").forEach((b) => (b.onclick = () => backup().catch((e) => ($("#backupMsg").textContent = "Yedek alınamadı: " + e.message))));
+  $("#bkPdfs").checked = store.get("ok:bkPdfs", false);
+  $("#bkPdfs").onchange = () => store.set("ok:bkPdfs", $("#bkPdfs").checked);
   $("#restore").onchange = async (e) => {
     const f = e.target.files[0];
     e.target.value = "";
     if (!f) return;
+    const msg = $("#backupMsg");
     try {
       const j = JSON.parse(await f.text());
       if (j.app !== "okuma" || !j.data) throw new Error("Bu dosya bir Okuma yedeği değil.");
-      if (!confirm(`Yedekte ${j.data.articles.length} makale ve ${j.data.notes.length} not var. Bu cihazdakilerin yerine geçsin mi?`)) return;
+      const np = j.pdfs ? Object.keys(j.pdfs).length : 0;
+      if (!confirm(`Yedekte ${j.data.articles.length} makale, ${j.data.notes.length} not${np ? ` ve ${np} PDF` : ""} var (${(j.created || "").slice(0, 10)}). Bu cihazdakilerin yerine geçsin mi?`)) return;
+      msg.textContent = "Geri yükleniyor…";
       DB.articles = j.data.articles; DB.notes = j.data.notes;
       saveDB();
       for (const [k, v] of Object.entries(j.hl || {})) store.set("ok:hl:" + k, v);
-      $("#exportMsg").textContent = "Yedek yüklendi. PDF'leri makalelere yeniden eklemen gerekebilir.";
-      renderAllNotes();
-    } catch (er) { $("#exportMsg").textContent = "Yedek okunamadı: " + er.message; }
+      for (const [k, v] of Object.entries(j.pdfs || {})) { try { await IDB.put(k, { name: v.name, data: (await fromB64(v.b64)).buffer }); } catch (er) {} }
+      for (const [k, v] of Object.entries(j.ink || {})) { try { await IDB.put(k, v, "ink"); } catch (er) {} }
+      msg.textContent = "Yedek yüklendi." + (np ? "" : " Bu yedekte PDF yok; gerekirse PDF'leri makalelere yeniden ekle.");
+      store.set("ok:lastBackup", Date.now());
+      show("lib");
+    } catch (er) { msg.textContent = "Yedek okunamadı: " + er.message; }
   };
+  function updateBackupInfo() {
+    const last = store.get("ok:lastBackup", 0), changed = store.get("ok:changedAt", 0);
+    const days = last ? Math.floor((Date.now() - last) / 864e5) : null;
+    $("#lastBackup").textContent = last ? `Son yedek: ${new Date(last).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}${days ? ` (${days} gün önce)` : " (bugün)"}` : "Henüz yedek almadın.";
+    const need = DB.notes.length && changed > last && (!last || Date.now() - last > 3 * 864e5);
+    $("#backupNag").hidden = !need;
+    if (need) $("#nagText").textContent = last ? `Son yedeğin ${days} gün önce. Yeni notların var.` : `${DB.notes.length} notun var ama hiç yedek almadın.`;
+  }
+  // Safari'den verilerin kalıcı tutulmasını iste
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then((p) => { if (!p) navigator.storage.persist(); }); } catch (e) {}
 
   /* ---------- Word ---------- */
   $("#citeLocale").value = store.get("ok:locale", "tr-TR");
