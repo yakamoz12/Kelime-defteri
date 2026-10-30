@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Makale Çevirmeni</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #eef1f4; --surface: #ffffff; --sunk: #f6f8fa; --ink: #18212c; --muted: #5a6676; --line: #d6dce4;
+  --accent: #1f4e79; --accent-ink: #ffffff; --mark: #f2d94e; --ok: #2f855a; --err: #b4442a; --warn: #8a6100;
+  --serif: "Literata", Georgia, "Times New Roman", serif;
+  --sans: "Public Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0f1318; --surface: #171d24; --sunk: #12171d; --ink: #e4e9ef; --muted: #9aa5b3; --line: #2b343f;
+    --accent: #8fb8e8; --accent-ink: #0f1318; --mark: #e3c73a; --ok: #68c391; --err: #f08a70; --warn: #e2b54a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f1318; --surface: #171d24; --sunk: #12171d; --ink: #e4e9ef; --muted: #9aa5b3; --line: #2b343f;
+  --accent: #8fb8e8; --accent-ink: #0f1318; --mark: #e3c73a; --ok: #68c391; --err: #f08a70; --warn: #e2b54a;
+}
+*, *::before, *::after { box-sizing: inherit; }
+input, select, textarea, button, canvas, details > * { box-sizing: border-box; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); -webkit-text-size-adjust: 100%; }
+h1, h2 { font-family: var(--serif); font-weight: 650; margin: 0; letter-spacing: -0.01em; }
+header { padding: 20px clamp(16px, 3vw, 32px) 14px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+header h1 { font-size: 1.6rem; }
+header p { margin: 0; color: var(--muted); max-width: 62ch; }
+main { display: grid; grid-template-columns: minmax(300px, 400px) minmax(0, 1fr); gap: 16px; padding: 0 clamp(12px, 3vw, 32px) 32px; align-items: start; }
+@media (max-width: 860px) { main { grid-template-columns: minmax(0, 1fr); } }
+.panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+section.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+section.card > h2 { font-size: 1.08rem; display: flex; gap: 10px; align-items: baseline; margin-bottom: 10px; }
+section.card > h2 .n { font-family: var(--sans); font-size: .8rem; font-weight: 600; color: var(--muted); border: 1px solid var(--line); border-radius: 50%; width: 1.6em; height: 1.6em; display: inline-grid; place-items: center; flex: none; transform: translateY(-1px); }
+label { display: block; font-weight: 500; font-size: .9rem; margin: 10px 0 4px; }
+.hint { color: var(--muted); font-size: .84rem; margin: 4px 0 0; }
+.hint a { color: var(--accent); }
+input[type=text], input[type=password], input[type=number], select {
+  width: 100%; font: inherit; color: var(--ink); background: var(--sunk); border: 1px solid var(--line); border-radius: 7px; padding: 9px 10px; min-height: 42px;
+}
+input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row { display: flex; gap: 8px; align-items: end; }
+.row > * { flex: 1; min-width: 0; }
+.row > .btn { flex: none; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; margin: 8px 0; }
+.check input { width: 20px; height: 20px; margin: 1px 0 0; flex: none; accent-color: var(--accent); }
+.btn { font: 500 .95rem var(--sans); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 9px 14px; min-height: 42px; cursor: pointer; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.small { min-height: 36px; padding: 6px 10px; font-size: .88rem; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+.tabs [role=tab] { font: 500 .93rem var(--sans); background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); padding: 8px 10px; cursor: pointer; margin-bottom: -1px; }
+.tabs [role=tab][aria-selected=true] { color: var(--ink); border-bottom-color: var(--ink); }
+.file { display: block; border: 1.5px dashed var(--line); border-radius: 8px; padding: 18px; text-align: center; color: var(--muted); cursor: pointer; margin-top: 10px; }
+.file input { display: block; margin: 8px auto 0; max-width: 100%; }
+details { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 6px; }
+summary { cursor: pointer; font-weight: 500; padding: 6px 0; }
+#zItems { list-style: none; margin: 10px 0 0; padding: 0; max-height: 46vh; overflow: auto; border: 1px solid var(--line); border-radius: 8px; }
+#zItems:empty { display: none; }
+#zItems li { border-bottom: 1px solid var(--line); }
+#zItems li:last-child { border-bottom: 0; }
+#zItems li.muted { padding: 10px 12px; color: var(--muted); }
+.zitem { display: block; width: 100%; text-align: left; background: none; border: 0; color: var(--ink); padding: 10px 12px; cursor: pointer; font: inherit; }
+.zitem strong { display: block; font-weight: 500; line-height: 1.35; }
+.zitem small { color: var(--muted); }
+.pdfs { padding: 0 12px 10px; display: flex; flex-wrap: wrap; gap: 6px; color: var(--muted); font-size: .88rem; }
+.meter { height: 8px; background: var(--sunk); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; margin-top: 12px; }
+#bar { height: 100%; width: 0; background: var(--mark); transition: width .3s; }
+#barText { font-size: .84rem; color: var(--muted); margin-top: 4px; min-height: 1.3em; }
+#status { font-size: .92rem; margin-top: 8px; }
+#summary { margin: 0; }
+#log { list-style: none; margin: 10px 0 0; padding: 0; max-height: 220px; overflow: auto; font-size: .84rem; }
+#log li { display: flex; gap: 8px; padding: 4px 0; border-top: 1px solid var(--line); }
+#log time { color: var(--muted); flex: none; font-variant-numeric: tabular-nums; }
+#log li.err span { color: var(--err); }
+#log li.warn span { color: var(--warn); }
+#log li.ok span { color: var(--ok); }
+.viewer { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; min-width: 0; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+@media (max-width: 860px) { .viewer { position: static; } }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { font: 500 .9rem var(--sans); background: none; border: 0; color: var(--muted); padding: 7px 12px; min-height: 38px; cursor: pointer; }
+.seg button[aria-pressed=true] { background: var(--ink); color: var(--surface); }
+.pager { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+#docName { font-family: var(--serif); font-weight: 500; padding: 10px 12px 0; overflow-wrap: anywhere; }
+#legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 6px 12px 0; font-size: .84rem; color: var(--muted); }
+#legend[hidden] { display: none; }
+#legend i { display: inline-block; width: 22px; height: 12px; vertical-align: -1px; margin-right: 6px; border-radius: 2px; }
+.k-tr { background: color-mix(in srgb, var(--mark) 60%, transparent); }
+.k-done { background: color-mix(in srgb, var(--mark) 30%, transparent); box-shadow: inset 3px 0 0 #2f855a; }
+.k-skip { border: 1px dashed var(--muted); }
+#stage { padding: 12px; overflow: auto; max-height: calc(100vh - 140px); background: var(--sunk); border-radius: 0 0 10px 10px; display: flex; justify-content: center; }
+@media (max-width: 860px) { #stage { max-height: none; } }
+#canvas { display: block; max-width: 100%; height: auto; background: #fff; box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
+.empty { padding: 48px 16px; text-align: center; color: var(--muted); }
+.empty h2 { font-size: 1.25rem; color: var(--ink); margin-bottom: 6px; }
+#workspace:not(.has-doc) .doc-only { display: none; }
+#workspace.has-doc .empty { display: none; }
+#resultActions { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+#resultActions[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { #bar { transition: none; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Makale Çevirmeni</h1>
+  <p>İngilizce makaleyi sayfa düzenini koruyarak Gemini ile Türkçeye çevirir. Kaynakça, formüller ve tablolar olduğu gibi kalır.</p>
+</header>
+<main id="workspace">
+  <div class="panel">
+    <section class="card">
+      <h2><span class="n">1</span>Makaleyi seçin</h2>
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" aria-controls="panelZotero">Zotero</button>
+        <button role="tab" aria-selected="false" aria-controls="panelFile">Dosyadan</button>
+      </div>
+      <div id="panelZotero" class="tabpanel">
+        <label for="zKey">Zotero API anahtarı</label>
+        <input id="zKey" type="password" autocomplete="off" spellcheck="false">
+        <div class="row">
+          <div><label for="zId">Kullanıcı kimliği (userID)</label><input id="zId" type="text" inputmode="numeric" autocomplete="off"></div>
+          <div style="flex:.8"><label for="zType">Kütüphane</label><select id="zType"><option value="user">Kişisel</option><option value="group">Grup</option></select></div>
+        </div>
+        <p class="hint">İkisini de <a href="https://www.zotero.org/settings/keys" target="_blank" rel="noopener">zotero.org/settings/keys</a> sayfasında bulursunuz. Yeni anahtar oluştururken “Allow library access” ve çeviriyi Zotero'ya geri eklemek için “Allow write access” seçeneklerini açın.</p>
+        <label class="check"><input id="zRemember" type="checkbox" checked> Bu cihazda hatırla</label>
+        <button id="zConnect" class="btn primary" type="button">Bağlan</button>
+        <p id="zStatus" class="hint" aria-live="polite"></p>
+        <div id="zBrowse" hidden>
+          <label for="zCollection">Koleksiyon</label>
+          <select id="zCollection"><option value="">Tüm kütüphane</option></select>
+          <div class="row">
+            <div><label for="zQuery">Başlık, yazar ya da yıl</label><input id="zQuery" type="text" placeholder="ör. calibration 2023"></div>
+            <button id="zSearchBtn" class="btn" type="button">Ara</button>
+          </div>
+          <ul id="zItems"></ul>
+        </div>
+      </div>
+      <div id="panelFile" class="tabpanel" hidden>
+        <label class="file">PDF dosyası seçin
+          <input id="file" type="file" accept="application/pdf,.pdf">
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n">2</span>Gemini ayarları</h2>
+      <label for="gKey">Gemini API anahtarı</label>
+      <input id="gKey" type="password" autocomplete="off" spellcheck="false">
+      <p class="hint">Ücretsiz anahtarı <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> adresinden alabilirsiniz. Anahtar yalnızca bu tarayıcıda kalır.</p>
+      <label class="check"><input id="remember" type="checkbox" checked> Bu cihazda hatırla</label>
+      <div class="row">
+        <div><label for="model">Model</label><input id="model" type="text" list="modelList" value="gemini-2.5-flash" spellcheck="false"></div>
+        <button id="listModels" class="btn" type="button">Modelleri getir</button>
+      </div>
+      <datalist id="modelList"><option value="gemini-2.5-flash"></option><option value="gemini-2.5-flash-lite"></option></datalist>
+      <label for="fallback">Günlük kota bitince geçilecek model</label>
+      <input id="fallback" type="text" list="modelList" value="gemini-2.5-flash-lite" spellcheck="false">
+      <p class="hint">Dakikalık sınıra takılınca uygulama bekleyip aynı isteği kendisi tekrarlar. Günlük kota biterse yedek modele geçer; o da biterse ilerlemeyi kaydedip durur.</p>
+      <details>
+        <summary>Çeviri seçenekleri</summary>
+        <label class="check"><input id="skipRefs" type="checkbox" checked> Kaynakçayı çevirme</label>
+        <label class="check"><input id="appendix" type="checkbox" checked> Kaynakçadan sonra gelen ekleri (Appendix) çevir</label>
+        <label class="check"><input id="captions" type="checkbox"> Şekil ve tablo açıklamalarını çevirme</label>
+        <label class="check"><input id="justify" type="checkbox" checked> Paragrafları iki yana yasla</label>
+        <label for="range">Sayfa aralığı</label>
+        <input id="range" type="text" placeholder="Boş bırakırsanız tümü, ör. 1-5, 8">
+        <label for="output">Çıktı</label>
+        <select id="output"><option value="translated">Yalnızca Türkçe sayfalar</option><option value="bilingual">Orijinal ve Türkçe sayfa sayfa ardışık</option></select>
+        <label for="fontStyle">Yazı tipi</label>
+        <select id="fontStyle"><option value="serif">Tırnaklı (Noto Serif)</option><option value="sans">Tırnaksız (Noto Sans)</option></select>
+        <label for="target">Hedef dil</label>
+        <input id="target" type="text" value="Turkish">
+        <div class="row">
+          <div><label for="batch">İstek başına karakter</label><input id="batch" type="number" min="1000" step="500" value="6000"></div>
+          <div><label for="gap">İstekler arası bekleme (sn)</label><input id="gap" type="number" min="0" step="1" value="7"></div>
+        </div>
+        <p class="hint">Ücretsiz katmanda dakikada yaklaşık 10 istek sınırı olduğundan 6–7 saniye bekleme güvenlidir. Daha büyük gruplar daha az istek harcar.</p>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2><span class="n">3</span>Çevir</h2>
+      <p id="summary" class="hint">Önce bir makale seçin.</p>
+      <div class="btns">
+        <button id="start" class="btn primary" type="button">Çeviriyi başlat</button>
+        <button id="pause" class="btn" type="button">Duraklat</button>
+        <button id="stop" class="btn" type="button">Durdur</button>
+      </div>
+      <div class="meter" aria-hidden="true"><div id="bar"></div></div>
+      <div id="barText"></div>
+      <div id="status" aria-live="polite">Hazır.</div>
+      <div class="btns">
+        <button id="buildNow" class="btn small" type="button">Mevcut çeviriyle PDF oluştur</button>
+        <button id="clearCache" class="btn small" type="button">Kayıtlı çeviriyi sil</button>
+      </div>
+      <div id="resultActions" hidden>
+        <div class="btns" style="margin-top:0">
+          <button id="download" class="btn primary" type="button">PDF'i indir</button>
+          <button id="share" class="btn" type="button" hidden>Paylaş</button>
+          <button id="toZotero" class="btn" type="button" hidden>Zotero'ya ekle</button>
+        </div>
+      </div>
+      <ul id="log" aria-live="polite"></ul>
+    </section>
+  </div>
+
+  <section class="viewer">
+    <div class="empty">
+      <h2>Henüz makale yok</h2>
+      <p>Zotero'dan bir makale açın ya da bir PDF dosyası seçin. Çevrilecek kısımlar burada fosforlu kalemle işaretlenmiş gibi görünür.</p>
+    </div>
+    <div class="doc-only">
+      <div id="docName"></div>
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Görünüm">
+          <button type="button" data-view="analysis" aria-pressed="true">Orijinal</button>
+          <button type="button" data-view="result" aria-pressed="false">Çeviri</button>
+        </div>
+        <div class="pager">
+          <button id="prev" class="btn small" type="button" aria-label="Önceki sayfa">‹</button>
+          <span id="pageLabel">1 / 1</span>
+          <button id="next" class="btn small" type="button" aria-label="Sonraki sayfa">›</button>
+        </div>
+      </div>
+      <div id="legend">
+        <span><i class="k-tr"></i>Çevrilecek</span>
+        <span><i class="k-done"></i>Çevrildi</span>
+        <span><i class="k-skip"></i>Olduğu gibi kalacak</span>
+        <span>Bir alana dokunarak seçimi değiştirin.</span>
+      </div>
+      <div id="stage"><canvas id="canvas"></canvas></div>
+    </div>
+  </section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
+<script>
+/* ===== Çekirdek: blok çıkarma, sınıflandırma, PDF oluşturma ===== */
+const Core = (() => {
+  const BOLD_RE = /bold|black|heavy|semibold|demi|[,-]b$|medi\b|\.b$/i;
+
+  async function extractPage(page, pageIndex) {
+    const view = page.view; // [x0,y0,x1,y1]
+    const tc = await page.getTextContent();
+    const boldCache = {};
+    let opsLoaded = false;
+    async function isBold(fn) {
+      if (fn in boldCache) return boldCache[fn];
+      if (!opsLoaded) { opsLoaded = true; try { await page.getOperatorList(); } catch (e) {} }
+      let b = false;
+      try {
+        if (page.commonObjs.has(fn)) {
+          const f = page.commonObjs.get(fn);
+          b = !!(f && (f.bold || f.black || BOLD_RE.test(f.name || "")));
+        }
+      } catch (e) {}
+      boldCache[fn] = b;
+      return b;
+    }
+
+    const items = [];
+    for (const it of tc.items) {
+      if (!it.str || !it.str.trim()) continue;
+      const [a, b, c, d, e, f] = it.transform;
+      if (a <= 0 || Math.abs(b) > 0.02 * Math.abs(a) || Math.abs(c) > 0.02 * Math.abs(d)) continue; // yatay olmayan metne dokunma
+      const size = Math.hypot(c, d) || it.height;
+      if (!(size >= 1)) continue;
+      items.push({ str: it.str, x: e, y: f, w: it.width, size, bold: await isBold(it.fontName) });
+    }
+
+    // 1) Akış sırasına göre satır kur
+    let lines = [];
+    let cur = null;
+    for (const it of items) {
+      if (cur) {
+        const tol = 0.55 * Math.max(cur.size, it.size);
+        const gap = it.x - cur.x1;
+        if (Math.abs(it.y - cur.y) < tol && gap > -cur.size * 0.6 && gap < Math.max(cur.size, it.size) * 1.5) {
+          cur.items.push(it);
+          cur.x1 = Math.max(cur.x1, it.x + it.w);
+          continue;
+        }
+      }
+      cur = { items: [it], x0: it.x, x1: it.x + it.w, y: it.y, size: it.size };
+      lines.push(cur);
+    }
+    // 2) Aynı taban çizgisindeki komşu satırları birleştir
+    lines.sort((p, q) => (Math.abs(p.y - q.y) > 0.3 * Math.min(p.size, q.size) ? q.y - p.y : p.x0 - q.x0));
+    const merged = [];
+    for (const ln of lines) {
+      const prev = merged[merged.length - 1];
+      if (prev && Math.abs(prev.y - ln.y) < 0.3 * Math.min(prev.size, ln.size) && ln.x0 - prev.x1 < Math.max(prev.size, ln.size) * 1.5 && ln.x0 - prev.x1 > -prev.size) {
+        prev.items.push(...ln.items);
+        prev.x1 = Math.max(prev.x1, ln.x1);
+        prev.x0 = Math.min(prev.x0, ln.x0);
+      } else merged.push(ln);
+    }
+    lines = merged.map(finishLine);
+
+    // 3) Satırları paragraf bloklarına topla
+    const blocks = [];
+    for (const ln of lines) {
+      let best = null, bestDy = Infinity;
+      for (const bl of blocks) {
+        const L = bl.lines[bl.lines.length - 1];
+        const s = Math.max(L.size, ln.size);
+        const dy = L.y - ln.y;
+        if (dy < 0.5 * s || dy > 1.75 * s) continue;
+        if (Math.abs(L.size - ln.size) > 0.18 * s) continue;
+        if (L.bold !== ln.bold) continue;
+        if (L.prose !== ln.prose) continue;
+        const ov = Math.min(bl.x1, ln.x1) - Math.max(bl.x0, ln.x0);
+        if (ov < 0.5 * Math.min(bl.x1 - bl.x0, ln.x1 - ln.x0)) continue;
+        const dl = ln.x0 - bl.x0, dr = bl.x1 - ln.x1;
+        const centered = bl.allCentered && Math.abs(dl - dr) < 1.5 * s && (Math.abs(dl) > s || bl.lines.length === 1);
+        if (!centered && (ln.x1 - bl.x1 > 2 * s || bl.x0 - ln.x0 > 2 * s)) continue;
+        // yeni paragraf: girinti ya da önceki satır kısa bittiyse
+        if (!centered && ln.x0 > bl.x0 + 0.7 * s && ln.x1 > bl.x1 - 1.5 * s) continue;
+        if (!centered && bl.lines.length >= 2 && L.x1 < bl.x1 - 2.5 * s) continue;
+        if (dy < bestDy) { best = bl; bestDy = dy; }
+      }
+      if (best) {
+        const dl = ln.x0 - best.x0, dr = best.x1 - ln.x1;
+        best.allCentered = best.allCentered && Math.abs(dl - dr) < 1.5 * ln.size;
+        best.lines.push(ln);
+        best.x0 = Math.min(best.x0, ln.x0);
+        best.x1 = Math.max(best.x1, ln.x1);
+      } else blocks.push({ lines: [ln], x0: ln.x0, x1: ln.x1, allCentered: true });
+    }
+    const out = blocks.map((bl, k) => finishBlock(bl, `${pageIndex}:${k}`, view));
+    // Taşma için boş alan: sağdaki ve alttaki en yakın komşu
+    const cr = Math.max(...out.map((b) => b.x1), view[0]);
+    const cl = Math.min(...out.map((b) => b.x0), view[2]);
+    const cb = Math.min(...out.map((b) => b.y0), view[3]);
+    for (const b of out) {
+      let maxX1 = Math.max(cr, b.x1), minX0 = Math.min(cl, b.x0), minY0 = Math.min(cb, b.y0);
+      for (const o of out) {
+        if (o === b) continue;
+        const yov = Math.min(b.y1, o.y1) - Math.max(b.y0, o.y0) > 0;
+        const xov = Math.min(b.x1, o.x1) - Math.max(b.x0, o.x0) > 0;
+        if (yov && o.x0 >= b.x1 - 1) maxX1 = Math.min(maxX1, o.x0 - 4);
+        if (yov && o.x1 <= b.x0 + 1) minX0 = Math.max(minX0, o.x1 + 4);
+        if (xov && o.y1 <= b.y0 + 1) minY0 = Math.max(minY0, o.y1 + 2);
+      }
+      b.ext = { x0: Math.min(minX0, b.x0), x1: Math.max(maxX1, b.x1), y0: Math.min(Math.max(minY0 + b.size * 0.3, b.y0 - b.size * 2.5), b.y0) };
+    }
+    return { index: pageIndex, view, blocks: out };
+  }
+
+  function finishLine(ln) {
+    ln.items.sort((p, q) => p.x - q.x);
+    // baskın yazı boyutu / kalınlık: en çok karakteri olan
+    const bySize = {};
+    let boldChars = 0, allChars = 0;
+    for (const it of ln.items) {
+      const k = it.size.toFixed(1);
+      bySize[k] = (bySize[k] || 0) + it.str.length;
+      allChars += it.str.length;
+      if (it.bold) boldChars += it.str.length;
+    }
+    const dom = +Object.entries(bySize).sort((a, b) => b[1] - a[1])[0][0];
+    const domItem = ln.items.find((it) => it.size.toFixed(1) === dom.toFixed(1)) || ln.items[0];
+    let text = "";
+    let lastEnd = null;
+    for (const it of ln.items) {
+      if (lastEnd !== null) {
+        const gap = it.x - lastEnd;
+        if (gap > 0.15 * Math.min(dom, it.size) && !/\s$/.test(text) && !/^\s/.test(it.str)) text += " ";
+      }
+      text += it.str;
+      lastEnd = it.x + it.w;
+    }
+    text = text.replace(/\s+/g, " ").trim();
+    const letters = (text.match(/\p{L}/gu) || []).length;
+    const prose = letters >= 2 && letters / Math.max(1, text.replace(/\s/g, "").length) >= 0.5 && !isMathy(text);
+    return { x0: ln.x0, x1: ln.x1, y: domItem.y, size: dom, bold: boldChars > allChars * 0.6, text, prose };
+  }
+
+  function finishBlock(bl, id, view) {
+    const L = bl.lines;
+    const size = median(L.map((l) => l.size));
+    let text = "";
+    for (const l of L) {
+      if (!text) text = l.text;
+      else if (/[A-Za-zÀ-ÿ]-$/.test(text) && /^[a-zà-ÿ]/.test(l.text)) text = text.slice(0, -1) + l.text;
+      else text += " " + l.text;
+    }
+    const y1 = Math.max(...L.map((l) => l.y + l.size * 0.8));
+    const y0 = Math.min(...L.map((l) => l.y - l.size * 0.24));
+    const lh = L.length > 1 ? clamp((L[0].y - L[L.length - 1].y) / (L.length - 1) / size, 1.0, 1.8) : 1.2;
+    const w = bl.x1 - bl.x0;
+    const nonLast = L.slice(0, -1);
+    const justified = nonLast.length >= 1 && nonLast.filter((l) => l.x1 > bl.x1 - size * 0.6 && l.x0 < bl.x0 + size * 1.2).length >= nonLast.length * 0.7;
+    const pageCx = (view[0] + view[2]) / 2;
+    const bcx = (bl.x0 + bl.x1) / 2;
+    let centered = false;
+    if (L.length === 1) centered = Math.abs(bcx - pageCx) < size * 1.5 && bl.x0 - view[0] > size * 4;
+    else centered = !justified && L.every((l) => Math.abs((l.x0 + l.x1) / 2 - bcx) < size * 0.8) && L.some((l) => l.x1 - l.x0 < w - size * 2);
+    return {
+      id, text, size, lh, bold: L.filter((l) => l.bold).length > L.length / 2,
+      x0: bl.x0, x1: bl.x1, y0, y1, nLines: L.length,
+      align: centered ? "center" : justified ? "justify" : "left",
+    };
+  }
+
+  /* ---------- Sınıflandırma ---------- */
+  const REF_RE = /^(?:[\dIVX]+\.?\s*)?(references|reference list|bibliography|literature cited|works cited|cited literature|references and notes|notes and references|literatür|kaynakça|kaynaklar)$/i;
+  const RESUME_RE = /^(?:[\dA-Z]+\.?\s*)?(appendix|appendices|supplementary|supporting information|ek(?:ler)?\b)/i;
+
+  function readingOrder(page) {
+    const W = page.view[2] - page.view[0];
+    const mid = (page.view[0] + page.view[2]) / 2;
+    const bl = page.blocks.slice().sort((a, b) => b.y1 - a.y1);
+    // tam genişlikteki bloklar sayfayı bantlara böler
+    const out = [];
+    let band = [];
+    const flush = () => {
+      band.sort((a, b) => {
+        const ca = (a.x0 + a.x1) / 2 < mid ? 0 : 1, cb = (b.x0 + b.x1) / 2 < mid ? 0 : 1;
+        return ca - cb || b.y1 - a.y1;
+      });
+      out.push(...band);
+      band = [];
+    };
+    for (const b of bl) {
+      if (b.x1 - b.x0 > 0.62 * W || (b.x0 < mid - 0.05 * W && b.x1 > mid + 0.05 * W)) { flush(); out.push(b); }
+      else band.push(b);
+    }
+    flush();
+    return out;
+  }
+
+  function classify(pages, opts) {
+    let refMode = false;
+    const ordered = [];
+    for (const p of pages) {
+      if (opts.pageSet && !opts.pageSet.has(p.index)) {
+        for (const b of p.blocks) { b.skip = "sayfa aralığı dışında"; }
+        // kaynakça başlığını aralık dışında da takip et
+        for (const b of readingOrder(p)) {
+          const t = b.text.trim().replace(/[:.]$/, "");
+          if (opts.skipRefs && b.nLines <= 2 && REF_RE.test(t)) refMode = true;
+          else if (refMode && opts.translateAppendix && b.nLines <= 2 && t.length < 90 && RESUME_RE.test(t)) refMode = false;
+        }
+        continue;
+      }
+      for (const b of readingOrder(p)) {
+        const t = b.text.trim();
+        const tc = t.replace(/[:.]$/, "");
+        const heading = b.nLines <= 2 && t.length < 90;
+        b.skip = null;
+        b.fixed = null;
+        if (refMode && opts.translateAppendix && heading && RESUME_RE.test(tc)) refMode = false;
+        if (refMode) b.skip = "kaynakça";
+        else if (opts.skipRefs && heading && REF_RE.test(tc)) { refMode = true; b.fixed = opts.refTitle || "Kaynakça"; }
+        else {
+          const letters = (t.match(/\p{L}/gu) || []).length;
+          const nonspace = t.replace(/\s/g, "").length;
+          if (letters < 3) b.skip = "sayı/sembol";
+          else if (letters / nonspace < 0.5 || isMathy(t)) b.skip = "formül/tablo";
+          else if (/^(https?:\/\/|www\.|doi:|arxiv:)\S*$/i.test(t)) b.skip = "bağlantı";
+          else if (/\S+@\S+\.\S+/.test(t) && t.length < 80) b.skip = "e-posta";
+          else if (opts.skipCaptions && /^(fig(ure)?|table|şekil|tablo)\.?\s*\d/i.test(t)) b.skip = "şekil/tablo yazısı";
+        }
+        const ov = opts.overrides && opts.overrides[b.id];
+        if (ov === "skip") { b.skip = "elle atlandı"; b.fixed = null; }
+        else if (ov === "translate" && b.skip) { b.skip = null; b.manual = true; }
+        if (!b.skip) ordered.push(b);
+      }
+    }
+    return ordered; // çevrilecek bloklar, okuma sırasında
+  }
+
+  /* ---------- Yerleştirme ---------- */
+  function wrap(text, font, size, W) {
+    const words = text.split(/\s+/).filter(Boolean);
+    const lines = [];
+    let line = "";
+    const fits = (s) => font.widthOfTextAtSize(s, size) <= W;
+    for (let w of words) {
+      const cand = line ? line + " " + w : w;
+      if (fits(cand)) { line = cand; continue; }
+      if (line) lines.push(line);
+      line = "";
+      while (!fits(w) && w.length > 1) {
+        let k = w.length - 1;
+        while (k > 1 && !fits(w.slice(0, k) + "-")) k--;
+        lines.push(w.slice(0, k) + "-");
+        w = w.slice(k);
+      }
+      line = w;
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function layoutBlock(text, font, b, minScale) {
+    const minSize = Math.max(b.size * minScale, 3.5);
+    const step = Math.max(0.1, b.size * 0.025);
+    const ext = b.ext || { x0: b.x0, x1: b.x1, y0: b.y0 };
+    const boxes = [{ x0: b.x0, x1: b.x1, y0: b.y0, lo: b.size * 0.9 }];
+    // Tek satırlık başlıklar sağa (ortalıysa iki yana) genişleyebilir; tüm bloklar alttaki boşluğa taşabilir
+    let ex0 = b.x0, ex1 = b.x1;
+    if (b.nLines === 1) {
+      if (b.align === "center") { const cx = (b.x0 + b.x1) / 2, half = Math.min(cx - ext.x0, ext.x1 - cx); ex0 = cx - half; ex1 = cx + half; }
+      else ex1 = ext.x1;
+    }
+    boxes.push({ x0: ex0, x1: ex1, y0: ext.y0, lo: minSize });
+    let res = null;
+    for (const box of boxes) {
+      const W = Math.max(box.x1 - box.x0, 10), H = b.y1 - box.y0;
+      for (let s = b.size; s >= box.lo - 1e-6; s -= step) {
+        const lines = wrap(text, font, s, W);
+        if (s * (1.02 + (lines.length - 1) * b.lh) <= H + 0.5) return { size: s, lines, lh: b.lh, x0: box.x0, W };
+      }
+    }
+    const box = boxes[1], W = Math.max(box.x1 - box.x0, 10), H = b.y1 - box.y0;
+    const lines = wrap(text, font, minSize, W);
+    const lh = Math.max(1.0, Math.min(b.lh, (H / minSize - 1.02) / Math.max(1, lines.length - 1)));
+    return { size: minSize, lines, lh, x0: box.x0, W };
+  }
+
+  function sanitize(text, font) {
+    const fk = font.embedder && font.embedder.font;
+    text = text.replace(/[\u00AD\u200B-\u200D\uFEFF]/g, "").replace(/\s+/g, " ").trim();
+    if (!fk || !fk.hasGlyphForCodePoint) return text;
+    let out = "";
+    for (const ch of text) {
+      const cp = ch.codePointAt(0);
+      if (fk.hasGlyphForCodePoint(cp)) { out += ch; continue; }
+      const base = ch.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+      out += base && [...base].every((c) => fk.hasGlyphForCodePoint(c.codePointAt(0))) ? base : "?";
+    }
+    return out;
+  }
+
+  function drawBlock(page, b, text, fonts, rgb, opts) {
+    const font = b.bold ? fonts.bold : fonts.regular;
+    text = sanitize(text, font);
+    page.drawRectangle({ x: b.x0 - 1.5, y: b.y0 - 1, width: b.x1 - b.x0 + 3, height: b.y1 - b.y0 + 2, color: rgb(1, 1, 1) });
+    if (!text) return;
+    const L = layoutBlock(text, font, b, opts.minScale || 0.6);
+    const s = L.size, lh = L.lh, W = L.W, X0 = L.x0;
+    const color = rgb(0.05, 0.05, 0.05);
+    let y = b.y1 - s * 0.8;
+    L.lines.forEach((ln, i) => {
+      const lw = font.widthOfTextAtSize(ln, s);
+      const last = i === L.lines.length - 1;
+      if (b.align === "justify" && !last && opts.justify !== false) {
+        const words = ln.split(" ");
+        const ww = words.map((w) => font.widthOfTextAtSize(w, s));
+        const gap = words.length > 1 ? (W - ww.reduce((a, c) => a + c, 0)) / (words.length - 1) : 0;
+        if (words.length > 1 && gap < s * 1.2) {
+          let x = X0;
+          words.forEach((w, j) => { page.drawText(w, { x, y, size: s, font, color }); x += ww[j] + gap; });
+          y -= s * lh;
+          return;
+        }
+      }
+      const x = b.align === "center" ? X0 + (W - lw) / 2 : X0;
+      page.drawText(ln, { x, y, size: s, font, color });
+      y -= s * lh;
+    });
+  }
+
+  async function buildPdf(PDFLib, fontkit, bytes, pages, translations, fontBytes, opts) {
+    const { PDFDocument, rgb } = PDFLib;
+    const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+    doc.registerFontkit(fontkit);
+    const fonts = {
+      regular: await doc.embedFont(fontBytes.regular, { subset: opts.subset !== false }),
+      bold: await doc.embedFont(fontBytes.bold, { subset: opts.subset !== false }),
+    };
+    const docPages = doc.getPages();
+    for (const p of pages) {
+      const page = docPages[p.index];
+      for (const b of p.blocks) {
+        const tr = b.fixed || translations[b.id];
+        if (b.skip || !tr) continue;
+        drawBlock(page, b, tr, fonts, rgb, opts);
+      }
+    }
+    let outBytes = await doc.save();
+    if (opts.bilingual) {
+      const orig = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      const tr = await PDFDocument.load(outBytes);
+      const out = await PDFDocument.create();
+      const n = orig.getPageCount();
+      const range = opts.pageSet ? [...opts.pageSet].sort((a, b) => a - b) : [...Array(n).keys()];
+      const o = await out.copyPages(orig, range);
+      const t = await out.copyPages(tr, range);
+      range.forEach((_, i) => { out.addPage(o[i]); out.addPage(t[i]); });
+      outBytes = await out.save();
+    } else if (opts.onlyRange && opts.pageSet) {
+      const tr = await PDFDocument.load(outBytes);
+      const out = await PDFDocument.create();
+      const range = [...opts.pageSet].sort((a, b) => a - b);
+      (await out.copyPages(tr, range)).forEach((pg) => out.addPage(pg));
+      outBytes = await out.save();
+    }
+    return outBytes;
+  }
+
+  function isMathy(t) {
+    const words = (t.match(/\p{L}{3,}/gu) || []).filter((w) => !/^(log|exp|sin|cos|tan|max|min|arg|lim|det|softmax)$/i.test(w));
+    const math = (t.match(/[=+−×÷±≤≥≈≠∈∉⊂∑Σ∏∫√∂∇∞→↦‖]/g) || []).length;
+    return (math >= 1 && words.length <= 2) || (math >= 3 && words.length <= 5);
+  }
+  function median(a) { const s = a.slice().sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  return { extractPage, classify, buildPdf, readingOrder };
+})();
+if (typeof module !== "undefined") module.exports = Core;
+
+</script>
+<script>
+/* ===== Uygulama ===== */
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+  const FONT_SRC = {
+    serif: ["NotoSerif", "NotoSerif-Regular", "NotoSerif-Bold"],
+    sans: ["NotoSans", "NotoSans-Regular", "NotoSans-Bold"],
+  };
+  const fontUrls = (fam, file) => [
+    `https://raw.githubusercontent.com/notofonts/notofonts.github.io/main/fonts/${fam}/hinted/ttf/${file}.ttf`,
+    `https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io@main/fonts/${fam}/hinted/ttf/${file}.ttf`,
+  ];
+
+  const PDFJS_OPTS = { cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/", cMapPacked: true, standardFontDataUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/standard_fonts/" };
+  const S = {
+    bytes: null, name: "", pdf: null, pages: null, fp: "", zotero: null,
+    translations: {}, overrides: {}, outBytes: null, outPdf: null,
+    running: false, paused: false, stopped: false, view: "analysis", pageNo: 0, fonts: {},
+  };
+
+  /* ---------- Ayarlar ---------- */
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+  };
+  const SETTINGS = ["gKey", "model", "fallback", "target", "batch", "gap", "skipRefs", "appendix", "captions", "fontStyle", "output", "justify", "remember", "zKey", "zId", "zType", "zRemember"];
+  function loadSettings() {
+    const s = store.get("mc:settings", {});
+    for (const k of SETTINGS) {
+      const el = $("#" + k);
+      if (!el || !(k in s)) continue;
+      if (el.type === "checkbox") el.checked = !!s[k]; else el.value = s[k];
+    }
+  }
+  function saveSettings() {
+    const s = {};
+    for (const k of SETTINGS) {
+      const el = $("#" + k);
+      if (!el) continue;
+      s[k] = el.type === "checkbox" ? el.checked : el.value;
+    }
+    if (!s.remember) delete s.gKey;
+    if (!s.zRemember) { delete s.zKey; delete s.zId; }
+    store.set("mc:settings", s);
+  }
+  const val = (id) => $("#" + id).value.trim();
+  const on = (id) => $("#" + id).checked;
+
+  /* ---------- Günlük ve durum ---------- */
+  function log(msg, kind = "") {
+    const li = document.createElement("li");
+    li.className = kind;
+    const t = new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    li.innerHTML = `<time>${t}</time><span></span>`;
+    li.lastChild.textContent = msg;
+    $("#log").prepend(li);
+    while ($("#log").children.length > 200) $("#log").lastChild.remove();
+  }
+  function status(msg) { $("#status").textContent = msg; }
+  function progress(done, total) {
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    $("#bar").style.width = pct + "%";
+    $("#barText").textContent = total ? `${done} / ${total} parça · %${pct}` : "";
+  }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  class StopErr extends Error {}
+  class QuotaErr extends Error { constructor(m, daily) { super(m); this.daily = daily; } }
+  class FatalErr extends Error {}
+
+  async function countdown(sec, why) {
+    const end = Date.now() + sec * 1000;
+    while (Date.now() < end) {
+      if (S.stopped) throw new StopErr();
+      status(`${why} — ${Math.ceil((end - Date.now()) / 1000)} sn sonra tekrar denenecek`);
+      await sleep(250);
+    }
+  }
+  async function waitIfPaused() {
+    while (S.paused && !S.stopped) await sleep(250);
+    if (S.stopped) throw new StopErr();
+  }
+
+  /* ---------- PDF yükleme ve analiz ---------- */
+  async function loadPdf(bytes, name, zotero) {
+    if (S.running) { log("Önce devam eden çeviriyi durdurun.", "warn"); return; }
+    S.bytes = bytes; S.name = name; S.zotero = zotero || null;
+    S.outBytes = null; S.outPdf = null; S.pageNo = 0; S.view = "analysis";
+    $("#docName").textContent = name;
+    $("#resultActions").hidden = true;
+    status("PDF okunuyor…");
+    try {
+      S.pdf = await pdfjsLib.getDocument({ data: bytes.slice(), ...PDFJS_OPTS }).promise;
+    } catch (e) {
+      status("Bu PDF açılamadı.");
+      log("PDF açılamadı: " + e.message, "err");
+      return;
+    }
+    S.fp = (S.pdf.fingerprints && S.pdf.fingerprints[0]) || name + bytes.length;
+    S.pages = [];
+    for (let i = 1; i <= S.pdf.numPages; i++) {
+      status(`Sayfa yapısı çıkarılıyor: ${i} / ${S.pdf.numPages}`);
+      S.pages.push(await Core.extractPage(await S.pdf.getPage(i), i - 1));
+    }
+    const chars = S.pages.reduce((a, p) => a + p.blocks.reduce((x, b) => x + b.text.length, 0), 0);
+    const cache = store.get(cacheKey(), null);
+    S.translations = (cache && cache.t) || {};
+    S.overrides = (cache && cache.o) || {};
+    reclassify();
+    const done = Object.keys(S.translations).length;
+    if (chars < 200 * S.pdf.numPages * 0.1) log("Bu PDF'te seçilebilir metin çok az. Taranmış (resim) bir PDF olabilir; bu durumda çeviri yapılamaz.", "warn");
+    log(`${name}: ${S.pdf.numPages} sayfa yüklendi.` + (done ? ` Daha önce çevrilmiş ${done} parça bulundu, kaldığı yerden devam edilecek.` : ""));
+    status("Hazır. Sarı alanlar çevrilecek; bir alana dokunarak çevir/atla seçimini değiştirebilirsiniz.");
+    $("#workspace").classList.add("has-doc");
+    setView("analysis");
+    updateButtons();
+  }
+  const cacheKey = () => `mc:cache:${S.fp}:${val("target")}`;
+  function saveCache() { store.set(cacheKey(), { t: S.translations, o: S.overrides }); }
+
+  function parseRange(str, n) {
+    str = (str || "").trim();
+    if (!str) return null;
+    const set = new Set();
+    for (const part of str.split(/[,;\s]+/)) {
+      const m = part.match(/^(\d+)(?:-(\d+))?$/);
+      if (!m) continue;
+      let a = +m[1], b = m[2] ? +m[2] : a;
+      if (a > b) [a, b] = [b, a];
+      for (let i = Math.max(1, a); i <= Math.min(n, b); i++) set.add(i - 1);
+    }
+    return set.size ? set : null;
+  }
+  function classifyOpts() {
+    return {
+      skipRefs: on("skipRefs"), translateAppendix: on("appendix"), skipCaptions: on("captions"),
+      pageSet: S.pdf ? parseRange(val("range"), S.pdf.numPages) : null, overrides: S.overrides,
+      refTitle: /türk/i.test(val("target")) ? "Kaynakça" : null,
+    };
+  }
+  function reclassify() {
+    if (!S.pages) return [];
+    const list = Core.classify(S.pages, classifyOpts());
+    const todo = list.filter((b) => !b.fixed && !S.translations[b.id]).length;
+    const chars = list.filter((b) => !b.fixed && !S.translations[b.id]).reduce((a, b) => a + b.text.length, 0);
+    const batches = Math.ceil(chars / Math.max(1000, +val("batch") || 6000));
+    $("#summary").textContent = list.length
+      ? `${list.length} parça çevrilecek, ${list.length - todo} tanesi hazır. Kalan iş yaklaşık ${batches} istek.`
+      : "Çevrilecek metin bulunamadı.";
+    progress(list.length - todo, list.length);
+    if (S.view === "analysis") renderPreview();
+    return list;
+  }
+
+  /* ---------- Önizleme ---------- */
+  let renderTask = null, lastViewport = null;
+  async function renderPreview() {
+    const doc = S.view === "result" ? S.outPdf : S.pdf;
+    if (!doc) return;
+    const n = doc.numPages;
+    S.pageNo = Math.max(0, Math.min(n - 1, S.pageNo));
+    $("#pageLabel").textContent = `${S.pageNo + 1} / ${n}`;
+    const page = await doc.getPage(S.pageNo + 1);
+    const canvas = $("#canvas");
+    const wrapW = $("#stage").clientWidth || 600;
+    const base = page.getViewport({ scale: 1 });
+    const dpr = window.devicePixelRatio || 1;
+    const scale = Math.min(wrapW / base.width, 2.2);
+    const vp = page.getViewport({ scale: scale * dpr });
+    if (renderTask) { try { renderTask.cancel(); } catch (e) {} }
+    canvas.width = vp.width; canvas.height = vp.height;
+    canvas.style.width = vp.width / dpr + "px";
+    const ctx = canvas.getContext("2d");
+    renderTask = page.render({ canvasContext: ctx, viewport: vp });
+    try { await renderTask.promise; } catch (e) { return; }
+    renderTask = null;
+    lastViewport = vp;
+    if (S.view !== "analysis") return;
+    const p = S.pages[S.pageNo];
+    const css = getComputedStyle(document.documentElement);
+    const hi = css.getPropertyValue("--mark").trim() || "#f2d94e";
+    for (const b of p.blocks) {
+      const [x0, y0, x1, y1] = vp.convertToViewportRectangle([b.x0, b.y0, b.x1, b.y1]);
+      const rx = Math.min(x0, x1), ry = Math.min(y0, y1), rw = Math.abs(x1 - x0), rh = Math.abs(y1 - y0);
+      if (!b.skip) {
+        ctx.globalAlpha = S.translations[b.id] || b.fixed ? 0.22 : 0.42;
+        ctx.fillStyle = hi;
+        ctx.fillRect(rx, ry, rw, rh);
+        ctx.globalAlpha = 1;
+        if (S.translations[b.id] || b.fixed) {
+          ctx.fillStyle = "#2f855a";
+          ctx.fillRect(rx - 3 * dpr, ry, 2.5 * dpr, rh);
+        }
+      } else {
+        ctx.save();
+        ctx.strokeStyle = "rgba(90,100,115,.55)";
+        ctx.lineWidth = 1 * dpr;
+        ctx.setLineDash([3 * dpr, 3 * dpr]);
+        ctx.strokeRect(rx, ry, rw, rh);
+        ctx.restore();
+      }
+    }
+  }
+  $("#canvas").addEventListener("click", (ev) => {
+    if (S.view !== "analysis" || !lastViewport || S.running) return;
+    const r = ev.target.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const [px, py] = lastViewport.convertToPdfPoint((ev.clientX - r.left) * dpr, (ev.clientY - r.top) * dpr);
+    const hits = S.pages[S.pageNo].blocks.filter((b) => px >= b.x0 - 2 && px <= b.x1 + 2 && py >= b.y0 - 2 && py <= b.y1 + 2);
+    if (!hits.length) return;
+    const b = hits.sort((a, c) => (a.x1 - a.x0) * (a.y1 - a.y0) - (c.x1 - c.x0) * (c.y1 - c.y0))[0];
+    if (b.skip && b.skip !== "sayfa aralığı dışında") S.overrides[b.id] = "translate";
+    else if (!b.skip) S.overrides[b.id] = "skip";
+    else return;
+    saveCache();
+    reclassify();
+    log(b.skip ? `Atlanacak: “${b.text.slice(0, 50)}…”` : `Çevrilecek: “${b.text.slice(0, 50)}…”`);
+  });
+  function setView(v) {
+    S.view = v;
+    $$("[data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === v)));
+    $("#legend").hidden = v !== "analysis";
+    renderPreview();
+  }
+  $$("[data-view]").forEach((b) => b.addEventListener("click", () => { if (b.dataset.view === "result" && !S.outPdf) return; setView(b.dataset.view); }));
+  $("#prev").onclick = () => { S.pageNo--; renderPreview(); };
+  $("#next").onclick = () => { S.pageNo++; renderPreview(); };
+  let rz;
+  window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(renderPreview, 200); });
+
+  /* ---------- Gemini ---------- */
+  function sysPrompt(target) {
+    return [
+      `You are an expert translator of academic and scientific papers. Translate every string in the JSON array the user sends into ${target}.`,
+      "Rules:",
+      "1. Reply with ONLY a JSON array of strings with exactly the same number of items, in the same order. Never merge, split, drop or reorder items.",
+      "2. The items are consecutive text blocks extracted from a PDF in reading order. A block may start or end mid-sentence because of column or page breaks: translate each block as a fragment, use the neighbours only as context, and keep each block's content inside its own item.",
+      `3. Use formal, fluent academic ${target} with established terminology for the field.`,
+      "4. Leave unchanged: mathematical expressions, variables, formulas, numbers, units, chemical formulas, citation markers like [12] or (Smith et al., 2020), names of people and institutions, names of models, datasets, software and genes, URLs, DOIs and e-mail addresses.",
+      "5. Fix broken hyphenation left over from line breaks. Do not add notes, explanations or quotation marks.",
+      "6. If an item has nothing to translate (only names, symbols or codes), return it unchanged.",
+    ].join("\n");
+  }
+
+  async function geminiCall(texts) {
+    const model = S.activeModel;
+    const key = val("gKey");
+    if (!key) throw new FatalErr("Gemini API anahtarı girilmedi.");
+    const body = {
+      systemInstruction: { parts: [{ text: sysPrompt(val("target") || "Turkish") }] },
+      contents: [{ role: "user", parts: [{ text: JSON.stringify(texts) }] }],
+      generationConfig: { temperature: 0.2, responseMimeType: "application/json", responseSchema: { type: "ARRAY", items: { type: "STRING" } } },
+    };
+    if (/2\.5-flash/.test(model)) body.generationConfig.thinkingConfig = { thinkingBudget: 0 };
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+    let attempt = 0;
+    for (;;) {
+      await waitIfPaused();
+      let res;
+      try {
+        res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body: JSON.stringify(body) });
+      } catch (e) {
+        await countdown(Math.min(60, 5 * 2 ** attempt++), "Bağlantı hatası");
+        continue;
+      }
+      if (res.ok) {
+        const data = await res.json();
+        const c = data.candidates && data.candidates[0];
+        if (!c || !c.content) return { arr: null, why: (data.promptFeedback && data.promptFeedback.blockReason) || "boş yanıt" };
+        if (c.finishReason === "MAX_TOKENS") return { arr: null, why: "yanıt çok uzun" };
+        let txt = (c.content.parts || []).map((p) => p.text || "").join("").trim().replace(/^```(?:json)?\s*|\s*```$/g, "");
+        try { const arr = JSON.parse(txt); return Array.isArray(arr) ? { arr, why: `${texts.length} parça yerine ${arr.length} geldi` } : { arr: null, why: "dizi değil" }; }
+        catch (e) { return { arr: null, why: "JSON okunamadı" }; }
+      }
+      let err = {};
+      try { err = (await res.json()).error || {}; } catch (e) {}
+      const raw = JSON.stringify(err);
+      if (res.status === 429 || err.status === "RESOURCE_EXHAUSTED") {
+        if (/PerDay|per day|daily/i.test(raw)) throw new QuotaErr(`${model} için günlük ücretsiz kota doldu.`, true);
+        const ri = (err.details || []).find((d) => String(d["@type"] || "").includes("RetryInfo"));
+        const sec = ri && ri.retryDelay ? parseFloat(ri.retryDelay) + 1 : Math.min(65, 10 * 2 ** attempt);
+        attempt++;
+        log(`Hız sınırına takıldı (${model}). ${Math.round(sec)} sn bekleniyor.`, "warn");
+        await countdown(sec, "Hız sınırı");
+        continue;
+      }
+      if ([500, 502, 503, 504].includes(res.status)) {
+        const sec = Math.min(90, 5 * 2 ** attempt++);
+        log(`Gemini sunucusu yanıt vermedi (${res.status}). ${sec} sn sonra tekrar.`, "warn");
+        await countdown(sec, "Sunucu meşgul");
+        continue;
+      }
+      if (res.status === 404) throw new FatalErr(`“${model}” modeli bulunamadı. “Modelleri getir” ile listeden seçin.`);
+      if (res.status === 400 && /API_KEY_INVALID|API key not valid/i.test(raw)) throw new FatalErr("Gemini API anahtarı geçersiz.");
+      if (res.status === 403) throw new FatalErr("Bu anahtarın Gemini API'ye erişim izni yok: " + (err.message || ""));
+      throw new FatalErr(`Gemini hatası ${res.status}: ${err.message || res.statusText}`);
+    }
+  }
+
+  async function translateBatch(texts) {
+    const { arr, why } = await geminiCall(texts);
+    if (arr && arr.length === texts.length) return arr.map((t, i) => (typeof t === "string" && t.trim() ? t : texts[i]));
+    if (texts.length === 1) { log(`Bir parça çevrilemedi (${why}); orijinali bırakıldı.`, "warn"); return [null]; }
+    log(`Yanıt eşleşmedi (${why}); grup ikiye bölünüp tekrar deneniyor.`, "warn");
+    const h = Math.ceil(texts.length / 2);
+    return [...(await translateBatch(texts.slice(0, h))), ...(await translateBatch(texts.slice(h)))];
+  }
+
+  function makeBatches(list) {
+    const budget = Math.max(1000, +val("batch") || 6000);
+    const out = [];
+    let cur = [], n = 0;
+    for (const b of list) {
+      if (cur.length && (n + b.text.length > budget || cur.length >= 60)) { out.push(cur); cur = []; n = 0; }
+      cur.push(b); n += b.text.length;
+    }
+    if (cur.length) out.push(cur);
+    return out;
+  }
+
+  async function run() {
+    if (!S.pages || S.running) return;
+    if (!val("gKey")) { log("Önce Gemini API anahtarınızı girin.", "err"); $("#gKey").focus(); return; }
+    saveSettings();
+    S.running = true; S.stopped = false; S.paused = false;
+    S.activeModel = val("model") || "gemini-2.5-flash";
+    updateButtons();
+    const list = reclassify();
+    const total = list.length;
+    const todo = list.filter((b) => !b.fixed && !S.translations[b.id]);
+    const batches = makeBatches(todo);
+    const gap = Math.max(0, +val("gap") || 0) * 1000;
+    log(`Çeviri başladı: ${todo.length} parça, ${batches.length} istek, model ${S.activeModel}.`);
+    let i = 0;
+    try {
+      while (i < batches.length) {
+        await waitIfPaused();
+        const batch = batches[i];
+        status(`Çevriliyor: istek ${i + 1} / ${batches.length}`);
+        try {
+          const res = await translateBatch(batch.map((b) => b.text));
+          res.forEach((t, k) => { if (t) S.translations[batch[k].id] = t; });
+          saveCache();
+          i++;
+          progress(list.filter((b) => b.fixed || S.translations[b.id]).length, total);
+          if (S.view === "analysis") renderPreview();
+          if (i < batches.length && gap) await countdown(gap / 1000, "Hız sınırına takılmamak için bekleniyor");
+        } catch (e) {
+          if (e instanceof StopErr) throw e;
+          if (e instanceof QuotaErr) {
+            const fb = val("fallback");
+            if (fb && fb !== S.activeModel) {
+              log(`${e.message} Yedek modele geçiliyor: ${fb}.`, "warn");
+              S.activeModel = fb;
+              continue;
+            }
+            log(`${e.message} İlerleme kaydedildi. Başka bir model seçip “Devam et”e basabilir, yarın kaldığınız yerden sürdürebilir ya da mevcut çeviriyle PDF oluşturabilirsiniz.`, "err");
+          } else log((e instanceof FatalErr ? "" : "Beklenmeyen hata: ") + e.message + " Ayarı düzeltip “Devam et”e basın.", "err");
+          S.paused = true;
+          S.activeModel = val("model") || S.activeModel;
+          updateButtons();
+          status("Duraklatıldı.");
+          await waitIfPaused();
+          S.activeModel = val("model") || S.activeModel;
+        }
+      }
+      log("Tüm parçalar çevrildi.", "ok");
+      await build();
+    } catch (e) {
+      if (!(e instanceof StopErr)) log("Hata: " + e.message, "err");
+      else log("Çeviri durduruldu. Yapılan kısım kaydedildi.");
+      status("Durduruldu.");
+    } finally {
+      S.running = false; S.paused = false;
+      updateButtons();
+    }
+  }
+
+  /* ---------- PDF oluşturma ---------- */
+  async function getFonts() {
+    const style = val("fontStyle");
+    if (S.fonts[style]) return S.fonts[style];
+    const [fam, reg, bold] = FONT_SRC[style];
+    const fetchOne = async (file) => {
+      for (const u of fontUrls(fam, file)) {
+        try { const r = await fetch(u); if (r.ok) return new Uint8Array(await r.arrayBuffer()); } catch (e) {}
+      }
+      throw new Error("Yazı tipi indirilemedi (" + file + "). İnternet bağlantısını kontrol edin.");
+    };
+    status("Türkçe karakterli yazı tipi indiriliyor…");
+    const f = { regular: await fetchOne(reg), bold: await fetchOne(bold) };
+    S.fonts[style] = f;
+    return f;
+  }
+  async function build() {
+    if (!S.pages) return;
+    try {
+      status("PDF oluşturuluyor…");
+      const fonts = await getFonts();
+      const opts = classifyOpts();
+      Core.classify(S.pages, opts);
+      const out = val("output");
+      S.outBytes = await Core.buildPdf(PDFLib, fontkit, S.bytes, S.pages, S.translations, fonts, {
+        justify: on("justify"), bilingual: out === "bilingual", onlyRange: true, pageSet: opts.pageSet, minScale: 0.6,
+      });
+      S.outPdf = await pdfjsLib.getDocument({ data: S.outBytes.slice(), ...PDFJS_OPTS }).promise;
+      $("#resultActions").hidden = false;
+      $("#toZotero").hidden = !S.zotero;
+      $("#share").hidden = !(navigator.canShare && navigator.canShare({ files: [new File([new Uint8Array(1)], "a.pdf", { type: "application/pdf" })] }));
+      S.pageNo = out === "bilingual" ? 1 : 0;
+      reclassify();
+      setView("result");
+      if (matchMedia("(max-width: 860px)").matches) $(".viewer").scrollIntoView({ behavior: "smooth", block: "start" });
+      const kb = Math.round(S.outBytes.length / 1024);
+      log(`Çevrilmiş PDF hazır (${kb} KB).`, "ok");
+      status("Çevrilmiş PDF hazır. İndirebilir ya da Zotero'ya ekleyebilirsiniz.");
+    } catch (e) {
+      log("PDF oluşturulamadı: " + e.message, "err");
+      status("PDF oluşturulamadı.");
+    }
+    updateButtons();
+  }
+  const outName = () => S.name.replace(/\.pdf$/i, "") + (val("output") === "bilingual" ? "_EN-TR.pdf" : "_TR.pdf");
+  $("#download").onclick = () => {
+    const url = URL.createObjectURL(new Blob([S.outBytes], { type: "application/pdf" }));
+    const a = Object.assign(document.createElement("a"), { href: url, download: outName() });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  };
+  $("#share").onclick = async () => {
+    try { await navigator.share({ files: [new File([S.outBytes], outName(), { type: "application/pdf" })], title: outName() }); }
+    catch (e) { if (e.name !== "AbortError") log("Paylaşılamadı: " + e.message, "err"); }
+  };
+
+  /* ---------- Zotero ---------- */
+  const Z = {
+    base() { return `https://api.zotero.org/${val("zType") === "group" ? "groups" : "users"}/${val("zId")}`; },
+    check() {
+      if (!val("zKey") || !val("zId")) throw new Error("Zotero API anahtarı ve kullanıcı/grup kimliği gerekli.");
+    },
+    async get(path, params = {}) {
+      this.check();
+      const u = new URL(this.base() + path);
+      for (const [k, v] of Object.entries({ ...params, key: val("zKey"), v: 3 })) if (v !== "" && v != null) u.searchParams.set(k, v);
+      for (let a = 0; ; a++) {
+        const r = await fetch(u);
+        if ((r.status === 429 || r.status === 503) && a < 5) { await sleep((+r.headers.get("Retry-After") || 5) * 1000); continue; }
+        if (r.status === 403) throw new Error("Zotero erişimi reddedildi. Anahtarın bu kütüphaneyi okuma izni olduğundan emin olun.");
+        if (r.status === 404) throw new Error("Bulunamadı. Kullanıcı/grup kimliğini kontrol edin.");
+        if (!r.ok) throw new Error(`Zotero hatası ${r.status}`);
+        return r;
+      }
+    },
+    async json(path, params) { return (await this.get(path, params)).json(); },
+    async write(path, opts) {
+      this.check();
+      const r = await fetch(this.base() + path, { ...opts, headers: { "Zotero-API-Key": val("zKey"), "Zotero-API-Version": "3", ...(opts.headers || {}) } });
+      return r;
+    },
+  };
+  async function zConnect() {
+    try {
+      saveSettings();
+      $("#zStatus").textContent = "Bağlanılıyor…";
+      const cols = [];
+      for (let start = 0; ; start += 100) {
+        const page = await Z.json("/collections", { limit: 100, start });
+        cols.push(...page);
+        if (page.length < 100) break;
+      }
+      const byKey = Object.fromEntries(cols.map((c) => [c.key, c]));
+      const path = (c) => { const p = []; let x = c; let guard = 0; while (x && guard++ < 20) { p.unshift(x.data.name); x = byKey[x.data.parentCollection]; } return p.join(" / "); };
+      const sel = $("#zCollection");
+      sel.innerHTML = "";
+      sel.append(new Option("Tüm kütüphane", ""));
+      cols.map((c) => [c.key, path(c)]).sort((x, y) => x[1].localeCompare(y[1], "tr")).forEach(([k, p]) => sel.append(new Option(p, k)));
+      $("#zBrowse").hidden = false;
+      $("#zStatus").textContent = `Bağlandı. ${cols.length} koleksiyon bulundu.`;
+      zSearch();
+    } catch (e) { $("#zStatus").textContent = e.message; }
+  }
+  async function zSearch() {
+    const list = $("#zItems");
+    list.innerHTML = "<li class='muted'>Aranıyor…</li>";
+    try {
+      const col = val("zCollection");
+      const items = await Z.json(col ? `/collections/${col}/items/top` : "/items/top", { q: val("zQuery"), qmode: "titleCreatorYear", limit: 40, sort: "dateModified", direction: "desc", itemType: "-note" });
+      list.innerHTML = "";
+      if (!items.length) { list.innerHTML = "<li class='muted'>Sonuç yok. Başka bir arama deneyin.</li>"; return; }
+      for (const it of items) {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "zitem";
+        const title = it.data.title || "(başlıksız)";
+        const meta = [it.meta.creatorSummary, it.meta.parsedDate && it.meta.parsedDate.slice(0, 4)].filter(Boolean).join(", ");
+        btn.innerHTML = "<strong></strong><small></small>";
+        btn.firstChild.textContent = title;
+        btn.lastChild.textContent = meta || (it.data.itemType === "attachment" ? "Tek başına dosya" : "");
+        btn.onclick = () => zOpen(it, li);
+        li.append(btn);
+        list.append(li);
+      }
+    } catch (e) { list.innerHTML = ""; const li = document.createElement("li"); li.className = "muted"; li.textContent = e.message; list.append(li); }
+  }
+  async function zOpen(item, li) {
+    const old = li.querySelector(".pdfs");
+    if (old) { old.remove(); return; }
+    const box = document.createElement("div");
+    box.className = "pdfs";
+    box.textContent = "Ekler aranıyor…";
+    li.append(box);
+    try {
+      let pdfs;
+      if (item.data.itemType === "attachment") pdfs = item.data.contentType === "application/pdf" ? [item] : [];
+      else pdfs = (await Z.json(`/items/${item.key}/children`)).filter((c) => c.data.itemType === "attachment" && c.data.contentType === "application/pdf");
+      box.textContent = "";
+      if (!pdfs.length) { box.textContent = "Bu kayıtta PDF eki yok."; return; }
+      for (const p of pdfs) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "btn small";
+        b.textContent = "Aç: " + (p.data.filename || p.data.title || "PDF");
+        b.onclick = async () => {
+          b.disabled = true;
+          b.textContent = "İndiriliyor…";
+          try {
+            if (/^(linked_file|linked_url)$/.test(p.data.linkMode)) throw new Error("Bu ek bağlantılı bir dosya; Zotero sunucusunda kopyası yok.");
+            const r = await Z.get(`/items/${p.key}/file`);
+            const bytes = new Uint8Array(await r.arrayBuffer());
+            await loadPdf(bytes, p.data.filename || (item.data.title || "makale") + ".pdf", { parentKey: item.data.itemType === "attachment" ? null : item.key, title: item.data.title || "" });
+            b.textContent = "Açıldı";
+          } catch (e) {
+            b.disabled = false;
+            b.textContent = "Aç: " + (p.data.filename || "PDF");
+            log("Zotero'dan indirilemedi: " + (e.message.includes("Bulunamadı") ? "Dosya Zotero sunucusunda yok (WebDAV kullanıyor ya da henüz senkronlanmamış olabilir)." : e.message), "err");
+          }
+        };
+        box.append(b);
+      }
+    } catch (e) { box.textContent = e.message; }
+  }
+  async function zUpload() {
+    const btn = $("#toZotero");
+    btn.disabled = true;
+    const label = btn.textContent;
+    try {
+      const filename = outName();
+      const bytes = S.outBytes;
+      btn.textContent = "Kayıt oluşturuluyor…";
+      const item = {
+        itemType: "attachment", linkMode: "imported_file", title: (val("output") === "bilingual" ? "İki dilli çeviri" : "Türkçe çeviri") + " (Gemini)",
+        contentType: "application/pdf", filename, tags: [{ tag: "çeviri" }], note: "", relations: {}, charset: "",
+      };
+      if (S.zotero.parentKey) item.parentItem = S.zotero.parentKey;
+      let r = await Z.write("/items", { method: "POST", headers: { "Content-Type": "application/json", "Zotero-Write-Token": crypto.getRandomValues(new Uint32Array(4)).join("").slice(0, 32) }, body: JSON.stringify([item]) });
+      if (r.status === 403) throw new Error("Anahtarın yazma izni yok. zotero.org/settings/keys sayfasında “Allow write access” seçeneğini açın.");
+      const created = await r.json();
+      const key = created.success && created.success["0"];
+      if (!key) throw new Error("Ek kaydı oluşturulamadı: " + JSON.stringify(created.failed || created));
+      btn.textContent = "Dosya yükleniyor…";
+      const md5 = SparkMD5.ArrayBuffer.hash(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
+      const form = new URLSearchParams({ md5, filename, filesize: String(bytes.length), mtime: String(Date.now()) });
+      r = await Z.write(`/items/${key}/file`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", "If-None-Match": "*" }, body: form.toString() });
+      if (r.status === 413) throw new Error("Zotero depolama alanınız dolu.");
+      if (!r.ok) throw new Error("Yükleme izni alınamadı: " + r.status + " " + (await r.text()));
+      const auth = await r.json();
+      if (!auth.exists) {
+        const blob = new Blob([auth.prefix, bytes, auth.suffix]);
+        try {
+          const up = await fetch(auth.url, { method: "POST", headers: { "Content-Type": auth.contentType }, body: blob });
+          if (!up.ok && up.status !== 201) throw new Error("Depoya yükleme başarısız: " + up.status);
+        } catch (e) {
+          if (!(e instanceof TypeError)) throw e;
+          await fetch(auth.url, { method: "POST", mode: "no-cors", headers: { "Content-Type": auth.contentType }, body: blob });
+        }
+        r = await Z.write(`/items/${key}/file`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", "If-None-Match": "*" }, body: "upload=" + encodeURIComponent(auth.uploadKey) });
+        if (r.status !== 204) throw new Error("Yükleme kaydedilemedi: " + r.status + " " + (await r.text()));
+      }
+      log("Çeviri Zotero'ya eklendi. iPad'de senkronlandıktan sonra makalenin altında görünecek.", "ok");
+      btn.textContent = "Zotero'ya eklendi";
+      return;
+    } catch (e) {
+      log("Zotero'ya eklenemedi: " + e.message, "err");
+      btn.textContent = label;
+      btn.disabled = false;
+    }
+  }
+  $("#toZotero").onclick = zUpload;
+  $("#zConnect").onclick = zConnect;
+  $("#zSearchBtn").onclick = zSearch;
+  $("#zQuery").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); zSearch(); } });
+  $("#zCollection").onchange = zSearch;
+
+  /* ---------- Modeller ---------- */
+  $("#listModels").onclick = async () => {
+    if (!val("gKey")) { log("Modelleri görmek için önce API anahtarını girin.", "warn"); return; }
+    try {
+      const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200", { headers: { "x-goog-api-key": val("gKey") } });
+      const d = await r.json();
+      if (!r.ok) throw new Error((d.error && d.error.message) || r.status);
+      const names = (d.models || []).filter((m) => (m.supportedGenerationMethods || []).includes("generateContent") && /gemini/i.test(m.name) && !/embedding|image|tts|audio|live/i.test(m.name)).map((m) => m.name.replace(/^models\//, ""));
+      $("#modelList").innerHTML = names.map((n) => `<option value="${n}"></option>`).join("");
+      log(`${names.length} model bulundu. Model kutusuna dokunarak listeden seçebilirsiniz. Ücretsiz katmanda genellikle “flash” ve “flash-lite” modelleri kullanılabilir.`, "ok");
+    } catch (e) { log("Model listesi alınamadı: " + e.message, "err"); }
+  };
+
+  /* ---------- Düğmeler ---------- */
+  function updateButtons() {
+    const has = !!S.pages;
+    $("#start").disabled = !has || S.running;
+    $("#pause").disabled = !S.running;
+    $("#pause").textContent = S.paused ? "Devam et" : "Duraklat";
+    $("#stop").disabled = !S.running;
+    $("#buildNow").disabled = !has || (S.running && !S.paused);
+    $("#clearCache").disabled = !has || S.running;
+  }
+  $("#start").onclick = run;
+  $("#pause").onclick = () => { S.paused = !S.paused; if (S.paused) status("Duraklatıldı."); updateButtons(); };
+  $("#stop").onclick = () => { S.stopped = true; S.paused = false; };
+  $("#buildNow").onclick = build;
+  $("#clearCache").onclick = () => {
+    if (!confirm("Bu makale için kaydedilmiş çeviriler ve elle yaptığınız seçimler silinsin mi?")) return;
+    store.del(cacheKey());
+    S.translations = {}; S.overrides = {};
+    reclassify();
+    log("Kayıtlı çeviriler silindi.");
+  };
+  $("#file").addEventListener("change", async (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    await loadPdf(new Uint8Array(await f.arrayBuffer()), f.name, null);
+    e.target.value = "";
+  });
+  $$(".tabs [role=tab]").forEach((t) => t.addEventListener("click", () => {
+    $$(".tabs [role=tab]").forEach((x) => x.setAttribute("aria-selected", String(x === t)));
+    $$(".tabpanel").forEach((p) => (p.hidden = p.id !== t.getAttribute("aria-controls")));
+  }));
+  ["skipRefs", "appendix", "captions", "range", "batch", "target"].forEach((id) => $("#" + id).addEventListener("change", () => {
+    saveSettings();
+    if (id === "target" && S.pages) { const c = store.get(cacheKey(), null); S.translations = (c && c.t) || {}; }
+    reclassify();
+  }));
+  SETTINGS.forEach((id) => { const el = $("#" + id); if (el) el.addEventListener("change", saveSettings); });
+
+  loadSettings();
+  updateButtons();
+  if (val("zKey") && val("zId")) zConnect();
+})();
+
+</script>
+</body>
+</html>
