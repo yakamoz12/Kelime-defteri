@@ -323,6 +323,20 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
 @media (min-width: 900px) and (orientation: landscape), (min-width: 1100px) {
   body.webreading.notes-open .wbody { grid-template-columns: minmax(0, 1fr) min(380px, 34vw); }
 }
+/* Çeviri */
+#webText .tr { font-family: var(--sans); font-size: .93em; line-height: 1.6; color: #1d3b57; background: #f2f7fc; border-left: 3px solid #4a86c5; border-radius: 0 6px 6px 0; padding: 8px 12px; margin: -.4em 0 1.2em; }
+#webText li .tr { margin: 6px 0 8px; }
+#webText .tr.h { font-weight: 600; }
+#webText .tr.wait { color: #7a8796; background: #f6f8fa; border-left-color: #c9d2dc; font-style: italic; }
+#webText.hide-tr .tr { display: none; }
+#wTr[data-state="run"] { background: color-mix(in srgb, var(--mark) 35%, var(--surface)); }
+@media (max-width: 700px) {
+  .rtop { gap: 5px; padding: 6px; }
+  .rtop .tb { padding: 6px 8px; font-size: .84rem; min-width: 36px; }
+  .rtitle span { display: none; }
+}
+@media (max-width: 480px) { .rtitle { display: none; } .rtop { justify-content: space-between; } }
+.keybox input { margin-top: 4px; }
 /* Başlık seçme penceresi */
 #sheetBack { position: fixed; inset: 0; z-index: 60; background: rgba(15, 19, 24, .45); display: flex; align-items: center; justify-content: center; padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
 #sheet { background: var(--surface); color: var(--ink); border-radius: 14px; width: min(520px, 100%); max-height: 100%; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.3); overflow: hidden; }
@@ -364,6 +378,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
       <button type="button" data-view="outline"><span>Başlıklar</span><span class="cnt" id="cntH"></span></button>
       <button type="button" data-view="notes"><span>Tüm notlar</span><span class="cnt" id="cntN"></span></button>
       <button type="button" data-view="backup"><span>Yedek</span><span id="bkDot"></span></button>
+      <button type="button" data-view="settings"><span>Ayarlar</span><span class="cnt" id="keyState"></span></button>
     </nav>
   </aside>
 
@@ -501,6 +516,25 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
       <div id="allNotes"></div>
     </section>
 
+    <!-- Ayarlar -->
+    <section class="view" id="vSettings" hidden>
+      <div class="vhead"><h2>Ayarlar</h2></div>
+      <section class="card keybox" style="max-width:760px">
+        <h2>Gemini ile çeviri</h2>
+        <p class="hint" style="margin-top:0">Web sayfalarını paragraf paragraf Türkçeye çevirmek için ücretsiz Gemini API anahtarı kullanılır. Anahtarı <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> adresinden alabilirsin. Anahtar yalnızca bu cihazda saklanır.</p>
+        <label for="gKey">Gemini API anahtarı</label>
+        <input id="gKey" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="AIza…">
+        <div class="grid2">
+          <div><label for="gModel">Model</label><input id="gModel" type="text" list="gModels" spellcheck="false" autocapitalize="off"></div>
+          <div><label for="gFallback">Günlük kota bitince</label><input id="gFallback" type="text" list="gModels" spellcheck="false" autocapitalize="off"></div>
+        </div>
+        <datalist id="gModels"><option value="gemini-2.5-flash-lite"></option><option value="gemini-2.5-flash"></option></datalist>
+        <p class="hint">Ücretsiz katmanda dakikalık ve günlük istek sınırı var. Uygulama istekleri araya bekleme koyarak gönderir, çevirdiklerini saklar ve aynı metni ikinci kez çevirmez. Ücretsiz katmanda gönderilen metinler Google tarafından ürün geliştirmede kullanılabilir; gizli belgeleri çevirme.</p>
+        <div class="btns"><button id="gSave" class="btn primary" type="button">Kaydet</button><button id="gTest" class="btn" type="button">Anahtarı dene</button><button id="gDel" class="btn" type="button">Anahtarı sil</button></div>
+        <p id="gMsg" class="hint" aria-live="polite"></p>
+      </section>
+    </section>
+
     <!-- Yedek -->
     <section class="view" id="vBackup" hidden>
       <div class="vhead"><h2>Yedek</h2></div>
@@ -540,7 +574,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     </div>
     <div id="pages"><div id="pinner"></div></div>
     <section class="card" id="noteCard">
-      <div class="notehead"><h2>Notlar <small id="dCite"></small></h2><button id="noteClose" class="tb" type="button">PDF'e dön</button></div>
+      <div class="notehead"><h2>Notlar <small id="dCite"></small></h2><button id="noteClose" class="tb" type="button">Okumaya dön</button></div>
       <div data-form="d"></div>
       <div id="dNotes"></div>
     </section>
@@ -551,7 +585,8 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     <button id="wClose" class="tb" type="button">‹ Kapat</button>
     <div class="rtitle"><strong id="wTitle"></strong><span id="wCite"></span></div>
     <div class="grp"><button id="wSmaller" class="tb" type="button" aria-label="Yazıyı küçült">A−</button><button id="wBigger" class="tb" type="button" aria-label="Yazıyı büyüt">A+</button></div>
-    <a id="wSafari" class="tb" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Safari'de aç</a>
+    <button id="wTr" class="tb" type="button">Çevir</button>
+    <a id="wSafari" class="tb" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Safari</a>
     <button id="wNotesBtn" class="tb primary" type="button">Notlar</button>
   </div>
   <div class="wbody"><div id="webScroll"><article id="webText"></article></div></div>
@@ -900,7 +935,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
 
   /* ---------- Görünümler ---------- */
   let view = "welcome";
-  const VIEWS = { welcome: "vWelcome", form: "vForm", article: "vArticle", outline: "vOutline", notes: "vNotes", backup: "vBackup" };
+  const VIEWS = { welcome: "vWelcome", form: "vForm", article: "vArticle", outline: "vOutline", notes: "vNotes", backup: "vBackup", settings: "vSettings" };
   function show(v, pane) {
     view = v;
     for (const [k, id] of Object.entries(VIEWS)) $("#" + id).hidden = k !== v;
@@ -911,6 +946,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     if (v === "outline") renderOutline();
     if (v === "notes") renderAllNotes();
     if (v === "backup") updateBackupInfo();
+    if (v === "settings") loadKeyForm();
     renderLib();
     updateBackupInfo();
     $(".main").scrollTop = 0;
@@ -1138,12 +1174,14 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     try {
       const rec = await getWebText(force);
       $("#webText").innerHTML = `<h1>${esc(A.meta.title)}</h1>` + mdToHtml(rec.md);
+      await showCachedTranslations();
       $("#webScroll").scrollTop = (store.get("ok:wpos:" + A.id, 0)) * $("#webScroll").scrollHeight;
     } catch (e) {
       $("#webText").innerHTML = `<p class="wmsg"><strong>Bu sayfanın metni uygulamaya alınamadı.</strong></p><p class="wmsg">Bazı siteler (özellikle üyelik isteyenler) metinlerinin dışarıdan alınmasına izin vermiyor. Yukarıdaki <strong>Safari'de aç</strong> ile sayfayı aç; istersen ekranı bölerek Okuma'yı yanına al. Not almak istediğin yeri Safari'de seçip <strong>Kopyala</strong> de, sonra burada Notlar panelindeki <strong>Panodan alıntı</strong>'ya bas.</p>`;
     }
   }
   function closeWebReader() {
+    TR.stop = true;
     $("#webCard").hidden = true;
     $("#readerCard .rbody").append($("#noteCard"));
     document.body.classList.remove("reading", "webreading");
@@ -1151,7 +1189,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     $("#addSel").hidden = true;
   }
   $("#webRead").onclick = () => openWebReader(false);
-  $("#webRefresh").onclick = async () => { try { $("#webMsg").textContent = "Metin yeniden alınıyor…"; await getWebText(true); $("#webMsg").textContent = "Metin güncellendi."; } catch (e) { $("#webMsg").textContent = "Metin alınamadı. Safari'de açıp Panodan alıntı ile not alabilirsin."; } };
+  $("#webRefresh").onclick = async () => { try { $("#webMsg").textContent = "Metin yeniden alınıyor…"; await getWebText(true); try { await IDB.del("tr:" + A.id); } catch (e) {} $("#webMsg").textContent = "Metin güncellendi."; } catch (e) { $("#webMsg").textContent = "Metin alınamadı. Safari'de açıp Panodan alıntı ile not alabilirsin."; } };
   $("#wClose").onclick = () => { closeWebReader(); if (store.get("ok:panel", true)) document.body.classList.add("notes-open"); openArticle(A.id); };
   $("#wNotesBtn").onclick = () => { document.body.classList.toggle("notes-open"); if (wideReader()) store.set("ok:panel", document.body.classList.contains("notes-open")); };
   const wfs = (d) => { const v = Math.max(0.9, Math.min(1.8, Math.round((store.get("ok:wfs", 1.12) + d) * 100) / 100)); store.set("ok:wfs", v); $("#webText").style.setProperty("--wfs", v + "rem"); };
@@ -1159,6 +1197,191 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
   $("#wBigger").onclick = () => wfs(0.08);
   let wst;
   $("#webScroll").addEventListener("scroll", () => { clearTimeout(wst); wst = setTimeout(() => { if (A && $("#webScroll").scrollHeight) store.set("ok:wpos:" + A.id, $("#webScroll").scrollTop / $("#webScroll").scrollHeight); }, 200); }, { passive: true });
+
+  /* ---------- Gemini ile paragraf paragraf çeviri ---------- */
+  const G = () => store.get("ok:gemini", { key: "", model: "gemini-2.5-flash-lite", fallback: "gemini-2.5-flash" });
+  function loadKeyForm() { const g = G(); $("#gKey").value = g.key || ""; $("#gModel").value = g.model || ""; $("#gFallback").value = g.fallback || ""; $("#gMsg").textContent = ""; }
+  function updateKeyState() { $("#keyState").textContent = G().key ? "çeviri açık" : ""; }
+  $("#gSave").onclick = () => { store.set("ok:gemini", { key: val("gKey"), model: val("gModel") || "gemini-2.5-flash-lite", fallback: val("gFallback") }); $("#gMsg").textContent = "Kaydedildi."; updateKeyState(); };
+  $("#gDel").onclick = () => { if (!confirm("Gemini anahtarı bu cihazdan silinsin mi?")) return; store.set("ok:gemini", { ...G(), key: "" }); loadKeyForm(); updateKeyState(); };
+  $("#gTest").onclick = async () => {
+    $("#gSave").click();
+    $("#gMsg").textContent = "Deneniyor…";
+    try { const r = await geminiTranslate(["Hello world."], G().model, () => {}); $("#gMsg").textContent = "Anahtar çalışıyor. Deneme çevirisi: " + r[0]; }
+    catch (e) { $("#gMsg").textContent = e.message; }
+  };
+
+  const TR = { running: false, stop: false, lastCall: 0, done: 0, total: 0 };
+  const GAP_MS = 7000; // istekler arası en az bekleme: dakikada en fazla ~8 istek
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  class QuotaErr extends Error { constructor(m, daily) { super(m); this.daily = daily; } }
+  class KeyErr extends Error {}
+  async function waitTurn(info) {
+    for (;;) {
+      if (TR.stop) throw new Error("durduruldu");
+      const left = TR.lastCall + GAP_MS - Date.now();
+      if (left <= 0) break;
+      if (info) info(`Bekleniyor (${Math.ceil(left / 1000)} sn)`);
+      await sleep(Math.min(left, 500));
+    }
+    TR.lastCall = Date.now();
+  }
+  async function geminiTranslate(texts, model, info) {
+    const key = G().key;
+    if (!key) throw new KeyErr("Gemini API anahtarı girilmemiş.");
+    const body = {
+      systemInstruction: { parts: [{ text: "You translate web articles into Turkish. Translate every string in the JSON array the user sends into fluent, natural Turkish. Reply with ONLY a JSON array of strings with exactly the same number of items in the same order; never merge, split or drop items. Keep names of people and organisations, numbers, dates, citations, URLs and abbreviations as they are (you may add the Turkish expansion of an abbreviation in parentheses the first time). Do not add notes or explanations." }] },
+      contents: [{ role: "user", parts: [{ text: JSON.stringify(texts) }] }],
+      generationConfig: { temperature: 0.2, responseMimeType: "application/json", responseSchema: { type: "ARRAY", items: { type: "STRING" } } },
+    };
+    if (/2\.5-flash(?!-lite)/.test(model)) body.generationConfig.thinkingConfig = { thinkingBudget: 0 };
+    let attempt = 0;
+    for (;;) {
+      await waitTurn(info);
+      let res;
+      try {
+        res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body: JSON.stringify(body) });
+      } catch (e) {
+        if (++attempt > 3) throw new Error("Gemini'ye bağlanılamadı. İnternet bağlantını kontrol et.");
+        continue;
+      }
+      if (res.ok) {
+        const data = await res.json();
+        const c = data.candidates && data.candidates[0];
+        const txt = c && c.content ? (c.content.parts || []).map((p) => p.text || "").join("").trim().replace(/^```(?:json)?\s*|\s*```$/g, "") : "";
+        try { const arr = JSON.parse(txt); if (Array.isArray(arr) && arr.length === texts.length) return arr.map((t, i) => (typeof t === "string" && t.trim() ? t : texts[i])); } catch (e) {}
+        if (texts.length === 1) return [null];
+        const h = Math.ceil(texts.length / 2); // yanıt eşleşmediyse grubu ikiye böl
+        return [...(await geminiTranslate(texts.slice(0, h), model, info)), ...(await geminiTranslate(texts.slice(h), model, info))];
+      }
+      let err = {};
+      try { err = (await res.json()).error || {}; } catch (e) {}
+      const raw = JSON.stringify(err);
+      if (res.status === 429 || err.status === "RESOURCE_EXHAUSTED") {
+        if (/PerDay|per day|daily/i.test(raw)) throw new QuotaErr(`${model} için günlük ücretsiz kota doldu.`, true);
+        const ri = (err.details || []).find((d) => String(d["@type"] || "").includes("RetryInfo"));
+        const sec = ri && ri.retryDelay ? parseFloat(ri.retryDelay) + 2 : Math.min(70, 15 * 2 ** attempt++);
+        TR.lastCall = Date.now() + Math.max(sec * 1000, GAP_MS) - GAP_MS; // Google'ın istediği kadar, en az normal aralık kadar bekle
+        continue;
+      }
+      if ([500, 502, 503, 504].includes(res.status)) { TR.lastCall = Date.now() + Math.min(60, 8 * 2 ** attempt++) * 1000 - GAP_MS; if (attempt > 5) throw new Error("Gemini şu an yanıt vermiyor; biraz sonra tekrar dene."); continue; }
+      if (res.status === 400 && /API_KEY_INVALID|API key not valid/i.test(raw)) throw new KeyErr("Gemini API anahtarı geçersiz.");
+      if (res.status === 403) throw new KeyErr("Bu anahtarın Gemini'ye erişim izni yok.");
+      if (res.status === 404) throw new KeyErr(`“${model}” modeli bulunamadı. Ayarlar'dan model adını kontrol et.`);
+      throw new Error(`Gemini hatası ${res.status}: ${err.message || ""}`);
+    }
+  }
+  // Çevrilecek bloklar: başlıklar, paragraflar, liste maddeleri, alıntılar (içlerindeki çeviri kutusu hariç metin)
+  const srcText = (el) => [...el.childNodes].filter((n) => !(n.nodeType === 1 && n.classList.contains("tr"))).map((n) => n.textContent).join("").replace(/\s+/g, " ").trim();
+  function trBlocks() {
+    return [...$("#webText").querySelectorAll("h1, h2, h3, h4, p:not(.wmsg), li, blockquote > p")]
+      .filter((el) => !el.closest(".tr") && srcText(el).length > 1 && /\p{L}/u.test(srcText(el)));
+  }
+  function putTr(el, text, wait) {
+    let box = el.tagName === "LI" ? el.querySelector(":scope > .tr") : el.nextElementSibling && el.nextElementSibling.classList.contains("tr") ? el.nextElementSibling : null;
+    if (!box) {
+      box = document.createElement("div");
+      box.className = "tr";
+      box.lang = "tr";
+      if (el.tagName === "LI") el.append(box); else el.after(box);
+    }
+    box.classList.toggle("wait", !!wait);
+    box.classList.toggle("h", /^H\d$/.test(el.tagName));
+    box.textContent = text;
+  }
+  async function trCache() { try { return (await IDB.get("tr:" + A.id)) || { items: {} }; } catch (e) { return { items: {} }; } }
+  async function showCachedTranslations() {
+    const c = await trCache();
+    const blocks = trBlocks();
+    let n = 0;
+    for (const el of blocks) { const t = c.items[srcText(el)]; if (t) { putTr(el, t); n++; } }
+    $("#webText").classList.toggle("hide-tr", !!store.get("ok:hideTr", false));
+    setTrButton(n && n === blocks.length ? "done" : n ? "partial" : "idle", n, blocks.length);
+  }
+  function setTrButton(state, done, total) {
+    const b = $("#wTr");
+    b.dataset.state = state;
+    const hidden = $("#webText").classList.contains("hide-tr");
+    b.textContent = state === "run" ? `Çevriliyor ${total ? Math.round((done / total) * 100) : 0}% · Durdur`
+      : state === "done" ? (hidden ? "Çeviriyi göster" : "Çeviriyi gizle")
+      : state === "partial" ? "Çeviriye devam et" : "Çevir";
+  }
+  $("#wTr").onclick = async () => {
+    const st = $("#wTr").dataset.state;
+    if (st === "run") { TR.stop = true; return; }
+    if (st === "done") { const h = !$("#webText").classList.contains("hide-tr"); $("#webText").classList.toggle("hide-tr", h); store.set("ok:hideTr", h); setTrButton("done"); return; }
+    if (!G().key) { askKey(); return; }
+    $("#webText").classList.remove("hide-tr"); store.set("ok:hideTr", false);
+    runTranslate();
+  };
+  function askKey() {
+    const back = document.createElement("div");
+    back.id = "sheetBack";
+    back.innerHTML = `<div id="sheet" role="dialog" aria-modal="true" aria-labelledby="kTitle"><div class="sh-top keybox"><h3 id="kTitle">Gemini API anahtarı</h3><p class="hint" style="margin-top:0">Çeviri için ücretsiz bir Gemini anahtarı gerekiyor. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> adresinden “Create API key” ile al, buraya yapıştır. Anahtar yalnızca bu cihazda saklanır.</p><input type="password" placeholder="AIza…" autocomplete="off" spellcheck="false" autocapitalize="off"></div><div class="sh-bot x"><button type="button" class="btn" data-k="no">Vazgeç</button><button type="button" class="btn primary" data-k="ok">Kaydet ve çevir</button></div></div>`;
+    const inp = back.querySelector("input");
+    back.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-k]");
+      if (e.target === back || (b && b.dataset.k === "no")) { back.remove(); return; }
+      if (b && b.dataset.k === "ok") {
+        if (!inp.value.trim()) { inp.focus(); return; }
+        store.set("ok:gemini", { ...G(), key: inp.value.trim() });
+        updateKeyState();
+        back.remove();
+        runTranslate();
+      }
+    });
+    document.body.append(back);
+    inp.focus();
+  }
+  async function runTranslate() {
+    if (TR.running || !A) return;
+    TR.running = true; TR.stop = false;
+    const id = A.id;
+    const cache = await trCache();
+    const blocks = trBlocks();
+    const todo = blocks.filter((el) => !cache.items[srcText(el)]);
+    let done = blocks.length - todo.length;
+    let model = G().model || "gemini-2.5-flash-lite";
+    const info = (m) => { if (A && A.id === id) $("#wTr").textContent = `${m} · Durdur`; };
+    setTrButton("run", done, blocks.length);
+    todo.forEach((el) => putTr(el, "Çeviri sırada…", true));
+    // paragrafları ~3500 karakterlik gruplar halinde gönder (az istek, kota dostu)
+    const batches = [];
+    let cur = [], len = 0;
+    for (const el of todo) {
+      const t = srcText(el);
+      if (cur.length && (len + t.length > 3500 || cur.length >= 20)) { batches.push(cur); cur = []; len = 0; }
+      cur.push(el); len += t.length;
+    }
+    if (cur.length) batches.push(cur);
+    try {
+      for (let i = 0; i < batches.length; i++) {
+        const batch = batches[i];
+        let out;
+        try { out = await geminiTranslate(batch.map((el) => srcText(el)), model, info); }
+        catch (e) {
+          if (e instanceof QuotaErr && G().fallback && model !== G().fallback) { model = G().fallback; toast("Günlük kota doldu, yedek modele geçildi"); i--; continue; }
+          throw e;
+        }
+        if (!A || A.id !== id || $("#webCard").hidden) break;
+        batch.forEach((el, k) => { if (out[k]) { cache.items[srcText(el)] = out[k]; putTr(el, out[k]); } else putTr(el, "(çevrilemedi)", true); });
+        done += batch.length;
+        try { await IDB.put("tr:" + id, cache); } catch (e) {}
+        setTrButton("run", done, blocks.length);
+      }
+      if (A && A.id === id) setTrButton(done >= blocks.length ? "done" : "partial", done, blocks.length);
+    } catch (e) {
+      if (A && A.id === id) {
+        $("#webText").querySelectorAll(".tr.wait").forEach((x) => x.remove());
+        setTrButton(done ? "partial" : "idle", done, blocks.length);
+        if (e instanceof KeyErr) { toast(e.message); askKey(); }
+        else if (e instanceof QuotaErr) toast("Günlük ücretsiz çeviri kotası doldu. Çevrilenler kaydedildi; yarın kaldığın yerden devam edebilirsin.");
+        else if (e.message !== "durduruldu") toast(e.message);
+      }
+    } finally { TR.running = false; }
+  }
+  updateKeyState();
+
   function readWebSelection() {
     const sel = getSelection();
     if (!sel || sel.isCollapsed || !sel.rangeCount || !$("#webText").contains(sel.anchorNode)) return null;
