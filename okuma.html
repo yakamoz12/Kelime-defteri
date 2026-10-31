@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Okuma">
 <title>Okuma</title>
+<script>try { var t = JSON.parse(localStorage.getItem("ok:theme") || '"dark"'); if (t !== "auto") document.documentElement.dataset.theme = t; if (JSON.parse(localStorage.getItem("ok:pdfDark") || "false")) document.documentElement.dataset.pdfdark = "1"; } catch (e) {}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -170,8 +171,52 @@ body.reading #dock { z-index: 35; }
 @media (prefers-reduced-motion: reduce) { body.reading #noteCard { transition: none; } }
 
 /* ================= Okuma ================= */
+:root[data-theme="sepia"] { color-scheme: light; --bg: #ece3d2; --surface: #f8f1e3; --sunk: #f0e7d6; --ink: #3a2f23; --muted: #7b6a55; --line: #dccdb2; --accent: #7a4f1f; --accent-ink: #fffaf0; --mark: #e6be5c; --ok: #4d7a37; --err: #a2442a; }
+/* koyu PDF sayfaları */
+:root[data-theme="dark"][data-pdfdark="1"] .page { background: #1b1f24; }
+:root[data-theme="dark"][data-pdfdark="1"] .page canvas { filter: invert(.9) hue-rotate(180deg); }
+:root[data-theme="dark"][data-pdfdark="1"] .inkl path, :root[data-theme="dark"][data-pdfdark="1"] .hl i { mix-blend-mode: normal !important; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme])[data-pdfdark="1"] .page { background: #1b1f24; }
+  :root:not([data-theme])[data-pdfdark="1"] .page canvas { filter: invert(.9) hue-rotate(180deg); }
+  :root:not([data-theme])[data-pdfdark="1"] .inkl path, :root:not([data-theme])[data-pdfdark="1"] .hl i { mix-blend-mode: normal !important; }
+}
+:root[data-theme="sepia"] .page canvas { filter: sepia(.25) brightness(.97); }
+/* sayaç */
+.stat { margin: 0 12px 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--sunk); cursor: pointer; display: block; width: calc(100% - 24px); text-align: left; color: var(--ink); font: inherit; }
+.stat:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.stat .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.stat .n { font: 650 1.35rem/1.1 var(--serif); font-variant-numeric: tabular-nums; }
+.stat .l { font-size: .74rem; color: var(--muted); }
+.stat .bar { height: 7px; border-radius: 99px; background: color-mix(in srgb, var(--line) 70%, transparent); overflow: hidden; margin: 9px 0 5px; }
+.stat .bar i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .4s; }
+.stat .bar i.full { background: var(--ok); }
+.stat .msg { display: flex; justify-content: space-between; gap: 8px; font-size: .8rem; color: var(--muted); }
+.stat .msg b { color: var(--ink); font-weight: 600; }
+.themebtn { width: 40px; height: 40px; flex: none; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-grid; place-items: center; padding: 0; }
+.themebtn svg { width: 20px; height: 20px; }
+.rstat { font-size: .8rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; flex: none; }
+@media (max-width: 900px) { .rstat { display: none; } }
+/* istatistik ekranı */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.tile .n { font: 650 1.7rem/1.1 var(--serif); font-variant-numeric: tabular-nums; }
+.tile .l { color: var(--muted); font-size: .85rem; margin-top: 2px; }
+.tile .s { color: var(--muted); font-size: .8rem; margin-top: 6px; }
+.chart { display: grid; grid-template-columns: repeat(14, 1fr); gap: 6px; align-items: end; height: 150px; padding-top: 18px; }
+.chart .col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; min-width: 0; }
+.chart .b { width: 100%; max-width: 30px; background: color-mix(in srgb, var(--accent) 75%, transparent); border-radius: 5px 5px 2px 2px; min-height: 2px; position: relative; }
+.chart .b.today { background: var(--mark); }
+.chart .v { font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.chart .d { font-size: .7rem; color: var(--muted); }
+.big-msg { font: 600 1.15rem/1.4 var(--serif); margin: 0 0 4px; }
+.themes { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 4px; }
+.themes button { display: flex; align-items: center; gap: 8px; font: 500 .95rem var(--sans); border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); padding: 8px 12px; min-height: 44px; cursor: pointer; }
+.themes button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
+.themes .sw2 { width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(0,0,0,.2); }
 html, body { height: 100%; }
 body { overscroll-behavior: none; }
+input[type=number] { width: 100%; font: inherit; color: var(--ink); background: var(--sunk); border: 1px solid var(--line); border-radius: 7px; padding: 9px 10px; min-height: 44px; }
 input[type=search] { width: 100%; font: inherit; color: var(--ink); background: var(--sunk); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; min-height: 44px; -webkit-appearance: none; appearance: none; }
 .muted { color: var(--muted); }
 .bib { font-family: var(--serif); line-height: 1.5; padding-left: 2em; text-indent: -2em; margin: 4px 0; overflow-wrap: anywhere; }
@@ -235,7 +280,7 @@ label.btn input { position: absolute; width: 1px; height: 1px; opacity: 0; overf
 .note textarea.qt { font-family: var(--serif); border-left: 4px solid var(--mark); }
 .note textarea.cm { font-family: var(--sans); font-size: .92rem; }
 .note .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; justify-content: space-between; align-items: center; color: var(--muted); font-size: .84rem; margin-top: 6px; }
-.note .src { color: var(--muted); font-size: .85rem; margin-top: 4px; }
+.note .nsrc { color: var(--muted); font-size: .85rem; margin-top: 6px; }
 .nform { border: 1px dashed var(--line); border-radius: 9px; padding: 10px; margin-bottom: 12px; }
 .nform textarea { min-height: 84px; margin-top: 6px; }
 .nform .row { align-items: center; margin-top: 6px; }
@@ -247,6 +292,28 @@ label.btn input { position: absolute; width: 1px; height: 1px; opacity: 0; overf
 .grp-h.l2 { font-size: 1rem; margin-left: 14px; } .grp-h.l3, .grp-h.l4 { font-size: .96rem; margin-left: 28px; font-style: italic; }
 .grp-h .cnt { font: 400 .85rem var(--sans); color: var(--muted); margin-left: 6px; }
 
+/* Notlar: başlık sekmeleri */
+.nview { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
+#noteTabs { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+#noteTabs::-webkit-scrollbar { display: none; }
+.ntab { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex: none; text-align: left; font: 500 .93rem var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: 8px 14px; min-height: 42px; cursor: pointer; white-space: nowrap; }
+.ntab .c { font: 600 .78rem var(--sans); color: var(--muted); background: var(--sunk); border-radius: 99px; padding: 1px 8px; min-width: 22px; text-align: center; }
+.ntab[aria-selected="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.ntab[aria-selected="true"] .c { background: color-mix(in srgb, var(--surface) 22%, transparent); color: var(--surface); }
+.ntab.empty0 { color: var(--muted); }
+.ntab.all { font-weight: 650; }
+@media (min-width: 1100px) {
+  .nview { grid-template-columns: 270px minmax(0, 1fr); }
+  #noteTabs { flex-direction: column; overflow-x: visible; overflow-y: auto; max-height: calc(100vh - 140px); position: sticky; top: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px; gap: 2px; }
+  .ntab { border: 0; border-radius: 8px; white-space: normal; padding: 10px 10px; min-height: 44px; background: none; }
+  .ntab:hover { background: var(--sunk); }
+  .ntab[aria-selected="true"], .ntab[aria-selected="true"]:hover { background: var(--ink); color: var(--surface); }
+  .ntab.l1 { font-weight: 650; margin-top: 4px; } .ntab.l2 { padding-left: 22px; } .ntab.l3 { padding-left: 36px; font-weight: 400; } .ntab.l4 { padding-left: 50px; font-weight: 400; }
+  .ntab.all { margin-top: 0; }
+}
+.nhead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.nhead h3 { margin: 0; font: 650 1.2rem var(--serif); }
+.nhead .hint { margin: 0; }
 /* Başlıklar */
 #olist { list-style: none; margin: 0; padding: 0; }
 .orow { display: flex; gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
@@ -254,6 +321,7 @@ label.btn input { position: absolute; width: 1px; height: 1px; opacity: 0; overf
 .orow.l1 input { font-weight: 600; }
 .orow.l2 { padding-left: 22px; } .orow.l3 { padding-left: 44px; } .orow.l4 { padding-left: 66px; }
 .orow .cnt { color: var(--muted); font-size: .84rem; flex: none; min-width: 44px; text-align: right; }
+.orow .cnt.link { color: var(--accent); text-decoration: underline; cursor: pointer; background: none; border: 0; font-family: var(--sans); padding: 8px 4px; }
 .ib { font: 600 1rem var(--sans); width: 40px; height: 40px; flex: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; cursor: pointer; padding: 0; }
 .ib:disabled { opacity: .35; }
 .ib.del { color: var(--err); }
@@ -311,23 +379,23 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
 #webCard { position: fixed; inset: 0; z-index: 30; background: var(--sunk); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); }
 .wbody { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); }
 #webScroll { overflow: auto; min-height: 0; padding: 20px 14px calc(110px + env(safe-area-inset-bottom, 0px)); -webkit-overflow-scrolling: touch; }
-#webText { max-width: 44rem; margin: 0 auto; background: #fff; color: #1b1f24; border: 1px solid var(--line); border-radius: 10px; padding: 28px clamp(18px, 4vw, 52px); font-family: var(--serif); font-size: var(--wfs, 1.12rem); line-height: 1.7; overflow-wrap: break-word; }
-#webText h1, #webText h2, #webText h3, #webText h4 { font-family: var(--serif); line-height: 1.3; margin: 1.2em 0 .5em; color: #111; }
+#webText { max-width: 44rem; margin: 0 auto; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 28px clamp(18px, 4vw, 52px); font-family: var(--serif); font-size: var(--wfs, 1.12rem); line-height: 1.7; overflow-wrap: break-word; }
+#webText h1, #webText h2, #webText h3, #webText h4 { font-family: var(--serif); line-height: 1.3; margin: 1.2em 0 .5em; color: var(--ink); }
 #webText h1 { font-size: 1.5em; margin-top: 0; } #webText h2 { font-size: 1.25em; } #webText h3, #webText h4 { font-size: 1.08em; }
 #webText p { margin: 0 0 1em; } #webText ul, #webText ol { margin: 0 0 1em 1.2em; padding: 0; } #webText li { margin: .2em 0; }
-#webText blockquote { margin: 0 0 1em; padding-left: 1em; border-left: 3px solid #d0d5dc; color: #444; }
-#webText pre { white-space: pre-wrap; font-size: .85em; background: #f4f6f8; padding: 10px; border-radius: 6px; }
-#webText a { color: #1f4e79; }
+#webText blockquote { margin: 0 0 1em; padding-left: 1em; border-left: 3px solid var(--line); color: var(--muted); }
+#webText pre { white-space: pre-wrap; font-size: .85em; background: var(--sunk); padding: 10px; border-radius: 6px; }
+#webText a { color: var(--accent); }
 #webText ::selection { background: rgba(31, 78, 121, .25); }
-#webText .wmsg { font-family: var(--sans); font-size: 1rem; color: #444; }
+#webText .wmsg { font-family: var(--sans); font-size: 1rem; color: var(--muted); }
 @media (min-width: 900px) and (orientation: landscape), (min-width: 1100px) {
   body.webreading.notes-open .wbody { grid-template-columns: minmax(0, 1fr) min(380px, 34vw); }
 }
 /* Çeviri */
-#webText .tr { font-family: var(--sans); font-size: .93em; line-height: 1.6; color: #1d3b57; background: #f2f7fc; border-left: 3px solid #4a86c5; border-radius: 0 6px 6px 0; padding: 8px 12px; margin: -.4em 0 1.2em; }
+#webText .tr { font-family: var(--sans); font-size: .93em; line-height: 1.6; color: var(--ink); background: color-mix(in srgb, var(--accent) 9%, var(--surface)); border-left: 3px solid color-mix(in srgb, var(--accent) 70%, transparent); border-radius: 0 6px 6px 0; padding: 8px 12px; margin: -.4em 0 1.2em; }
 #webText li .tr { margin: 6px 0 8px; }
 #webText .tr.h { font-weight: 600; }
-#webText .tr.wait { color: #7a8796; background: #f6f8fa; border-left-color: #c9d2dc; font-style: italic; }
+#webText .tr.wait { color: var(--muted); background: var(--sunk); border-left-color: var(--line); font-style: italic; }
 #webText.hide-tr .tr { display: none; }
 #wTr[data-state="run"] { background: color-mix(in srgb, var(--mark) 35%, var(--surface)); }
 @media (max-width: 700px) {
@@ -337,6 +405,84 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
 }
 @media (max-width: 480px) { .rtitle { display: none; } .rtop { justify-content: space-between; } }
 .keybox input { margin-top: 4px; }
+/* ===== B · Tez masası düzeni ===== */
+:root[data-theme="dark"] { color-scheme: dark; --bg: #12151a; --surface: #1a1f26; --sunk: #161a20; --ink: #e9ecf1; --muted: #a3adba; --line: #2c333d; --accent: #f0c35a; --accent-ink: #1a1408; --mark: #f0c35a; --ok: #7fcf9a; --err: #f08a70; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme]) { color-scheme: dark; --bg: #12151a; --surface: #1a1f26; --sunk: #161a20; --ink: #e9ecf1; --muted: #a3adba; --line: #2c333d; --accent: #f0c35a; --accent-ink: #1a1408; --mark: #f0c35a; --ok: #7fcf9a; --err: #f08a70; } }
+.app { display: grid; grid-template-columns: 270px 300px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); height: 100vh; height: 100dvh; padding-top: 0; }
+.topbar { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding: calc(10px + env(safe-area-inset-top, 0px)) 14px 10px; background: var(--sunk); border-bottom: 1px solid var(--line); min-width: 0; }
+.brand { font: 650 1.35rem var(--serif); margin-right: 6px; flex: none; }
+.gsearch { flex: 0 1 320px; min-width: 120px; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); margin: 0; }
+.gsearch input { flex: 1; min-width: 0; border: 0 !important; background: transparent !important; color: var(--ink); font: inherit; outline: none; min-height: 0 !important; padding: 0 !important; }
+.spacer { flex: 1; }
+.pills { display: flex; align-items: center; gap: 6px; flex: none; }
+.pill { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 12px; border-radius: 19px; border: 0; background: color-mix(in srgb, var(--line) 55%, var(--sunk)); color: var(--ink); font: 400 .84rem var(--sans); cursor: pointer; white-space: nowrap; }
+.pill b { font-weight: 650; font-variant-numeric: tabular-nums; }
+.pill .u { color: var(--muted); }
+.pill .mini { width: 44px; height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; display: inline-block; }
+.pill .mini i { display: block; height: 100%; background: var(--accent); }
+.pill .mini i.full { background: var(--ok); }
+.pill.fire { background: color-mix(in srgb, #f0a35a 18%, var(--sunk)); color: #f0a35a; }
+.pill.fire svg { width: 15px; height: 15px; }
+.pill.goal { color: var(--accent); background: transparent; border: 1px dashed color-mix(in srgb, var(--accent) 60%, var(--line)); }
+.iconbtn { position: relative; width: 44px; height: 44px; flex: none; border-radius: 12px; border: 1px solid var(--line); background: transparent; color: var(--ink); display: inline-grid; place-items: center; cursor: pointer; padding: 0; }
+.iconbtn svg { width: 20px; height: 20px; }
+.iconbtn[aria-current="true"] { background: var(--ink); color: var(--surface); }
+.iconbtn #bkDot.dot { position: absolute; top: 7px; right: 7px; }
+.only-narrow { display: none !important; }
+.col1#noteTabs { flex-direction: column; overflow-y: auto; overflow-x: hidden; max-height: none; position: static; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: var(--sunk); padding: 12px 10px calc(12px + env(safe-area-inset-bottom, 0px)); gap: 2px; min-height: 0; }
+.colhead { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 2px 6px 8px; font: 600 .74rem var(--sans); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+.colhead .ib { width: 36px; height: 36px; font-size: 1.1rem; }
+#noteTabs .ntab { border: 0; border-radius: 9px; white-space: normal; padding: 10px; min-height: 44px; background: none; width: 100%; color: var(--ink); }
+#noteTabs .ntab:hover { background: color-mix(in srgb, var(--line) 45%, transparent); }
+#noteTabs .ntab.l1 { font-weight: 650; margin-top: 2px; } #noteTabs .ntab.l2 { padding-left: 24px; } #noteTabs .ntab.l3 { padding-left: 38px; font-weight: 400; } #noteTabs .ntab.l4 { padding-left: 52px; font-weight: 400; }
+#noteTabs .ntab.empty0 { color: var(--muted); }
+#noteTabs .ntab .c { background: none; padding: 0; min-width: 0; font-weight: 500; }
+#noteTabs .ntab[aria-selected="true"], #noteTabs .ntab[aria-selected="true"]:hover { background: var(--accent); color: var(--accent-ink); }
+#noteTabs .ntab[aria-selected="true"] .c { color: var(--accent-ink); background: none; }
+#noteTabs .ntab.none { border: 1px dashed var(--line); margin-top: 10px; }
+#noteTabs .tabsfoot { margin-top: auto; padding-top: 10px; }
+#noteTabs .tabsfoot button { width: 100%; }
+.col2 { background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+.col2 #libList { padding: 12px 12px calc(16px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 8px; }
+.col2 .sub2 { list-style: none; padding: 10px 6px 2px; font: 600 .74rem var(--sans); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+.src { list-style: none; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--sunk) 40%, var(--surface)); overflow: hidden; }
+.src.hit { background: color-mix(in srgb, var(--line) 35%, var(--surface)); border-color: color-mix(in srgb, var(--line) 60%, var(--muted)); }
+.src.cur { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.src .acard { padding: 12px 12px 6px; border: 0; border-radius: 0; background: none; }
+.src .acard:hover { background: none; }
+.src .acard strong { -webkit-line-clamp: 3; }
+.src .srow { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px 12px; font-size: .84rem; color: var(--muted); }
+.src .okbtn { height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--ink); font: 600 .85rem var(--sans); cursor: pointer; flex: none; }
+.src.hit .okbtn { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.main { padding: 18px clamp(14px, 2.2vw, 26px) calc(32px + env(safe-area-inset-bottom, 0px)); }
+.main .view { max-width: 900px; margin: 0 auto 0 0; }
+.crumb { font-size: .84rem; color: var(--muted); }
+#vNotes .nhead { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 4px 0 10px; flex-wrap: wrap; }
+#vNotes .nhead h2 { font: 650 1.55rem/1.25 var(--serif); margin: 2px 0 2px; }
+.cont { display: flex; align-items: center; gap: 18px; padding: 18px 20px; border-radius: 16px; background: color-mix(in srgb, var(--line) 30%, var(--surface)); border: 1px solid var(--line); margin-bottom: 16px; }
+.cont .ct { flex: 1; min-width: 0; }
+.cont .lbl { font-size: .84rem; color: var(--muted); }
+.cont .tt { font: 650 1.15rem/1.3 var(--serif); margin: 4px 0 2px; }
+.cont .bar2 { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; margin-top: 10px; }
+.cont .bar2 i { display: block; height: 100%; background: var(--accent); }
+.cont button { height: 56px; padding: 0 24px; font-size: 1.02rem; flex: none; }
+.note { background: var(--surface); }
+@media (max-width: 1100px) { .pills .pill.words, .pills .pill.read { display: none; } }
+@media (max-width: 899px) {
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); }
+  .only-narrow { display: inline-flex !important; }
+  .brand { display: none; }
+  .gsearch { display: none; }
+  body[data-pane="list"] .gsearch { display: flex; flex: 1; }
+  .col1#noteTabs { flex-direction: row; overflow-x: auto; overflow-y: hidden; border-right: 0; border-bottom: 1px solid var(--line); padding: 8px; gap: 6px; }
+  #noteTabs .colhead, #noteTabs .tabsfoot { display: none; }
+  #noteTabs .ntab { width: auto; flex: none; white-space: nowrap; border: 1px solid var(--line); border-radius: 99px; padding: 8px 14px !important; margin: 0 !important; }
+  body[data-pane="list"] .main { display: none; }
+  body:not([data-pane="list"]) .col2 { display: none; }
+  .col2 { border-right: 0; }
+  .mainback { display: inline-flex; }
+  .pills .pill:not(.notes):not(.fire):not(.goal) { display: none; }
+}
 /* Başlık seçme penceresi */
 #sheetBack { position: fixed; inset: 0; z-index: 60; background: rgba(15, 19, 24, .45); display: flex; align-items: center; justify-content: center; padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
 #sheet { background: var(--surface); color: var(--ink); border-radius: 14px; width: min(520px, 100%); max-height: 100%; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.3); overflow: hidden; }
@@ -367,23 +513,25 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
 </head>
 <body data-pane="side">
 <div class="app">
-  <aside class="side">
-    <div class="sidehead">
-      <h1>Okuma</h1>
-      <button id="newArticle" class="btn primary" type="button">+ Makale</button>
-    </div>
-    <div class="sidesearch"><input id="libSearch" type="search" placeholder="Makalelerde ara"></div>
+  <header class="topbar">
+    <button id="paneToggle" class="tb only-narrow" type="button">Kaynaklar</button>
+    <div class="brand">Okuma</div>
+    <label class="gsearch"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="libSearch" type="search" placeholder="Kaynaklarda ara" aria-label="Kaynaklarda ara"></label>
+    <div class="spacer"></div>
+    <div id="statWidget" class="pills" role="group" aria-label="Bugünkü çalışman"></div>
+    <button id="themeQuick" class="iconbtn" type="button" aria-label="Açık / koyu tema"></button>
+    <button class="iconbtn" type="button" data-view="backup" aria-label="Yedek"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg><span id="bkDot"></span></button>
+    <button class="iconbtn" type="button" data-view="settings" aria-label="Ayarlar"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    <button id="newArticle" class="btn primary" type="button">+ Kaynak</button>
+    <span id="cntN" hidden></span><span id="cntH" hidden></span><span id="keyState" hidden></span>
+  </header>
+  <nav id="noteTabs" class="col1" aria-label="Tez başlıkları"></nav>
+  <aside class="col2" aria-label="Kaynaklar">
     <ul id="libList"></ul>
-    <nav class="sidenav" aria-label="Bölümler">
-      <button type="button" data-view="outline"><span>Başlıklar</span><span class="cnt" id="cntH"></span></button>
-      <button type="button" data-view="notes"><span>Tüm notlar</span><span class="cnt" id="cntN"></span></button>
-      <button type="button" data-view="backup"><span>Yedek</span><span id="bkDot"></span></button>
-      <button type="button" data-view="settings"><span>Ayarlar</span><span class="cnt" id="keyState"></span></button>
-    </nav>
   </aside>
 
   <main class="main">
-    <button class="btn link mainback" type="button" id="mainBack">‹ Makaleler</button>
+    <button class="btn link mainback" type="button" id="mainBack">‹ Kaynaklar</button>
     <div id="backupNag" class="card nag" hidden><span id="nagText"></span><button class="btn primary" type="button" data-backup>Yedek al</button></div>
 
     <!-- Karşılama -->
@@ -502,9 +650,13 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
 
     <!-- Tüm notlar -->
     <section class="view" id="vNotes" hidden>
-      <div class="vhead"><h2>Tüm notlar</h2><button id="exportDocx" class="btn primary" type="button">Word olarak indir</button></div>
-      <p id="exportMsg" class="hint" aria-live="polite" style="margin-top:-6px"></p>
-      <details class="card" style="padding:10px 14px">
+      <div id="continueBox"></div>
+      <div class="nhead">
+        <div style="min-width:0"><div class="crumb" id="tabCrumb"></div><h2 id="tabTitle"></h2><div class="hint" id="tabInfo"></div></div>
+        <div class="btns" style="margin:0"><button id="tabWord" class="btn" type="button" hidden>Word'e aktar</button><button id="exportDocx" class="btn primary" type="button">Word olarak indir</button></div>
+      </div>
+      <p id="exportMsg" class="hint" aria-live="polite" style="margin:0 0 6px"></p>
+      <details class="card" style="padding:10px 14px" id="wordOpts">
         <summary>Word ayarları</summary>
         <label for="citeLocale">Atıf dili</label>
         <select id="citeLocale"><option value="tr-TR">Türkçe (vd., t.y.)</option><option value="en-US">İngilizce (et al., n.d.)</option></select>
@@ -512,13 +664,40 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
         <label class="check"><input id="exPages" type="checkbox" checked> Çeviri PDF'inin sayfa numarasını hatırlatma olarak ekle</label>
         <label class="check"><input id="exComments" type="checkbox" checked> Yorumlarımı ekle</label>
       </details>
-      <input id="noteSearch" type="search" placeholder="Notlarda ara" style="margin:4px 0 4px">
+      <input id="noteSearch" type="search" placeholder="Bu başlıkta ara" style="margin:0 0 8px">
       <div id="allNotes"></div>
+    </section>
+
+    <!-- İstatistik -->
+    <section class="view" id="vStats" hidden>
+      <div class="vhead"><h2>Çalışma özetin</h2></div>
+      <section class="card"><p class="big-msg" id="stMsg"></p><p class="hint" id="stStreak" style="margin:0"></p></section>
+      <div class="tiles" id="stTiles"></div>
+      <section class="card" style="margin-top:12px"><h2>Son 14 gün · alınan not</h2><div class="chart" id="stChart"></div></section>
+      <section class="card">
+        <h2>Günlük hedeflerin</h2>
+        <div class="grid2">
+          <div><label for="goalNotes">Günde not</label><input id="goalNotes" type="number" min="0" inputmode="numeric"></div>
+          <div><label for="goalWords">Günde kelime (notlarında)</label><input id="goalWords" type="number" min="0" step="50" inputmode="numeric"></div>
+        </div>
+        <p class="hint">Hedefleri sen belirlersin; boş bırakırsan hedef olmaz. Sayaçtaki çubuk not hedefini gösterir; not hedefi yoksa kelime hedefini gösterir. Bir gün en az bir not alırsan, bir makale okursan ya da 5 dakika okursan seri devam eder.</p>
+      </section>
     </section>
 
     <!-- Ayarlar -->
     <section class="view" id="vSettings" hidden>
       <div class="vhead"><h2>Ayarlar</h2></div>
+      <section class="card" style="max-width:760px">
+        <h2>Görünüm</h2>
+        <div class="themes" role="group" aria-label="Tema">
+          <button type="button" data-theme-opt="auto"><span class="sw2" style="background:linear-gradient(135deg,#fff 50%,#171d24 50%)"></span>Otomatik</button>
+          <button type="button" data-theme-opt="light"><span class="sw2" style="background:#fff"></span>Açık</button>
+          <button type="button" data-theme-opt="dark"><span class="sw2" style="background:#171d24"></span>Koyu</button>
+          <button type="button" data-theme-opt="sepia"><span class="sw2" style="background:#f8f1e3"></span>Sepya</button>
+        </div>
+        <p class="hint">Otomatik, iPad'in açık/koyu ayarını izler. Sepya, uzun okumalarda gözü daha az yoran kâğıt rengidir.</p>
+        <label class="check"><input id="pdfDark" type="checkbox"> Koyu temada PDF sayfalarını da koyulaştır (gece okuma)</label>
+      </section>
       <section class="card keybox" style="max-width:760px">
         <h2>Gemini ile çeviri</h2>
         <p class="hint" style="margin-top:0">Web sayfalarını paragraf paragraf Türkçeye çevirmek için ücretsiz Gemini API anahtarı kullanılır. Anahtarı <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> adresinden alabilirsin. Anahtar yalnızca bu cihazda saklanır.</p>
@@ -554,6 +733,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
   <div class="rtop">
     <button id="rClose" class="tb" type="button">‹ Kapat</button>
     <div class="rtitle"><strong id="rTitle"></strong><span id="rCite"></span></div>
+    <span class="rstat"></span>
     <div class="grp"><button id="zoomOut" class="tb" type="button" aria-label="Küçült">−</button><span id="zoomLabel">%100</span><button id="zoomIn" class="tb" type="button" aria-label="Büyüt">+</button></div>
     <span id="pageInfo"></span>
     <button id="notesBtn" class="tb primary" type="button">Notlar</button>
@@ -584,6 +764,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
   <div class="rtop">
     <button id="wClose" class="tb" type="button">‹ Kapat</button>
     <div class="rtitle"><strong id="wTitle"></strong><span id="wCite"></span></div>
+    <span class="rstat"></span>
     <div class="grp"><button id="wSmaller" class="tb" type="button" aria-label="Yazıyı küçült">A−</button><button id="wBigger" class="tb" type="button" aria-label="Yazıyı büyüt">A+</button></div>
     <button id="wTr" class="tb" type="button">Çevir</button>
     <a id="wSafari" class="tb" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Safari</a>
@@ -879,7 +1060,12 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
       inp.value = h.label;
       inp.addEventListener("input", () => { h.label = inp.value; saveSoon(); });
       inp.addEventListener("change", () => { if (!inp.value.trim()) inp.value = h.label = "(adsız başlık)"; saveDB(); refreshHeadingUI(); });
-      li.querySelector(".cnt").textContent = counts[h.id] ? counts[h.id] + " not" : "";
+      if (counts[h.id]) {
+        const c = document.createElement("button");
+        c.type = "button"; c.className = "cnt link"; c.textContent = counts[h.id] + " not";
+        c.onclick = (e) => { e.stopPropagation(); openTab(h.id); };
+        li.querySelector(".cnt").replaceWith(c);
+      } else li.querySelector(".cnt").textContent = "";
       li.querySelector('[data-a="out"]').disabled = h.level <= 1;
       li.querySelector('[data-a="in"]').disabled = h.level >= 4;
       li.querySelector('[data-a="up"]').disabled = i === 0;
@@ -935,29 +1121,31 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
 
   /* ---------- Görünümler ---------- */
   let view = "welcome";
-  const VIEWS = { welcome: "vWelcome", form: "vForm", article: "vArticle", outline: "vOutline", notes: "vNotes", backup: "vBackup", settings: "vSettings" };
+  const VIEWS = { welcome: "vWelcome", form: "vForm", article: "vArticle", outline: "vOutline", notes: "vNotes", backup: "vBackup", settings: "vSettings", stats: "vStats" };
   function show(v, pane) {
     view = v;
     for (const [k, id] of Object.entries(VIEWS)) $("#" + id).hidden = k !== v;
-    document.querySelectorAll(".sidenav [data-view]").forEach((b) => b.setAttribute("aria-current", String(b.dataset.view === v)));
-    document.body.dataset.pane = pane || (v === "welcome" ? "side" : "main");
-    if (v !== "article" && v !== "form") { A = v === "welcome" ? null : A; }
+    document.querySelectorAll(".topbar [data-view]").forEach((b) => b.setAttribute("aria-current", String(b.dataset.view === v)));
+    document.body.dataset.pane = pane || "main";
+    if (v === "welcome" || v === "notes") A = null;
     if (v === "welcome") renderWelcome();
     if (v === "outline") renderOutline();
     if (v === "notes") renderAllNotes();
     if (v === "backup") updateBackupInfo();
-    if (v === "settings") loadKeyForm();
+    if (v === "settings") { loadKeyForm(); syncThemeUI(); }
+    if (v === "stats") renderStats();
     renderLib();
     updateBackupInfo();
     $(".main").scrollTop = 0;
   }
-  document.querySelectorAll(".sidenav [data-view]").forEach((b) => (b.onclick = () => show(b.dataset.view)));
-  $("#mainBack").onclick = () => show("welcome", "side");
+  document.querySelectorAll(".topbar [data-view]").forEach((b) => (b.onclick = () => show(b.dataset.view)));
+  $("#mainBack").onclick = () => { document.body.dataset.pane = "list"; renderLib(); };
+  $("#paneToggle").onclick = () => { document.body.dataset.pane = document.body.dataset.pane === "list" ? "main" : "list"; renderLib(); };
   function renderWelcome() {
     const box = $("#welcomeBox");
     if (!DB.outline.length) box.innerHTML = '<strong>Hoş geldin</strong><p>İstersen önce tezinin başlıklarını gir; not alırken bunlardan seçersin. Sonra makalelerini ekle.</p><div class="btns"><button class="btn primary" type="button" data-go="outline">Başlıkları gir</button><button class="btn" type="button" data-go="new">Makale ekle</button></div>';
     else if (!DB.articles.length) box.innerHTML = '<strong>Makale ekle</strong><p>DOI ile ya da elle ilk makaleni ekle.</p><div class="btns"><button class="btn primary" type="button" data-go="new">Makale ekle</button></div>';
-    else box.innerHTML = '<strong>Bir makale seç</strong><p>Soldaki listeden okumak ya da not almak istediğin makaleyi seç.</p>';
+    else box.innerHTML = '<strong>Bir kaynak seç</strong><p>Ortadaki listeden okumak ya da not almak istediğin kaynağı seç.</p>';
     box.querySelectorAll("[data-go]").forEach((b) => (b.onclick = () => (b.dataset.go === "new" ? openForm(null) : show("outline"))));
   }
 
@@ -966,25 +1154,58 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     const q = val("libSearch").toLocaleLowerCase("tr");
     const ul = $("#libList");
     ul.innerHTML = "";
-    const list = DB.articles.slice().sort((a, b) => (b.opened || b.created) - (a.opened || a.created))
-      .filter((a) => !q || (a.meta.title + " " + plain(apa(a.meta).bib)).toLocaleLowerCase("tr").includes(q));
-    if (!DB.articles.length) ul.innerHTML = '<li class="hint" style="padding:8px 6px">Henüz makale yok. “+ Makale” ile ekle.</li>';
-    else if (!list.length) ul.innerHTML = '<li class="hint" style="padding:8px 6px">Aramaya uyan makale yok.</li>';
-    for (const a of list) {
-      const n = DB.notes.filter((x) => x.articleId === a.id).length;
+    const tab = typeof noteTab === "undefined" ? "all" : noteTab;
+    const ids = tab === "all" ? null : tab === "__none" ? null : new Set(descIds(tab));
+    const inTab = (n) => (tab === "all" ? true : tab === "__none" ? !H(n.hid) : ids.has(n.hid));
+    const match = (a) => !q || (a.meta.title + " " + plain(apa(a.meta).bib)).toLocaleLowerCase("tr").includes(q);
+    const all = DB.articles.slice().sort((a, b) => (b.opened || b.created) - (a.opened || a.created)).filter(match);
+    const cnt = (a) => DB.notes.filter((n) => n.articleId === a.id && inTab(n)).length;
+    const hits = tab === "all" ? all : all.filter((a) => cnt(a) > 0).sort((a, b) => cnt(b) - cnt(a));
+    const rest = tab === "all" ? [] : all.filter((a) => !hits.includes(a));
+    const head = (txt) => { const li = document.createElement("li"); li.className = "sub2"; li.textContent = txt; ul.append(li); };
+    const card = (a, hit) => {
+      const n = cnt(a), total = DB.notes.filter((x) => x.articleId === a.id).length;
       const li = document.createElement("li");
+      li.className = "src" + (hit && tab !== "all" ? " hit" : "") + (A && A.id === a.id && view === "article" ? " cur" : "");
       const b = document.createElement("button");
       b.type = "button"; b.className = "acard";
-      b.setAttribute("aria-current", String(!!A && A.id === a.id && view === "article"));
       b.innerHTML = '<strong></strong><div class="sub"></div>';
       b.children[0].textContent = a.meta.title || "(başlıksız)";
-      b.children[1].innerHTML = esc(apa(a.meta).cite) + " " + (a.meta.type === "web" ? '<span class="badge">Web</span>' : "") + (a.pdfName ? '<span class="badge">PDF</span>' : "") + (n ? `<span class="badge">${n} not</span>` : "");
+      b.children[1].textContent = apa(a.meta).cite;
       b.onclick = () => openArticle(a.id);
-      li.append(b);
+      const row = document.createElement("div");
+      row.className = "srow";
+      const info = [tab === "all" ? (total ? total + " not" : "henüz not yok") : (n ? n + " not bu başlıkta" : total ? total + " not" : "henüz not yok"), a.meta.type === "web" ? "Web" : a.pdfName ? "PDF" : ""].filter(Boolean).join(" · ");
+      row.innerHTML = "<span></span>";
+      row.firstChild.textContent = info;
+      if (a.pdfName || (a.meta.type === "web" && a.meta.url)) {
+        const ok = document.createElement("button");
+        ok.type = "button"; ok.className = "okbtn"; ok.textContent = "Oku";
+        ok.onclick = () => readNow(a.id);
+        row.append(ok);
+      }
+      li.append(b, row);
       ul.append(li);
+    };
+    if (!DB.articles.length) ul.innerHTML = '<li class="hint" style="list-style:none;padding:8px 6px">Henüz kaynak yok. Üstteki “+ Kaynak” ile ekle.</li>';
+    else if (!all.length) ul.innerHTML = '<li class="hint" style="list-style:none;padding:8px 6px">Aramaya uyan kaynak yok.</li>';
+    else {
+      head(tab === "all" ? `Tüm kaynaklar · ${all.length}` : tab === "__none" ? "Başlıksız notu olan kaynaklar" : "Bu başlıktaki kaynaklar");
+      if (!hits.length) { const li = document.createElement("li"); li.className = "hint"; li.style.cssText = "list-style:none;padding:0 6px 6px"; li.textContent = "Bu başlığa henüz not vermedin. Aşağıdan bir kaynak açıp not alabilirsin."; ul.append(li); }
+      hits.forEach((a) => card(a, true));
+      if (rest.length) { head("Diğer kaynaklar"); rest.forEach((a) => card(a, false)); }
     }
     $("#cntN").textContent = DB.notes.length || "";
+    if (typeof refreshStats === "function" && $("#statWidget")) try { refreshStats(); } catch (e) {}
     $("#cntH").textContent = DB.outline.length || "";
+    try { renderTabs(); } catch (e) {}
+  }
+  // Kaynağı açıp doğrudan okumaya başla
+  async function readNow(id) {
+    openArticle(id);
+    if (!A) return;
+    if (A.meta.type === "web" && A.meta.url && !A.pdfName) $("#webRead").click();
+    else if (A.pdfName) $("#pdfOpen").click();
   }
   $("#libSearch").addEventListener("input", renderLib);
 
@@ -1165,6 +1386,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     $("#webText").innerHTML = '<p class="wmsg">Sayfanın metni alınıyor…</p>';
     $("#webText").style.setProperty("--wfs", store.get("ok:wfs", 1.12) + "rem");
     $("#webCard").hidden = false;
+    markRead(A.id);
     $("#webCard .wbody").append($("#noteCard"));
     document.body.classList.add("reading", "webreading");
     if (!wideReader()) document.body.classList.remove("notes-open");
@@ -1395,6 +1617,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
   function openArticle(id) {
     A = art(id);
     if (!A) { show("welcome"); return; }
+    if (typeof noteTab !== "undefined" && H(noteTab)) { store.set("ok:activeH", noteTab); store.set("ok:lastPick", noteTab); refreshHeadingUI(); }
     A.opened = Date.now();
     saveDB();
     S.hl = store.get("ok:hl:" + A.id, []);
@@ -1457,7 +1680,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
   function noteEl(n, opts = {}) {
     const d = document.createElement("div");
     d.className = "note";
-    d.innerHTML = `<select data-hsel="note" aria-label="Başlık"></select><textarea class="${n.kind === "quote" ? "qt" : ""}" aria-label="Not"></textarea><textarea class="cm" placeholder="Yorumun (isteğe bağlı)" aria-label="Yorum"></textarea><div class="src"></div><div class="meta"><span></span><button type="button" class="btn link">Sil</button></div>`;
+    d.innerHTML = `<select data-hsel="note" aria-label="Başlık"></select><textarea class="${n.kind === "quote" ? "qt" : ""}" aria-label="Not"></textarea><textarea class="cm" placeholder="Yorumun (isteğe bağlı)" aria-label="Yorum"></textarea><div class="nsrc"></div><div class="meta"><span></span><button type="button" class="btn link">Sil</button></div>`;
     const sel = d.querySelector("select"), tx = d.querySelector("textarea"), cm = d.querySelector(".cm");
     fillHSelect(sel, n.hid);
     bindHSelect(sel, (id) => { n.hid = id; saveDB(); if (opts.onMove) opts.onMove(); else renderLib(); });
@@ -1466,8 +1689,8 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     tx.addEventListener("input", () => { n.text = tx.value; autoGrow(tx); saveSoon(); });
     cm.addEventListener("input", () => { n.comment = cm.value; autoGrow(cm); saveSoon(); });
     const a = art(n.articleId);
-    if (opts.showArticle && a) d.querySelector(".src").textContent = apa(a.meta).cite + " · " + a.meta.title;
-    else d.querySelector(".src").remove();
+    if (opts.showArticle && a) d.querySelector(".nsrc").textContent = apa(a.meta).cite + " · " + a.meta.title;
+    else d.querySelector(".nsrc").remove();
     const dt = new Date(n.created).toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
     d.querySelector(".meta span").textContent = (n.page ? (n.kind === "quote" ? "çeviri s. " : "s. ") + n.page + " · " : "") + dt;
     d.querySelector(".meta button").onclick = () => {
@@ -1602,23 +1825,105 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     if (byH.has("")) out.push([null, byH.get("")]);
     return out;
   }
+  // Sekme: "all" (tümü), başlık kimliği ya da "__none" (başlıksız)
+  let noteTab = store.get("ok:noteTab", "all");
+  const descIds = (id) => { const i = DB.outline.findIndex((h) => h.id === id); if (i < 0) return []; const out = [id], lv = DB.outline[i].level; for (let j = i + 1; j < DB.outline.length && DB.outline[j].level > lv; j++) out.push(DB.outline[j].id); return out; };
+  function openTab(id) { noteTab = id; store.set("ok:noteTab", id); $("#noteSearch").value = ""; show("notes"); }
+  function renderTabs() {
+    const nav = $("#noteTabs");
+    nav.innerHTML = "";
+    const own = {};
+    DB.notes.forEach((n) => { const k = H(n.hid) ? n.hid : "__none"; own[k] = (own[k] || 0) + 1; });
+    const total = (id) => descIds(id).reduce((a, x) => a + (own[x] || 0), 0);
+    const tab = (id, label, count, cls) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.setAttribute("role", "tab");
+      b.className = "ntab " + cls + (count ? "" : " empty0");
+      b.setAttribute("aria-selected", String(noteTab === id));
+      b.innerHTML = '<span></span><span class="c"></span>';
+      b.firstChild.textContent = label;
+      b.lastChild.textContent = count;
+      b.onclick = () => openTab(id);
+      nav.append(b);
+      return b;
+    };
+    const hd = document.createElement("div");
+    hd.className = "colhead";
+    hd.innerHTML = '<span>Tez başlıkları</span><button class="ib" type="button" aria-label="Başlıkları düzenle">+</button>';
+    hd.querySelector("button").onclick = () => show("outline");
+    nav.append(hd);
+    tab("all", "Tümü", DB.notes.length, "all");
+    DB.outline.forEach((h) => tab(h.id, h.label || "(adsız başlık)", total(h.id), "l" + h.level));
+    if (own.__none) tab("__none", "Başlıksız notlar", own.__none, "none");
+    const ft = document.createElement("div");
+    ft.className = "tabsfoot";
+    ft.innerHTML = '<button class="btn" type="button">Başlıkları düzenle</button>';
+    ft.querySelector("button").onclick = () => show("outline");
+    nav.append(ft);
+    nav.querySelectorAll(".ntab").forEach((b) => b.setAttribute("aria-selected", String(b.getAttribute("aria-selected") === "true" && (view === "notes" || view === "article"))));
+    const sel = nav.querySelector('[aria-selected="true"]');
+    if (sel) sel.scrollIntoView({ block: "nearest", inline: "center" });
+  }
   function renderAllNotes() {
+    if (noteTab !== "all" && noteTab !== "__none" && !H(noteTab)) noteTab = "all";
+    if (noteTab === "__none" && !DB.notes.some((n) => !H(n.hid))) noteTab = "all";
+    renderLib();
+    renderContinue();
     const q = val("noteSearch").toLocaleLowerCase("tr");
     const box = $("#allNotes");
     box.innerHTML = "";
-    const list = DB.notes.filter((n) => !q || [H(n.hid) ? H(n.hid).label : "", n.text, n.comment, (art(n.articleId) || { meta: {} }).meta.title].join(" ").toLocaleLowerCase("tr").includes(q));
+    let pool = DB.notes, title = "Tüm notlar";
+    if (noteTab === "__none") { pool = DB.notes.filter((n) => !H(n.hid)); title = "Başlıksız notlar"; }
+    else if (noteTab !== "all") { const ids = new Set(descIds(noteTab)); pool = DB.notes.filter((n) => ids.has(n.hid)); title = H(noteTab).label || "(adsız başlık)"; }
+    $("#tabTitle").textContent = title;
+    const anc = [];
+    if (H(noteTab)) { const i = DB.outline.findIndex((h) => h.id === noteTab); let lv = DB.outline[i].level; for (let j = i - 1; j >= 0 && lv > 1; j--) if (DB.outline[j].level < lv) { anc.unshift(DB.outline[j].label); lv = DB.outline[j].level; } }
+    $("#tabCrumb").textContent = anc.join(" › ");
+    $("#exportDocx").hidden = noteTab !== "all";
+    $("#wordOpts").hidden = noteTab !== "all";
+    $("#noteSearch").placeholder = noteTab === "all" ? "Notlarda ara" : "Bu başlıkta ara";
+    $("#tabInfo").textContent = pool.length ? `${pool.length} not · ${new Set(pool.map((n) => n.articleId)).size} kaynak` : "";
+    $("#tabWord").hidden = noteTab === "all" || !pool.length;
+    const list = pool.filter((n) => !q || [H(n.hid) ? H(n.hid).label : "", n.text, n.comment, (art(n.articleId) || { meta: {} }).meta.title].join(" ").toLocaleLowerCase("tr").includes(q));
     if (!DB.notes.length) { box.innerHTML = '<div class="empty"><strong>Henüz not yok</strong>Bir makale açıp not almaya başla.</div>'; return; }
+    if (!pool.length) { box.innerHTML = '<div class="empty"><strong>Bu başlıkta henüz not yok</strong>Okurken alıntıyı eklerken bu başlığı seçersen burada görünür.</div>'; return; }
     if (!list.length) { box.innerHTML = '<div class="empty">Aramaya uyan not yok.</div>'; return; }
+    const single = noteTab !== "all" && noteTab !== "__none" && descIds(noteTab).length === 1;
     for (const [h, notes] of groups(list, false)) {
-      const hd = document.createElement("div");
-      hd.className = "grp-h l" + (h ? h.level : 1);
-      hd.innerHTML = "<span></span><span class='cnt'></span>";
-      hd.firstChild.textContent = h ? h.label : "Başlıksız notlar";
-      hd.lastChild.textContent = notes.length + " not";
-      box.append(hd);
+      if (!single) {
+        const hd = document.createElement("div");
+        hd.className = "grp-h l" + (h ? h.level : 1);
+        hd.innerHTML = "<span></span><span class='cnt'></span>";
+        hd.firstChild.textContent = h ? h.label : "Başlıksız notlar";
+        hd.lastChild.textContent = notes.length + " not";
+        box.append(hd);
+      }
       notes.forEach((n) => box.append(noteEl(n, { showArticle: true, onMove: renderAllNotes })));
     }
   }
+  // "Tümü" seçiliyken: kaldığın kaynağa dön
+  function renderContinue() {
+    const box = $("#continueBox");
+    box.innerHTML = "";
+    if (noteTab !== "all") return;
+    const a = DB.articles.filter((x) => x.pdfName || (x.meta.type === "web" && x.meta.url)).sort((x, y) => (y.opened || 0) - (x.opened || 0))[0];
+    if (!a || !a.opened) return;
+    const pos = a.pdfName ? store.get("ok:pos:" + a.id, 0) : store.get("ok:wpos:" + a.id, 0);
+    const pct = Math.max(0, Math.min(100, Math.round(pos * 100)));
+    const d = document.createElement("div");
+    d.className = "cont";
+    d.innerHTML = '<div class="ct"><div class="lbl"></div><div class="tt"></div><div class="lbl"></div><div class="bar2"><i></i></div></div><button class="btn primary" type="button">Okumaya devam et</button>';
+    d.querySelector(".lbl").textContent = "Kaldığın yer · " + (a.pdfName ? "PDF" : "Web") + ` · %${pct}`;
+    d.querySelector(".tt").textContent = a.meta.title;
+    d.querySelectorAll(".lbl")[1].textContent = apa(a.meta).cite;
+    d.querySelector(".bar2 i").style.width = pct + "%";
+    d.querySelector("button").onclick = () => readNow(a.id);
+    box.append(d);
+  }
+  $("#tabWord").onclick = () => {
+    const ids = noteTab === "__none" ? [""] : descIds(noteTab);
+    exportDocx(new Set(ids)).catch((e) => ($("#exportMsg").textContent = "Word dosyası oluşturulamadı: " + e.message));
+  };
   $("#noteSearch").addEventListener("input", renderAllNotes);
 
   /* ---------- Okuyucu ---------- */
@@ -1647,6 +1952,7 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     $("#pdfMsg").textContent = "";
     R.lastName = name;
     INK.key = A.id;
+    markRead(A.id);
     INK.undo = []; INK.redo = [];
     try { INK.strokes = (await IDB.get(A.id, "ink")) || {}; } catch (e) { INK.strokes = {}; }
     updateUndo();
@@ -2141,7 +2447,16 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     msg.textContent = "Yedek hazırlanıyor…";
     const hl = {};
     DB.articles.forEach((a) => { const h = store.get("ok:hl:" + a.id, null); if (h && h.length) hl[a.id] = h; });
-    const out = { app: "okuma", v: 2, created: new Date().toISOString(), data: DB, hl };
+    const out = { app: "okuma", v: 2, created: new Date().toISOString(), data: DB, hl, web: {}, tr: {}, log: store.get("ok:log", {}), goals: store.get("ok:goals", null) };
+    // web sayfalarının alınmış metni ve çeviriler her yedeğe girer (küçük ve yeniden almak kota harcar)
+    for (const a of DB.articles) {
+      try {
+        const w = await IDB.get("web:" + a.id);
+        if (w) out.web[a.id] = w;
+        const t = await IDB.get("tr:" + a.id);
+        if (t && t.items && Object.keys(t.items).length) out.tr[a.id] = t;
+      } catch (e) {}
+    }
     const full = $("#bkPdfs").checked;
     if (full) {
       out.pdfs = {}; out.ink = {};
@@ -2179,6 +2494,10 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
       for (const [k, v] of Object.entries(j.hl || {})) store.set("ok:hl:" + k, v);
       for (const [k, v] of Object.entries(j.pdfs || {})) { try { await IDB.put(k, { name: v.name, data: (await fromB64(v.b64)).buffer }); } catch (er) {} }
       for (const [k, v] of Object.entries(j.ink || {})) { try { await IDB.put(k, v, "ink"); } catch (er) {} }
+      if (j.log) store.set("ok:log", j.log);
+      if (j.goals) store.set("ok:goals", j.goals);
+      for (const [k, v] of Object.entries(j.web || {})) { try { await IDB.put("web:" + k, v); } catch (er) {} }
+      for (const [k, v] of Object.entries(j.tr || {})) { try { await IDB.put("tr:" + k, v); } catch (er) {} }
       msg.textContent = "Yedek yüklendi." + (np ? "" : " Bu yedekte PDF yok; gerekirse PDF'leri makalelere yeniden ekle.");
       store.set("ok:lastBackup", Date.now());
       refreshHeadingUI();
@@ -2276,9 +2595,9 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
       update();
     });
   }
-  async function exportDocx() {
+  async function exportDocx(preset) {
     if (!DB.notes.length && !DB.outline.length) { $("#exportMsg").textContent = "Henüz not yok."; return; }
-    const pick = await pickExport();
+    const pick = preset instanceof Set ? preset : await pickExport();
     if (!pick) return;
     const loc = locale();
     const showPages = $("#exPages").checked, showComments = $("#exComments").checked, withEmpty = $("#exEmpty").checked;
@@ -2307,10 +2626,11 @@ body.reading #pages { height: auto; min-height: 0; overflow: auto; padding: 12px
     const blob = docxBlob(docXml);
     $("#exportMsg").textContent = `Word dosyası hazır: ${nCount} not, ${bibs.length} kaynak.`;
     const chosen = DB.outline.filter((h) => pick.has(h.id));
-    const slug = chosen.length === 1 ? "-" + chosen[0].label.toLocaleLowerCase("tr").replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 40) : "";
+    const slugSrc = preset instanceof Set ? (H([...preset][0]) || {}).label || "" : chosen.length === 1 ? chosen[0].label : "";
+    const slug = slugSrc ? "-" + slugSrc.toLocaleLowerCase("tr").replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 40) : "";
     await deliver(blob, `okuma-notlari${slug}-${stamp()}.docx`);
   }
-  $("#exportDocx").onclick = () => exportDocx().catch((e) => ($("#exportMsg").textContent = "Word dosyası oluşturulamadı: " + e.message));
+  $("#exportDocx").onclick = () => exportDocx(null).catch((e) => ($("#exportMsg").textContent = "Word dosyası oluşturulamadı: " + e.message));
   function docxBlob(documentXml) {
     const W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
     const st = (id, name, ppr, rpr, extra = "") => `<w:style w:type="paragraph" w:styleId="${id}"><w:name w:val="${name}"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/>${extra}<w:qFormat/><w:pPr>${ppr}</w:pPr><w:rPr>${rpr}</w:rPr></w:style>`;
@@ -2367,10 +2687,157 @@ ${st("Bibliography", "Bibliography", '<w:ind w:left="720" w:hanging="720"/><w:jc
   }
 
 
+
+  /* ---------- Tema ---------- */
+  const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 7 7 0 1 0 20 14.5z"/></svg>';
+  const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  const isDark = () => { const t = document.documentElement.dataset.theme; return t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches); };
+  function setTheme(t) {
+    if (t === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
+    store.set("ok:theme", t);
+    syncThemeUI();
+    if (t === "auto") document.documentElement.removeAttribute("data-theme");
+  }
+  function syncThemeUI() {
+    const t = store.get("ok:theme", "dark");
+    document.querySelectorAll("[data-theme-opt]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeOpt === t)));
+    $("#themeQuick").innerHTML = isDark() ? ICON_SUN : ICON_MOON;
+    $("#themeQuick").setAttribute("aria-label", isDark() ? "Açık temaya geç" : "Koyu temaya geç");
+    $("#pdfDark").checked = !!store.get("ok:pdfDark", false);
+  }
+  document.querySelectorAll("[data-theme-opt]").forEach((b) => (b.onclick = () => setTheme(b.dataset.themeOpt)));
+  $("#themeQuick").onclick = () => setTheme(isDark() ? "light" : "dark");
+  $("#pdfDark").onchange = () => { store.set("ok:pdfDark", $("#pdfDark").checked); if ($("#pdfDark").checked) document.documentElement.dataset.pdfdark = "1"; else delete document.documentElement.dataset.pdfdark; };
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncThemeUI);
+  syncThemeUI();
+
+  /* ---------- Sayaç: okunan makale, not, kelime, süre, seri ---------- */
+  const dayKey = (d = new Date()) => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`; };
+  const LOG = store.get("ok:log", {});
+  const goals = () => store.get("ok:goals", { notes: 0, words: 0 });
+  const wordsIn = (t) => (String(t || "").match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) || []).length;
+  const noteWords = (n) => wordsIn(n.text) + wordsIn(n.comment);
+  function logDay(k = dayKey()) { return (LOG[k] = LOG[k] || { read: [], sec: 0 }); }
+  let logT;
+  const saveLog = () => { clearTimeout(logT); logT = setTimeout(() => store.set("ok:log", LOG), 800); };
+  function markRead(id) { const d = logDay(); if (!d.read.includes(id)) { d.read.push(id); saveLog(); refreshStats(); } }
+  // okuma süresi: okuyucu açık, sayfa görünür ve son 2 dakikada dokunma/kaydırma varsa
+  let lastAct = Date.now();
+  ["pointerdown", "keydown", "wheel", "touchstart"].forEach((ev) => document.addEventListener(ev, () => (lastAct = Date.now()), { passive: true, capture: true }));
+  document.addEventListener("scroll", () => (lastAct = Date.now()), { passive: true, capture: true });
+  setInterval(() => {
+    if (!document.body.classList.contains("reading") || document.visibilityState !== "visible" || Date.now() - lastAct > 120000) return;
+    logDay().sec += 15; saveLog();
+    if (logDay().sec % 60 === 0) refreshStats();
+  }, 15000);
+  function dayStats(k) {
+    const notes = DB.notes.filter((n) => dayKey(n.created) === k);
+    const d = LOG[k] || { read: [], sec: 0 };
+    const read = new Set([...(d.read || []), ...notes.map((n) => n.articleId)]);
+    return { notes: notes.length, words: notes.reduce((a, n) => a + noteWords(n), 0), read: read.size, sec: d.sec || 0 };
+  }
+  const active = (s) => s.notes > 0 || s.read > 0 || s.sec >= 300;
+  function streak() {
+    let n = 0;
+    const d = new Date();
+    if (!active(dayStats(dayKey(d)))) d.setDate(d.getDate() - 1);
+    for (;;) { if (!active(dayStats(dayKey(d)))) break; n++; d.setDate(d.getDate() - 1); if (n > 3650) break; }
+    return n;
+  }
+  const fmtMin = (sec) => { const m = Math.round(sec / 60); return m < 60 ? `${m} dk` : `${Math.floor(m / 60)} sa ${m % 60} dk`; };
+  function goalState(t) {
+    const g = goals();
+    if (g.notes > 0) return { cur: t.notes, goal: g.notes, unit: "not" };
+    if (g.words > 0) return { cur: t.words, goal: g.words, unit: "kelime" };
+    return null;
+  }
+  function message(t, gs, st) {
+    if (gs && gs.cur >= gs.goal) return "Günlük hedef tamam! 🎉 Harika iş çıkardın.";
+    if (!active(t)) return st ? `${st} günlük serin var; bugün bir not alıp sürdür.` : "Bugün küçük bir adımla başla: bir paragraf oku, bir not al.";
+    if (gs && gs.cur / gs.goal >= 0.5) return `Hedefe az kaldı: ${gs.goal - gs.cur} ${gs.unit} daha.`;
+    if (t.notes) return "Güzel başlangıç, devam et!";
+    return "Okumaya başladın, ilk notunu al!";
+  }
+  let wasDone = null;
+  function refreshStats() {
+    const t = dayStats(dayKey());
+    const gs = goalState(t), st = streak();
+    const pct = gs ? Math.min(100, Math.round((gs.cur / gs.goal) * 100)) : 0;
+    const done = !!gs && gs.cur >= gs.goal;
+    const FLAME = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5.3 1.8 1.4 2.8 2.4 3C11 9 11 6 12 3z"/></svg>';
+    const notePill = gs && gs.unit === "not"
+      ? `<button type="button" class="pill notes" data-p="goal" aria-label="Bugünkü not hedefi"><b>${t.notes}/${gs.goal}</b><span class="u">not</span><span class="mini"><i class="${done ? "full" : ""}" style="width:${pct}%"></i></span></button>`
+      : `<button type="button" class="pill notes" data-p="stats"><b>${t.notes}</b><span class="u">not</span></button>`;
+    $("#statWidget").innerHTML =
+      `<button type="button" class="pill read" data-p="stats"><b>${t.read}</b><span class="u">makale</span></button>` + notePill +
+      `<button type="button" class="pill words" data-p="${gs && gs.unit === "kelime" ? "goal" : "stats"}"><b>${t.words}${gs && gs.unit === "kelime" ? "/" + gs.goal : ""}</b><span class="u">kelime</span></button>` +
+      (gs ? "" : `<button type="button" class="pill goal" data-p="goal">Hedef belirle</button>`) +
+      (st ? `<button type="button" class="pill fire" data-p="stats">${FLAME}<b>${st} gün</b></button>` : "");
+    document.querySelectorAll(".rstat").forEach((x) => (x.textContent = `Bugün: ${t.notes} not · ${t.words} kelime${t.sec >= 60 ? " · " + fmtMin(t.sec) : ""}`));
+    if (wasDone === false && done) setTimeout(() => toast("Günlük hedefe ulaştın! 🎉"), 1600);
+    wasDone = done;
+    if (view === "stats") renderStats();
+  }
+  $("#statWidget").onclick = (e) => { const p = e.target.closest("[data-p]"); if (!p) return; if (p.dataset.p === "goal") askGoal(); else show("stats"); };
+  // Günlük hedefi kullanıcı belirler
+  function askGoal() {
+    const g = goals();
+    const back = document.createElement("div");
+    back.id = "sheetBack";
+    back.innerHTML = `<div id="sheet" role="dialog" aria-modal="true" aria-labelledby="gTitle"><div class="sh-top"><h3 id="gTitle">Günlük hedefin</h3><p class="hint" style="margin-top:0">Her gün kaç not almak istiyorsun? 0 yazarsan not hedefi olmaz.</p><div class="row" style="align-items:center;gap:8px"><button type="button" class="ib" data-g="-">−</button><input id="gNotes" type="number" min="0" inputmode="numeric" style="text-align:center;font-size:1.3rem;font-weight:600"><button type="button" class="ib" data-g="+">+</button></div><label for="gWords">İstersen kelime hedefi de koy (notlarındaki kelime sayısı, 0 = yok)</label><input id="gWords" type="number" min="0" step="50" inputmode="numeric"></div><div class="sh-bot x"><button type="button" class="btn" data-g="no">Vazgeç</button><button type="button" class="btn primary" data-g="ok">Kaydet</button></div></div>`;
+    const n = back.querySelector("#gNotes"), w = back.querySelector("#gWords");
+    n.value = g.notes || ""; w.value = g.words || "";
+    n.placeholder = "ör. 5";
+    back.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-g]");
+      if (e.target === back || (b && b.dataset.g === "no")) { back.remove(); return; }
+      if (!b) return;
+      if (b.dataset.g === "-") n.value = Math.max(0, (parseInt(n.value, 10) || 0) - 1);
+      if (b.dataset.g === "+") n.value = (parseInt(n.value, 10) || 0) + 1;
+      if (b.dataset.g === "ok") {
+        store.set("ok:goals", { notes: Math.max(0, parseInt(n.value, 10) || 0), words: Math.max(0, parseInt(w.value, 10) || 0) });
+        back.remove(); wasDone = null; refreshStats();
+        if (view === "stats") renderStats();
+      }
+    });
+    document.body.append(back);
+    n.focus();
+  }
+  function renderStats() {
+    const today = dayKey();
+    const t = dayStats(today), gs = goalState(t), st = streak();
+    $("#stMsg").textContent = message(t, gs, st);
+    let best = 0, run = 0;
+    const days = [...new Set([...Object.keys(LOG), ...DB.notes.map((n) => dayKey(n.created))])].sort();
+    if (days.length) { const d = new Date(days[0] + "T12:00:00"); const end = new Date(); end.setHours(23, 59, 59); while (d <= end) { if (active(dayStats(dayKey(d)))) { run++; best = Math.max(best, run); } else run = 0; d.setDate(d.getDate() + 1); } }
+    best = Math.max(best, st);
+    $("#stStreak").textContent = st ? `🔥 ${st} gündür üst üste çalışıyorsun. En uzun serin: ${best} gün.` : best ? `En uzun serin: ${best} gün. Bugün yeni bir seri başlat.` : "";
+    const week = { notes: 0, words: 0, read: new Set(), sec: 0 };
+    for (let i = 0; i < 7; i++) { const d = new Date(); d.setDate(d.getDate() - i); const k = dayKey(d); const s2 = dayStats(k); week.notes += s2.notes; week.words += s2.words; week.sec += s2.sec; ((LOG[k] || {}).read || []).forEach((x) => week.read.add(x)); DB.notes.filter((n) => dayKey(n.created) === k).forEach((n) => week.read.add(n.articleId)); }
+    const totalWords = DB.notes.reduce((a, n) => a + noteWords(n), 0);
+    const totalSec = Object.values(LOG).reduce((a, d) => a + (d.sec || 0), 0);
+    const tile = (n, l, s2) => `<div class="tile"><div class="n">${n}</div><div class="l">${l}</div>${s2 ? `<div class="s">${s2}</div>` : ""}</div>`;
+    $("#stTiles").innerHTML =
+      tile(t.notes, "not bugün", `${t.words} kelime`) + tile(t.read, "makale bugün", t.sec >= 60 ? fmtMin(t.sec) + " okuma" : "") +
+      tile(week.notes, "not bu hafta", `${week.words} kelime · ${week.read.size} makale`) + tile(fmtMin(week.sec), "okuma bu hafta", "") +
+      tile(DB.notes.length, "toplam not", `${totalWords} kelime`) + tile(DB.articles.length, "toplam kaynak", totalSec >= 60 ? fmtMin(totalSec) + " toplam okuma" : "");
+    const cols = [];
+    let max = 1;
+    for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); const k = dayKey(d); const n = dayStats(k).notes; max = Math.max(max, n); cols.push([d, k, n]); }
+    $("#stChart").innerHTML = cols.map(([d, k, n]) => `<div class="col" title="${k}: ${n} not"><span class="v">${n || ""}</span><div class="b${k === today ? " today" : ""}" style="height:${Math.round((n / max) * 100)}%"></div><span class="d">${d.toLocaleDateString("tr-TR", { weekday: "short" })}</span></div>`).join("");
+    const g = goals();
+    $("#goalNotes").value = g.notes || ""; $("#goalWords").value = g.words || "";
+    $("#goalNotes").placeholder = "belirlemedin"; $("#goalWords").placeholder = "belirlemedin";
+  }
+  ["goalNotes", "goalWords"].forEach((id) => $("#" + id).addEventListener("change", () => {
+    store.set("ok:goals", { notes: Math.max(0, parseInt(val("goalNotes"), 10) || 0), words: Math.max(0, parseInt(val("goalWords"), 10) || 0) });
+    wasDone = null; refreshStats();
+  }));
+
   /* ---------- Başlangıç ---------- */
   refreshHeadingUI();
-  const lastA = DB.articles.slice().sort((a, b) => (b.opened || 0) - (a.opened || 0))[0];
-  if (lastA && window.matchMedia("(min-width: 900px)").matches) openArticle(lastA.id); else show("welcome");
+  if (!DB.articles.length && !DB.outline.length) show("welcome");
+  else show("notes", window.matchMedia("(max-width: 899px)").matches && !DB.notes.length ? "list" : "main");
 })();
 </script>
 </body>
